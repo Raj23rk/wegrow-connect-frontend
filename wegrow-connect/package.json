@@ -1,26 +1,24 @@
 {
-  "name": "wegrow-connect",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
-  },
   "dependencies": {
-    "next": "16.2.12",
-    "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "@hookform/resolvers": "^5.7.1",
+    "@reduxjs/toolkit": "^2.12.0",
+    "axios": "^1.19.0",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.4.0",
+    "js-cookie": "^3.0.8",
+    "jwt-decode": "^4.0.0",
+    "lucide-react": "^1.28.0",
+    "react-hook-form": "^7.84.0",
+    "react-hot-toast": "^2.6.0",
+    "react-icons": "^5.7.0",
+    "react-redux": "^9.3.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.2.12",
-    "tailwindcss": "^4",
-    "typescript": "^5"
+    "eslint-config-prettier": "^10.1.8",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.3.0",
+    "prettier": "^3.9.6",
+    "prettier-plugin-tailwindcss": "^0.8.1"
   }
 }
