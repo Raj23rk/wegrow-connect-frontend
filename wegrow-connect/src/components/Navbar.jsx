@@ -33,6 +33,8 @@ export default function Navbar({
             onClick={scrollToHero} 
             className="flex items-center hover:opacity-90 transition text-left focus:outline-none cursor-pointer"
           >
+
+            
             {/* 1. EMBLEM LOGO */}
             <img 
               src="/logo.jpg" 
