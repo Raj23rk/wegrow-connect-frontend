@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { theme } from '../theme';
 
@@ -26,14 +26,65 @@ const corporateFeatures = [
 ];
 
 const keyStats = [
-  { value: '2x', label: 'Faster Onboarding' },
-  { value: '40%', label: 'Boost in Productivity' },
-  { value: '95%', label: 'Employee Satisfaction' },
-  { value: '50+', label: 'Corporate Partners' }
+  { rawValue: 2, suffix: 'x', label: 'Faster Onboarding' },
+  { rawValue: 40, suffix: '%', label: 'Boost in Productivity' },
+  { rawValue: 95, suffix: '%', label: 'Employee Satisfaction' },
+  { rawValue: 50, suffix: '+', label: 'Corporate Partners' }
 ];
 
 export default function Enterprices({ enterpricesTargetRef, enterpricesStyle }) {
   const navigate = useNavigate();
+  const [counts, setCounts] = useState(keyStats.map(() => 0));
+  const sectionInternalRef = useRef(null);
+
+  // Trigger counter animation every time the section enters the viewport (scroll up/down)
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          // Reset to 0 first to replay animation fresh
+          setCounts(keyStats.map(() => 0));
+
+          const duration = 1200; // total duration in milliseconds
+          const steps = 40;
+          const intervalTime = duration / steps;
+          let currentStep = 0;
+
+          const timer = setInterval(() => {
+            currentStep++;
+            const progress = currentStep / steps;
+
+            setCounts(
+              keyStats.map((stat) => {
+                const currentVal = Math.floor(stat.rawValue * progress);
+                return currentVal > stat.rawValue ? stat.rawValue : currentVal;
+              })
+            );
+
+            if (currentStep >= steps) {
+              clearInterval(timer);
+              setCounts(keyStats.map((stat) => stat.rawValue));
+            }
+          }, intervalTime);
+
+          // Cleanup timer on re-trigger
+          return () => clearInterval(timer);
+        }
+      },
+      { threshold: 0.3 }
+    );
+
+    const currentRef = enterpricesTargetRef?.current || sectionInternalRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
+    }
+
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+    };
+  }, [enterpricesTargetRef]);
 
   // Direct Navigation to Login Page for Request Corporate Demo button
   const handleRequestDemoClick = (e) => {
@@ -43,14 +94,21 @@ export default function Enterprices({ enterpricesTargetRef, enterpricesStyle }) 
 
   return (
     <section 
-      ref={enterpricesTargetRef} 
+      ref={(node) => {
+        sectionInternalRef.current = node;
+        if (typeof enterpricesTargetRef === 'function') {
+          enterpricesTargetRef(node);
+        } else if (enterpricesTargetRef) {
+          enterpricesTargetRef.current = node;
+        }
+      }}
       id="enterprise" 
       style={enterpricesStyle}
       className="relative pt-0 pb-16 transition-all duration-300 ease-out transform-gpu"
     >
       <div className="max-w-7xl mx-auto px-4 md:px-6 relative space-y-10">
 
-        {/* HEADER SECTION - REDUCED MARGIN */}
+        {/* HEADER SECTION */}
         <div className="max-w-4xl mx-auto text-center space-y-2">
           <span className="text-xs uppercase font-black tracking-widest block" style={{ color: theme.orange }}>
             FOR ORGANIZATIONS & TEAMS
@@ -63,7 +121,7 @@ export default function Enterprices({ enterpricesTargetRef, enterpricesStyle }) 
           </p>
         </div>
 
-        {/* STATS HIGHLIGHT BAR */}
+        {/* STATS HIGHLIGHT BAR WITH RE-TRIGGER COUNT ANIMATION */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-5xl mx-auto">
           {keyStats.map((stat, idx) => (
             <div 
@@ -72,7 +130,7 @@ export default function Enterprices({ enterpricesTargetRef, enterpricesStyle }) 
               style={{ backgroundColor: theme.cardBg, borderColor: theme.cardBorder }}
             >
               <div className="text-2xl md:text-3xl font-black" style={{ color: theme.primary }}>
-                {stat.value}
+                {counts[idx]}{stat.suffix}
               </div>
               <div className="text-xs font-bold uppercase tracking-wider" style={{ color: theme.textMuted }}>
                 {stat.label}

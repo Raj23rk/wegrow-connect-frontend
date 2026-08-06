@@ -12,8 +12,39 @@ export default function ContactSection({ contactTargetRef, contactStyle }) {
   });
   const [submitted, setSubmitted] = useState(false);
 
+  // Custom Alert Modal State
+  const [alertModal, setAlertModal] = useState({
+    isOpen: false,
+    title: '',
+    message: ''
+  });
+
+  const showAlert = (title, message) => {
+    setAlertModal({ isOpen: true, title, message });
+  };
+
+  const handlePhoneChange = (e) => {
+    let value = e.target.value.replace(/\D/g, '');
+    if (value.length > 10) value = value.slice(0, 10);
+    setFormData({ ...formData, mobile: value });
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    // Check if length is less than 10 digits
+    if (formData.mobile.length !== 10) {
+      showAlert("Invalid Mobile Number", "Please enter a valid 10-digit mobile number.");
+      return;
+    }
+
+    // Check if it starts with 6, 7, 8, or 9
+    const firstDigit = formData.mobile.charAt(0);
+    if (!['6', '7', '8', '9'].includes(firstDigit)) {
+      showAlert("Invalid Mobile Number", "Give your valid mobile number.");
+      return;
+    }
+
     setSubmitted(true);
     setTimeout(() => {
       setSubmitted(false);
@@ -42,6 +73,27 @@ export default function ContactSection({ contactTargetRef, contactStyle }) {
       }}
       className="relative pt-0 pb-20 transition-all duration-500 ease-out transform-gpu"
     >
+      {/* CUSTOM DESIGNED ALERT MODAL */}
+      {alertModal.isOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl border border-gray-100 transform transition-all">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 text-red-600 text-3xl">
+              ⚠️
+            </div>
+            <h3 className="text-xl font-black text-gray-900 mb-2">{alertModal.title}</h3>
+            <p className="text-xs font-semibold text-gray-500 mb-6 leading-relaxed">
+              {alertModal.message}
+            </p>
+            <button
+              onClick={() => setAlertModal({ isOpen: false, title: '', message: '' })}
+              className="w-full py-3 rounded-full bg-[#104288] hover:bg-[#f97316] text-white font-extrabold text-xs uppercase tracking-wider transition-all shadow-md cursor-pointer"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="max-w-7xl mx-auto px-4 md:px-6 relative">
         
         {/* HEADER SECTION */}
@@ -183,9 +235,10 @@ export default function ContactSection({ contactTargetRef, contactStyle }) {
                   <input 
                     type="tel" 
                     required 
-                    placeholder="Enter your mobile number"
+                    maxLength={10}
+                    placeholder="9876543210"
                     value={formData.mobile}
-                    onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
+                    onChange={handlePhoneChange}
                     className="w-full px-4 py-2.5 rounded-xl text-xs font-semibold border outline-none transition focus:border-amber-500"
                     style={{ borderColor: theme.cardBorder, color: theme.textBright, backgroundColor: 'rgba(255,255,255,0.05)' }}
                   />

@@ -14,8 +14,14 @@ import SuccessStories from './components/SuccessStories';
 import ContactSection from './components/ContactSection';
 import Footer from './components/Footer';
 import LoginScreen from './components/LoginScreen';
+import RegisterSelection from './components/RegisterSelection';
+import AuthLayout from './components/AuthLayout';
 import { workshopsData } from './data/workshopsData';
 import { theme } from './theme';
+import StudentRegister from './components/StudentRegister';
+import BusinessRegister from './components/BusinessRegister';
+import ForgotPasswordScreen from './components/ForgotPasswordScreen';
+import SetPasswordScreen from './components/SetPasswordScreen';
 
 // Main Home Component
 function MainHomePage() {
@@ -139,7 +145,6 @@ function MainHomePage() {
     const scrollY = scrollContainerRef.current.scrollTop;
     const windowHeight = window.innerHeight;
 
-    // Hero section seminar section mela pogum pothu mattum fade aagi marayum
     if (scrollY <= windowHeight * 1.2) {
       const progress = Math.min(scrollY / windowHeight, 1); 
       setHeroTransform({
@@ -325,8 +330,6 @@ function MainHomePage() {
 
   return (
     <div className="font-['Inter'] overflow-hidden h-screen w-screen relative" style={{ backgroundColor: theme.bgDark, color: theme.textMain }}>
-      
-      {/* BACKGROUND */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         <img 
           src="https://images.unsplash.com/photo-1511578314322-379afb476865?w=1600" 
@@ -393,20 +396,28 @@ function MainHomePage() {
   );
 }
 
-// Root App Component wrapped with Router with nested paths (/home and /home/login)
+// Root App Component wrapped with Router
 export default function App() {
   return (
     <Router>
       <Routes>
-        {/* 1. First app open / refresh pannina localhost:5173 (Splash Screen) varum */}
         <Route path="/" element={<Splash />} />
-        
-        {/* 2. Splash mudinji pogura path localhost:5173/home */}
         <Route path="/home" element={<MainHomePage />} />
         
-        {/* 3. Login click panna localhost:5173/home/login pogum */}
-        <Route path="/home/login" element={<LoginScreen />} />
-        <Route path="/login" element={<LoginScreen />} />
+        {/* Auth Routes with constant background */}
+        <Route path="/home/login" element={<AuthLayout><LoginScreen /></AuthLayout>} />
+        <Route path="/login" element={<AuthLayout><LoginScreen /></AuthLayout>} />
+        <Route path="/home/login/forgotpassword" element={<AuthLayout><ForgotPasswordScreen /></AuthLayout>} />
+        <Route path="/home/login/option" element={<AuthLayout><RegisterSelection /></AuthLayout>} />
+        <Route path="/home/login/forgotpassword" element={<AuthLayout><ForgotPasswordScreen /></AuthLayout>} />
+        <Route path="/home/login/forgotpassword/setpassword" element={<AuthLayout><SetPasswordScreen /></AuthLayout>} />
+        
+        {/* Student and Business Registration Routes */}
+        <Route path="/home/login/option/student" element={<AuthLayout><StudentRegister /></AuthLayout>} />
+        <Route path="/student/register" element={<AuthLayout><StudentRegister /></AuthLayout>} />
+        <Route path="/home/login/option/business" element={<AuthLayout><BusinessRegister /></AuthLayout>} />
+
+        <Route path="*" element={<MainHomePage />} />
       </Routes>
     </Router>
   );
