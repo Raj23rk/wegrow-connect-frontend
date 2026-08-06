@@ -1,0 +1,277 @@
+import React, { useState } from 'react';
+import { theme } from '../theme';
+
+export default function ContactSection({ contactTargetRef, contactStyle }) {
+  const [formData, setFormData] = useState({ 
+    name: '', 
+    mobile: '', 
+    email: '', 
+    aboutBusiness: false, 
+    aboutCourse: false, 
+    message: '' 
+  });
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setSubmitted(true);
+    setTimeout(() => {
+      setSubmitted(false);
+      handleReset();
+    }, 3000);
+  };
+
+  const handleReset = () => {
+    setFormData({ 
+      name: '', 
+      mobile: '', 
+      email: '', 
+      aboutBusiness: false, 
+      aboutCourse: false, 
+      message: '' 
+    });
+  };
+
+  return (
+    <section 
+      ref={contactTargetRef} 
+      id="contact" 
+      style={{
+        ...contactStyle,
+        willChange: 'opacity, transform'
+      }}
+      className="relative pt-0 pb-20 transition-all duration-500 ease-out transform-gpu"
+    >
+      <div className="max-w-7xl mx-auto px-4 md:px-6 relative">
+        
+        {/* HEADER SECTION */}
+        <div className="max-w-4xl mx-auto text-center space-y-2 mb-6">
+          <span className="text-xs uppercase font-black tracking-widest block" style={{ color: theme.orange }}>
+            24/7 ASSISTANCE & GUIDANCE
+          </span>
+          <h2 className="text-3xl lg:text-5xl font-extrabold drop-shadow-sm leading-tight" style={{ color: theme.primary }}>
+            Contact & Support
+          </h2>
+          <p className="text-sm lg:text-base font-semibold leading-relaxed" style={{ color: theme.textMuted }}>
+            Have questions about our bootcamps, workshops, or membership? We're here to help you grow.
+          </p>
+        </div>
+
+        {/* MAIN CONTACT CONTAINER (GRID 2 COLS) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch max-w-6xl mx-auto">
+          
+          {/* LEFT SIDE: DIRECT CONTACT DETAILS & QUICK LINKS */}
+          <div 
+            className="lg:col-span-5 backdrop-blur-md rounded-3xl p-8 border shadow-xl flex flex-col justify-between space-y-6 text-left"
+            style={{ backgroundColor: theme.cardBg, borderColor: theme.cardBorder }}
+          >
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-xl font-extrabold mb-2" style={{ color: theme.textBright }}>
+                  Get in Touch Directly
+                </h3>
+                <p className="text-xs font-semibold leading-relaxed" style={{ color: theme.textMuted }}>
+                  Connect with our program advisors for instant assistance regarding workshops and course fees.
+                </p>
+              </div>
+
+              {/* QUICK BUTTONS */}
+              <div className="space-y-3 pt-2">
+                <a 
+                  href="https://wa.me/919363337331" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between p-4 rounded-2xl border text-sm font-extrabold transition hover:scale-[1.02] shadow-sm cursor-pointer"
+                  style={{ borderColor: 'rgba(34, 197, 94, 0.4)', backgroundColor: 'rgba(34, 197, 94, 0.08)', color: '#16a34a' }}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-xl">💬</span>
+                    <span>Chat on WhatsApp</span>
+                  </div>
+                  <span>➔</span>
+                </a>
+
+                {/* DIRECT GMAIL COMPOSE LINK */}
+                <a 
+                  href="https://mail.google.com/mail/?view=cm&fs=1&to=wegrowskillcampus@gmail.com" 
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between p-4 rounded-2xl border text-sm font-extrabold transition hover:scale-[1.02] shadow-sm cursor-pointer"
+                  style={{ borderColor: 'rgba(16, 66, 136, 0.3)', backgroundColor: 'rgba(16, 66, 136, 0.08)', color: theme.primary }}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-xl">✉️</span>
+                    <span>Chat on Email</span>
+                  </div>
+                  <span>➔</span>
+                </a>
+              </div>
+
+              {/* INFO LIST */}
+              <div className="pt-4 border-t space-y-3 text-xs font-bold" style={{ borderColor: 'rgba(255,255,255,0.08)', color: theme.textMuted }}>
+                <div className="flex items-center gap-3">
+                  <span>✉️</span>
+                  <span>Email: <strong style={{ color: theme.textBright }}>wegrowskillcampus@gmail.com</strong></span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span>📍</span>
+                  <span>Location: <strong style={{ color: theme.textBright }}>Sivakasi & Srivilliputtur, India</strong></span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span>⏰</span>
+                  <span>Support Hours: <strong style={{ color: theme.textBright }}>Mon - Sat (10:00 AM - 7:00 PM)</strong></span>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 rounded-2xl border text-xs font-semibold backdrop-blur-sm" style={{ backgroundColor: 'rgba(255,255,255,0.03)', borderColor: theme.cardBorder, color: theme.textMuted }}>
+              ✦ Average response time: <strong style={{ color: theme.orange }}>Under 15 minutes</strong>
+            </div>
+          </div>
+
+          {/* RIGHT SIDE: MESSAGE FORM */}
+          <div 
+            className="lg:col-span-7 backdrop-blur-md rounded-3xl p-8 border shadow-xl text-left"
+            style={{ backgroundColor: theme.cardBg, borderColor: theme.cardBorder }}
+          >
+            {submitted ? (
+              <div className="py-16 text-center space-y-3">
+                <div className="text-5xl">🎉</div>
+                <h3 className="text-2xl font-extrabold" style={{ color: theme.primary }}>Message Received!</h3>
+                <p className="text-sm font-semibold max-w-sm mx-auto" style={{ color: theme.textMuted }}>
+                  Thank you for reaching out. One of our mentors will contact you shortly via email or phone.
+                </p>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <h3 className="text-xl font-extrabold" style={{ color: theme.textBright }}>
+                  Send Us a Direct Message
+                </h3>
+
+                {/* NAME & EMAIL */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-extrabold mb-1.5" style={{ color: theme.primary }}>Your Full Name</label>
+                    <input 
+                      type="text" 
+                      required 
+                      placeholder="Enter your name"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      className="w-full px-4 py-2.5 rounded-xl text-xs font-semibold border outline-none transition focus:border-amber-500"
+                      style={{ borderColor: theme.cardBorder, color: theme.textBright, backgroundColor: 'rgba(255,255,255,0.05)' }}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-extrabold mb-1.5" style={{ color: theme.primary }}>Email Address</label>
+                    <input 
+                      type="email" 
+                      required 
+                      placeholder="Enter your email"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      className="w-full px-4 py-2.5 rounded-xl text-xs font-semibold border outline-none transition focus:border-amber-500"
+                      style={{ borderColor: theme.cardBorder, color: theme.textBright, backgroundColor: 'rgba(255,255,255,0.05)' }}
+                    />
+                  </div>
+                </div>
+
+                {/* MOBILE NUMBER FIELD */}
+                <div>
+                  <label className="block text-xs font-extrabold mb-1.5" style={{ color: theme.primary }}>Your Mobile Number</label>
+                  <input 
+                    type="tel" 
+                    required 
+                    placeholder="Enter your mobile number"
+                    value={formData.mobile}
+                    onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
+                    className="w-full px-4 py-2.5 rounded-xl text-xs font-semibold border outline-none transition focus:border-amber-500"
+                    style={{ borderColor: theme.cardBorder, color: theme.textBright, backgroundColor: 'rgba(255,255,255,0.05)' }}
+                  />
+                </div>
+
+                {/* CHECKBOXES: BUSINESS OR COURSE */}
+                <div>
+                  <label className="block text-xs font-extrabold mb-2" style={{ color: theme.primary }}>Query About:</label>
+                  <div className="flex items-center gap-6 text-xs font-bold" style={{ color: theme.textBright }}>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input 
+                        type="checkbox" 
+                        checked={formData.aboutBusiness} 
+                        onChange={(e) => setFormData({ ...formData, aboutBusiness: e.target.checked })}
+                        className="w-4 h-4 accent-amber-500 cursor-pointer rounded"
+                      />
+                      Business
+                    </label>
+
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input 
+                        type="checkbox" 
+                        checked={formData.aboutCourse} 
+                        onChange={(e) => setFormData({ ...formData, aboutCourse: e.target.checked })}
+                        className="w-4 h-4 accent-amber-500 cursor-pointer rounded"
+                      />
+                      Course
+                    </label>
+                  </div>
+                </div>
+
+                {/* MESSAGE AREA */}
+                <div>
+                  <label className="block text-xs font-extrabold mb-1.5" style={{ color: theme.primary }}>How can we help you?</label>
+                  <textarea 
+                    rows="3" 
+                    required 
+                    placeholder="Type your query regarding bootcamps, workshops, or career guidance..."
+                    value={formData.message}
+                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                    className="w-full px-4 py-2.5 rounded-xl text-xs font-semibold border outline-none transition focus:border-amber-500 resize-none"
+                    style={{ borderColor: theme.cardBorder, color: theme.textBright, backgroundColor: 'rgba(255,255,255,0.05)' }}
+                  ></textarea>
+                </div>
+
+                {/* BUTTONS CONTAINER */}
+                <div className="space-y-3 pt-1">
+                  <button 
+                    type="submit" 
+                    className="w-full py-3.5 rounded-xl font-extrabold text-sm transition-all duration-300 shadow-lg hover:scale-[1.01] cursor-pointer"
+                    style={{ backgroundColor: theme.primary, color: '#ffffff' }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = theme.orange || '#f3a812'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = theme.primary}
+                  >
+                    Submit Query ➔
+                  </button>
+
+                  <button 
+                    type="button" 
+                    onClick={handleReset}
+                    className="w-full py-2.5 rounded-xl font-bold text-xs transition-all duration-300 border cursor-pointer"
+                    style={{ 
+                      borderColor: '#ef4444', 
+                      color: '#ef4444',
+                      backgroundColor: 'transparent'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = '#ef4444';
+                      e.currentTarget.style.color = '#ffffff';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                      e.currentTarget.style.color = '#ef4444';
+                    }}
+                  >
+                    Reset Form
+                  </button>
+                </div>
+
+              </form>
+            )}
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+  );
+}
