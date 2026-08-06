@@ -14,6 +14,7 @@ import SuccessStories from './components/SuccessStories';
 import ContactSection from './components/ContactSection';
 import Footer from './components/Footer';
 import LoginScreen from './components/LoginScreen';
+import ProfilePage from './components/ProfilePage';
 import { workshopsData } from './data/workshopsData';
 import { theme } from './theme';
 
@@ -407,6 +408,7 @@ export default function App() {
         {/* 3. Login click panna localhost:5173/home/login pogum */}
         <Route path="/home/login" element={<LoginScreen />} />
         <Route path="/login" element={<LoginScreen />} />
+        <Route path="/home/profile" element={<ProfilePage />} />
       </Routes>
     </Router>
   );

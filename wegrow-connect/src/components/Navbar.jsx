@@ -1,6 +1,7 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate hook
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { theme } from '../theme';
+import { fetchProfile, logoutUser, clearAuthStorage } from '../services/api';
 
 export default function Navbar({ 
   scrollToHero,
@@ -14,14 +15,63 @@ export default function Navbar({
   scrollToStories,
   scrollToContact
 }) {
-  
-  // Initialize navigation
   const navigate = useNavigate();
+  const [user, setUser] = useState(null);
 
-  // Function to handle Login button click
-  const handleLoginClick = () => {
-    navigate('/home/login'); // Changed to /home/login as per your exact requirement
+  useEffect(() => {
+    const cachedUser = localStorage.getItem('user');
+    if (cachedUser) {
+      try {
+        setUser(JSON.parse(cachedUser));
+      } catch {
+        localStorage.removeItem('user');
+      }
+    }
+
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+      fetchUserProfile();
+    }
+  }, []);
+
+  const fetchUserProfile = async () => {
+    try {
+      const data = await fetchProfile();
+
+      if (data.success) {
+        setUser(data.data);
+        localStorage.setItem('user', JSON.stringify(data.data));
+      } else {
+        clearAuthStorage();
+        setUser(null);
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
+
+  const handleLoginClick = () => {
+    navigate('/home/login');
+  };
+
+  const handleProfileClick = () => {
+    navigate('/home/profile');
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logoutUser();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      clearAuthStorage();
+      setUser(null);
+    }
+  };
+
+  const displayName = user
+    ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email
+    : '';
 
   return (
     <header className="fixed top-0 left-0 w-full z-50 bg-transparent pointer-events-none pt-4">
@@ -282,24 +332,100 @@ export default function Navbar({
 
         </div>
 
-        {/* LOGIN BUTTON */}
+        {/* LOGIN / PROFILE */}
         <div className="flex justify-end">
-          <button 
-            onClick={handleLoginClick} // Changed this to navigate to login page
-            className="font-extrabold px-7 py-2.5 rounded-full text-sm transition-all duration-300 shadow-md hover:scale-105 hover:shadow-xl transform focus:outline-none cursor-pointer" 
-            style={{ 
-              backgroundColor: theme.primary, 
-              color: '#ffffff' 
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = theme.orange || '#f3a812';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = theme.primary;
-            }}
-          >
-            Login
-          </button>
+          {user ? (
+            <div className="relative dropdown py-2">
+              <button
+                className="flex items-center gap-2 font-extrabold px-5 py-2.5 rounded-full text-sm transition-all duration-300 shadow-md hover:scale-105 hover:shadow-xl transform focus:outline-none cursor-pointer"
+                style={{
+                  backgroundColor: theme.primary,
+                  color: '#ffffff',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = theme.orange || '#f3a812';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = theme.primary;
+                }}
+              >
+                <span className="flex items-center justify-center w-7 h-7 rounded-full bg-white/20 text-xs uppercase">
+                  {(user.firstName?.[0] || user.email?.[0] || 'U')}
+                </span>
+                {displayName}
+                <span className="text-xs">▾</span>
+              </button>
+
+              <div
+                className="dropdown-menu absolute top-full right-0 w-52 backdrop-blur-xl rounded-xl shadow-2xl p-1.5 text-left z-50 transition-all duration-200"
+                style={{ backgroundColor: theme.dropdownBg, border: `1px solid ${theme.cardBorder}` }}
+              >
+                <div
+                  className="px-2.5 py-2 rounded-lg mb-1"
+                  style={{ borderBottom: `1px solid ${theme.cardBorder}` }}
+                >
+                  <div className="font-extrabold text-sm leading-tight" style={{ color: theme.primary }}>
+                    {displayName}
+                  </div>
+                  <div className="text-[11px] font-semibold leading-tight mt-0.5 truncate" style={{ color: theme.textMuted }}>
+                    {user.email}
+                  </div>
+                  {user.role && (
+                    <div className="text-[10px] font-bold mt-0.5 uppercase leading-tight" style={{ color: theme.orange || '#f3a812' }}>
+                      {user.role}
+                    </div>
+                  )}
+                </div>
+
+                <button
+                  onClick={handleProfileClick}
+                  className="w-full text-left px-2.5 py-2 rounded-lg transition-all duration-200 cursor-pointer font-extrabold text-sm leading-tight"
+                  style={{ color: theme.primary }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = theme.primary || '#104288';
+                    e.currentTarget.style.color = '#ffffff';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.color = theme.primary;
+                  }}
+                >
+                  My Profile
+                </button>
+
+                <button
+                  onClick={handleLogout}
+                  className="w-full text-left px-2.5 py-2 rounded-lg transition-all duration-200 cursor-pointer font-extrabold text-sm leading-tight"
+                  style={{ color: '#dc2626' }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = 'rgba(220, 38, 38, 0.08)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }}
+                >
+                  Logout
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              onClick={handleLoginClick}
+              className="font-extrabold px-7 py-2.5 rounded-full text-sm transition-all duration-300 shadow-md hover:scale-105 hover:shadow-xl transform focus:outline-none cursor-pointer"
+              style={{
+                backgroundColor: theme.primary,
+                color: '#ffffff',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = theme.orange || '#f3a812';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = theme.primary;
+              }}
+            >
+              Login
+            </button>
+          )}
         </div>
       </nav>
     </header>

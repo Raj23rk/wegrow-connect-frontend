@@ -57,3 +57,24 @@ html, body {
   -ms-overflow-style: none !important;
   overflow: hidden;
 }
+
+.page-scroll {
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+.page-scroll::-webkit-scrollbar {
+  display: block !important;
+  width: 8px !important;
+}
+
+.page-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.page-scroll::-webkit-scrollbar-thumb {
+  background: rgba(16, 66, 136, 0.3);
+  border-radius: 10px;
+}
