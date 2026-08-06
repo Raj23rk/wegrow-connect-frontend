@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@keyframes floatArrow {
+  0%, 100% { transform: translateY(0); opacity: 0.8; }
+  50% { transform: translateY(10px); opacity: 1; }
+}
+
+.bounce-arrow { 
+  animation: floatArrow 1.8s infinite ease-in-out; 
+}
+
+.scroll-container {
+  height: 100vh;
+  overflow-y: auto;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0px, transparent 40px, black 110px);
+  mask-image: linear-gradient(to bottom, transparent 0px, transparent 40px, black 110px);
+}
+
+.scroll-container::-webkit-scrollbar { width: 8px; }
+.scroll-container::-webkit-scrollbar-track { background: transparent; }
+.scroll-container::-webkit-scrollbar-thumb { background: rgba(0, 77, 64, 0.3); border-radius: 10px; }
+
+.dropdown:hover .dropdown-menu {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.dropdown-menu {
+  display: none;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Dynamic Profile Image Smooth Fade Animation */
+@keyframes fadeIn {
+  from { opacity: 0.6; transform: scale(0.99); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.25s ease-out forwards;
+}
+
+/* Hide browser default scrollbars completely */
+::-webkit-scrollbar {
+  display: none !important;
+  width: 0px !important;
+  height: 0px !important;
+}
+
+html, body {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+  overflow: hidden;
+}
