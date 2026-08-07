@@ -9,22 +9,39 @@ export default function EventSection({ eventTargetRef, eventStyle }) {
 
   // Fetch data from your AWS API
   useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        const response = await fetch('http://13.239.234.181:4000/v1/events/all-event?page=1&limit=10');
-        const json = await response.json();
-        if (json.success && json.data && json.data.events) {
-          setEvents(json.data.events);
-        }
-      } catch (error) {
-        console.error('Error fetching events:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchEvents = async () => {
+    try {
+      const token = localStorage.getItem('token');
 
-    fetchEvents();
-  }, []);
+      const response = await fetch(
+        'http://13.239.234.181:4000/api/v1/events/all-event?page=1&limit=10',
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      const json = await response.json();
+
+      if (!response.ok) {
+        throw new Error(json.message || 'Failed to fetch events');
+      }
+
+      if (json.success && json.data?.events) {
+        setEvents(json.data.events);
+      }
+    } catch (error) {
+      console.error('Error fetching events:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchEvents();
+}, []);
 
   // Filter events based on selected tab
   const filteredEvents = events.filter((ev) => {
