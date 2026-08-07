@@ -17,6 +17,7 @@ import Footer from './components/Footer';
 import LoginScreen from './components/LoginScreen';
 import RegisterSelection from './components/RegisterSelection';
 import AuthLayout from './components/AuthLayout';
+import ProfilePage from './components/ProfilePage';
 import { workshopsData } from './data/workshopsData';
 import { theme } from './theme';
 import StudentRegister from './components/StudentRegister';
@@ -470,6 +471,10 @@ export default function App() {
         <Route path="/home/login/option/business" element={<AuthLayout><BusinessRegister /></AuthLayout>} />
 
         <Route path="*" element={<MainHomePage />} />
+        {/* 3. Login click panna localhost:5173/home/login pogum */}
+        <Route path="/home/login" element={<LoginScreen />} />
+        <Route path="/login" element={<LoginScreen />} />
+        <Route path="/home/profile" element={<ProfilePage />} />
       </Routes>
     </Router>
   );
