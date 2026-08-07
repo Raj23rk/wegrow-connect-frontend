@@ -6,6 +6,17 @@ export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Custom Modal State for Alerts
+  const [modalConfig, setModalConfig] = useState({
+    isOpen: false,
+    title: '',
+    message: ''
+  });
+
+  const showAlert = (title, message) => {
+    setModalConfig({ isOpen: true, title, message });
+  };
+
   const handleVerifyEmail = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -19,14 +30,13 @@ export default function ForgotPasswordScreen() {
 
       const data = await response.json();
 
-      if (response.ok || true) { // Direct navigation as requested
+      if (response.ok || true) { 
         navigate('/home/login/forgotpassword/setpassword');
       } else {
-        alert(data.message || 'Something went wrong.');
+        showAlert("Error", data.message || 'Something went wrong.');
       }
     } catch (error) {
       console.error('Network Error:', error);
-      // Navigate smoothly even if mock fetch fails
       navigate('/home/login/forgotpassword/setpassword');
     } finally {
       setLoading(false);
@@ -40,6 +50,10 @@ export default function ForgotPasswordScreen() {
   const handleRegisterClick = (e) => {
     e.preventDefault();
     navigate('/home/login/option');
+  };
+
+  const handleAlertModalClose = () => {
+    setModalConfig({ isOpen: false, title: '', message: '' });
   };
 
   return (
@@ -76,6 +90,27 @@ export default function ForgotPasswordScreen() {
         }
       `}</style>
 
+      {/* CUSTOM DESIGNED ALERT MODAL */}
+      {modalConfig.isOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl border border-gray-100 transform transition-all">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 text-red-600 text-3xl">
+              ⚠️
+            </div>
+            <h3 className="text-xl font-black text-gray-900 mb-2">{modalConfig.title}</h3>
+            <p className="text-xs font-semibold text-gray-500 mb-6 leading-relaxed">
+              {modalConfig.message}
+            </p>
+            <button
+              onClick={handleAlertModalClose}
+              className="w-full py-3 rounded-full bg-[#104288] hover:bg-[#f97316] text-white font-extrabold text-xs uppercase tracking-wider transition-all shadow-md cursor-pointer"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="w-full max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-center gap-6 lg:gap-10 page-fade">
         
         <div className="w-full md:w-1/2 flex flex-col items-center md:items-start text-center md:text-left">
@@ -94,9 +129,10 @@ export default function ForgotPasswordScreen() {
 
         <div className="w-full md:w-1/2 max-w-md bg-white/95 backdrop-blur-2xl border border-gray-200/90 rounded-3xl p-6 sm:p-8 shadow-2xl flex flex-col items-center">
           
-          <div className="relative inline-flex items-center justify-center mb-6">
-            <img src="/login/wegrow-logo.png" alt="WeGrow Text Logo" className="w-[220px] h-[65px] object-contain" />
-            <img src="/login/logo.jpg" alt="WeGrow Emblem" className="absolute -left-9 top-0 w-16 h-16 object-contain rounded-full shadow-md" />
+          {/* WEGROW LOGO WITH REDUCED GAP & NO ROUND WRAPPER */}
+          <div className="flex items-center justify-center mb-6">
+            <img src="/login/logo.jpg" alt="Logo Icon" className="w-12 h-12 object-contain relative z-10" />
+            <img src="/login/wegrow-logo.png" alt="WeGrow Text Logo" className="w-[160px] h-[48px] object-contain -ml-6 relative z-0" />
           </div>
           
           <form onSubmit={handleVerifyEmail} className="w-full flex flex-col items-center">

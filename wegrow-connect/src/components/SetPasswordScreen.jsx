@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export default function SetPasswordScreen() {
@@ -7,7 +7,7 @@ export default function SetPasswordScreen() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Custom Alert State instead of browser alert
+  // Custom Alert State
   const [modalConfig, setModalConfig] = useState({
     isOpen: false,
     title: '',
@@ -19,6 +19,20 @@ export default function SetPasswordScreen() {
     setModalConfig({ isOpen: true, title, message, isSuccess });
   };
 
+  // 5 Seconds automatic silent redirect timer when success modal is open
+  // No countdown displayed to the user.
+  useEffect(() => {
+    let timer;
+    if (modalConfig.isOpen && modalConfig.isSuccess) {
+      // Sets a timer for 5 seconds (5000ms) to navigate silently
+      timer = setTimeout(() => {
+        navigate('/home/login');
+      }, 5000);
+    }
+    // Cleanup the timer if the component unmounts or modal closes
+    return () => clearTimeout(timer);
+  }, [modalConfig.isOpen, modalConfig.isSuccess, navigate]);
+
   const handleSetPassword = (e) => {
     e.preventDefault();
 
@@ -27,7 +41,6 @@ export default function SetPasswordScreen() {
       return;
     }
 
-    // Validation for Caps, Small, Number, Special Character, and Min length 8
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     if (!passwordRegex.test(newPassword)) {
       showAlert(
@@ -40,15 +53,20 @@ export default function SetPasswordScreen() {
 
     setLoading(true);
 
+    // Mock API call delay
     setTimeout(() => {
       setLoading(false);
-      showAlert("Success!", "Password updated successfully! Redirecting to login...", true);
+      // Show success message WITHOUT countdown text
+      showAlert("Success!", "Password updated successfully!", true);
     }, 1000);
   };
 
+  // Handles click on the "OK" button in the modal
   const handleModalClose = () => {
     const isSuccess = modalConfig.isSuccess;
+    // Close the modal immediately
     setModalConfig({ isOpen: false, title: '', message: '', isSuccess: false });
+    // Instant navigation on button click
     if (isSuccess) {
       navigate('/home/login');
     }
@@ -97,7 +115,7 @@ export default function SetPasswordScreen() {
         }
       `}</style>
 
-      {/* CUSTOM DESIGNED MODAL POPUP */}
+      {/* CUSTOM DESIGNED SUCCESS / ALERT MODAL */}
       {modalConfig.isOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl border border-gray-100 transform transition-all">
@@ -138,10 +156,10 @@ export default function SetPasswordScreen() {
         {/* RIGHT SIDE SET PASSWORD FORM CARD */}
         <div className="w-full md:w-1/2 max-w-md bg-white/95 backdrop-blur-2xl border border-gray-200/90 rounded-3xl p-6 sm:p-8 shadow-2xl flex flex-col items-center">
           
-          {/* WEGROW LOGO */}
-          <div className="relative inline-flex items-center justify-center mb-6">
-            <img src="/login/wegrow-logo.png" alt="WeGrow Text Logo" className="w-[220px] h-[65px] object-contain" />
-            <img src="/login/logo.jpg" alt="WeGrow Emblem" className="absolute -left-9 top-0 w-16 h-16 object-contain rounded-full shadow-md" />
+          {/* WEGROW LOGO WITH REDUCED GAP & NO ROUND WRAPPER */}
+          <div className="flex items-center justify-center mb-6">
+            <img src="/login/logo.jpg" alt="Logo Icon" className="w-12 h-12 object-contain relative z-10" />
+            <img src="/login/wegrow-logo.png" alt="WeGrow Text Logo" className="w-[160px] h-[48px] object-contain -ml-6 relative z-0" />
           </div>
           
           {/* FORM */}

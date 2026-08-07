@@ -245,10 +245,16 @@ export default function BusinessRegister() {
           transform: translateY(-1px);
           box-shadow: 0 8px 20px rgba(249, 115, 22, 0.35) !important;
         }
-        .back-btn-hover:hover {
-          background-color: #f97316 !important;
-          border-color: #f97316 !important;
-          color: white !important;
+        .back-btn {
+          background-color: #ffffff;
+          border: 2px solid #d1d5db;
+          color: #374151;
+          transition: all 0.25s ease;
+        }
+        .back-btn:hover {
+          background-color: #f1f5f9 !important;
+          border-color: #104288 !important;
+          color: #104288 !important;
         }
         .custom-scroll::-webkit-scrollbar {
           width: 5px;
@@ -306,14 +312,15 @@ export default function BusinessRegister() {
         
         <div className="w-full lg:w-5/12 bg-transparent p-8 sm:p-10 text-gray-900 hidden lg:flex flex-col justify-between relative overflow-hidden">
           <div className="relative z-10 flex items-center justify-between">
-            <div className="flex items-center -space-x-1">
-              <img src="/login/logo.jpg" alt="Logo Icon" className="w-12 h-12 object-contain rounded-full bg-white p-0.5 shadow relative z-10" />
-              <img src="/login/wegrow-logo.png" alt="WeGrow Text Logo" className="w-[160px] h-[48px] object-contain -ml-3" />
+            {/* ROUND SHAPE REMOVED FROM LOGO */}
+            <div className="flex items-center">
+              <img src="/login/logo.jpg" alt="Logo Icon" className="w-12 h-12 object-contain relative z-10" />
+              <img src="/login/wegrow-logo.png" alt="WeGrow Text Logo" className="w-[160px] h-[48px] object-contain -ml-6 relative z-0" />
             </div>
             <button 
               type="button"
               onClick={() => navigate('/home/login/option')}
-              className="back-btn-hover text-sm font-extrabold px-5 py-2.5 rounded-full bg-white/90 transition-all border border-gray-300 text-[#104288] cursor-pointer shadow-md"
+              className="back-btn px-5 py-2 rounded-full font-bold text-xs cursor-pointer shadow-sm"
             >
               ← Back
             </button>
@@ -364,9 +371,9 @@ export default function BusinessRegister() {
             <button 
               type="button"
               onClick={() => navigate('/home/login/option')}
-              className="lg:hidden back-btn-hover text-xs font-bold px-3 py-1.5 rounded-full bg-gray-100 transition-all text-gray-700 cursor-pointer shadow-sm border border-gray-300"
+              className="lg:hidden back-btn px-3 py-1.5 rounded-full font-bold text-xs cursor-pointer shadow-sm"
             >
-              ← Back
+              ← BACK
             </button>
           </div>
 

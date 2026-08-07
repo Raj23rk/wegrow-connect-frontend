@@ -59,7 +59,7 @@ export default function Hero({ heroTransform, scrollToEvents, scrollToSeminars }
   const [currentSlide, setCurrentSlide] = useState(0);
   const [fade, setFade] = useState(true);
 
-  // Slow and smooth fade transition effect
+  // Slow and smooth fade transition effect for carousel slides
   useEffect(() => {
     const timer = setInterval(() => {
       setFade(false); // Slow fade out
@@ -88,22 +88,22 @@ export default function Hero({ heroTransform, scrollToEvents, scrollToSeminars }
   // Direct Navigation to Login Page for Join Membership button
   const handleJoinMembershipClick = (e) => {
     e.preventDefault();
-    navigate('/home/login'); // Inthu ippo /home/login-ku correct-ah pogum
+    navigate('/home/login');
   };
 
-  // Direct Smooth Scroll Trigger for Arrow with offset adjustment (- 80)
-  const handleSeminarScroll = (e) => {
+  // Direct Smooth Scroll Trigger for Arrow to navigate to Event Section
+  const handleEventScroll = (e) => {
     e.preventDefault();
-    if (scrollToSeminars) {
-      scrollToSeminars();
+    if (scrollToEvents) {
+      scrollToEvents();
     } else {
-      const seminarSection = document.getElementById('seminar') || document.getElementById('seminars');
+      const eventSection = document.getElementById('event-section') || document.getElementById('events');
       const scrollContainer = document.querySelector('.scroll-container');
-      if (seminarSection && scrollContainer) {
-        const topPos = Math.max(seminarSection.offsetTop - 80, 0);
+      if (eventSection && scrollContainer) {
+        const topPos = Math.max(eventSection.offsetTop - 80, 0);
         scrollContainer.scrollTo({ top: topPos, behavior: 'smooth' });
-      } else if (seminarSection) {
-        seminarSection.scrollIntoView({ behavior: 'smooth' });
+      } else if (eventSection) {
+        eventSection.scrollIntoView({ behavior: 'smooth' });
       }
     }
   };
@@ -152,7 +152,7 @@ export default function Hero({ heroTransform, scrollToEvents, scrollToSeminars }
         }
       `}</style>
       
-      {/* BACKGROUND PHOTO COLLAGE ANIMATION (Opacity 30 for subtle look) */}
+      {/* BACKGROUND PHOTO COLLAGE ANIMATION */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-30 flex flex-col justify-around py-2 space-y-3">
         
         {/* ROW 1: Moving Left */}
@@ -182,7 +182,7 @@ export default function Hero({ heroTransform, scrollToEvents, scrollToSeminars }
           ))}
         </div>
 
-        {/* Smooth gradient overlay for opacity-30 */}
+        {/* Smooth gradient overlay */}
         <div className="absolute inset-0 z-10" style={{ background: 'linear-gradient(to bottom, rgba(242,244,248,0.78) 0%, rgba(242,244,248,0.65) 50%, rgba(242,244,248,0.82) 100%)' }}></div>
       </div>
 
@@ -268,9 +268,9 @@ export default function Hero({ heroTransform, scrollToEvents, scrollToSeminars }
 
       </div>
 
-      {/* BOUNCING ARROW AT THE BOTTOM */}
+      {/* BOUNCING ARROW LINKED TO EVENT SECTION */}
       <div className="flex justify-center pb-2 pt-0 relative z-20">
-        <button onClick={handleSeminarScroll} className="bounce-arrow transition p-2 focus:outline-none cursor-pointer" style={{ color: theme.primary }}>
+        <button onClick={handleEventScroll} className="bounce-arrow transition p-2 focus:outline-none cursor-pointer" style={{ color: theme.primary }}>
           <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path>
           </svg>

@@ -47,6 +47,12 @@ export default function RegisterSelection() {
           background-color: #104288 !important;
           transform: translateY(-1px);
         }
+        .back-btn {
+          background-color: #ffffff;
+          border: 2px solid #d1d5db;
+          color: #374151;
+          transition: all 0.25s ease;
+        }
         .back-btn:hover {
           background-color: #f1f5f9 !important;
           border-color: #104288 !important;
@@ -57,7 +63,7 @@ export default function RegisterSelection() {
       {/* WRAPPER WITH SLOW FADE ANIMATION */}
       <div className="w-full h-full flex items-center justify-center relative page-fade">
 
-        {/* BACK BUTTON */}
+        {/* BACK BUTTON WITH LOGIN SCREEN STYLE */}
         <button 
           type="button"
           onClick={handleBackClick}
@@ -66,15 +72,12 @@ export default function RegisterSelection() {
             position: 'absolute',
             top: '30px',
             left: '40px',
-            padding: '10px 20px',
+            padding: '10px 22px',
             borderRadius: '9999px',
             fontWeight: 700,
-            color: '#104288',
             fontSize: '14px',
-            border: '2px solid #104288',
             cursor: 'pointer',
-            backgroundColor: 'white',
-            transition: 'all 0.2s ease',
+            boxShadow: '0 2px 5px rgba(0,0,0,0.05)',
             zIndex: 50
           }}
         >

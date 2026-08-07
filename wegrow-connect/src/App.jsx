@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Splash from './components/Splash';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
+import EventSection from './components/EventSection';
 import WorkshopSection from './components/WorkshopSection';
 import SeminarSection from './components/SeminarSection';
 import VisitSection from './components/VisitSection';
@@ -27,11 +28,15 @@ import SetPasswordScreen from './components/SetPasswordScreen';
 function MainHomePage() {
   const [activeItem, setActiveItem] = useState(workshopsData[0]);
   const [heroTransform, setHeroTransform] = useState({ opacity: 1, transform: 'scale(1) translateY(0%)' });
+  
+  // Section styles based on order: Hero -> EventSection -> Reward -> Resources -> Seminars -> Visit -> Workshops
+  const [eventStyle, setEventStyle] = useState({ opacity: 0, transform: 'scale(0.98)' });
+  const [rewardStyle, setRewardStyle] = useState({ opacity: 0, transform: 'scale(0.98)' });
+  const [resourceStyle, setResourceStyle] = useState({ opacity: 0, transform: 'scale(0.98)' });
   const [seminarStyle, setSeminarStyle] = useState({ opacity: 0, transform: 'scale(0.98)' });
   const [visitStyle, setVisitStyle] = useState({ opacity: 0, transform: 'scale(0.98)' });
   const [workshopStyle, setWorkshopStyle] = useState({ opacity: 0, transform: 'scale(0.98) translateY(20px)' });
-  const [rewardStyle, setRewardStyle] = useState({ opacity: 0, transform: 'scale(0.98)' });
-  const [resourceStyle, setResourceStyle] = useState({ opacity: 0, transform: 'scale(0.98)' });
+
   const [mentorStyle, setMentorStyle] = useState({ opacity: 0, transform: 'scale(0.98)' });
   const [enterpricesStyle, setEnterpricesStyle] = useState({ opacity: 0, transform: 'scale(0.98)' });
   const [storiesStyle, setStoriesStyle] = useState({ opacity: 0, transform: 'scale(0.98)' });
@@ -41,11 +46,15 @@ function MainHomePage() {
   const [activeResourceTab, setActiveResourceTab] = useState('blog');
 
   const scrollContainerRef = useRef(null);
-  const seminarTargetRef = useRef(null);
-  const visitTargetRef = useRef(null);
-  const eventsTargetRef = useRef(null);
+  
+  // Target refs in new correct order
+  const eventTargetRef = useRef(null);
   const rewardTargetRef = useRef(null);
   const resourceTargetRef = useRef(null);
+  const seminarTargetRef = useRef(null);
+  const visitTargetRef = useRef(null);
+  const eventsTargetRef = useRef(null); // Workshops
+
   const mentorTargetRef = useRef(null);
   const enterpricesTargetRef = useRef(null);
   const storiesTargetRef = useRef(null);
@@ -55,6 +64,34 @@ function MainHomePage() {
   const scrollToHero = () => {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const scrollToEventsMain = () => {
+    if (eventTargetRef.current && scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({
+        top: Math.max(eventTargetRef.current.offsetTop - 40, 0),
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  const scrollToRewards = () => {
+    if (rewardTargetRef.current && scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({
+        top: Math.max(rewardTargetRef.current.offsetTop - 80, 0),
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  const scrollToResources = (tab = 'blog') => {
+    setActiveResourceTab(tab);
+    if (resourceTargetRef.current && scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({
+        top: Math.max(resourceTargetRef.current.offsetTop - 40, 0),
+        behavior: 'smooth'
+      });
     }
   };
 
@@ -80,25 +117,6 @@ function MainHomePage() {
     if (eventsTargetRef.current && scrollContainerRef.current) {
       scrollContainerRef.current.scrollTo({
         top: Math.max(eventsTargetRef.current.offsetTop - 80, 0),
-        behavior: 'smooth'
-      });
-    }
-  };
-
-  const scrollToRewards = () => {
-    if (rewardTargetRef.current && scrollContainerRef.current) {
-      scrollContainerRef.current.scrollTo({
-        top: Math.max(rewardTargetRef.current.offsetTop - 80, 0),
-        behavior: 'smooth'
-      });
-    }
-  };
-
-  const scrollToResources = (tab = 'blog') => {
-    setActiveResourceTab(tab);
-    if (resourceTargetRef.current && scrollContainerRef.current) {
-      scrollContainerRef.current.scrollTo({
-        top: Math.max(resourceTargetRef.current.offsetTop - 40, 0),
         behavior: 'smooth'
       });
     }
@@ -154,68 +172,44 @@ function MainHomePage() {
     }
 
     if (
+      eventTargetRef.current &&
+      rewardTargetRef.current && 
+      resourceTargetRef.current && 
       seminarTargetRef.current && 
       visitTargetRef.current && 
       eventsTargetRef.current && 
-      rewardTargetRef.current && 
-      resourceTargetRef.current &&
       mentorTargetRef.current &&
       enterpricesTargetRef.current &&
       storiesTargetRef.current &&
       contactTargetRef.current
     ) {
+      const eventTop = eventTargetRef.current.getBoundingClientRect().top;
+      const rewardTop = rewardTargetRef.current.getBoundingClientRect().top;
+      const resourceTop = resourceTargetRef.current.getBoundingClientRect().top;
       const seminarTop = seminarTargetRef.current.getBoundingClientRect().top;
       const visitTop = visitTargetRef.current.getBoundingClientRect().top;
       const eventsTop = eventsTargetRef.current.getBoundingClientRect().top;
-      const rewardTop = rewardTargetRef.current.getBoundingClientRect().top;
-      const resourceTop = resourceTargetRef.current.getBoundingClientRect().top;
       const mentorTop = mentorTargetRef.current.getBoundingClientRect().top;
       const enterpricesTop = enterpricesTargetRef.current.getBoundingClientRect().top;
       const storiesTop = storiesTargetRef.current.getBoundingClientRect().top;
       const contactTop = contactTargetRef.current.getBoundingClientRect().top;
 
-      if (seminarTop <= windowHeight) {
-        const seminarFadeIn = Math.min(Math.max((windowHeight - seminarTop) / (windowHeight * 0.4), 0), 1);
-        let seminarFadeOut = 0;
-        if (visitTop < windowHeight * 0.85) {
-          seminarFadeOut = Math.min(Math.max((windowHeight * 0.85 - visitTop) / (windowHeight * 0.5), 0), 1);
-        }
-        setSeminarStyle({
-          opacity: Math.max(seminarFadeIn - seminarFadeOut, 0),
-          transform: `scale(${0.98 + (0.02 * seminarFadeIn) - (0.03 * seminarFadeOut)})`
-        });
-      } else {
-        setSeminarStyle({ opacity: 0, transform: 'scale(0.98)' });
-      }
-
-      if (visitTop <= windowHeight) {
-        const visitFadeIn = Math.min(Math.max((windowHeight - visitTop) / (windowHeight * 0.4), 0), 1);
-        let visitFadeOut = 0;
-        if (eventsTop < windowHeight * 0.85) {
-          visitFadeOut = Math.min(Math.max((windowHeight * 0.85 - eventsTop) / (windowHeight * 0.5), 0), 1);
-        }
-        setVisitStyle({
-          opacity: Math.max(visitFadeIn - visitFadeOut, 0),
-          transform: `scale(${0.98 + (0.02 * visitFadeIn) - (0.03 * visitFadeOut)})`
-        });
-      } else {
-        setVisitStyle({ opacity: 0, transform: 'scale(0.98)' });
-      }
-
-      if (eventsTop <= windowHeight) {
-        const fadeInProgress = Math.min(Math.max((windowHeight - eventsTop) / (windowHeight * 0.45), 0), 1);
-        let fadeOutProgress = 0;
+      // 1. Event Section Animation
+      if (eventTop <= windowHeight) {
+        const eventFadeIn = Math.min(Math.max((windowHeight - eventTop) / (windowHeight * 0.4), 0), 1);
+        let eventFadeOut = 0;
         if (rewardTop < windowHeight * 0.85) {
-          fadeOutProgress = Math.min(Math.max((windowHeight * 0.85 - rewardTop) / (windowHeight * 0.5), 0), 1);
+          eventFadeOut = Math.min(Math.max((windowHeight * 0.85 - rewardTop) / (windowHeight * 0.5), 0), 1);
         }
-        setWorkshopStyle({
-          opacity: Math.max(fadeInProgress - fadeOutProgress, 0),
-          transform: `scale(${Math.max(0.98 + (0.02 * fadeInProgress) - (0.03 * fadeOutProgress), 0.93)}) translateY(${(1 - fadeInProgress) * 20 - (fadeOutProgress * 20)}px)`
+        setEventStyle({
+          opacity: Math.max(eventFadeIn - eventFadeOut, 0),
+          transform: `scale(${0.98 + (0.02 * eventFadeIn) - (0.03 * eventFadeOut)})`
         });
       } else {
-        setWorkshopStyle({ opacity: 0, transform: 'scale(0.98) translateY(20px)' });
+        setEventStyle({ opacity: 0, transform: 'scale(0.98)' });
       }
 
+      // 2. Reward Animation
       if (rewardTop <= windowHeight) {
         const rewardFadeIn = Math.min(Math.max((windowHeight - rewardTop) / (windowHeight * 0.4), 0), 1);
         let rewardFadeOut = 0;
@@ -230,11 +224,12 @@ function MainHomePage() {
         setRewardStyle({ opacity: 0, transform: 'scale(0.98)' });
       }
 
+      // 3. Resource Animation
       if (resourceTop <= windowHeight) {
         const resourceFadeIn = Math.min(Math.max((windowHeight - resourceTop) / (windowHeight * 0.4), 0), 1);
         let resourceFadeOut = 0;
-        if (mentorTop < windowHeight * 0.85) {
-          resourceFadeOut = Math.min(Math.max((windowHeight * 0.85 - mentorTop) / (windowHeight * 0.5), 0), 1);
+        if (seminarTop < windowHeight * 0.85) {
+          resourceFadeOut = Math.min(Math.max((windowHeight * 0.85 - seminarTop) / (windowHeight * 0.5), 0), 1);
         }
         setResourceStyle({
           opacity: Math.max(resourceFadeIn - resourceFadeOut, 0),
@@ -242,6 +237,51 @@ function MainHomePage() {
         });
       } else {
         setResourceStyle({ opacity: 0, transform: 'scale(0.98)' });
+      }
+
+      // 4. Seminars Animation
+      if (seminarTop <= windowHeight) {
+        const seminarFadeIn = Math.min(Math.max((windowHeight - seminarTop) / (windowHeight * 0.4), 0), 1);
+        let seminarFadeOut = 0;
+        if (visitTop < windowHeight * 0.85) {
+          seminarFadeOut = Math.min(Math.max((windowHeight * 0.85 - visitTop) / (windowHeight * 0.5), 0), 1);
+        }
+        setSeminarStyle({
+          opacity: Math.max(seminarFadeIn - seminarFadeOut, 0),
+          transform: `scale(${0.98 + (0.02 * seminarFadeIn) - (0.03 * seminarFadeOut)})`
+        });
+      } else {
+        setSeminarStyle({ opacity: 0, transform: 'scale(0.98)' });
+      }
+
+      // 5. Visit Animation
+      if (visitTop <= windowHeight) {
+        const visitFadeIn = Math.min(Math.max((windowHeight - visitTop) / (windowHeight * 0.4), 0), 1);
+        let visitFadeOut = 0;
+        if (eventsTop < windowHeight * 0.85) {
+          visitFadeOut = Math.min(Math.max((windowHeight * 0.85 - eventsTop) / (windowHeight * 0.5), 0), 1);
+        }
+        setVisitStyle({
+          opacity: Math.max(visitFadeIn - visitFadeOut, 0),
+          transform: `scale(${0.98 + (0.02 * visitFadeIn) - (0.03 * visitFadeOut)})`
+        });
+      } else {
+        setVisitStyle({ opacity: 0, transform: 'scale(0.98)' });
+      }
+
+      // 6. Workshops Animation
+      if (eventsTop <= windowHeight) {
+        const fadeInProgress = Math.min(Math.max((windowHeight - eventsTop) / (windowHeight * 0.45), 0), 1);
+        let fadeOutProgress = 0;
+        if (mentorTop < windowHeight * 0.85) {
+          fadeOutProgress = Math.min(Math.max((windowHeight * 0.85 - mentorTop) / (windowHeight * 0.5), 0), 1);
+        }
+        setWorkshopStyle({
+          opacity: Math.max(fadeInProgress - fadeOutProgress, 0),
+          transform: `scale(${Math.max(0.98 + (0.02 * fadeInProgress) - (0.03 * fadeOutProgress), 0.93)}) translateY(${(1 - fadeInProgress) * 20 - (fadeOutProgress * 20)}px)`
+        });
+      } else {
+        setWorkshopStyle({ opacity: 0, transform: 'scale(0.98) translateY(20px)' });
       }
 
       if (mentorTop <= windowHeight) {
@@ -341,9 +381,9 @@ function MainHomePage() {
 
       <Navbar 
         scrollToHero={scrollToHero}
+        scrollToEvents={scrollToEventsMain} 
         scrollToSeminars={scrollToSeminars} 
         scrollToVisits={scrollToVisits} 
-        scrollToEvents={scrollToEvents} 
         scrollToRewards={scrollToRewards}
         scrollToResources={scrollToResources}
         scrollToMentors={scrollToMentors}
@@ -358,10 +398,25 @@ function MainHomePage() {
         style={{ clipPath: 'inset(55px 0 0 0)' }}
         className="scroll-container relative z-20 w-full h-full overflow-y-auto pt-14 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
       >
-        <Hero heroTransform={heroTransform} scrollToEvents={scrollToEvents} />
+        {/* 1. HERO SECTION */}
+        <Hero heroTransform={heroTransform} scrollToEvents={scrollToEventsMain} />
+        
+        {/* 2. EVENT SECTION (DYNAMIC API CAROUSEL - PLACED DIRECTLY BELOW HERO) */}
+        <EventSection eventTargetRef={eventTargetRef} eventStyle={eventStyle} />
+
+        {/* 3. REWARD SECTION */}
+        <RewardSection rewardTargetRef={rewardTargetRef} rewardStyle={rewardStyle} />
+        
+        {/* 4. RESOURCE SECTION */}
+        <ResourceSection resourceTargetRef={resourceTargetRef} resourceStyle={resourceStyle} activeTab={activeResourceTab} setActiveTab={setActiveResourceTab} />
+        
+        {/* 5. SEMINAR SECTION */}
         <SeminarSection seminarTargetRef={seminarTargetRef} seminarStyle={seminarStyle} />
+        
+        {/* 6. VISIT SECTION */}
         <VisitSection visitTargetRef={visitTargetRef} visitStyle={visitStyle} />
         
+        {/* 7. WORKSHOP SECTION (EXPLORE WORKSHOP) */}
         <WorkshopSection 
           eventsTargetRef={eventsTargetRef}
           activeItem={activeItem}
@@ -372,8 +427,6 @@ function MainHomePage() {
           workshopStyle={workshopStyle}
         />
 
-        <RewardSection rewardTargetRef={rewardTargetRef} rewardStyle={rewardStyle} />
-        <ResourceSection resourceTargetRef={resourceTargetRef} resourceStyle={resourceStyle} activeTab={activeResourceTab} setActiveTab={setActiveResourceTab} />
         <Mentor mentorTargetRef={mentorTargetRef} mentorStyle={mentorStyle} />
         <Enterprices enterpricesTargetRef={enterpricesTargetRef} enterpricesStyle={enterpricesStyle} />
         <SuccessStories storiesTargetRef={storiesTargetRef} storiesStyle={storiesStyle} />
@@ -381,7 +434,7 @@ function MainHomePage() {
 
         <Footer 
           scrollToHero={scrollToHero}
-          scrollToEvents={scrollToEvents}
+          scrollToEvents={scrollToEventsMain}
           scrollToSeminars={scrollToSeminars}
           scrollToVisits={scrollToVisits}
           scrollToRewards={scrollToRewards}
@@ -409,7 +462,6 @@ export default function App() {
         <Route path="/login" element={<AuthLayout><LoginScreen /></AuthLayout>} />
         <Route path="/home/login/forgotpassword" element={<AuthLayout><ForgotPasswordScreen /></AuthLayout>} />
         <Route path="/home/login/option" element={<AuthLayout><RegisterSelection /></AuthLayout>} />
-        <Route path="/home/login/forgotpassword" element={<AuthLayout><ForgotPasswordScreen /></AuthLayout>} />
         <Route path="/home/login/forgotpassword/setpassword" element={<AuthLayout><SetPasswordScreen /></AuthLayout>} />
         
         {/* Student and Business Registration Routes */}

@@ -12,7 +12,7 @@ export default function LoginScreen() {
     setLoading(true);
 
     try {
-      const response = await fetch('/auth/login', {
+      const response = await fetch('http://13.239.234.181:4000/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -22,12 +22,14 @@ export default function LoginScreen() {
 
       if (response.ok) {
         console.log('Login Success:', data);
+        alert('Login successful!');
+        navigate('/home'); // Login aanathum home page-ku pogum
       } else {
         alert(data.message || 'Login failed.');
       }
     } catch (error) {
       console.error('Network Error:', error);
-      alert('An error occurred.');
+      alert('An error occurred while connecting to the server.');
     } finally {
       setLoading(false);
     }
@@ -108,10 +110,10 @@ export default function LoginScreen() {
         {/* RIGHT SIDE LOGIN FORM CARD */}
         <div className="w-full md:w-1/2 max-w-md bg-white/95 backdrop-blur-2xl border border-gray-200/90 rounded-3xl p-6 sm:p-8 shadow-2xl flex flex-col items-center">
           
-          {/* WEGROW LOGO */}
-          <div className="relative inline-flex items-center justify-center mb-6">
-            <img src="/login/wegrow-logo.png" alt="WeGrow Text Logo" className="w-[220px] h-[65px] object-contain" />
-            <img src="/login/logo.jpg" alt="WeGrow Emblem" className="absolute -left-9 top-0 w-16 h-16 object-contain rounded-full shadow-md" />
+          {/* WEGROW LOGO WITH REDUCED GAP & NO ROUND WRAPPER */}
+          <div className="flex items-center justify-center mb-6">
+            <img src="/login/logo.jpg" alt="Logo Icon" className="w-12 h-12 object-contain relative z-10" />
+            <img src="/login/wegrow-logo.png" alt="WeGrow Text Logo" className="w-[160px] h-[48px] object-contain -ml-6 relative z-0" />
           </div>
           
           {/* FORM */}
