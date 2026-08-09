@@ -24,6 +24,7 @@ import StudentRegister from './components/StudentRegister';
 import BusinessRegister from './components/BusinessRegister';
 import ForgotPasswordScreen from './components/ForgotPasswordScreen';
 import SetPasswordScreen from './components/SetPasswordScreen';
+import EventDetails from "./components/EventDetails";
 
 // Main Home Component
 function MainHomePage() {
@@ -475,6 +476,8 @@ export default function App() {
         <Route path="/home/login" element={<LoginScreen />} />
         <Route path="/login" element={<LoginScreen />} />
         <Route path="/home/profile" element={<ProfilePage />} />
+        <Route path="/home/events/:eventId"element={<EventDetails />}
+/>
       </Routes>
     </Router>
   );
