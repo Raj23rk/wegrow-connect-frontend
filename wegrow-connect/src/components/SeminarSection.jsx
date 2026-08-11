@@ -35,7 +35,7 @@ export default function SeminarSection({ seminarTargetRef, seminarStyle }) {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2 text-left">
             {["Keynote Sessions", "Interactive Q&A", "Peer Networking"].map((item, idx) => (
               <div key={idx} className="backdrop-blur-md p-5 rounded-2xl shadow-lg transition" style={{ backgroundColor: theme.cardBg, border: `1px solid ${theme.cardBorder}` }}>
-                <h4 className="font-extrabold text-lg mb-1" style={{ color: theme.primary }}>✦ {item}</h4>
+                <h4 className="font-extrabold text-lg mb-1" style={{ color: theme.neutralText }}>✦ {item}</h4>
                 <p className="text-xs font-medium leading-normal" style={{ color: theme.textMuted }}>Direct insights and mentorship from top industry experts.</p>
               </div>
             ))}

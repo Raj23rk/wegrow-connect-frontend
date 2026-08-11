@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { theme } from '../theme';
 
 export default function EventSection({ eventTargetRef, eventStyle }) {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('All'); // 'All', 'STUDENT', 'BUSINESS'
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const sliderRef = useRef(null);
 
   // Fetch data from your AWS API
   useEffect(() => {
@@ -32,12 +32,50 @@ export default function EventSection({ eventTargetRef, eventStyle }) {
     return ev.type?.toUpperCase() === activeTab.toUpperCase();
   });
 
-  const handlePrev = () => {
-    setCurrentIndex((prev) => (prev === 0 ? Math.max(0, filteredEvents.length - 1) : prev - 1));
+  // Tripled list for smooth infinite scrolling effect matching Mentor section
+  const infiniteEvents = [...filteredEvents, ...filteredEvents, ...filteredEvents];
+
+  // Custom Smooth Ease-In-Out Smooth Scroll
+  const customSmoothScroll = (targetScrollLeft, duration = 1000) => {
+    if (!sliderRef.current) return;
+    const startScrollLeft = sliderRef.current.scrollLeft;
+    const distance = targetScrollLeft - startScrollLeft;
+    let startTime = null;
+
+    const easeInOutCubic = (t) => 
+      t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+    const animation = (currentTime) => {
+      if (!startTime) startTime = currentTime;
+      const timeElapsed = currentTime - startTime;
+      const progress = Math.min(timeElapsed / duration, 1);
+      const easeProgress = easeInOutCubic(progress);
+
+      if (sliderRef.current) {
+        sliderRef.current.scrollLeft = startScrollLeft + (distance * easeProgress);
+      }
+
+      if (timeElapsed < duration) {
+        requestAnimationFrame(animation);
+      } else if (sliderRef.current) {
+        const singleSetWidth = sliderRef.current.scrollWidth / 3;
+        if (sliderRef.current.scrollLeft >= singleSetWidth * 2) {
+          sliderRef.current.scrollLeft -= singleSetWidth;
+        } else if (sliderRef.current.scrollLeft <= 0) {
+          sliderRef.current.scrollLeft += singleSetWidth;
+        }
+      }
+    };
+
+    requestAnimationFrame(animation);
   };
 
-  const handleNext = () => {
-    setCurrentIndex((prev) => (prev >= filteredEvents.length - 1 ? 0 : prev + 1));
+  const scroll = (direction) => {
+    if (sliderRef.current) {
+      const cardWidth = sliderRef.current.children[0]?.offsetWidth + 24 || 350;
+      const scrollAmount = direction === 'left' ? -cardWidth : cardWidth;
+      customSmoothScroll(sliderRef.current.scrollLeft + scrollAmount, 900);
+    }
   };
 
   return (
@@ -47,10 +85,27 @@ export default function EventSection({ eventTargetRef, eventStyle }) {
         ...eventStyle,
         backgroundColor: 'transparent',
       }}
-      className="w-full min-h-[80vh] py-10 px-6 sm:px-12 flex flex-col items-center justify-center transition-all duration-700 my-4 max-w-7xl mx-auto"
+      className="w-full py-16 px-6 sm:px-12 flex flex-col items-center justify-center transition-all duration-700 my-4 w-full"
     >
-      {/* HEADER SECTION WITH REDUCED TOP/BOTTOM SPACING & IMAGE 2/4 MATCHING YELLOW COLOR */}
-      <div className="text-center max-w-3xl mb-8">
+      <style>{`
+        @keyframes moveLeftRightLeft {
+          0%, 100% { transform: translateX(0); }
+          50% { transform: translateX(-6px); }
+        }
+        @keyframes moveLeftRightRight {
+          0%, 100% { transform: translateX(0); }
+          50% { transform: translateX(6px); }
+        }
+        .animate-nudge-left {
+          animation: moveLeftRightLeft 1.4s infinite ease-in-out;
+        }
+        .animate-nudge-right {
+          animation: moveLeftRightRight 1.4s infinite ease-in-out;
+        }
+      `}</style>
+
+      {/* HEADER SECTION */}
+      <div className="text-center max-w-3xl mb-10">
         <span className="text-xs sm:text-sm font-black tracking-widest uppercase mb-2 block drop-shadow-sm text-[#f59e0b]">
           UPCOMING EVENTS & SESSIONS
         </span>
@@ -63,11 +118,14 @@ export default function EventSection({ eventTargetRef, eventStyle }) {
       </div>
 
       {/* CATEGORY TABS */}
-      <div className="flex items-center justify-center gap-3 bg-white/70 backdrop-blur-md p-2 rounded-full mb-8 shadow-lg border border-white/60">
+      <div className="flex items-center justify-center gap-3 bg-white/70 backdrop-blur-md p-2 rounded-full mb-12 shadow-lg border border-white/60">
         {['All', 'STUDENT', 'BUSINESS'].map((tab) => (
           <button
             key={tab}
-            onClick={() => { setActiveTab(tab); setCurrentIndex(0); }}
+            onClick={() => { 
+              setActiveTab(tab); 
+              if (sliderRef.current) sliderRef.current.scrollLeft = 0; 
+            }}
             className={`px-6 py-2.5 rounded-full text-xs sm:text-sm font-extrabold transition-all duration-300 cursor-pointer ${
               activeTab === tab 
                 ? 'bg-[#104288] text-white shadow-lg' 
@@ -79,105 +137,123 @@ export default function EventSection({ eventTargetRef, eventStyle }) {
         ))}
       </div>
 
-      {/* CAROUSEL CONTAINER */}
-      <div className="w-full max-w-4xl relative flex items-center justify-center">
+      {/* CAROUSEL WRAPPER WITH MENTOR STYLE ARROWS */}
+      <div className="w-full max-w-7xl mx-auto px-4 md:px-6 relative">
+
         {loading ? (
-          <div className="py-16 text-sm font-bold text-gray-700 animate-pulse">Loading amazing events...</div>
+          <div className="py-16 text-center text-sm font-bold text-gray-700 animate-pulse">Loading amazing events from server...</div>
         ) : filteredEvents.length === 0 ? (
-          <div className="py-16 text-sm font-bold text-gray-700">No events found for this category.</div>
+          <div className="py-16 text-center text-sm font-bold text-gray-700">No events found for this category.</div>
         ) : (
-          <div className="w-full flex items-center justify-center relative overflow-hidden px-4">
-            
-            {/* EVENT CARD */}
-            <div className="w-full bg-white/90 backdrop-blur-xl border border-white/80 rounded-3xl p-6 sm:p-8 shadow-2xl flex flex-col justify-between transition-all duration-500">
-              
-              <div>
-                <span className="inline-block text-[10px] sm:text-xs font-black uppercase px-3 py-1 rounded-full bg-blue-50 text-[#104288] mb-4 shadow-sm">
-                  {filteredEvents[currentIndex]?.type || 'SESSION'}
-                </span>
+          <>
+            {/* LEFT ARROW */}
+            <button 
+              onClick={() => scroll('left')}
+              className="absolute -left-3 md:-left-7 top-1/2 -translate-y-1/2 z-50 p-1.5 transition-all duration-300 hover:scale-125 focus:outline-none cursor-pointer bg-transparent border-none"
+              title="Previous"
+            >
+              <svg 
+                className="w-7 h-7 md:w-9 md:h-9 animate-nudge-left transition-colors" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="#104288" 
+                strokeWidth="2" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+              >
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+            </button>
 
-                {filteredEvents[currentIndex]?.image && (
-                  <div className="w-full h-44 sm:h-56 rounded-2xl overflow-hidden mb-5 shadow-md bg-gray-100">
-                    <img 
-                      src={filteredEvents[currentIndex].image} 
-                      alt="Event banner" 
-                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-                      onError={(e)=>{e.target.src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&auto=format&fit=crop&q=80"}}
-                    />
-                  </div>
-                )}
+            {/* RIGHT ARROW */}
+            <button 
+              onClick={() => scroll('right')}
+              className="absolute -right-3 md:-right-7 top-1/2 -translate-y-1/2 z-50 p-1.5 transition-all duration-300 hover:scale-125 focus:outline-none cursor-pointer bg-transparent border-none"
+              title="Next"
+            >
+              <svg 
+                className="w-7 h-7 md:w-9 md:h-9 animate-nudge-right transition-colors" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="#104288" 
+                strokeWidth="2" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+              >
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </button>
 
-                <h3 className="text-xl sm:text-2xl font-black text-gray-900 mb-2">
-                  {filteredEvents[currentIndex]?.title}
-                </h3>
-
-                <p className="text-xs sm:text-sm font-semibold text-gray-700 leading-relaxed mb-5">
-                  {filteredEvents[currentIndex]?.description}
-                </p>
-              </div>
-
-              {/* Card Footer: Location, Date & Price */}
-              <div className="pt-4 border-t border-gray-200/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div className="flex flex-wrap items-center gap-4 text-xs font-bold text-gray-600">
-                  <div className="flex items-center gap-1.5">
-                    <span>📍</span> {filteredEvents[currentIndex]?.location || 'Online'}
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <span>📅</span> {filteredEvents[currentIndex]?.date ? new Date(filteredEvents[currentIndex].date).toLocaleDateString() : 'TBA'}
-                  </div>
-                </div>
-
-                <div className="w-full sm:w-auto flex items-center justify-between sm:justify-end gap-6">
+            {/* HORIZONTAL SLIDER CONTAINER */}
+            <div 
+              ref={sliderRef}
+              className="flex gap-6 overflow-x-auto pb-4 pt-1 px-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+            >
+              {infiniteEvents.map((item, index) => (
+                <div 
+                  key={`${item._id || item.id || index}-${index}`}
+                  className="shrink-0 w-full sm:w-[calc((100%-1.5rem)/2)] lg:w-[calc((100%-3rem)/3)] bg-white/95 backdrop-blur-xl border border-white/80 rounded-3xl p-6 shadow-2xl flex flex-col justify-between transition-all duration-300 hover:-translate-y-2"
+                >
                   <div>
-                    <span className="block text-[10px] font-bold text-gray-400 uppercase">Seat Fee</span>
-                    <span className="text-lg sm:text-xl font-black text-[#104288]">
-                      ₹{filteredEvents[currentIndex]?.price || '999'}
+                    <span className="inline-block text-[10px] sm:text-xs font-semibold uppercase px-3 py-1 rounded-full mb-4 shadow-sm" style={{ backgroundColor: theme.neutralBg, color: theme.neutralText }}>
+                      {item.type || 'SESSION'}
                     </span>
+
+                    {item.image && (
+                      <div className="w-full h-44 rounded-2xl overflow-hidden mb-5 shadow-md bg-gray-100">
+                        <img 
+                          src={item.image} 
+                          alt={item.title} 
+                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                          onError={(e)=>{e.target.src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&auto=format&fit=crop&q=80"}}
+                        />
+                      </div>
+                    )}
+
+                    <h3 className="text-lg font-black text-gray-900 mb-2 line-clamp-2">
+                      {item.title}
+                    </h3>
+
+                    <p className="text-xs font-semibold text-gray-700 leading-relaxed mb-5 line-clamp-3">
+                      {item.description}
+                    </p>
                   </div>
 
-                  <button 
-                    onClick={() => alert(`Booking seat for: ${filteredEvents[currentIndex]?.title}`)}
-                    className="bg-[#104288] hover:bg-[#f97316] text-white font-extrabold text-xs px-6 py-3 rounded-full transition-all duration-300 shadow-md cursor-pointer flex items-center gap-2"
-                  >
-                    Book Seat Now →
-                  </button>
+                  {/* Card Footer */}
+                  <div className="pt-4 border-t border-gray-200/80 flex flex-col gap-3">
+                    <div className="flex items-center justify-between text-xs font-bold text-gray-600">
+                      <div className="flex items-center gap-1.5 truncate">
+                        <span>📍</span> <span className="truncate">{item.location || 'Online'}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <span>📅</span> {item.date ? new Date(item.date).toLocaleDateString() : 'TBA'}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-2">
+                      <div>
+                        <span className="block text-[10px] font-bold text-gray-400 uppercase">Seat Fee</span>
+                        <span className="text-base font-black text-[#104288]">
+                          ₹{item.price || '999'}
+                        </span>
+                      </div>
+
+                      <button 
+                        onClick={() => alert(`Booking seat for: ${item.title}`)}
+                        className="bg-[#104288] hover:bg-[#f97316] text-white font-extrabold text-xs px-4 py-2 rounded-full transition-all duration-300 shadow-md cursor-pointer"
+                      >
+                        Book Seat Now →
+                      </button>
+                    </div>
+                  </div>
+
                 </div>
-              </div>
-
+              ))}
             </div>
-
-          </div>
+          </>
         )}
+
       </div>
-
-      {/* CAROUSEL CONTROLS */}
-      {!loading && filteredEvents.length > 1 && (
-        <div className="flex items-center justify-center gap-4 mt-6">
-          <button 
-            onClick={handlePrev}
-            className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-md border border-gray-300 text-[#104288] font-black flex items-center justify-center shadow-lg hover:bg-[#104288] hover:text-white transition-all cursor-pointer"
-          >
-            ←
-          </button>
-          
-          <div className="flex items-center gap-2">
-            {filteredEvents.map((_, idx) => (
-              <button
-                key={idx}
-                onClick={() => setCurrentIndex(idx)}
-                className={`h-2 rounded-full transition-all duration-300 ${idx === currentIndex ? 'w-6 bg-[#f97316]' : 'w-2 bg-gray-300'}`}
-              />
-            ))}
-          </div>
-
-          <button 
-            onClick={handleNext}
-            className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-md border border-gray-300 text-[#104288] font-black flex items-center justify-center shadow-lg hover:bg-[#104288] hover:text-white transition-all cursor-pointer"
-          >
-            →
-          </button>
-        </div>
-      )}
     </section>
   );
 }

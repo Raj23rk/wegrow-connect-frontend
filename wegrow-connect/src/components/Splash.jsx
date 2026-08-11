@@ -23,7 +23,7 @@ export default function Splash() {
   }, [navigate]);
 
   return (
-    <div className="font-['Inter'] overflow-hidden h-screen w-screen relative bg-[#f2f4f8]">
+    <div className="font-['Inter'] overflow-hidden h-screen w-screen relative bg-[#edf2f9]">
       <style>{`
         @keyframes fadeInSplash {
           0% { opacity: 0; transform: scale(0.92); }
@@ -37,7 +37,7 @@ export default function Splash() {
         className={`fixed inset-0 z-[99999] flex items-center justify-center transition-opacity duration-1000 ease-in-out ${
           isFadingOut ? 'opacity-0 pointer-events-none' : 'opacity-100'
         }`}
-        style={{ backgroundColor: '#f2f4f8' }}
+        style={{ backgroundColor: '#edf2f9' }}
       >
         <div className="w-full h-full flex items-center justify-center overflow-hidden p-0 m-0">
           <img 

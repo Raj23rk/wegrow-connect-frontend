@@ -159,7 +159,7 @@ export default function Enterprices({ enterpricesTargetRef, enterpricesStyle }) 
                 </p>
               </div>
               <div className="pt-4 mt-4 border-t" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
-                <span className="text-[11px] font-bold uppercase tracking-wider block" style={{ color: theme.primary }}>
+                <span className="text-[11px] font-bold uppercase tracking-wider block" style={{ color: theme.neutralText }}>
                   ✦ Tailored Module
                 </span>
               </div>

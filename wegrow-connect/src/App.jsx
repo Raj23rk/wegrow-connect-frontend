@@ -158,6 +158,94 @@ function MainHomePage() {
     }
   };
 
+  // Keeps --app-vh in sync with the real viewport height (handles mobile
+  // browser chrome), and --navbar-height in sync with the ACTUAL rendered
+  // navbar element instead of the fixed 56px/64px guess in index.css. A
+  // guessed height meant that on some mobile widths the navbar renders
+  // taller than assumed, so <main>'s clip-path/top-padding didn't clear
+  // it - which is what was cutting into the top of the Mentor section's
+  // heading. Measuring it directly makes this correct on every screen.
+  useEffect(() => {
+    const setAppHeight = () => {
+      document.documentElement.style.setProperty('--app-vh', `${window.innerHeight}px`);
+    };
+    const setNavbarHeight = () => {
+      // Was querySelector('nav') - but Navbar.jsx's actual fixed, full-width
+      // positioned element is the outer <header> (with its own pt-4 padding
+      // above the inner <nav>). Measuring just <nav> missed that 16px of
+      // padding, which is exactly what was clipping the top of the Mentor
+      // section's heading - <header> is the element that actually occupies
+      // visual space at the top of the screen.
+      const navEl = document.querySelector('header');
+      if (navEl) {
+        document.documentElement.style.setProperty('--navbar-height', `${navEl.offsetHeight}px`);
+      }
+    };
+
+    setAppHeight();
+    setNavbarHeight();
+    // Re-measure shortly after mount too, in case the logo image or a
+    // wrapping nav item shifts the navbar's height after first paint.
+    const settleTimeout = setTimeout(setNavbarHeight, 300);
+
+    window.addEventListener('resize', setAppHeight);
+    window.addEventListener('resize', setNavbarHeight);
+    window.addEventListener('orientationchange', setAppHeight);
+    window.addEventListener('orientationchange', setNavbarHeight);
+    return () => {
+      clearTimeout(settleTimeout);
+      window.removeEventListener('resize', setAppHeight);
+      window.removeEventListener('resize', setNavbarHeight);
+      window.removeEventListener('orientationchange', setAppHeight);
+      window.removeEventListener('orientationchange', setNavbarHeight);
+    };
+  }, []);
+
+  // Fades each section in ONCE the first time it enters the viewport, then
+  // leaves it alone - instead of the previous approach, which recalculated
+  // opacity/scale/translateY for all 10 sections on every single scroll
+  // frame (continuously growing/shrinking as you scrolled past them, even
+  // after they'd already been seen). This keeps the same "fade + rise into
+  // view" feel on first appearance, at a fraction of the ongoing scroll
+  // cost, and reads as calmer since content stops moving once it's visible.
+  useEffect(() => {
+    const sections = [
+      { ref: eventTargetRef, setStyle: setEventStyle },
+      { ref: rewardTargetRef, setStyle: setRewardStyle },
+      { ref: resourceTargetRef, setStyle: setResourceStyle },
+      { ref: seminarTargetRef, setStyle: setSeminarStyle },
+      { ref: visitTargetRef, setStyle: setVisitStyle },
+      { ref: eventsTargetRef, setStyle: setWorkshopStyle, extraTranslateY: 20 },
+      { ref: mentorTargetRef, setStyle: setMentorStyle },
+      { ref: enterpricesTargetRef, setStyle: setEnterpricesStyle },
+      { ref: storiesTargetRef, setStyle: setStoriesStyle },
+      { ref: contactTargetRef, setStyle: setContactStyle }
+    ];
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          const match = sections.find((s) => s.ref.current === entry.target);
+          if (!match) return;
+          match.setStyle({ opacity: 1, transform: 'scale(1) translateY(0px)' });
+          observer.unobserve(entry.target); // seen once - stop watching it
+        });
+      },
+      {
+        root: scrollContainerRef.current,
+        rootMargin: '0px 0px -10% 0px', // start the reveal slightly before it's fully in view
+        threshold: 0.15
+      }
+    );
+
+    sections.forEach(({ ref }) => {
+      if (ref.current) observer.observe(ref.current);
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
   const handleScroll = () => {
     if (!scrollContainerRef.current) return;
     const scrollY = scrollContainerRef.current.scrollTop;
@@ -169,172 +257,6 @@ function MainHomePage() {
         opacity: Math.max(1 - progress * 1.2, 0),
         transform: `scale(${1 - progress * 0.05}) translateY(-${progress * 40}px)`
       });
-    }
-
-    if (
-      eventTargetRef.current &&
-      rewardTargetRef.current && 
-      resourceTargetRef.current && 
-      seminarTargetRef.current && 
-      visitTargetRef.current && 
-      eventsTargetRef.current && 
-      mentorTargetRef.current &&
-      enterpricesTargetRef.current &&
-      storiesTargetRef.current &&
-      contactTargetRef.current
-    ) {
-      const eventTop = eventTargetRef.current.getBoundingClientRect().top;
-      const rewardTop = rewardTargetRef.current.getBoundingClientRect().top;
-      const resourceTop = resourceTargetRef.current.getBoundingClientRect().top;
-      const seminarTop = seminarTargetRef.current.getBoundingClientRect().top;
-      const visitTop = visitTargetRef.current.getBoundingClientRect().top;
-      const eventsTop = eventsTargetRef.current.getBoundingClientRect().top;
-      const mentorTop = mentorTargetRef.current.getBoundingClientRect().top;
-      const enterpricesTop = enterpricesTargetRef.current.getBoundingClientRect().top;
-      const storiesTop = storiesTargetRef.current.getBoundingClientRect().top;
-      const contactTop = contactTargetRef.current.getBoundingClientRect().top;
-
-      // 1. Event Section Animation
-      if (eventTop <= windowHeight) {
-        const eventFadeIn = Math.min(Math.max((windowHeight - eventTop) / (windowHeight * 0.4), 0), 1);
-        let eventFadeOut = 0;
-        if (rewardTop < windowHeight * 0.85) {
-          eventFadeOut = Math.min(Math.max((windowHeight * 0.85 - rewardTop) / (windowHeight * 0.5), 0), 1);
-        }
-        setEventStyle({
-          opacity: Math.max(eventFadeIn - eventFadeOut, 0),
-          transform: `scale(${0.98 + (0.02 * eventFadeIn) - (0.03 * eventFadeOut)})`
-        });
-      } else {
-        setEventStyle({ opacity: 0, transform: 'scale(0.98)' });
-      }
-
-      // 2. Reward Animation
-      if (rewardTop <= windowHeight) {
-        const rewardFadeIn = Math.min(Math.max((windowHeight - rewardTop) / (windowHeight * 0.4), 0), 1);
-        let rewardFadeOut = 0;
-        if (resourceTop < windowHeight * 0.85) {
-          rewardFadeOut = Math.min(Math.max((windowHeight * 0.85 - resourceTop) / (windowHeight * 0.5), 0), 1);
-        }
-        setRewardStyle({
-          opacity: Math.max(rewardFadeIn - rewardFadeOut, 0),
-          transform: `scale(${0.98 + (0.02 * rewardFadeIn) - (0.03 * rewardFadeOut)})`
-        });
-      } else {
-        setRewardStyle({ opacity: 0, transform: 'scale(0.98)' });
-      }
-
-      // 3. Resource Animation
-      if (resourceTop <= windowHeight) {
-        const resourceFadeIn = Math.min(Math.max((windowHeight - resourceTop) / (windowHeight * 0.4), 0), 1);
-        let resourceFadeOut = 0;
-        if (seminarTop < windowHeight * 0.85) {
-          resourceFadeOut = Math.min(Math.max((windowHeight * 0.85 - seminarTop) / (windowHeight * 0.5), 0), 1);
-        }
-        setResourceStyle({
-          opacity: Math.max(resourceFadeIn - resourceFadeOut, 0),
-          transform: `scale(${0.98 + (0.02 * resourceFadeIn) - (0.03 * resourceFadeOut)})`
-        });
-      } else {
-        setResourceStyle({ opacity: 0, transform: 'scale(0.98)' });
-      }
-
-      // 4. Seminars Animation
-      if (seminarTop <= windowHeight) {
-        const seminarFadeIn = Math.min(Math.max((windowHeight - seminarTop) / (windowHeight * 0.4), 0), 1);
-        let seminarFadeOut = 0;
-        if (visitTop < windowHeight * 0.85) {
-          seminarFadeOut = Math.min(Math.max((windowHeight * 0.85 - visitTop) / (windowHeight * 0.5), 0), 1);
-        }
-        setSeminarStyle({
-          opacity: Math.max(seminarFadeIn - seminarFadeOut, 0),
-          transform: `scale(${0.98 + (0.02 * seminarFadeIn) - (0.03 * seminarFadeOut)})`
-        });
-      } else {
-        setSeminarStyle({ opacity: 0, transform: 'scale(0.98)' });
-      }
-
-      // 5. Visit Animation
-      if (visitTop <= windowHeight) {
-        const visitFadeIn = Math.min(Math.max((windowHeight - visitTop) / (windowHeight * 0.4), 0), 1);
-        let visitFadeOut = 0;
-        if (eventsTop < windowHeight * 0.85) {
-          visitFadeOut = Math.min(Math.max((windowHeight * 0.85 - eventsTop) / (windowHeight * 0.5), 0), 1);
-        }
-        setVisitStyle({
-          opacity: Math.max(visitFadeIn - visitFadeOut, 0),
-          transform: `scale(${0.98 + (0.02 * visitFadeIn) - (0.03 * visitFadeOut)})`
-        });
-      } else {
-        setVisitStyle({ opacity: 0, transform: 'scale(0.98)' });
-      }
-
-      // 6. Workshops Animation
-      if (eventsTop <= windowHeight) {
-        const fadeInProgress = Math.min(Math.max((windowHeight - eventsTop) / (windowHeight * 0.45), 0), 1);
-        let fadeOutProgress = 0;
-        if (mentorTop < windowHeight * 0.85) {
-          fadeOutProgress = Math.min(Math.max((windowHeight * 0.85 - mentorTop) / (windowHeight * 0.5), 0), 1);
-        }
-        setWorkshopStyle({
-          opacity: Math.max(fadeInProgress - fadeOutProgress, 0),
-          transform: `scale(${Math.max(0.98 + (0.02 * fadeInProgress) - (0.03 * fadeOutProgress), 0.93)}) translateY(${(1 - fadeInProgress) * 20 - (fadeOutProgress * 20)}px)`
-        });
-      } else {
-        setWorkshopStyle({ opacity: 0, transform: 'scale(0.98) translateY(20px)' });
-      }
-
-      if (mentorTop <= windowHeight) {
-        const mentorFadeIn = Math.min(Math.max((windowHeight - mentorTop) / (windowHeight * 0.4), 0), 1);
-        let mentorFadeOut = 0;
-        if (enterpricesTop < windowHeight * 0.85) {
-          mentorFadeOut = Math.min(Math.max((windowHeight * 0.85 - enterpricesTop) / (windowHeight * 0.5), 0), 1);
-        }
-        setMentorStyle({
-          opacity: Math.max(mentorFadeIn - mentorFadeOut, 0),
-          transform: `scale(${0.98 + (0.02 * mentorFadeIn) - (0.03 * mentorFadeOut)})`
-        });
-      } else {
-        setMentorStyle({ opacity: 0, transform: 'scale(0.98)' });
-      }
-
-      if (enterpricesTop <= windowHeight) {
-        const enterpricesFadeIn = Math.min(Math.max((windowHeight - enterpricesTop) / (windowHeight * 0.4), 0), 1);
-        let enterpricesFadeOut = 0;
-        if (storiesTop < windowHeight * 0.85) {
-          enterpricesFadeOut = Math.min(Math.max((windowHeight * 0.85 - storiesTop) / (windowHeight * 0.5), 0), 1);
-        }
-        setEnterpricesStyle({
-          opacity: Math.max(enterpricesFadeIn - enterpricesFadeOut, 0),
-          transform: `scale(${0.98 + (0.02 * enterpricesFadeIn) - (0.03 * enterpricesFadeOut)})`
-        });
-      } else {
-        setEnterpricesStyle({ opacity: 0, transform: 'scale(0.98)' });
-      }
-
-      if (storiesTop <= windowHeight) {
-        const storiesFadeIn = Math.min(Math.max((windowHeight - storiesTop) / (windowHeight * 0.4), 0), 1);
-        let storiesFadeOut = 0;
-        if (contactTop < windowHeight * 0.85) {
-          storiesFadeOut = Math.min(Math.max((windowHeight * 0.85 - contactTop) / (windowHeight * 0.5), 0), 1);
-        }
-        setStoriesStyle({
-          opacity: Math.max(storiesFadeIn - storiesFadeOut, 0),
-          transform: `scale(${0.98 + (0.02 * storiesFadeIn) - (0.03 * storiesFadeOut)})`
-        });
-      } else {
-        setStoriesStyle({ opacity: 0, transform: 'scale(0.98)' });
-      }
-
-      if (contactTop <= windowHeight) {
-        const contactFadeIn = Math.min(Math.max((windowHeight - contactTop) / (windowHeight * 0.4), 0), 1);
-        setContactStyle({
-          opacity: contactFadeIn,
-          transform: `scale(${0.98 + (0.02 * contactFadeIn)})`
-        });
-      } else {
-        setContactStyle({ opacity: 0, transform: 'scale(0.98)' });
-      }
     }
   };
 
@@ -369,7 +291,7 @@ function MainHomePage() {
   }, [activeItem]);
 
   return (
-    <div className="font-['Inter'] overflow-hidden h-screen w-screen relative" style={{ backgroundColor: theme.bgDark, color: theme.textMain }}>
+    <div className="app-shell font-['Inter'] overflow-hidden relative" style={{ backgroundColor: theme.bgDark, color: theme.textMain }}>
       <div className="fixed inset-0 z-0 pointer-events-none">
         <img 
           src="https://images.unsplash.com/photo-1511578314322-379afb476865?w=1600" 
@@ -395,8 +317,8 @@ function MainHomePage() {
       <main 
         ref={scrollContainerRef} 
         onScroll={handleScroll} 
-        style={{ clipPath: 'inset(55px 0 0 0)' }}
-        className="scroll-container relative z-20 w-full h-full overflow-y-auto pt-14 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+        style={{ clipPath: 'inset(var(--navbar-height) 0 0 0)', paddingTop: 'var(--navbar-height)' }}
+        className="scroll-container relative z-20 w-full overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
       >
         {/* 1. HERO SECTION */}
         <Hero heroTransform={heroTransform} scrollToEvents={scrollToEventsMain} />

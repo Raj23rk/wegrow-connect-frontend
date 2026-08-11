@@ -7,17 +7,17 @@ export default function BusinessRegister() {
   const businessSlides = [
     {
       img: "https://images.unsplash.com/photo-1553413077-190dd305871c?w=1000&auto=format&fit=crop&q=80",
-      title: "Accelerate Your <br />Business Growth",
+      title: "Accelerate Your Business Growth",
       desc: "Connect with skilled interns, find qualified talent, and scale your operations with WeGrow."
     },
     {
       img: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=1000&auto=format&fit=crop&q=80",
-      title: "Post Opportunities <br />& Find Talent",
+      title: "Post Opportunities & Find Talent",
       desc: "Easily post internships and job openings to a vast network of verified students and graduates."
     },
     {
       img: "https://images.unsplash.com/photo-1606857521015-7f9fcf423740?w=1000&auto=format&fit=crop&q=80",
-      title: "Build Your <br />Employer Brand",
+      title: "Build Your Employer Brand",
       desc: "Showcase your company culture, attract top-tier talent, and establish your industry presence."
     }
   ];
@@ -249,12 +249,18 @@ export default function BusinessRegister() {
           background-color: #ffffff;
           border: 2px solid #d1d5db;
           color: #374151;
+          font-size: 14px;
+          padding: 10px 24px;
+          border-radius: 9999px;
+          font-weight: 800;
           transition: all 0.25s ease;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         }
         .back-btn:hover {
           background-color: #f1f5f9 !important;
           border-color: #104288 !important;
           color: #104288 !important;
+          transform: translateY(-1px);
         }
         .custom-scroll::-webkit-scrollbar {
           width: 5px;
@@ -265,7 +271,6 @@ export default function BusinessRegister() {
         }
       `}</style>
 
-      {/* CUSTOM DESIGNED ALERT MODAL */}
       {modalConfig.isOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl border border-gray-100 transform transition-all">
@@ -286,7 +291,6 @@ export default function BusinessRegister() {
         </div>
       )}
 
-      {/* SUCCESS MODAL POPUP */}
       {showSuccessModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl border border-gray-100 transform transition-all">
@@ -307,12 +311,11 @@ export default function BusinessRegister() {
         </div>
       )}
 
-      {/* MAIN CONTAINER */}
       <div className="w-full max-w-6xl mx-auto px-4 flex items-center justify-center page-fade gap-6">
         
-        <div className="w-full lg:w-5/12 bg-transparent p-8 sm:p-10 text-gray-900 hidden lg:flex flex-col justify-between relative overflow-hidden">
+        <div className="w-full lg:w-5/12 bg-white/95 backdrop-blur-xl border border-white/80 rounded-3xl p-6 sm:p-8 shadow-2xl text-gray-900 hidden lg:flex flex-col justify-between relative overflow-hidden self-stretch">
+          
           <div className="relative z-10 flex items-center justify-between">
-            {/* ROUND SHAPE REMOVED FROM LOGO */}
             <div className="flex items-center">
               <img src="/login/logo.jpg" alt="Logo Icon" className="w-12 h-12 object-contain relative z-10" />
               <img src="/login/wegrow-logo.png" alt="WeGrow Text Logo" className="w-[160px] h-[48px] object-contain -ml-6 relative z-0" />
@@ -320,14 +323,14 @@ export default function BusinessRegister() {
             <button 
               type="button"
               onClick={() => navigate('/home/login/option')}
-              className="back-btn px-5 py-2 rounded-full font-bold text-xs cursor-pointer shadow-sm"
+              className="back-btn cursor-pointer"
             >
               ← Back
             </button>
           </div>
 
-          <div className="relative z-10 my-auto py-8">
-            <div className="h-44 sm:h-52 rounded-2xl overflow-hidden shadow-lg mb-6 border border-gray-200/60 relative">
+          <div className="relative z-10 my-auto py-4">
+            <div className="h-64 sm:h-72 rounded-2xl overflow-hidden shadow-lg mb-6 border border-gray-200/60 relative">
               {businessSlides.map((slide, idx) => (
                 <div 
                   key={idx} 
@@ -335,23 +338,22 @@ export default function BusinessRegister() {
                 >
                   <img src={slide.img} alt="Slide" className="w-full h-full object-cover filter brightness-90" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex items-end p-4">
-                    <p className="text-xs font-semibold text-white/95" dangerouslySetInnerHTML={{ __html: slide.desc }}></p>
+                    <p className="text-xs font-semibold text-white/95">{slide.desc}</p>
                   </div>
                 </div>
               ))}
             </div>
 
             <h2 
-              className="text-xl sm:text-2xl font-black mb-2 leading-snug text-[#104288] drop-shadow-sm"
+              className="text-xl sm:text-2xl font-black mb-2 leading-snug drop-shadow-sm text-[#104288]"
               dangerouslySetInnerHTML={{ __html: businessSlides[currentSlide].title }}
             ></h2>
             <p 
-              className="text-xs text-[#f97316] leading-relaxed font-bold"
-              dangerouslySetInnerHTML={{ __html: businessSlides[currentSlide].desc }}
-            ></p>
+              className="text-xs leading-relaxed font-bold text-[#f97316]"
+            >{businessSlides[currentSlide].desc}</p>
           </div>
 
-          <div className="relative z-10 flex items-center justify-center gap-2">
+          <div className="relative z-10 flex items-center justify-center gap-2 pb-2">
             {businessSlides.map((_, idx) => (
               <button
                 key={idx}
@@ -365,13 +367,13 @@ export default function BusinessRegister() {
         <div className="w-full lg:w-7/12 p-6 sm:p-10 overflow-y-auto custom-scroll max-h-[90vh] bg-white rounded-3xl shadow-2xl border border-gray-200/80">
           <div className="mb-6 flex items-center justify-between">
             <div>
-              <h3 className="text-2xl font-black text-gray-900">Business Register</h3>
-              <p className="text-xs font-semibold text-gray-500 mt-1">Create your business account. Find talent & post opportunities.</p>
+              <h3 className="text-2xl font-black text-[#104288]">Business Register</h3>
+              <p className="text-xs font-semibold text-[#f97316] mt-1">Create your business account. Find talent & post opportunities.</p>
             </div>
             <button 
               type="button"
               onClick={() => navigate('/home/login/option')}
-              className="lg:hidden back-btn px-3 py-1.5 rounded-full font-bold text-xs cursor-pointer shadow-sm"
+              className="lg:hidden back-btn cursor-pointer text-xs py-2 px-4"
             >
               ← BACK
             </button>
@@ -380,40 +382,40 @@ export default function BusinessRegister() {
           <form onSubmit={handleRegister} className="w-full flex flex-col gap-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">First Name</label>
+                <label className="text-[11px] font-bold text-[#104288] uppercase tracking-wider">First Name</label>
                 <input type="text" name="firstName" placeholder="Enter first name" value={formData.firstName} onChange={handleChange} required className="line-input" />
               </div>
               <div>
-                <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Last Name</label>
+                <label className="text-[11px] font-bold text-[#104288] uppercase tracking-wider">Last Name</label>
                 <input type="text" name="lastName" placeholder="Enter last name" value={formData.lastName} onChange={handleChange} required className="line-input" />
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Username</label>
+                <label className="text-[11px] font-bold text-[#104288] uppercase tracking-wider">Username</label>
                 <input type="text" name="username" placeholder="Choose a username" value={formData.username} onChange={handleChange} required className="line-input" />
               </div>
               <div>
-                <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Email Address</label>
+                <label className="text-[11px] font-bold text-[#104288] uppercase tracking-wider">Email Address</label>
                 <input type="email" name="email" placeholder="name@example.com" value={formData.email} onChange={handleChange} required className="line-input" />
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Password</label>
+                <label className="text-[11px] font-bold text-[#104288] uppercase tracking-wider">Password</label>
                 <input type="password" name="password" placeholder="••••••••" value={formData.password} onChange={handleChange} required className="line-input" />
               </div>
               <div>
-                <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Confirm Password</label>
+                <label className="text-[11px] font-bold text-[#104288] uppercase tracking-wider">Confirm Password</label>
                 <input type="password" name="confirmPassword" placeholder="••••••••" value={formData.confirmPassword} onChange={handleChange} required className="line-input" />
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Phone Number</label>
+                <label className="text-[11px] font-bold text-[#104288] uppercase tracking-wider">Phone Number</label>
                 <input 
                   type="text" 
                   name="phone" 
@@ -426,35 +428,35 @@ export default function BusinessRegister() {
                 />
               </div>
               <div>
-                <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Company Name</label>
+                <label className="text-[11px] font-bold text-[#104288] uppercase tracking-wider">Company Name</label>
                 <input type="text" name="companyName" placeholder="Enter company name" value={formData.companyName} onChange={handleChange} required className="line-input" />
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Business Type</label>
+                <label className="text-[11px] font-bold text-[#104288] uppercase tracking-wider">Business Type</label>
                 {renderCustomDropdown('businessType', 'Select or type business type')}
               </div>
               <div>
-                <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Designation</label>
+                <label className="text-[11px] font-bold text-[#104288] uppercase tracking-wider">Designation</label>
                 <input type="text" name="designation" placeholder="e.g. Founder, HR Manager" value={formData.designation} onChange={handleChange} required className="line-input" />
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Experience (Years)</label>
+                <label className="text-[11px] font-bold text-[#104288] uppercase tracking-wider">Experience (Years)</label>
                 <input type="number" name="experience" placeholder="e.g. 5" value={formData.experience} onChange={handleChange} required className="line-input" />
               </div>
               <div>
-                <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Website URL</label>
+                <label className="text-[11px] font-bold text-[#104288] uppercase tracking-wider">Website URL</label>
                 <input type="url" name="website" placeholder="https://company.com" value={formData.website} onChange={handleChange} required className="line-input" />
               </div>
             </div>
 
             <div className="w-full flex flex-col gap-1.5 pt-1">
-              <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Upload ID Proof (Company ID / Govt ID)</label>
+              <label className="text-[11px] font-bold text-[#104288] uppercase tracking-wider">Upload ID Proof (Company ID / Govt ID)</label>
               <input 
                 type="file" 
                 accept="image/*,.pdf" 
@@ -466,11 +468,11 @@ export default function BusinessRegister() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">City</label>
+                <label className="text-[11px] font-bold text-[#104288] uppercase tracking-wider">City</label>
                 {renderCustomDropdown('city', 'Select or type city')}
               </div>
               <div>
-                <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">State</label>
+                <label className="text-[11px] font-bold text-[#104288] uppercase tracking-wider">State</label>
                 {renderCustomDropdown('state', 'Select or type state')}
               </div>
             </div>
@@ -478,15 +480,15 @@ export default function BusinessRegister() {
             <div className="pt-3">
               <button 
                 type="submit" 
-                className="register-btn w-full py-3.5 rounded-full font-extrabold text-white text-sm uppercase tracking-wider border-none cursor-pointer shadow-lg"
+                className="register-btn w-full py-3.5 rounded-full font-extrabold text-white text-sm uppercase tracking-wider border-none cursor-pointer shadow-lg bg-[#104288]"
               >
                 REGISTER
               </button>
             </div>
 
-            <div className="flex items-center justify-between text-xs font-bold text-gray-500 pt-2 px-1">
-              <span>Already a member?</span>
-              <button type="button" onClick={() => navigate('/home/login')} className="text-[#104288] hover:text-orange-500 transition-colors font-extrabold cursor-pointer">
+            <div className="flex items-center justify-between text-xs font-bold pt-2 px-1">
+              <span className="text-[#104288]">Already a member?</span>
+              <button type="button" onClick={() => navigate('/home/login')} className="text-[#f97316] hover:text-[#104288] transition-colors font-extrabold cursor-pointer">
                 Sign In
               </button>
             </div>

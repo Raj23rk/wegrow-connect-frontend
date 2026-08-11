@@ -203,7 +203,7 @@ export default function ContactSection({ contactTargetRef, contactStyle }) {
                 {/* NAME & EMAIL */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-extrabold mb-1.5" style={{ color: theme.primary }}>Your Full Name</label>
+                    <label className="block text-xs font-semibold mb-1.5" style={{ color: theme.neutralText }}>Your Full Name</label>
                     <input 
                       type="text" 
                       required 
@@ -216,7 +216,7 @@ export default function ContactSection({ contactTargetRef, contactStyle }) {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-extrabold mb-1.5" style={{ color: theme.primary }}>Email Address</label>
+                    <label className="block text-xs font-semibold mb-1.5" style={{ color: theme.neutralText }}>Email Address</label>
                     <input 
                       type="email" 
                       required 
@@ -231,7 +231,7 @@ export default function ContactSection({ contactTargetRef, contactStyle }) {
 
                 {/* MOBILE NUMBER FIELD */}
                 <div>
-                  <label className="block text-xs font-extrabold mb-1.5" style={{ color: theme.primary }}>Your Mobile Number</label>
+                  <label className="block text-xs font-semibold mb-1.5" style={{ color: theme.neutralText }}>Your Mobile Number</label>
                   <input 
                     type="tel" 
                     required 
@@ -246,7 +246,7 @@ export default function ContactSection({ contactTargetRef, contactStyle }) {
 
                 {/* CHECKBOXES: BUSINESS OR COURSE */}
                 <div>
-                  <label className="block text-xs font-extrabold mb-2" style={{ color: theme.primary }}>Query About:</label>
+                  <label className="block text-xs font-semibold mb-2" style={{ color: theme.neutralText }}>Query About:</label>
                   <div className="flex items-center gap-6 text-xs font-bold" style={{ color: theme.textBright }}>
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input 
@@ -272,7 +272,7 @@ export default function ContactSection({ contactTargetRef, contactStyle }) {
 
                 {/* MESSAGE AREA */}
                 <div>
-                  <label className="block text-xs font-extrabold mb-1.5" style={{ color: theme.primary }}>How can we help you?</label>
+                  <label className="block text-xs font-semibold mb-1.5" style={{ color: theme.neutralText }}>How can we help you?</label>
                   <textarea 
                     rows="3" 
                     required 
