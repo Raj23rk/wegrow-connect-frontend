@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Splash from './components/Splash';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
+import EventSection from './components/EventSection';
 import WorkshopSection from './components/WorkshopSection';
 import SeminarSection from './components/SeminarSection';
 import VisitSection from './components/VisitSection';
@@ -14,19 +15,66 @@ import SuccessStories from './components/SuccessStories';
 import ContactSection from './components/ContactSection';
 import Footer from './components/Footer';
 import LoginScreen from './components/LoginScreen';
+import RegisterSelection from './components/RegisterSelection';
+import AuthLayout from './components/AuthLayout';
 import ProfilePage from './components/ProfilePage';
 import { workshopsData } from './data/workshopsData';
 import { theme } from './theme';
+import StudentRegister from './components/StudentRegister';
+import BusinessRegister from './components/BusinessRegister';
+import ForgotPasswordScreen from './components/ForgotPasswordScreen';
+import SetPasswordScreen from './components/SetPasswordScreen';
+import EventDetails from "./components/EventDetails";
+
+// Auth Context and Guard
+import { AuthProvider, ProtectedRoute } from './context/AuthContext';
+
+// Student Portal Sub-pages
+import StudentDashboard from './student/dashboard/page';
+import StudentCourses from './student/courses/page';
+import StudentCertificates from './student/certificates/page';
+import StudentRewards from './student/rewards/page';
+import StudentAnalytics from './student/analytics/page';
+import StudentWorkshops from './student/workshops/page';
+import StudentSettings from './student/settings/page';
+
+// Business Portal Sub-pages
+import BusinessDashboard from './business/dashboard/page';
+import BusinessAnalytics from './business/analytics/page';
+import BusinessCanvas from './business/canvas/page';
+import BusinessRoadmap from './business/roadmap/page';
+import BusinessWorkshops from './business/workshops/page';
+import BusinessLegal from './business/legal/page';
+import BusinessSubscriptions from './business/subscriptions/page';
+import BusinessSettings from './business/settings/page';
+
+// Admin Portal Sub-pages
+import AdminDashboard from './admin/page';
+import AdminCertificates from './admin/certificates/page';
+import AdminEvents from './admin/events/page';
+import AdminNotifications from './admin/notifications/page';
+import AdminPayments from './admin/payments/page';
+import AdminReports from './admin/reports/page';
+import AdminRewards from './admin/rewards/page';
+import AdminRoles from './admin/roles/page';
+import AdminSettings from './admin/settings/page';
+import AdminSubscriptions from './admin/subscriptions/page';
+import AdminUsers from './admin/users/page';
+import AdminWorkshops from './admin/workshops/page';
 
 // Main Home Component
 function MainHomePage() {
   const [activeItem, setActiveItem] = useState(workshopsData[0]);
   const [heroTransform, setHeroTransform] = useState({ opacity: 1, transform: 'scale(1) translateY(0%)' });
+  
+  // Section styles based on order: Hero -> EventSection -> Reward -> Resources -> Seminars -> Visit -> Workshops
+  const [eventStyle, setEventStyle] = useState({ opacity: 0, transform: 'scale(0.98)' });
+  const [rewardStyle, setRewardStyle] = useState({ opacity: 0, transform: 'scale(0.98)' });
+  const [resourceStyle, setResourceStyle] = useState({ opacity: 0, transform: 'scale(0.98)' });
   const [seminarStyle, setSeminarStyle] = useState({ opacity: 0, transform: 'scale(0.98)' });
   const [visitStyle, setVisitStyle] = useState({ opacity: 0, transform: 'scale(0.98)' });
   const [workshopStyle, setWorkshopStyle] = useState({ opacity: 0, transform: 'scale(0.98) translateY(20px)' });
-  const [rewardStyle, setRewardStyle] = useState({ opacity: 0, transform: 'scale(0.98)' });
-  const [resourceStyle, setResourceStyle] = useState({ opacity: 0, transform: 'scale(0.98)' });
+
   const [mentorStyle, setMentorStyle] = useState({ opacity: 0, transform: 'scale(0.98)' });
   const [enterpricesStyle, setEnterpricesStyle] = useState({ opacity: 0, transform: 'scale(0.98)' });
   const [storiesStyle, setStoriesStyle] = useState({ opacity: 0, transform: 'scale(0.98)' });
@@ -36,11 +84,15 @@ function MainHomePage() {
   const [activeResourceTab, setActiveResourceTab] = useState('blog');
 
   const scrollContainerRef = useRef(null);
-  const seminarTargetRef = useRef(null);
-  const visitTargetRef = useRef(null);
-  const eventsTargetRef = useRef(null);
+  
+  // Target refs in new correct order
+  const eventTargetRef = useRef(null);
   const rewardTargetRef = useRef(null);
   const resourceTargetRef = useRef(null);
+  const seminarTargetRef = useRef(null);
+  const visitTargetRef = useRef(null);
+  const eventsTargetRef = useRef(null); // Workshops
+
   const mentorTargetRef = useRef(null);
   const enterpricesTargetRef = useRef(null);
   const storiesTargetRef = useRef(null);
@@ -50,6 +102,34 @@ function MainHomePage() {
   const scrollToHero = () => {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const scrollToEventsMain = () => {
+    if (eventTargetRef.current && scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({
+        top: Math.max(eventTargetRef.current.offsetTop - 40, 0),
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  const scrollToRewards = () => {
+    if (rewardTargetRef.current && scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({
+        top: Math.max(rewardTargetRef.current.offsetTop - 80, 0),
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  const scrollToResources = (tab = 'blog') => {
+    setActiveResourceTab(tab);
+    if (resourceTargetRef.current && scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({
+        top: Math.max(resourceTargetRef.current.offsetTop - 40, 0),
+        behavior: 'smooth'
+      });
     }
   };
 
@@ -75,25 +155,6 @@ function MainHomePage() {
     if (eventsTargetRef.current && scrollContainerRef.current) {
       scrollContainerRef.current.scrollTo({
         top: Math.max(eventsTargetRef.current.offsetTop - 80, 0),
-        behavior: 'smooth'
-      });
-    }
-  };
-
-  const scrollToRewards = () => {
-    if (rewardTargetRef.current && scrollContainerRef.current) {
-      scrollContainerRef.current.scrollTo({
-        top: Math.max(rewardTargetRef.current.offsetTop - 80, 0),
-        behavior: 'smooth'
-      });
-    }
-  };
-
-  const scrollToResources = (tab = 'blog') => {
-    setActiveResourceTab(tab);
-    if (resourceTargetRef.current && scrollContainerRef.current) {
-      scrollContainerRef.current.scrollTo({
-        top: Math.max(resourceTargetRef.current.offsetTop - 40, 0),
         behavior: 'smooth'
       });
     }
@@ -140,7 +201,6 @@ function MainHomePage() {
     const scrollY = scrollContainerRef.current.scrollTop;
     const windowHeight = window.innerHeight;
 
-    // Hero section seminar section mela pogum pothu mattum fade aagi marayum
     if (scrollY <= windowHeight * 1.2) {
       const progress = Math.min(scrollY / windowHeight, 1); 
       setHeroTransform({
@@ -150,68 +210,44 @@ function MainHomePage() {
     }
 
     if (
+      eventTargetRef.current &&
+      rewardTargetRef.current && 
+      resourceTargetRef.current && 
       seminarTargetRef.current && 
       visitTargetRef.current && 
       eventsTargetRef.current && 
-      rewardTargetRef.current && 
-      resourceTargetRef.current &&
       mentorTargetRef.current &&
       enterpricesTargetRef.current &&
       storiesTargetRef.current &&
       contactTargetRef.current
     ) {
+      const eventTop = eventTargetRef.current.getBoundingClientRect().top;
+      const rewardTop = rewardTargetRef.current.getBoundingClientRect().top;
+      const resourceTop = resourceTargetRef.current.getBoundingClientRect().top;
       const seminarTop = seminarTargetRef.current.getBoundingClientRect().top;
       const visitTop = visitTargetRef.current.getBoundingClientRect().top;
       const eventsTop = eventsTargetRef.current.getBoundingClientRect().top;
-      const rewardTop = rewardTargetRef.current.getBoundingClientRect().top;
-      const resourceTop = resourceTargetRef.current.getBoundingClientRect().top;
       const mentorTop = mentorTargetRef.current.getBoundingClientRect().top;
       const enterpricesTop = enterpricesTargetRef.current.getBoundingClientRect().top;
       const storiesTop = storiesTargetRef.current.getBoundingClientRect().top;
       const contactTop = contactTargetRef.current.getBoundingClientRect().top;
 
-      if (seminarTop <= windowHeight) {
-        const seminarFadeIn = Math.min(Math.max((windowHeight - seminarTop) / (windowHeight * 0.4), 0), 1);
-        let seminarFadeOut = 0;
-        if (visitTop < windowHeight * 0.85) {
-          seminarFadeOut = Math.min(Math.max((windowHeight * 0.85 - visitTop) / (windowHeight * 0.5), 0), 1);
-        }
-        setSeminarStyle({
-          opacity: Math.max(seminarFadeIn - seminarFadeOut, 0),
-          transform: `scale(${0.98 + (0.02 * seminarFadeIn) - (0.03 * seminarFadeOut)})`
-        });
-      } else {
-        setSeminarStyle({ opacity: 0, transform: 'scale(0.98)' });
-      }
-
-      if (visitTop <= windowHeight) {
-        const visitFadeIn = Math.min(Math.max((windowHeight - visitTop) / (windowHeight * 0.4), 0), 1);
-        let visitFadeOut = 0;
-        if (eventsTop < windowHeight * 0.85) {
-          visitFadeOut = Math.min(Math.max((windowHeight * 0.85 - eventsTop) / (windowHeight * 0.5), 0), 1);
-        }
-        setVisitStyle({
-          opacity: Math.max(visitFadeIn - visitFadeOut, 0),
-          transform: `scale(${0.98 + (0.02 * visitFadeIn) - (0.03 * visitFadeOut)})`
-        });
-      } else {
-        setVisitStyle({ opacity: 0, transform: 'scale(0.98)' });
-      }
-
-      if (eventsTop <= windowHeight) {
-        const fadeInProgress = Math.min(Math.max((windowHeight - eventsTop) / (windowHeight * 0.45), 0), 1);
-        let fadeOutProgress = 0;
+      // 1. Event Section Animation
+      if (eventTop <= windowHeight) {
+        const eventFadeIn = Math.min(Math.max((windowHeight - eventTop) / (windowHeight * 0.4), 0), 1);
+        let eventFadeOut = 0;
         if (rewardTop < windowHeight * 0.85) {
-          fadeOutProgress = Math.min(Math.max((windowHeight * 0.85 - rewardTop) / (windowHeight * 0.5), 0), 1);
+          eventFadeOut = Math.min(Math.max((windowHeight * 0.85 - rewardTop) / (windowHeight * 0.5), 0), 1);
         }
-        setWorkshopStyle({
-          opacity: Math.max(fadeInProgress - fadeOutProgress, 0),
-          transform: `scale(${Math.max(0.98 + (0.02 * fadeInProgress) - (0.03 * fadeOutProgress), 0.93)}) translateY(${(1 - fadeInProgress) * 20 - (fadeOutProgress * 20)}px)`
+        setEventStyle({
+          opacity: Math.max(eventFadeIn - eventFadeOut, 0),
+          transform: `scale(${0.98 + (0.02 * eventFadeIn) - (0.03 * eventFadeOut)})`
         });
       } else {
-        setWorkshopStyle({ opacity: 0, transform: 'scale(0.98) translateY(20px)' });
+        setEventStyle({ opacity: 0, transform: 'scale(0.98)' });
       }
 
+      // 2. Reward Animation
       if (rewardTop <= windowHeight) {
         const rewardFadeIn = Math.min(Math.max((windowHeight - rewardTop) / (windowHeight * 0.4), 0), 1);
         let rewardFadeOut = 0;
@@ -226,11 +262,12 @@ function MainHomePage() {
         setRewardStyle({ opacity: 0, transform: 'scale(0.98)' });
       }
 
+      // 3. Resource Animation
       if (resourceTop <= windowHeight) {
         const resourceFadeIn = Math.min(Math.max((windowHeight - resourceTop) / (windowHeight * 0.4), 0), 1);
         let resourceFadeOut = 0;
-        if (mentorTop < windowHeight * 0.85) {
-          resourceFadeOut = Math.min(Math.max((windowHeight * 0.85 - mentorTop) / (windowHeight * 0.5), 0), 1);
+        if (seminarTop < windowHeight * 0.85) {
+          resourceFadeOut = Math.min(Math.max((windowHeight * 0.85 - seminarTop) / (windowHeight * 0.5), 0), 1);
         }
         setResourceStyle({
           opacity: Math.max(resourceFadeIn - resourceFadeOut, 0),
@@ -238,6 +275,51 @@ function MainHomePage() {
         });
       } else {
         setResourceStyle({ opacity: 0, transform: 'scale(0.98)' });
+      }
+
+      // 4. Seminars Animation
+      if (seminarTop <= windowHeight) {
+        const seminarFadeIn = Math.min(Math.max((windowHeight - seminarTop) / (windowHeight * 0.4), 0), 1);
+        let seminarFadeOut = 0;
+        if (visitTop < windowHeight * 0.85) {
+          seminarFadeOut = Math.min(Math.max((windowHeight * 0.85 - visitTop) / (windowHeight * 0.5), 0), 1);
+        }
+        setSeminarStyle({
+          opacity: Math.max(seminarFadeIn - seminarFadeOut, 0),
+          transform: `scale(${0.98 + (0.02 * seminarFadeIn) - (0.03 * seminarFadeOut)})`
+        });
+      } else {
+        setSeminarStyle({ opacity: 0, transform: 'scale(0.98)' });
+      }
+
+      // 5. Visit Animation
+      if (visitTop <= windowHeight) {
+        const visitFadeIn = Math.min(Math.max((windowHeight - visitTop) / (windowHeight * 0.4), 0), 1);
+        let visitFadeOut = 0;
+        if (eventsTop < windowHeight * 0.85) {
+          visitFadeOut = Math.min(Math.max((windowHeight * 0.85 - eventsTop) / (windowHeight * 0.5), 0), 1);
+        }
+        setVisitStyle({
+          opacity: Math.max(visitFadeIn - visitFadeOut, 0),
+          transform: `scale(${0.98 + (0.02 * visitFadeIn) - (0.03 * visitFadeOut)})`
+        });
+      } else {
+        setVisitStyle({ opacity: 0, transform: 'scale(0.98)' });
+      }
+
+      // 6. Workshops Animation
+      if (eventsTop <= windowHeight) {
+        const fadeInProgress = Math.min(Math.max((windowHeight - eventsTop) / (windowHeight * 0.45), 0), 1);
+        let fadeOutProgress = 0;
+        if (mentorTop < windowHeight * 0.85) {
+          fadeOutProgress = Math.min(Math.max((windowHeight * 0.85 - mentorTop) / (windowHeight * 0.5), 0), 1);
+        }
+        setWorkshopStyle({
+          opacity: Math.max(fadeInProgress - fadeOutProgress, 0),
+          transform: `scale(${Math.max(0.98 + (0.02 * fadeInProgress) - (0.03 * fadeOutProgress), 0.93)}) translateY(${(1 - fadeInProgress) * 20 - (fadeOutProgress * 20)}px)`
+        });
+      } else {
+        setWorkshopStyle({ opacity: 0, transform: 'scale(0.98) translateY(20px)' });
       }
 
       if (mentorTop <= windowHeight) {
@@ -326,8 +408,6 @@ function MainHomePage() {
 
   return (
     <div className="font-['Inter'] overflow-hidden h-screen w-screen relative" style={{ backgroundColor: theme.bgDark, color: theme.textMain }}>
-      
-      {/* BACKGROUND */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         <img 
           src="https://images.unsplash.com/photo-1511578314322-379afb476865?w=1600" 
@@ -339,9 +419,9 @@ function MainHomePage() {
 
       <Navbar 
         scrollToHero={scrollToHero}
+        scrollToEvents={scrollToEventsMain} 
         scrollToSeminars={scrollToSeminars} 
         scrollToVisits={scrollToVisits} 
-        scrollToEvents={scrollToEvents} 
         scrollToRewards={scrollToRewards}
         scrollToResources={scrollToResources}
         scrollToMentors={scrollToMentors}
@@ -356,10 +436,25 @@ function MainHomePage() {
         style={{ clipPath: 'inset(55px 0 0 0)' }}
         className="scroll-container relative z-20 w-full h-full overflow-y-auto pt-14 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
       >
-        <Hero heroTransform={heroTransform} scrollToEvents={scrollToEvents} />
+        {/* 1. HERO SECTION */}
+        <Hero heroTransform={heroTransform} scrollToEvents={scrollToEventsMain} />
+        
+        {/* 2. EVENT SECTION (DYNAMIC API CAROUSEL - PLACED DIRECTLY BELOW HERO) */}
+        <EventSection eventTargetRef={eventTargetRef} eventStyle={eventStyle} />
+
+        {/* 3. REWARD SECTION */}
+        <RewardSection rewardTargetRef={rewardTargetRef} rewardStyle={rewardStyle} />
+        
+        {/* 4. RESOURCE SECTION */}
+        <ResourceSection resourceTargetRef={resourceTargetRef} resourceStyle={resourceStyle} activeTab={activeResourceTab} setActiveTab={setActiveResourceTab} />
+        
+        {/* 5. SEMINAR SECTION */}
         <SeminarSection seminarTargetRef={seminarTargetRef} seminarStyle={seminarStyle} />
+        
+        {/* 6. VISIT SECTION */}
         <VisitSection visitTargetRef={visitTargetRef} visitStyle={visitStyle} />
         
+        {/* 7. WORKSHOP SECTION (EXPLORE WORKSHOP) */}
         <WorkshopSection 
           eventsTargetRef={eventsTargetRef}
           activeItem={activeItem}
@@ -370,8 +465,6 @@ function MainHomePage() {
           workshopStyle={workshopStyle}
         />
 
-        <RewardSection rewardTargetRef={rewardTargetRef} rewardStyle={rewardStyle} />
-        <ResourceSection resourceTargetRef={resourceTargetRef} resourceStyle={resourceStyle} activeTab={activeResourceTab} setActiveTab={setActiveResourceTab} />
         <Mentor mentorTargetRef={mentorTargetRef} mentorStyle={mentorStyle} />
         <Enterprices enterpricesTargetRef={enterpricesTargetRef} enterpricesStyle={enterpricesStyle} />
         <SuccessStories storiesTargetRef={storiesTargetRef} storiesStyle={storiesStyle} />
@@ -379,7 +472,7 @@ function MainHomePage() {
 
         <Footer 
           scrollToHero={scrollToHero}
-          scrollToEvents={scrollToEvents}
+          scrollToEvents={scrollToEventsMain}
           scrollToSeminars={scrollToSeminars}
           scrollToVisits={scrollToVisits}
           scrollToRewards={scrollToRewards}
@@ -394,22 +487,69 @@ function MainHomePage() {
   );
 }
 
-// Root App Component wrapped with Router with nested paths (/home and /home/login)
+// Root App Component wrapped with Router
 export default function App() {
   return (
-    <Router>
-      <Routes>
-        {/* 1. First app open / refresh pannina localhost:5173 (Splash Screen) varum */}
-        <Route path="/" element={<Splash />} />
-        
-        {/* 2. Splash mudinji pogura path localhost:5173/home */}
-        <Route path="/home" element={<MainHomePage />} />
-        
-        {/* 3. Login click panna localhost:5173/home/login pogum */}
-        <Route path="/home/login" element={<LoginScreen />} />
-        <Route path="/login" element={<LoginScreen />} />
-        <Route path="/home/profile" element={<ProfilePage />} />
-      </Routes>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <Routes>
+          {/* Public Landing & Splash */}
+          <Route path="/" element={<Splash />} />
+          <Route path="/home" element={<MainHomePage />} />
+          
+          {/* Auth Routes with constant background */}
+          <Route path="/home/login" element={<AuthLayout><LoginScreen /></AuthLayout>} />
+          <Route path="/login" element={<AuthLayout><LoginScreen /></AuthLayout>} />
+          <Route path="/home/login/forgotpassword" element={<AuthLayout><ForgotPasswordScreen /></AuthLayout>} />
+          <Route path="/home/login/option" element={<AuthLayout><RegisterSelection /></AuthLayout>} />
+          <Route path="/home/login/forgotpassword/setpassword" element={<AuthLayout><SetPasswordScreen /></AuthLayout>} />
+          
+          {/* Registration Routes */}
+          <Route path="/home/login/option/student" element={<AuthLayout><StudentRegister /></AuthLayout>} />
+          <Route path="/student/register" element={<AuthLayout><StudentRegister /></AuthLayout>} />
+          <Route path="/home/login/option/business" element={<AuthLayout><BusinessRegister /></AuthLayout>} />
+          
+          {/* Other Public/Partially Protected Routes */}
+          <Route path="/home/profile" element={<ProfilePage />} />
+          <Route path="/home/events/:eventId" element={<EventDetails />} />
+
+          {/* Student Dashboard Routes (Protected) */}
+          <Route path="/student/dashboard" element={<ProtectedRoute allowedRoles={['student']}><StudentDashboard /></ProtectedRoute>} />
+          <Route path="/student/courses" element={<ProtectedRoute allowedRoles={['student']}><StudentCourses /></ProtectedRoute>} />
+          <Route path="/student/certificates" element={<ProtectedRoute allowedRoles={['student']}><StudentCertificates /></ProtectedRoute>} />
+          <Route path="/student/rewards" element={<ProtectedRoute allowedRoles={['student']}><StudentRewards /></ProtectedRoute>} />
+          <Route path="/student/analytics" element={<ProtectedRoute allowedRoles={['student']}><StudentAnalytics /></ProtectedRoute>} />
+          <Route path="/student/workshops" element={<ProtectedRoute allowedRoles={['student']}><StudentWorkshops /></ProtectedRoute>} />
+          <Route path="/student/settings" element={<ProtectedRoute allowedRoles={['student']}><StudentSettings /></ProtectedRoute>} />
+
+          {/* Business Dashboard Routes (Protected) */}
+          <Route path="/business/dashboard" element={<ProtectedRoute allowedRoles={['business']}><BusinessDashboard /></ProtectedRoute>} />
+          <Route path="/business/analytics" element={<ProtectedRoute allowedRoles={['business']}><BusinessAnalytics /></ProtectedRoute>} />
+          <Route path="/business/canvas" element={<ProtectedRoute allowedRoles={['business']}><BusinessCanvas /></ProtectedRoute>} />
+          <Route path="/business/roadmap" element={<ProtectedRoute allowedRoles={['business']}><BusinessRoadmap /></ProtectedRoute>} />
+          <Route path="/business/workshops" element={<ProtectedRoute allowedRoles={['business']}><BusinessWorkshops /></ProtectedRoute>} />
+          <Route path="/business/legal" element={<ProtectedRoute allowedRoles={['business']}><BusinessLegal /></ProtectedRoute>} />
+          <Route path="/business/subscriptions" element={<ProtectedRoute allowedRoles={['business']}><BusinessSubscriptions /></ProtectedRoute>} />
+          <Route path="/business/settings" element={<ProtectedRoute allowedRoles={['business']}><BusinessSettings /></ProtectedRoute>} />
+
+          {/* Admin Dashboard Routes (Protected) */}
+          <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
+          <Route path="/admin/users" element={<ProtectedRoute allowedRoles={['admin']}><AdminUsers /></ProtectedRoute>} />
+          <Route path="/admin/roles" element={<ProtectedRoute allowedRoles={['admin']}><AdminRoles /></ProtectedRoute>} />
+          <Route path="/admin/workshops" element={<ProtectedRoute allowedRoles={['admin']}><AdminWorkshops /></ProtectedRoute>} />
+          <Route path="/admin/events" element={<ProtectedRoute allowedRoles={['admin']}><AdminEvents /></ProtectedRoute>} />
+          <Route path="/admin/subscriptions" element={<ProtectedRoute allowedRoles={['admin']}><AdminSubscriptions /></ProtectedRoute>} />
+          <Route path="/admin/payments" element={<ProtectedRoute allowedRoles={['admin']}><AdminPayments /></ProtectedRoute>} />
+          <Route path="/admin/certificates" element={<ProtectedRoute allowedRoles={['admin']}><AdminCertificates /></ProtectedRoute>} />
+          <Route path="/admin/rewards" element={<ProtectedRoute allowedRoles={['admin']}><AdminRewards /></ProtectedRoute>} />
+          <Route path="/admin/reports" element={<ProtectedRoute allowedRoles={['admin']}><AdminReports /></ProtectedRoute>} />
+          <Route path="/admin/notifications" element={<ProtectedRoute allowedRoles={['admin']}><AdminNotifications /></ProtectedRoute>} />
+          <Route path="/admin/settings" element={<ProtectedRoute allowedRoles={['admin']}><AdminSettings /></ProtectedRoute>} />
+
+          {/* Catch all redirecting to home */}
+          <Route path="*" element={<MainHomePage />} />
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
