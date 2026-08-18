@@ -39,7 +39,7 @@ export default function EventSection({
         );
 
         const response = await fetch(
-          "https://113d-13-239-234-181.ngrok-free.app/api/v1/events/all-event?page=1&limit=10",
+          "https://bff4-13-239-234-181.ngrok-free.app/api/v1/events/all-event?page=1&limit=10",
           {
             method: "GET",
             headers: {

@@ -241,7 +241,7 @@ export default function SetPasswordScreen() {
 
   const API_BASE_URL =
     import.meta.env.VITE_API_BASE_URL ||
-    'https://113d-13-239-234-181.ngrok-free.app/api/v1';
+    'https://bff4-13-239-234-181.ngrok-free.app/api/v1';
 
   const RESET_PASSWORD_API =
     `${API_BASE_URL}/users/reset-password`;

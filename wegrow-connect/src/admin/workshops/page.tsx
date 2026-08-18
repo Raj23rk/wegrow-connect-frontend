@@ -31,7 +31,7 @@ import {
 // =====================================================
 
 const API_BASE =
-  "https://113d-13-239-234-181.ngrok-free.app/api/v1";
+  "https://bff4-13-239-234-181.ngrok-free.app/api/v1";
 
 const ALL_BOOKINGS_API =
   `${API_BASE}/bookings/all-bookings`;
