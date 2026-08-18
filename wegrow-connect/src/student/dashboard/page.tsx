@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 
 // ─── API ────────────────────────────────────────────────
-const API_BASE = "http://13.239.234.181:4000/api/v1";
+const API_BASE = "https://8866-13-239-234-181.ngrok-free.app/api/v1";
 
 function getToken() {
   // return localStorage.getItem("accessToken") || localStorage.getItem("token") || "";

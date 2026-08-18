@@ -17,7 +17,7 @@ export default function EventDetails() {
 
   const API_BASE_URL =
     
-    "http://13.239.234.181:4000/api/v1";
+    "https://8866-13-239-234-181.ngrok-free.app/api/v1";
 
   // =====================================================
   // FETCH EVENT DETAILS

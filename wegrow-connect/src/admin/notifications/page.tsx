@@ -91,7 +91,7 @@ interface Pagination {
 // =====================================================
 
 const NOTIFICATIONS_API =
-  "http://13.239.234.181:4000/api/v1/notifications/admin/all";
+  "https://8866-13-239-234-181.ngrok-free.app/api/v1/notifications/admin/all";
 
 // =====================================================
 // COMPONENT
@@ -496,7 +496,7 @@ export default function AdminNotifications() {
        */
 
       const BROADCAST_API =
-        "http://13.239.234.181:4000/api/v1/notifications/admin/broadcast";
+        "https://8866-13-239-234-181.ngrok-free.app/api/v1/notifications/admin/broadcast";
 
       const response = await fetch(BROADCAST_API, {
         method: "POST",
