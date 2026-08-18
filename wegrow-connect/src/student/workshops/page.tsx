@@ -107,13 +107,13 @@ interface EventDetailsResponse {
  *
  * DO NOT use:
  *
- * https://8866-13-239-234-181.ngrok-free.app/api/v1
+ * https://113d-13-239-234-181.ngrok-free.app/api/v1
  *
  * Use your AWS backend:
  */
 
 const API_BASE_URL =
-  "https://8866-13-239-234-181.ngrok-free.app/api/v1";
+  "https://113d-13-239-234-181.ngrok-free.app/api/v1";
 
 const BOOKINGS_API =
   `${API_BASE_URL}/bookings/my-bookings`;

@@ -25,7 +25,7 @@ import {
 // =====================================================
 
 const API_BASE =
-  "https://8866-13-239-234-181.ngrok-free.app/api/v1";
+  "https://113d-13-239-234-181.ngrok-free.app/api/v1";
 
 const ALL_EVENTS_API =
   `${API_BASE}/events/all-event`;

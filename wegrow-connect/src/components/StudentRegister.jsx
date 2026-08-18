@@ -514,7 +514,7 @@ export default function StudentRegister() {
 
   const API_BASE_URL =
     import.meta.env.VITE_API_BASE_URL ||
-    'https://8866-13-239-234-181.ngrok-free.app/api/v1';
+    'https://113d-13-239-234-181.ngrok-free.app/api/v1';
 
   const REGISTER_API =
     `${API_BASE_URL}/auth/register/student`;

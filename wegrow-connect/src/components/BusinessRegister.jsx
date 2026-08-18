@@ -510,11 +510,11 @@ export default function BusinessRegister() {
 
   // Local:
   const REGISTER_API =
-    'https://8866-13-239-234-181.ngrok-free.app/api/v1/auth/register/business';
+    'https://113d-13-239-234-181.ngrok-free.app/api/v1/auth/register/business';
 
   // AWS:
   // const REGISTER_API =
-  //   'https://8866-13-239-234-181.ngrok-free.app/api/v1/auth/register/business';
+  //   'https://113d-13-239-234-181.ngrok-free.app/api/v1/auth/register/business';
 
   // =====================================================
   // SLIDER DATA
