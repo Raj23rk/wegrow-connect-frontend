@@ -76,7 +76,7 @@ interface BookingResponse {
 // CONSTANTS
 // =====================================================
 
-const API_BASE_URL = "https://bff4-13-239-234-181.ngrok-free.app/api/v1";
+const API_BASE_URL = "https://wegrow-connect-backend-1.onrender.com/api/v1";
 
 const EVENTS_API = `${API_BASE_URL}/events/all-event`;
 const EVENT_DETAIL_API = `${API_BASE_URL}/events`;

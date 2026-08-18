@@ -510,11 +510,11 @@ export default function BusinessRegister() {
 
   // Local:
   const REGISTER_API =
-    'https://bff4-13-239-234-181.ngrok-free.app/api/v1/auth/register/business';
+    'https://wegrow-connect-backend-1.onrender.com/api/v1/auth/register/business';
 
   // AWS:
   // const REGISTER_API =
-  //   'https://bff4-13-239-234-181.ngrok-free.app/api/v1/auth/register/business';
+  //   'https://wegrow-connect-backend-1.onrender.com/api/v1/auth/register/business';
 
   // =====================================================
   // SLIDER DATA

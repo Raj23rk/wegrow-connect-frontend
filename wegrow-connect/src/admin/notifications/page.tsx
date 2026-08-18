@@ -91,7 +91,7 @@ interface Pagination {
 // =====================================================
 
 const NOTIFICATIONS_API =
-  "https://bff4-13-239-234-181.ngrok-free.app/api/v1/notifications/admin/all";
+  "https://wegrow-connect-backend-1.onrender.com/api/v1/notifications/admin/all";
 
 // =====================================================
 // COMPONENT
@@ -496,7 +496,7 @@ export default function AdminNotifications() {
        */
 
       const BROADCAST_API =
-        "https://bff4-13-239-234-181.ngrok-free.app/api/v1/notifications/admin/broadcast";
+        "https://wegrow-connect-backend-1.onrender.com/api/v1/notifications/admin/broadcast";
 
       const response = await fetch(BROADCAST_API, {
         method: "POST",

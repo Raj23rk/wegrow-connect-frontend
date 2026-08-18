@@ -29,7 +29,7 @@ import {
 // API CONFIG
 // =====================================================
 
-const API_BASE_URL = "https://bff4-13-239-234-181.ngrok-free.app/api/v1";
+const API_BASE_URL = "https://wegrow-connect-backend-1.onrender.com/api/v1";
 
 // =====================================================
 // TYPES

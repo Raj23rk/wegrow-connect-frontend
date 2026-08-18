@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 
 // ─── API ────────────────────────────────────────────────
-const API_BASE = "https://bff4-13-239-234-181.ngrok-free.app/api/v1";
+const API_BASE = "https://wegrow-connect-backend-1.onrender.com/api/v1";
 
 function getToken() {
   // return localStorage.getItem("accessToken") || localStorage.getItem("token") || "";
