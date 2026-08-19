@@ -84,7 +84,7 @@ export default function VisitSection({ visitTargetRef, visitStyle }) {
                 { title: "Practical Exposure", desc: "Experiencing live workplace culture & operations." }
               ].map((item, idx) => (
                 <div key={idx} className="flex items-start gap-3 p-3.5 rounded-2xl border backdrop-blur-md" style={{ backgroundColor: theme.cardBg, borderColor: theme.cardBorder }}>
-                  <span className="text-lg" style={{ color: theme.primary }}>✦</span>
+                  <span className="text-lg" style={{ color: theme.neutralText }}>✦</span>
                   <div>
                     <h5 className="font-extrabold text-sm" style={{ color: theme.textBright }}>{item.title}</h5>
                     <p className="text-xs font-medium mt-0.5" style={{ color: theme.textMuted }}>{item.desc}</p>

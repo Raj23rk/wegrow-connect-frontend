@@ -62,9 +62,29 @@ export default function SuccessStories({ storiesTargetRef, storiesStyle }) {
           sliderRef.current.scrollLeft += singleSetWidth;
         }
 
-        const scrollLeft = sliderRef.current.scrollLeft;
-        const centerIndex = Math.round((scrollLeft + sliderRef.current.clientWidth / 2 - 150) / cardWidth);
-        setActiveIndex(centerIndex);
+        // Was: Math.round((scrollLeft + clientWidth/2 - 150) / cardWidth)
+        // The "150" was hardcoded as half of the 300px desktop card width
+        // (sm:w-[300px] / 2). On mobile the card is 280px wide, so that
+        // offset didn't match reality there, throwing off which card got
+        // detected as "centered" - which is why the zoom/highlight effect
+        // wasn't triggering correctly on mobile. This instead measures
+        // which card's ACTUAL rendered center is closest to the
+        // container's actual center, so it's correct at any card width
+        // or breakpoint without needing a hardcoded number.
+        const containerRect = sliderRef.current.getBoundingClientRect();
+        const containerCenter = containerRect.left + containerRect.width / 2;
+        let closestIndex = activeIndex;
+        let closestDistance = Infinity;
+        Array.from(sliderRef.current.children).forEach((child, idx) => {
+          const childRect = child.getBoundingClientRect();
+          const childCenter = childRect.left + childRect.width / 2;
+          const distance = Math.abs(childCenter - containerCenter);
+          if (distance < closestDistance) {
+            closestDistance = distance;
+            closestIndex = idx;
+          }
+        });
+        setActiveIndex(closestIndex);
       }
       animationFrameId = requestAnimationFrame(smoothContinuousScroll);
     };
@@ -218,8 +238,8 @@ export default function SuccessStories({ storiesTargetRef, storiesStyle }) {
                           }}
                         />
                         <span 
-                          className="absolute bottom-2 left-2 text-[10px] font-black px-2.5 py-1 rounded-full backdrop-blur-md border shadow-md"
-                          style={{ color: theme.orange, backgroundColor: 'white', borderColor: theme.cardBorder }}
+                          className="absolute bottom-2 left-2 text-[10px] font-semibold px-2.5 py-1 rounded-full backdrop-blur-md border shadow-md"
+                          style={{ color: theme.neutralText, backgroundColor: 'white', borderColor: theme.neutralBorder }}
                         >
                           🎓 Certified
                         </span>
@@ -237,7 +257,7 @@ export default function SuccessStories({ storiesTargetRef, storiesStyle }) {
 
                     <div className="pt-4 border-t mt-4 flex items-center justify-between text-[11px] font-bold" style={{ borderColor: 'rgba(255,255,255,0.08)', color: theme.textMuted }}>
                       <span>WeGrow Graduate</span>
-                      <span style={{ color: theme.primary }}>✦ Verified</span>
+                      <span style={{ color: theme.neutralText }}>✦ Verified</span>
                     </div>
 
                   </div>

@@ -366,9 +366,51 @@ export default function ContactSection({
 
   const [submitted, setSubmitted] = useState(false);
 
+<<<<<<< HEAD
   // =====================================================
   // LOADING STATE
   // =====================================================
+=======
+  // Custom Alert Modal State
+  const [alertModal, setAlertModal] = useState({
+    isOpen: false,
+    title: '',
+    message: ''
+  });
+
+  const showAlert = (title, message) => {
+    setAlertModal({ isOpen: true, title, message });
+  };
+
+  const handlePhoneChange = (e) => {
+    let value = e.target.value.replace(/\D/g, '');
+    if (value.length > 10) value = value.slice(0, 10);
+    setFormData({ ...formData, mobile: value });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    // Check if length is less than 10 digits
+    if (formData.mobile.length !== 10) {
+      showAlert("Invalid Mobile Number", "Please enter a valid 10-digit mobile number.");
+      return;
+    }
+
+    // Check if it starts with 6, 7, 8, or 9
+    const firstDigit = formData.mobile.charAt(0);
+    if (!['6', '7', '8', '9'].includes(firstDigit)) {
+      showAlert("Invalid Mobile Number", "Give your valid mobile number.");
+      return;
+    }
+
+    setSubmitted(true);
+    setTimeout(() => {
+      setSubmitted(false);
+      handleReset();
+    }, 3000);
+  };
+>>>>>>> 8aaf596c92567f6dbd348a56a1c4a0b3d9c5b640
 
   const [loading, setLoading] = useState(false);
 
@@ -703,6 +745,7 @@ export default function ContactSection({
       }}
       className="relative pt-0 pb-20 transition-all duration-500 ease-out transform-gpu"
     >
+<<<<<<< HEAD
       {/* =================================================
           CUSTOM ALERT MODAL
       ================================================= */}
@@ -726,6 +769,21 @@ export default function ContactSection({
             <button
               type="button"
               onClick={closeAlert}
+=======
+      {/* CUSTOM DESIGNED ALERT MODAL */}
+      {alertModal.isOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl border border-gray-100 transform transition-all">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 text-red-600 text-3xl">
+              ⚠️
+            </div>
+            <h3 className="text-xl font-black text-gray-900 mb-2">{alertModal.title}</h3>
+            <p className="text-xs font-semibold text-gray-500 mb-6 leading-relaxed">
+              {alertModal.message}
+            </p>
+            <button
+              onClick={() => setAlertModal({ isOpen: false, title: '', message: '' })}
+>>>>>>> 8aaf596c92567f6dbd348a56a1c4a0b3d9c5b640
               className="w-full py-3 rounded-full bg-[#104288] hover:bg-[#f97316] text-white font-extrabold text-xs uppercase tracking-wider transition-all shadow-md cursor-pointer"
             >
               OK
@@ -734,10 +792,13 @@ export default function ContactSection({
         </div>
       )}
 
+<<<<<<< HEAD
       {/* =================================================
           MAIN CONTAINER
       ================================================= */}
 
+=======
+>>>>>>> 8aaf596c92567f6dbd348a56a1c4a0b3d9c5b640
       <div className="max-w-7xl mx-auto px-4 md:px-6 relative">
 
         {/* =================================================
@@ -1052,6 +1113,7 @@ export default function ContactSection({
                   {/* NAME */}
 
                   <div>
+<<<<<<< HEAD
 
                     <label
                       className="block text-xs font-extrabold mb-1.5"
@@ -1066,6 +1128,12 @@ export default function ContactSection({
                       type="text"
                       required
                       disabled={loading}
+=======
+                    <label className="block text-xs font-semibold mb-1.5" style={{ color: theme.neutralText }}>Your Full Name</label>
+                    <input 
+                      type="text" 
+                      required 
+>>>>>>> 8aaf596c92567f6dbd348a56a1c4a0b3d9c5b640
                       placeholder="Enter your name"
                       value={formData.name}
                       onChange={(e) =>
@@ -1088,6 +1156,7 @@ export default function ContactSection({
                   {/* EMAIL */}
 
                   <div>
+<<<<<<< HEAD
 
                     <label
                       className="block text-xs font-extrabold mb-1.5"
@@ -1102,6 +1171,12 @@ export default function ContactSection({
                       type="email"
                       required
                       disabled={loading}
+=======
+                    <label className="block text-xs font-semibold mb-1.5" style={{ color: theme.neutralText }}>Email Address</label>
+                    <input 
+                      type="email" 
+                      required 
+>>>>>>> 8aaf596c92567f6dbd348a56a1c4a0b3d9c5b640
                       placeholder="Enter your email"
                       value={formData.email}
                       onChange={(e) =>
@@ -1128,6 +1203,7 @@ export default function ContactSection({
                 ================================================= */}
 
                 <div>
+<<<<<<< HEAD
 
                   <label
                     className="block text-xs font-extrabold mb-1.5"
@@ -1142,10 +1218,17 @@ export default function ContactSection({
                     type="tel"
                     required
                     disabled={loading}
+=======
+                  <label className="block text-xs font-semibold mb-1.5" style={{ color: theme.neutralText }}>Your Mobile Number</label>
+                  <input 
+                    type="tel" 
+                    required 
+>>>>>>> 8aaf596c92567f6dbd348a56a1c4a0b3d9c5b640
                     maxLength={10}
                     placeholder="9876543210"
                     value={formData.mobile}
                     onChange={handlePhoneChange}
+<<<<<<< HEAD
                     className="w-full px-4 py-2.5 rounded-xl text-xs font-semibold border outline-none transition focus:border-amber-500 disabled:opacity-60"
                     style={{
                       borderColor: theme.cardBorder,
@@ -1153,6 +1236,10 @@ export default function ContactSection({
                       backgroundColor:
                         'rgba(255,255,255,0.05)',
                     }}
+=======
+                    className="w-full px-4 py-2.5 rounded-xl text-xs font-semibold border outline-none transition focus:border-amber-500"
+                    style={{ borderColor: theme.cardBorder, color: theme.textBright, backgroundColor: 'rgba(255,255,255,0.05)' }}
+>>>>>>> 8aaf596c92567f6dbd348a56a1c4a0b3d9c5b640
                   />
 
                 </div>
@@ -1162,6 +1249,7 @@ export default function ContactSection({
                 ================================================= */}
 
                 <div>
+<<<<<<< HEAD
 
                   <label
                     className="block text-xs font-extrabold mb-2"
@@ -1181,6 +1269,10 @@ export default function ContactSection({
 
                     {/* BUSINESS */}
 
+=======
+                  <label className="block text-xs font-semibold mb-2" style={{ color: theme.neutralText }}>Query About:</label>
+                  <div className="flex items-center gap-6 text-xs font-bold" style={{ color: theme.textBright }}>
+>>>>>>> 8aaf596c92567f6dbd348a56a1c4a0b3d9c5b640
                     <label className="flex items-center gap-2 cursor-pointer">
 
                       <input
@@ -1236,6 +1328,7 @@ export default function ContactSection({
                 ================================================= */}
 
                 <div>
+<<<<<<< HEAD
 
                   <label
                     className="block text-xs font-extrabold mb-1.5"
@@ -1250,6 +1343,12 @@ export default function ContactSection({
                     rows="3"
                     required
                     disabled={loading}
+=======
+                  <label className="block text-xs font-semibold mb-1.5" style={{ color: theme.neutralText }}>How can we help you?</label>
+                  <textarea 
+                    rows="3" 
+                    required 
+>>>>>>> 8aaf596c92567f6dbd348a56a1c4a0b3d9c5b640
                     placeholder="Type your query regarding bootcamps, workshops, or career guidance..."
                     value={formData.message}
                     onChange={(e) =>

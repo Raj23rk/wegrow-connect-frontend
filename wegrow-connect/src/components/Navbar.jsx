@@ -365,6 +365,7 @@ export default function Navbar({
 
         {/* LOGIN / PROFILE */}
         <div className="flex justify-end">
+<<<<<<< HEAD
           {user ? (
             <div className="relative dropdown py-2">
               <button
@@ -491,6 +492,24 @@ export default function Navbar({
               Login
             </button>
           )}
+=======
+          <button 
+            onClick={handleLoginClick} 
+            className="font-extrabold px-7 py-2.5 rounded-full text-sm transition-all duration-300 shadow-md hover:scale-105 hover:shadow-xl transform focus:outline-none cursor-pointer" 
+            style={{ 
+              backgroundColor: theme.primary, 
+              color: '#ffffff' 
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = theme.orange || '#f3a812';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = theme.primary;
+            }}
+          >
+            Login
+          </button>
+>>>>>>> 8aaf596c92567f6dbd348a56a1c4a0b3d9c5b640
         </div>
       </nav>
     </header>

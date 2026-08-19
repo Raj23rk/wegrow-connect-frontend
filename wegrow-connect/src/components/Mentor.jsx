@@ -121,8 +121,24 @@ export default function Mentor({ mentorTargetRef, mentorStyle }) {
   const sliderRef = useRef(null);
   const [isPaused, setIsPaused] = useState(false);
 
-  const cardWidth = 344; // 320px width + 24px gap
+  // Measured from the real rendered card instead of assumed, so this stays
+  // accurate whether the card is w-[280px] (mobile) or sm:w-[320px] (desktop)
+  // instead of drifting out of sync with the actual layout on mobile.
+  const [cardWidth, setCardWidth] = useState(344); // fallback until measured
   const singleSetWidth = cardWidth * baseMentors.length;
+
+  useEffect(() => {
+    const measureCardWidth = () => {
+      if (sliderRef.current?.children[0]) {
+        const firstCard = sliderRef.current.children[0];
+        const gapPx = parseFloat(window.getComputedStyle(sliderRef.current).columnGap) || 24;
+        setCardWidth(firstCard.offsetWidth + gapPx);
+      }
+    };
+    measureCardWidth();
+    window.addEventListener('resize', measureCardWidth);
+    return () => window.removeEventListener('resize', measureCardWidth);
+  }, []);
 
   // Custom Smooth Ease-In-Out Smooth Scroll
   const customSmoothScroll = (targetScrollLeft, duration = 1200) => {
@@ -270,7 +286,7 @@ export default function Mentor({ mentorTargetRef, mentorStyle }) {
             {infiniteMentors.map((mentor, index) => (
               <div 
                 key={`${mentor.id}-${index}`}
-                className="shrink-0 w-[280px] sm:w-[320px] group backdrop-blur-md rounded-3xl overflow-hidden border shadow-xl p-5 flex flex-col justify-between transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl"
+                className="shrink-0 w-full sm:w-[calc((100%-1.5rem)/2)] lg:w-[calc((100%-3rem)/3)] xl:w-[calc((100%-4.5rem)/4)] group backdrop-blur-md rounded-3xl overflow-hidden border shadow-xl p-5 flex flex-col justify-between transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl"
                 style={{ backgroundColor: theme.cardBg, borderColor: theme.cardBorder }}
               >
                 <div>
@@ -282,8 +298,8 @@ export default function Mentor({ mentorTargetRef, mentorStyle }) {
                       className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
                     />
                     <span 
-                      className="absolute bottom-2 left-2 text-[10px] font-black px-2.5 py-1 rounded-full backdrop-blur-md border shadow-md"
-                      style={{ color: theme.primary, backgroundColor: 'white', borderColor: theme.cardBorder }}
+                      className="absolute bottom-2 left-2 text-[10px] font-semibold px-2.5 py-1 rounded-full backdrop-blur-md border shadow-md"
+                      style={{ color: theme.neutralText, backgroundColor: 'white', borderColor: theme.neutralBorder }}
                     >
                       ✦ {mentor.experience}
                     </span>

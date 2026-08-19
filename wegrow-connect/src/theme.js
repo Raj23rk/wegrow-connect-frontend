@@ -24,5 +24,8 @@ export const theme = {
   cardBg: "rgba(255, 255, 255, 0.90)",
   cardBorder: "rgba(16, 66, 136, 0.15)",
   cardBorderHover: "#f3a812",   // Hover-ப்ப orange border எரியும்
-  dropdownBg: "rgba(255, 255, 255, 0.98)"
+  dropdownBg: "rgba(255, 255, 255, 0.98)",
+  neutralBg: "#f1f5f9",         // Soft neutral pill/badge background
+  neutralText: "#64748b",       // Neutral label text (slate-500)
+  neutralBorder: "#e2e8f0"      // Neutral pill/badge border
 };

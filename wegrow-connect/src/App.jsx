@@ -196,6 +196,94 @@ function MainHomePage() {
     }
   };
 
+  // Keeps --app-vh in sync with the real viewport height (handles mobile
+  // browser chrome), and --navbar-height in sync with the ACTUAL rendered
+  // navbar element instead of the fixed 56px/64px guess in index.css. A
+  // guessed height meant that on some mobile widths the navbar renders
+  // taller than assumed, so <main>'s clip-path/top-padding didn't clear
+  // it - which is what was cutting into the top of the Mentor section's
+  // heading. Measuring it directly makes this correct on every screen.
+  useEffect(() => {
+    const setAppHeight = () => {
+      document.documentElement.style.setProperty('--app-vh', `${window.innerHeight}px`);
+    };
+    const setNavbarHeight = () => {
+      // Was querySelector('nav') - but Navbar.jsx's actual fixed, full-width
+      // positioned element is the outer <header> (with its own pt-4 padding
+      // above the inner <nav>). Measuring just <nav> missed that 16px of
+      // padding, which is exactly what was clipping the top of the Mentor
+      // section's heading - <header> is the element that actually occupies
+      // visual space at the top of the screen.
+      const navEl = document.querySelector('header');
+      if (navEl) {
+        document.documentElement.style.setProperty('--navbar-height', `${navEl.offsetHeight}px`);
+      }
+    };
+
+    setAppHeight();
+    setNavbarHeight();
+    // Re-measure shortly after mount too, in case the logo image or a
+    // wrapping nav item shifts the navbar's height after first paint.
+    const settleTimeout = setTimeout(setNavbarHeight, 300);
+
+    window.addEventListener('resize', setAppHeight);
+    window.addEventListener('resize', setNavbarHeight);
+    window.addEventListener('orientationchange', setAppHeight);
+    window.addEventListener('orientationchange', setNavbarHeight);
+    return () => {
+      clearTimeout(settleTimeout);
+      window.removeEventListener('resize', setAppHeight);
+      window.removeEventListener('resize', setNavbarHeight);
+      window.removeEventListener('orientationchange', setAppHeight);
+      window.removeEventListener('orientationchange', setNavbarHeight);
+    };
+  }, []);
+
+  // Fades each section in ONCE the first time it enters the viewport, then
+  // leaves it alone - instead of the previous approach, which recalculated
+  // opacity/scale/translateY for all 10 sections on every single scroll
+  // frame (continuously growing/shrinking as you scrolled past them, even
+  // after they'd already been seen). This keeps the same "fade + rise into
+  // view" feel on first appearance, at a fraction of the ongoing scroll
+  // cost, and reads as calmer since content stops moving once it's visible.
+  useEffect(() => {
+    const sections = [
+      { ref: eventTargetRef, setStyle: setEventStyle },
+      { ref: rewardTargetRef, setStyle: setRewardStyle },
+      { ref: resourceTargetRef, setStyle: setResourceStyle },
+      { ref: seminarTargetRef, setStyle: setSeminarStyle },
+      { ref: visitTargetRef, setStyle: setVisitStyle },
+      { ref: eventsTargetRef, setStyle: setWorkshopStyle, extraTranslateY: 20 },
+      { ref: mentorTargetRef, setStyle: setMentorStyle },
+      { ref: enterpricesTargetRef, setStyle: setEnterpricesStyle },
+      { ref: storiesTargetRef, setStyle: setStoriesStyle },
+      { ref: contactTargetRef, setStyle: setContactStyle }
+    ];
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          const match = sections.find((s) => s.ref.current === entry.target);
+          if (!match) return;
+          match.setStyle({ opacity: 1, transform: 'scale(1) translateY(0px)' });
+          observer.unobserve(entry.target); // seen once - stop watching it
+        });
+      },
+      {
+        root: scrollContainerRef.current,
+        rootMargin: '0px 0px -10% 0px', // start the reveal slightly before it's fully in view
+        threshold: 0.15
+      }
+    );
+
+    sections.forEach(({ ref }) => {
+      if (ref.current) observer.observe(ref.current);
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
   const handleScroll = () => {
     if (!scrollContainerRef.current) return;
     const scrollY = scrollContainerRef.current.scrollTop;
@@ -407,7 +495,7 @@ function MainHomePage() {
   }, [activeItem]);
 
   return (
-    <div className="font-['Inter'] overflow-hidden h-screen w-screen relative" style={{ backgroundColor: theme.bgDark, color: theme.textMain }}>
+    <div className="app-shell font-['Inter'] overflow-hidden relative" style={{ backgroundColor: theme.bgDark, color: theme.textMain }}>
       <div className="fixed inset-0 z-0 pointer-events-none">
         <img 
           src="https://images.unsplash.com/photo-1511578314322-379afb476865?w=1600" 
@@ -433,8 +521,8 @@ function MainHomePage() {
       <main 
         ref={scrollContainerRef} 
         onScroll={handleScroll} 
-        style={{ clipPath: 'inset(55px 0 0 0)' }}
-        className="scroll-container relative z-20 w-full h-full overflow-y-auto pt-14 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+        style={{ clipPath: 'inset(var(--navbar-height) 0 0 0)', paddingTop: 'var(--navbar-height)' }}
+        className="scroll-container relative z-20 w-full overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
       >
         {/* 1. HERO SECTION */}
         <Hero heroTransform={heroTransform} scrollToEvents={scrollToEventsMain} />
@@ -490,66 +578,25 @@ function MainHomePage() {
 // Root App Component wrapped with Router
 export default function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <Routes>
-          {/* Public Landing & Splash */}
-          <Route path="/" element={<Splash />} />
-          <Route path="/home" element={<MainHomePage />} />
-          
-          {/* Auth Routes with constant background */}
-          <Route path="/home/login" element={<AuthLayout><LoginScreen /></AuthLayout>} />
-          <Route path="/login" element={<AuthLayout><LoginScreen /></AuthLayout>} />
-          <Route path="/home/login/forgotpassword" element={<AuthLayout><ForgotPasswordScreen /></AuthLayout>} />
-          <Route path="/home/login/option" element={<AuthLayout><RegisterSelection /></AuthLayout>} />
-          <Route path="/home/login/forgotpassword/setpassword" element={<AuthLayout><SetPasswordScreen /></AuthLayout>} />
-          
-          {/* Registration Routes */}
-          <Route path="/home/login/option/student" element={<AuthLayout><StudentRegister /></AuthLayout>} />
-          <Route path="/student/register" element={<AuthLayout><StudentRegister /></AuthLayout>} />
-          <Route path="/home/login/option/business" element={<AuthLayout><BusinessRegister /></AuthLayout>} />
-          
-          {/* Other Public/Partially Protected Routes */}
-          <Route path="/home/profile" element={<ProfilePage />} />
-          <Route path="/home/events/:eventId" element={<EventDetails />} />
+    <Router>
+      <Routes>
+        <Route path="/" element={<Splash />} />
+        <Route path="/home" element={<MainHomePage />} />
+        
+        {/* Auth Routes with constant background */}
+        <Route path="/home/login" element={<AuthLayout><LoginScreen /></AuthLayout>} />
+        <Route path="/login" element={<AuthLayout><LoginScreen /></AuthLayout>} />
+        <Route path="/home/login/forgotpassword" element={<AuthLayout><ForgotPasswordScreen /></AuthLayout>} />
+        <Route path="/home/login/option" element={<AuthLayout><RegisterSelection /></AuthLayout>} />
+        <Route path="/home/login/forgotpassword/setpassword" element={<AuthLayout><SetPasswordScreen /></AuthLayout>} />
+        
+        {/* Student and Business Registration Routes */}
+        <Route path="/home/login/option/student" element={<AuthLayout><StudentRegister /></AuthLayout>} />
+        <Route path="/student/register" element={<AuthLayout><StudentRegister /></AuthLayout>} />
+        <Route path="/home/login/option/business" element={<AuthLayout><BusinessRegister /></AuthLayout>} />
 
-          {/* Student Dashboard Routes (Protected) */}
-          <Route path="/student/dashboard" element={<ProtectedRoute allowedRoles={['student']}><StudentDashboard /></ProtectedRoute>} />
-          <Route path="/student/courses" element={<ProtectedRoute allowedRoles={['student']}><StudentCourses /></ProtectedRoute>} />
-          <Route path="/student/certificates" element={<ProtectedRoute allowedRoles={['student']}><StudentCertificates /></ProtectedRoute>} />
-          <Route path="/student/rewards" element={<ProtectedRoute allowedRoles={['student']}><StudentRewards /></ProtectedRoute>} />
-          <Route path="/student/analytics" element={<ProtectedRoute allowedRoles={['student']}><StudentAnalytics /></ProtectedRoute>} />
-          <Route path="/student/workshops" element={<ProtectedRoute allowedRoles={['student']}><StudentWorkshops /></ProtectedRoute>} />
-          <Route path="/student/settings" element={<ProtectedRoute allowedRoles={['student']}><StudentSettings /></ProtectedRoute>} />
-
-          {/* Business Dashboard Routes (Protected) */}
-          <Route path="/business/dashboard" element={<ProtectedRoute allowedRoles={['business']}><BusinessDashboard /></ProtectedRoute>} />
-          <Route path="/business/analytics" element={<ProtectedRoute allowedRoles={['business']}><BusinessAnalytics /></ProtectedRoute>} />
-          <Route path="/business/canvas" element={<ProtectedRoute allowedRoles={['business']}><BusinessCanvas /></ProtectedRoute>} />
-          <Route path="/business/roadmap" element={<ProtectedRoute allowedRoles={['business']}><BusinessRoadmap /></ProtectedRoute>} />
-          <Route path="/business/workshops" element={<ProtectedRoute allowedRoles={['business']}><BusinessWorkshops /></ProtectedRoute>} />
-          <Route path="/business/legal" element={<ProtectedRoute allowedRoles={['business']}><BusinessLegal /></ProtectedRoute>} />
-          <Route path="/business/subscriptions" element={<ProtectedRoute allowedRoles={['business']}><BusinessSubscriptions /></ProtectedRoute>} />
-          <Route path="/business/settings" element={<ProtectedRoute allowedRoles={['business']}><BusinessSettings /></ProtectedRoute>} />
-
-          {/* Admin Dashboard Routes (Protected) */}
-          <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
-          <Route path="/admin/users" element={<ProtectedRoute allowedRoles={['admin']}><AdminUsers /></ProtectedRoute>} />
-          <Route path="/admin/roles" element={<ProtectedRoute allowedRoles={['admin']}><AdminRoles /></ProtectedRoute>} />
-          <Route path="/admin/workshops" element={<ProtectedRoute allowedRoles={['admin']}><AdminWorkshops /></ProtectedRoute>} />
-          <Route path="/admin/events" element={<ProtectedRoute allowedRoles={['admin']}><AdminEvents /></ProtectedRoute>} />
-          <Route path="/admin/subscriptions" element={<ProtectedRoute allowedRoles={['admin']}><AdminSubscriptions /></ProtectedRoute>} />
-          <Route path="/admin/payments" element={<ProtectedRoute allowedRoles={['admin']}><AdminPayments /></ProtectedRoute>} />
-          <Route path="/admin/certificates" element={<ProtectedRoute allowedRoles={['admin']}><AdminCertificates /></ProtectedRoute>} />
-          <Route path="/admin/rewards" element={<ProtectedRoute allowedRoles={['admin']}><AdminRewards /></ProtectedRoute>} />
-          <Route path="/admin/reports" element={<ProtectedRoute allowedRoles={['admin']}><AdminReports /></ProtectedRoute>} />
-          <Route path="/admin/notifications" element={<ProtectedRoute allowedRoles={['admin']}><AdminNotifications /></ProtectedRoute>} />
-          <Route path="/admin/settings" element={<ProtectedRoute allowedRoles={['admin']}><AdminSettings /></ProtectedRoute>} />
-
-          {/* Catch all redirecting to home */}
-          <Route path="*" element={<MainHomePage />} />
-        </Routes>
-      </Router>
-    </AuthProvider>
+        <Route path="*" element={<MainHomePage />} />
+      </Routes>
+    </Router>
   );
 }

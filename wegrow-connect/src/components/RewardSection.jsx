@@ -195,8 +195,12 @@ export default function RewardSection({ rewardTargetRef, rewardStyle }) {
 
           </div>
 
-          {/* RIGHT SIDE: ALWAYS VISIBLE CARD WITH TRUE CROSSFADE */}
-          <div className="lg:col-span-5 sticky top-16 flex flex-col items-center">
+          {/* RIGHT SIDE: ALWAYS VISIBLE CARD WITH TRUE CROSSFADE - sticky
+              only at lg+ now. Same reasoning as WorkshopSection: on mobile
+              this column collapses below the paragraphs (grid-cols-1), so
+              an unqualified `sticky` would pin this card on screen while
+              the paragraph list scrolled underneath it. */}
+          <div className="lg:col-span-5 lg:sticky lg:top-16 flex flex-col items-center">
             {activeBenefit && (
               <div 
                 className="w-full backdrop-blur-md rounded-3xl overflow-hidden border shadow-2xl p-4 transition-all duration-300"

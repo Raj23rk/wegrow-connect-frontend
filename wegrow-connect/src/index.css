@@ -2,6 +2,101 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================================
+   RESPONSIVE / 100% ZOOM FOUNDATION
+   The site was previously tuned visually for 110% browser zoom.
+   These base rules make sizing depend on the actual viewport
+   instead of an assumed zoom level, so 100% zoom (and every
+   other zoom level / device size) renders edge-to-edge without
+   feeling compressed or causing horizontal scroll.
+   ============================================================ */
+:root {
+  /* Single source of truth for navbar height, referenced by
+     App.jsx (main's top padding + clip-path) instead of a
+     hardcoded pixel value. Adjust these if the Navbar's real
+     rendered height differs. */
+  --navbar-height: 3.5rem;      /* 56px on mobile/tablet */
+  --app-vh: 100vh;              /* JS-corrected viewport height, see App.jsx */
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --navbar-height: 4rem;      /* 64px on laptop/desktop */
+  }
+}
+
+html {
+  font-size: 100%;              /* 1rem = 16px, independent of any assumed browser zoom */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden; /* guarantees no horizontal scroll/compression at any zoom or screen size */
+}
+
+img, svg, video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Full-height shell that respects mobile browser chrome
+   (address bar) using dvh with a vh fallback for older browsers. */
+.app-shell {
+  height: 100vh;
+  height: 100dvh;
+  height: var(--app-vh);
+  width: 100%;
+  max-width: 100vw;
+}
+
+/* ============================================================
+   SECTION CONTAINER GAP FIX
+   ContactSection, Enterprices, EventSection, Mentor,
+   ResourceSection, RewardSection, SeminarSection, VisitSection,
+   and WorkshopSection all wrap their content in Tailwind's
+   `max-w-7xl` (1280px) utility. That fixed 1280px cap is what
+   was leaving a visible empty gap on both sides on laptop/
+   desktop screens wider than 1280px (1366px, 1440px, 1536px,
+   1920px...). Removing the cap entirely (instead of just
+   raising it) makes every section using this class fill the
+   full width right up to its own padding, on any screen size,
+   in one place, without editing any component file. */
+.max-w-7xl {
+  max-width: 100% !important;
+}
+
+/* Same fix, extended to the auth pages: LoginScreen, ForgotPasswordScreen,
+   SetPasswordScreen, StudentRegister, and BusinessRegister all use
+   `max-w-6xl` (1152px) as their outer page container, and
+   RegisterSelection uses `max-w-5xl` (1024px) - same fixed-cap problem,
+   just a different class, which is why those pages were still showing
+   a compressed card with empty space on the sides. */
+.max-w-6xl {
+  max-width: 100% !important;
+}
+
+/* max-w-5xl (RegisterSelection's Student/Business cards, plus
+   Enterprices' stats bar and Hero's content column) looked
+   stretched and awkward at full 100% width - unlike the
+   data-dense marketing sections, a simple 2-card layout doesn't
+   have enough content to fill the whole screen nicely. This
+   raises the original 1024px cap to a moderate ~1120px instead
+   of removing it entirely, so it's noticeably wider than before
+   but still reads as a centered, intentional layout rather than
+   full-bleed. */
+.max-w-5xl {
+  max-width: min(70rem, 90vw) !important;
+}
+
 @keyframes floatArrow {
   0%, 100% { transform: translateY(0); opacity: 0.8; }
   50% { transform: translateY(10px); opacity: 1; }
@@ -13,7 +108,12 @@
 
 .scroll-container {
   height: 100vh;
+  height: 100dvh;
+  height: var(--app-vh);
+  width: 100%;
+  max-width: 100vw;
   overflow-y: auto;
+  overflow-x: hidden;
   -webkit-mask-image: linear-gradient(to bottom, transparent 0px, transparent 40px, black 110px);
   mask-image: linear-gradient(to bottom, transparent 0px, transparent 40px, black 110px);
 }

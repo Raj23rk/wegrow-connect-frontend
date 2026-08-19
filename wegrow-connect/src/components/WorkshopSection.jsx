@@ -34,12 +34,18 @@ export default function WorkshopSection({
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start relative">
           
-          {/* LEFT STICKY CARD */}
-          <div className="lg:col-span-4 sticky top-24 text-center z-10 flex flex-col items-center">
+          {/* LEFT STICKY CARD - sticky only applies at lg+ now. On mobile
+              (single-column layout) sticky kept this pinned on screen while
+              the CENTER SCROLLABLE LIST's big title text scrolled underneath
+              it, causing them to visually overlap. On desktop, sticky is
+              exactly what makes this feel like a preview panel next to an
+              independently-scrolling middle column, so that behavior is
+              preserved at lg+. */}
+          <div className="lg:col-span-4 lg:sticky lg:top-24 text-center z-10 flex flex-col items-center">
             <span 
-              className="text-[11px] uppercase font-black tracking-wider px-3 py-1 rounded-full border mb-2 backdrop-blur-md shadow-sm"
+              className="text-[11px] uppercase font-semibold tracking-wider px-3 py-1 rounded-full border mb-2 backdrop-blur-md shadow-sm"
               style={{ 
-                color: theme.primary, 
+                color: theme.neutralText, 
                 backgroundColor: theme.cardBg, 
                 borderColor: theme.cardBorder 
               }}
@@ -77,12 +83,12 @@ export default function WorkshopSection({
             ))}
           </div>
 
-          {/* RIGHT STICKY CARD */}
-          <div className="lg:col-span-4 sticky top-24 text-center z-10 flex flex-col items-center">
+          {/* RIGHT STICKY CARD - same lg:sticky fix as the left card above */}
+          <div className="lg:col-span-4 lg:sticky lg:top-24 text-center z-10 flex flex-col items-center">
             <span 
-              className="text-[11px] uppercase font-black tracking-wider px-3 py-1 rounded-full border mb-2 backdrop-blur-md shadow-sm"
+              className="text-[11px] uppercase font-semibold tracking-wider px-3 py-1 rounded-full border mb-2 backdrop-blur-md shadow-sm"
               style={{ 
-                color: theme.primary, 
+                color: theme.neutralText, 
                 backgroundColor: theme.cardBg, 
                 borderColor: theme.cardBorder 
               }}
