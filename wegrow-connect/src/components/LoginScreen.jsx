@@ -45,7 +45,7 @@ export default function LoginScreen() {
       console.log("====================================");
       console.log("LOGIN API");
       console.log("====================================");
-      console.log("API URL:", `${API_BASE_URL}/auth/login`);
+      console.log("API URL:", `${API_BASE_URL}api/v1/auth/login`);
       console.log("Email:", email.trim());
 
       // =================================================
