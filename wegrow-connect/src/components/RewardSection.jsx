@@ -96,14 +96,10 @@ export default function RewardSection({ rewardTargetRef, rewardStyle }) {
                 color: hoveredId === 'benefit1' ? activeColor : theme.textMain
               }}
             >
-              As you navigate workshops, our platform automatically tracks your progress through an automated{' '}
+              As you navigate workshops, our platform automatically tracks your progress through an automated
+              {' '}
               <span className="inline-flex items-center align-middle font-normal">
-                <img 
-                  src={rewardsData[0].img} 
-                  alt="" 
-                  className="w-5 h-5 object-cover rounded-full inline-block border shadow-sm align-middle mr-1.5" 
-                  style={{ borderColor: theme.primary }}
-                />
+                
                 Skill Credit Engine
               </span>{' '}
               that rewards every single quiz and project milestone you submit.
@@ -119,12 +115,7 @@ export default function RewardSection({ rewardTargetRef, rewardStyle }) {
             >
               Consistency is turned into proof. Every active learner builds a transparent{' '}
               <span className="inline-flex items-center align-middle font-normal">
-                <img 
-                  src={rewardsData[1].img} 
-                  alt="" 
-                  className="w-5 h-5 object-cover rounded-full inline-block border shadow-sm align-middle mr-1.5" 
-                  style={{ borderColor: theme.primary }}
-                />
+                
                 Dynamic Career Score
               </span>{' '}
               which acts as your verified badge of technical competency for partner companies.
@@ -140,12 +131,7 @@ export default function RewardSection({ rewardTargetRef, rewardStyle }) {
             >
               Accumulated credits aren't just numbers. You can directly redeem credits for{' '}
               <span className="inline-flex items-center align-middle font-normal">
-                <img 
-                  src={rewardsData[2].img} 
-                  alt="" 
-                  className="w-5 h-5 object-cover rounded-full inline-block border shadow-sm align-middle mr-1.5" 
-                  style={{ borderColor: theme.primary }}
-                />
+                
                 Exclusive Perks & Pass
               </span>{' '}
               including 1-on-1 industry mentor guidance, pro dev software, and VIP event tickets.
@@ -161,12 +147,7 @@ export default function RewardSection({ rewardTargetRef, rewardStyle }) {
             >
               High performers receive fast-track visibility through{' '}
               <span className="inline-flex items-center align-middle font-normal">
-                <img 
-                  src={rewardsData[3].img} 
-                  alt="" 
-                  className="w-5 h-5 object-cover rounded-full inline-block border shadow-sm align-middle mr-1.5" 
-                  style={{ borderColor: theme.primary }}
-                />
+                
                 Direct Hiring Referrals
               </span>{' '}
               giving your profile priority routing to top corporate recruitment desks.
@@ -182,12 +163,7 @@ export default function RewardSection({ rewardTargetRef, rewardStyle }) {
             >
               Share your achievements effortlessly with a full{' '}
               <span className="inline-flex items-center align-middle font-normal">
-                <img 
-                  src={rewardsData[4].img} 
-                  alt="" 
-                  className="w-5 h-5 object-cover rounded-full inline-block border shadow-sm align-middle mr-1.5" 
-                  style={{ borderColor: theme.primary }}
-                />
+                
                 Verified Credential Hub
               </span>{' '}
               designed to showcase shareable digital credentials on LinkedIn and personal portfolios.

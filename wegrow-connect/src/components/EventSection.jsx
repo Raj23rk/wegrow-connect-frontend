@@ -263,13 +263,9 @@ export default function EventSection({
           Expand Your Knowledge With Expert-Led Events
         </h2>
 
-        <p className="text-sm sm:text-base font-semibold text-gray-600 max-w-3xl mx-auto leading-relaxed">
-          Discover interactive workshops,
-          professional seminars, and
-          hands-on industrial experiences
-          designed to accelerate your
-          career growth.
-        </p>
+        <p className="text-sm sm:text-base font-semibold text-gray-600 max-w-3xl mx-auto leading-relaxed justify-center">
+  Discover interactive workshops, professional seminars, and hands-on industrial experiences designed to accelerate your career growth.
+</p>
       </div>
 
       {/* =====================================================

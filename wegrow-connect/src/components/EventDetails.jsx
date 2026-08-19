@@ -358,7 +358,7 @@ export default function EventDetails() {
 
                   <div className="bg-gray-50 rounded-2xl p-5">
                     <span className="block text-xs font-black uppercase text-gray-400 mb-2">
-                      Venu
+                      Venue
                     </span>
 
                     <span className="text-base font-black text-gray-900">
