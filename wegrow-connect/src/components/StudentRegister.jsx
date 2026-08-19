@@ -517,7 +517,7 @@ export default function StudentRegister() {
     'https://wegrow-connect-backend-1.onrender.com/api/v1';
 
   const REGISTER_API =
-    `${API_BASE_URL}/auth/register/student`;
+    `${API_BASE_URL}api/vi/auth/register/student`;
 
   // =====================================================
   // SLIDER DATA
