@@ -53,7 +53,7 @@ export default function LoginScreen() {
       // =================================================
 
       const response = await fetch(
-        `${API_BASE_URL}/auth/login`,
+        `${API_BASE_URL}api/v1/auth/login`,
         {
           method: "POST",
 
