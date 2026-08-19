@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Sidebar from "../../components/Sidebar";
+import { getCertificates, createCertificate } from "../../services/api";
 import {
   Award,
   Plus,
@@ -16,37 +17,7 @@ import {
 } from "lucide-react";
 
 export default function CertificatesPage() {
-  // Sample Issued Certificates List
-  const [certificates, setCertificates] = useState([
-    {
-      id: "CERT-2026-801",
-      studentName: "Silambarasan G",
-      studentEmail: "silambarasan@wegrow.com",
-      courseName: "Full Stack Web Development with Next.js 14",
-      issueDate: "Aug 10, 2026",
-      instructor: "Karthik Raja",
-      status: "Verified",
-    },
-    {
-      id: "CERT-2026-802",
-      studentName: "Priya Sharma",
-      studentEmail: "priya@gmail.com",
-      courseName: "AI & Machine Learning Masterclass",
-      issueDate: "Aug 05, 2026",
-      instructor: "Dr. Anand Kumar",
-      status: "Verified",
-    },
-    {
-      id: "CERT-2026-803",
-      studentName: "Arun Kumar",
-      studentEmail: "arun@ecopack.in",
-      courseName: "Startup Pitch & Business Growth Bootcamp",
-      issueDate: "Jul 28, 2026",
-      instructor: "WeGrow Core Team",
-      status: "Verified",
-    },
-  ]);
-
+  const [certificates, setCertificates] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [showGenerateModal, setShowGenerateModal] = useState(false);
   const [showPreviewModal, setShowPreviewModal] = useState<any>(null);
@@ -60,14 +31,47 @@ export default function CertificatesPage() {
     issueDate: "Aug 11, 2026",
   });
 
+  // Load Certificates
+  useEffect(() => {
+    async function loadCertificates() {
+      const data = await getCertificates();
+      if (data && data.length > 0) {
+        setCertificates(data);
+      } else {
+        // Fallback or leave empty
+        setCertificates([
+          {
+            id: "CERT-2026-801",
+            studentName: "Silambarasan G",
+            studentEmail: "silambarasan@wegrow.com",
+            courseName: "Full Stack Web Development with Next.js 14",
+            issueDate: "Aug 10, 2026",
+            instructor: "Karthik Raja",
+            status: "Verified",
+          }
+        ]);
+      }
+    }
+    loadCertificates();
+  }, []);
+
   // Handle Certificate Generation
-  const handleGenerate = (e: React.FormEvent) => {
+  const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newCert = {
+    const payload = {
       id: `CERT-2026-${800 + certificates.length + 1}`,
       ...formData,
       status: "Verified",
     };
+    
+    // Call API
+    try {
+      await createCertificate(payload);
+    } catch (error) {
+      console.error("Failed to create certificate", error);
+    }
+
+    const newCert = payload;
     setCertificates([newCert, ...certificates]);
     setShowGenerateModal(false);
     setShowPreviewModal(newCert); // Show Preview directly after generation

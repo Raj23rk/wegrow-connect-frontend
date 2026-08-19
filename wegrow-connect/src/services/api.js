@@ -243,3 +243,126 @@ export async function deleteEvent(id) {
 
   return response.json();
 }
+// =====================================================
+// CERTIFICATES API
+// =====================================================
+
+export async function getCertificates() {
+  try {
+    const response = await fetch(`${API_BASE}/certificates`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+    if (response.status === 401) { clearAuthStorage(); return []; }
+    const data = await response.json();
+    return data?.data || [];
+  } catch (error) {
+    console.error('getCertificates error:', error);
+    return [];
+  }
+}
+
+export async function createCertificate(payload) {
+  const response = await fetch(`${API_BASE}/certificates`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(payload),
+  });
+  if (response.status === 401) clearAuthStorage();
+  return response.json();
+}
+
+// =====================================================
+// SUBSCRIPTIONS API
+// =====================================================
+
+export async function getSubscriptions() {
+  try {
+    const response = await fetch(`${API_BASE}/subscriptions/plans`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+    if (response.status === 401) { clearAuthStorage(); return []; }
+    const data = await response.json();
+    return data?.data || [];
+  } catch (error) {
+    console.error('getSubscriptions error:', error);
+    return [];
+  }
+}
+
+export async function createSubscriptionPlan(payload) {
+  const response = await fetch(`${API_BASE}/subscriptions/plans`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(payload),
+  });
+  if (response.status === 401) clearAuthStorage();
+  return response.json();
+}
+
+export async function updateSubscriptionStatus(id, status) {
+  const response = await fetch(`${API_BASE}/subscriptions/${id}`, {
+    method: 'PUT',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ status }),
+  });
+  if (response.status === 401) clearAuthStorage();
+  return response.json();
+}
+
+// =====================================================
+// INVOICES API
+// =====================================================
+
+export async function getInvoices() {
+  try {
+    const response = await fetch(`${API_BASE}/invoices`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+    if (response.status === 401) { clearAuthStorage(); return []; }
+    const data = await response.json();
+    return data?.data || [];
+  } catch (error) {
+    console.error('getInvoices error:', error);
+    return [];
+  }
+}
+
+export async function createInvoice(payload) {
+  const response = await fetch(`${API_BASE}/invoices/generate`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(payload),
+  });
+  if (response.status === 401) clearAuthStorage();
+  return response.json();
+}
+
+
+export async function admingetSubscriptions() {
+  try {
+    const response = await fetch(
+      `${API_BASE}/subscriptions/all?page=1&limit=10`,
+      {
+        method: 'GET',
+        headers: getAuthHeaders(),
+      }
+    );
+
+    if (response.status === 401) {
+      clearAuthStorage();
+      return [];
+    }
+
+    const data = await response.json();
+
+    console.log("Subscriptions API Response:", data);
+
+    return data?.data || [];
+  } catch (error) {
+    console.error("getSubscriptions error:", error);
+    return [];
+  }
+}

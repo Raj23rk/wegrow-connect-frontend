@@ -1,5 +1,6 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import StudentSidebar from "../../components/StudentSidebar";
+import { getCertificates } from "../../services/api";
 
 import {
   Award,
@@ -42,6 +43,7 @@ export default function StudentCertificates() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCert, setSelectedCert] =
     useState<Certificate | null>(null);
+  const [certificates, setCertificates] = useState<Certificate[]>([]);
 
   // =====================================================
   // STUDENT
@@ -50,88 +52,18 @@ export default function StudentCertificates() {
   const studentName = "Silambarasan G";
 
   // =====================================================
-  // CERTIFICATES
+  // FETCH CERTIFICATES
   // =====================================================
 
-  const certificates: Certificate[] = [
-    {
-      id: "CERT-2026-8901",
-      title:
-        "Full Stack Web Development (Next.js 15 & React)",
-      issuer: "WeGrow Skill Campus & Tech Academy",
-      issueDate: "Aug 05, 2026",
-      grade: "Distinction (A+)",
-      credentialUrl:
-        "https://wegrow.com/verify/CERT-2026-8901",
-      skills: [
-        "Next.js 15",
-        "React",
-        "Tailwind CSS",
-        "TypeScript",
-        "REST APIs",
-      ],
-      isUnlocked: true,
-      downloads: 12,
-    },
+  useEffect(() => {
+    async function loadCertificates() {
+      const data = await getCertificates();
+      // If the API returns empty, you can fallback to empty array or keep mock data if you prefer
+      setCertificates(data);
+    }
+    loadCertificates();
+  }, []);
 
-    {
-      id: "CERT-2026-7742",
-      title:
-        "Data Analytics & Python Essentials Course",
-      issuer: "ICT Academy & Infosys Foundation",
-      issueDate: "Jul 20, 2026",
-      grade: "First Class",
-      credentialUrl:
-        "https://wegrow.com/verify/CERT-2026-7742",
-      skills: [
-        "Python",
-        "Pandas",
-        "SQL",
-        "Data Visualization",
-        "Excel Analytics",
-      ],
-      isUnlocked: true,
-      downloads: 8,
-    },
-
-    {
-      id: "CERT-2026-5510",
-      title:
-        "Facial Recognition Attendance System - Deep Learning",
-      issuer:
-        "International Journal & WeGrow Research Lab",
-      issueDate: "Jun 12, 2026",
-      grade: "Research Excellence",
-      credentialUrl:
-        "https://wegrow.com/verify/CERT-2026-5510",
-      skills: [
-        "OpenCV",
-        "Deep Learning",
-        "TensorFlow",
-        "Computer Vision",
-      ],
-      isUnlocked: true,
-      downloads: 15,
-    },
-
-    {
-      id: "CERT-2026-3109",
-      title:
-        "MongoDB Cloud Database Architecture Badge",
-      issuer: "MongoDB Atlas Credly Network",
-      issueDate: "Locked",
-      grade: "In Progress (80%)",
-      credentialUrl: "#",
-      skills: [
-        "MongoDB",
-        "Cloud Security",
-        "Schema Design",
-        "Prisma",
-      ],
-      isUnlocked: false,
-      downloads: 0,
-    },
-  ];
 
   // =====================================================
   // FILTER

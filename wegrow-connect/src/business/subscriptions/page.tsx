@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import BusinessSidebar from "../../components/BusinessSidebar";
+import { getSubscriptions, getInvoices } from "../../services/api";
 import {
   CreditCard,
   CheckCircle2,
@@ -16,9 +17,7 @@ import {
 
 export default function BusinessSubscriptions() {
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("yearly");
-
-  // Subscription Plans
-  const plans = [
+  const [plans, setPlans] = useState<any[]>([
     {
       id: "starter",
       name: "Starter Founder",
@@ -71,14 +70,31 @@ export default function BusinessSubscriptions() {
       buttonText: "Contact Enterprise Sales",
       current: false,
     },
-  ];
-
-  // Invoices & Payment History
-  const invoices = [
+  ]);
+  const [invoices, setInvoices] = useState<any[]>([
     { id: "INV-2026-008", date: "Aug 01, 2026", amount: "₹1,199", plan: "Pro Growth Pass (Annual)", status: "Paid" },
     { id: "INV-2026-007", date: "Jul 01, 2026", amount: "₹1,199", plan: "Pro Growth Pass (Annual)", status: "Paid" },
     { id: "INV-2026-006", date: "Jun 01, 2026", amount: "₹1,199", plan: "Pro Growth Pass (Annual)", status: "Paid" },
-  ];
+  ]);
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const subscriptionsData = await getSubscriptions();
+        if (subscriptionsData && subscriptionsData.length > 0) {
+          setPlans(subscriptionsData);
+        }
+        
+        const invoicesData = await getInvoices();
+        if (invoicesData && invoicesData.length > 0) {
+          setInvoices(invoicesData);
+        }
+      } catch (error) {
+        console.error("Failed to load subscription data", error);
+      }
+    }
+    loadData();
+  }, []);
 
   return (
     <div className="flex min-h-screen bg-slate-50/60 font-sans text-slate-800 antialiased">
