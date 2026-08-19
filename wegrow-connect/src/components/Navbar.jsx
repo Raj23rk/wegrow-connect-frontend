@@ -107,11 +107,11 @@ export default function Navbar({
             className="flex items-center hover:opacity-90 transition text-left focus:outline-none cursor-pointer"
           >
             {/* 1. EMBLEM LOGO */}
-            <img 
+            {/* <img 
               src="/logo.jpg" 
               alt="Logo" 
               className="w-12 h-12 object-contain relative z-10" 
-            />
+            /> */}
             
             {/* 2. WEGROW TEXT LOGO */}
             <div className="flex items-center justify-start h-10 -ml-6 overflow-hidden">

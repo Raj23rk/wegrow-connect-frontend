@@ -25,7 +25,7 @@ export default function SettingsPage() {
 
   // Form States
   const [generalConfig, setGeneralConfig] = useState({
-    siteName: "WeGrow Skill Campus",
+    siteName: "WeGrow B School",
     supportEmail: "support@wegrow.com",
     contactPhone: "+91 98765 43210",
     timezone: "IST (UTC +5:30)",

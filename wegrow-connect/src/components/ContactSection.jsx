@@ -345,7 +345,7 @@ export default function ContactSection({
     import.meta.env.VITE_API_BASE_URL ||
     'https://wegrow-connect-backend-1.onrender.com/api/v1';
 
-  const CONTACT_API = `${API_BASE_URL}/contact`;
+  const CONTACT_API = `${API_BASE_URL}api/v1/contact`;
 
   // =====================================================
   // FORM STATE

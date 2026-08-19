@@ -20,8 +20,8 @@ import {
 // API CONFIG
 // ============================================================
 
-const BASE_URL = "http://13.239.234.181:4000";
-const API_PREFIX = "/api/v1/users/admin";
+const BASE_URL = "https://wegrow-connect-backend-1.onrender.com/";
+const API_PREFIX = "api/v1/users/admin";
 
 const API = {
   LIST: `${BASE_URL}${API_PREFIX}/all`,

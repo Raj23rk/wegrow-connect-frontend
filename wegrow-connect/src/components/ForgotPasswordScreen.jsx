@@ -201,7 +201,7 @@ export default function ForgotPasswordScreen() {
 
   // Forgot Password API
   const FORGOT_PASSWORD_API =
-    `${API_BASE_URL}/users/forgot-password`;
+    `${API_BASE_URL}api/v1/users/forgot-password`;
 
   // =====================================================
   // CUSTOM MODAL STATE

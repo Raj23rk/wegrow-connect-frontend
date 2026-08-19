@@ -348,7 +348,7 @@ export default function CertificatesPage() {
                 <div className="w-8 h-8 rounded-xl bg-blue-600 text-white font-black flex items-center justify-center text-xs">
                   WG
                 </div>
-                <span className="font-black text-slate-900 text-lg tracking-tight">WeGrow Skill Campus</span>
+                <span className="font-black text-slate-900 text-lg tracking-tight">WeGrow B School</span>
               </div>
 
               <div className="space-y-1">
