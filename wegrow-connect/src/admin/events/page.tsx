@@ -1044,7 +1044,7 @@ export default function EventsBootcampsPage() {
 
       try {
         const token =
-          localStorage.getItem(
+          sessionStorage.getItem(
             "accessToken"
           );
 
