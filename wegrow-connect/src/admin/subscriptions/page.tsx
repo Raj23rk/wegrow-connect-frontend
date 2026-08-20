@@ -39,6 +39,7 @@ export default function SubscriptionsPage() {
 
   const [newPlanData, setNewPlanData] = useState({
     name: "",
+    type: "STUDENT",
     description: "",
     price: "",
     currency: "INR",
@@ -188,6 +189,8 @@ export default function SubscriptionsPage() {
     const payload = {
       name: newPlanData.name.trim(),
 
+      type: newPlanData.type || "STUDENT",
+
       description: newPlanData.description.trim(),
 
       price: Number(newPlanData.price),
@@ -242,14 +245,15 @@ export default function SubscriptionsPage() {
       // RESET FORM
       // ---------------------------------------------
 
-      setNewPlanData({
-        name: "",
-        description: "",
-        price: "",
-        currency: "INR",
-        features: "",
-        durationDays: "30",
-      });
+    setNewPlanData({
+      name: "",
+      type: "STUDENT",
+      description: "",
+      price: "",
+      currency: "INR",
+      features: "",
+      durationDays: "30",
+    });
 
       // ---------------------------------------------
       // REFRESH SUBSCRIPTIONS
@@ -908,6 +912,39 @@ export default function SubscriptionsPage() {
                   }
                   className="w-full p-2.5 border rounded-xl bg-slate-50 outline-none focus:border-blue-600"
                 />
+
+              </div>
+
+              {/* PLAN TYPE */}
+
+              <div>
+
+                <label className="font-bold text-slate-700 block mb-1">
+                  Plan Type
+                </label>
+
+                <div className="flex gap-3">
+
+                  {["STUDENT", "BUSINESS"].map((t) => (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() =>
+                        setNewPlanData({ ...newPlanData, type: t })
+                      }
+                      className={`flex-1 py-2 rounded-xl text-xs font-bold border-2 transition-all cursor-pointer ${
+                        newPlanData.type === t
+                          ? t === "STUDENT"
+                            ? "bg-blue-600 border-blue-600 text-white"
+                            : "bg-purple-600 border-purple-600 text-white"
+                          : "bg-white border-slate-200 text-slate-600 hover:border-slate-300"
+                      }`}
+                    >
+                      {t === "STUDENT" ? "🎓 Student" : "🏢 Business"}
+                    </button>
+                  ))}
+
+                </div>
 
               </div>
 

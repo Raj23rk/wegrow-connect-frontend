@@ -65,13 +65,16 @@ export default function CertificatesPage() {
     };
     
     // Call API
+    let newCert = payload;
     try {
-      await createCertificate(payload);
+      const created = await createCertificate(payload);
+      if (created && (created.id || created._id)) {
+        newCert = created;
+      }
     } catch (error) {
       console.error("Failed to create certificate", error);
     }
 
-    const newCert = payload;
     setCertificates([newCert, ...certificates]);
     setShowGenerateModal(false);
     setShowPreviewModal(newCert); // Show Preview directly after generation

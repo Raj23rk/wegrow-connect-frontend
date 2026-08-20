@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import StudentSidebar from "../../components/StudentSidebar";
 import DashboardProfileMenu, { useDashboardUser } from "../../components/DashboardProfileMenu";
+import { getStudentSubscriptions } from "../../services/api";
+import { openRazorpaySubscriptionCheckout } from "../../services/razorpay";
 import {
   BookOpen,
   CalendarDays,
@@ -14,6 +16,8 @@ import {
   CheckCircle2,
   XCircle,
   Clock3,
+  X,
+  Zap,
 } from "lucide-react";
 
 // ─── API ────────────────────────────────────────────────
@@ -188,7 +192,23 @@ export default function StudentDashboard() {
   const [events, setEvents] = useState<EventItem[]>([]);
   const [eventsLoading, setEventsLoading] = useState(true);
 
+  // ─── Subscription / Upgrade Modal ───────────────────────
+  const [showSubscribeModal, setShowSubscribeModal] = useState(false);
+  const [studentPlans, setStudentPlans] = useState<any[]>([]);
+  const [plansLoading, setPlansLoading] = useState(false);
+  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
+
   const { ref: scrollRef, pause, resume } = useAutoScroll(0.5);
+
+  // Get current user from session
+  const currentUser = (() => {
+    try {
+      const raw = sessionStorage.getItem("user");
+      return raw ? JSON.parse(raw) : {};
+    } catch {
+      return {};
+    }
+  })();
 
   // Fetch booking count
   useEffect(() => {
@@ -248,6 +268,75 @@ export default function StudentDashboard() {
       "";
     setSubscriptionStatus(typeof status === "string" ? status.toLowerCase() : "");
   }, [user]);
+
+  // Load student plans when modal opens
+  useEffect(() => {
+    if (!showSubscribeModal) return;
+    setPlansLoading(true);
+    getStudentSubscriptions()
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setStudentPlans(data);
+        } else {
+          // Fallback plans
+          setStudentPlans([
+            {
+              id: "student-free",
+              name: "Student Free",
+              type: "STUDENT",
+              desc: "Basic access to workshops and community.",
+              monthlyPrice: "₹0",
+              yearlyPrice: "₹0",
+              price: 0,
+              features: ["Community Access", "Free Workshops"],
+              popular: false,
+              buttonText: "Current Free Plan",
+            },
+            {
+              id: "student-pro",
+              name: "Student Pro Pass",
+              type: "STUDENT",
+              desc: "Unlimited masterclasses, certificates, and 1-on-1 mentor guidance.",
+              monthlyPrice: "₹499",
+              yearlyPrice: "₹399",
+              price: 499,
+              period: "/ month",
+              features: [
+                "All Free Features",
+                "Unlimited Masterclasses",
+                "Certificate Downloads",
+                "1-on-1 Mentor Guidance",
+                "Priority Support",
+              ],
+              popular: true,
+              buttonText: "Upgrade to Pro",
+            },
+          ]);
+        }
+      })
+      .finally(() => setPlansLoading(false));
+  }, [showSubscribeModal]);
+
+  // Razorpay checkout handler for student
+  const handleStudentSubscribe = (plan: any) => {
+    if (plan.price === 0) return;
+    setCheckoutLoading(plan.id);
+    openRazorpaySubscriptionCheckout({
+      plan: { ...plan, type: "STUDENT" },
+      user: currentUser,
+      onSuccess: (result: any) => {
+        console.log("Student subscription payment success:", result);
+        setSubscriptionStatus("active");
+        setShowSubscribeModal(false);
+        alert(`🎉 You are now subscribed to "${plan.name}"! Enjoy your WeGrow Pro access.`);
+        setCheckoutLoading(null);
+      },
+      onError: (err: any) => {
+        console.error("Student subscription payment failed:", err);
+        setCheckoutLoading(null);
+      },
+    });
+  };
 
   // Duplicate events for seamless infinite scroll (guard against non-array)
   const safeEvents: EventItem[] = Array.isArray(events) ? events : [];
@@ -348,8 +437,20 @@ export default function StudentDashboard() {
                     : "Free"}
                 </p>
                 <SubscribeBadge status={subscriptionStatus} />
+                {(!subscriptionStatus || subscriptionStatus === "" || subscriptionStatus === "inactive" || subscriptionStatus === "expired") && (
+                  <button
+                    onClick={() => setShowSubscribeModal(true)}
+                    className="mt-2 inline-flex items-center gap-1 bg-blue-600 hover:bg-blue-700 active:scale-95 transition-all text-white px-2.5 py-1 rounded-lg text-[10px] font-black cursor-pointer shadow-sm"
+                  >
+                    <Zap className="w-3 h-3" /> Upgrade Now
+                  </button>
+                )}
               </div>
-              <div className="w-11 h-11 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center">
+              <div
+                onClick={() => setShowSubscribeModal(true)}
+                className="w-11 h-11 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center cursor-pointer hover:bg-purple-100 transition-all"
+                title="Manage Subscription"
+              >
                 <ShieldCheck className="w-5 h-5" />
               </div>
             </div>
@@ -490,6 +591,100 @@ export default function StudentDashboard() {
           </div>
         </main>
       </div>
+
+      {/* ─── Student Subscribe / Upgrade Modal ──────────────── */}
+      {showSubscribeModal && (
+        <div className="fixed inset-0 z-[100] bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl border border-slate-100 overflow-hidden">
+
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100">
+              <div>
+                <h2 className="text-base font-black text-slate-900">Choose Your Student Plan</h2>
+                <p className="text-xs text-slate-400 mt-0.5">Unlock WeGrow Pro features with Razorpay secure checkout</p>
+              </div>
+              <button
+                onClick={() => setShowSubscribeModal(false)}
+                className="text-slate-400 hover:text-slate-600 bg-slate-100 hover:bg-slate-200 p-2 rounded-full transition-all cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Plan Cards */}
+            <div className="p-6">
+              {plansLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
+                  <span className="ml-2 text-xs text-slate-400">Loading plans...</span>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {studentPlans.map((plan) => (
+                    <div
+                      key={plan.id}
+                      className={`relative rounded-2xl border p-5 flex flex-col justify-between space-y-4 transition-all ${
+                        plan.popular
+                          ? "border-blue-500 ring-2 ring-blue-500/10 shadow-md"
+                          : "border-slate-200"
+                      }`}
+                    >
+                      {plan.popular && (
+                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-[9px] font-black uppercase tracking-wider px-3 py-0.5 rounded-full shadow-sm flex items-center gap-1">
+                          <Zap className="w-2.5 h-2.5" /> Most Popular
+                        </div>
+                      )}
+
+                      <div className="space-y-3">
+                        <div>
+                          <h3 className="font-extrabold text-slate-900 text-sm">{plan.name}</h3>
+                          <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">{plan.desc}</p>
+                        </div>
+
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-2xl font-black text-slate-900">{plan.monthlyPrice}</span>
+                          {plan.period && <span className="text-xs text-slate-400 font-bold">{plan.period}</span>}
+                        </div>
+
+                        <ul className="space-y-1.5 text-xs">
+                          {(plan.features || []).map((feat: string, i: number) => (
+                            <li key={i} className="flex items-center gap-2 text-slate-600 font-medium">
+                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                              {feat}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      <button
+                        onClick={() => handleStudentSubscribe(plan)}
+                        disabled={plan.price === 0 || checkoutLoading === plan.id}
+                        className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed ${
+                          plan.price === 0
+                            ? "bg-slate-100 text-slate-500 border border-slate-200"
+                            : plan.popular
+                            ? "bg-blue-600 hover:bg-blue-700 text-white shadow-md active:scale-95"
+                            : "bg-slate-900 hover:bg-slate-800 text-white active:scale-95"
+                        }`}
+                      >
+                        {checkoutLoading === plan.id
+                          ? "Opening Checkout..."
+                          : plan.price === 0
+                          ? "Free Plan"
+                          : plan.buttonText || "Subscribe Now"}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <p className="text-center text-[10px] text-slate-400 mt-4">
+                🔒 Secure payment powered by Razorpay. Cancel anytime.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

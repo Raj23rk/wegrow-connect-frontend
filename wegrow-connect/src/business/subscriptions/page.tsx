@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import BusinessSidebar from "../../components/BusinessSidebar";
-import { getSubscriptions, getInvoices } from "../../services/api";
+import { getBusinessSubscriptions, getInvoices } from "../../services/api";
+import { openRazorpaySubscriptionCheckout } from "../../services/razorpay";
 import {
   CreditCard,
   CheckCircle2,
@@ -17,6 +18,8 @@ import {
 
 export default function BusinessSubscriptions() {
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("yearly");
+  const [activePlanName, setActivePlanName] = useState<string>("Pro Growth Pass Plan");
+  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
   const [plans, setPlans] = useState<any[]>([
     {
       id: "starter",
@@ -24,6 +27,7 @@ export default function BusinessSubscriptions() {
       desc: "For early-stage entrepreneurs exploring market validation.",
       monthlyPrice: "₹0",
       yearlyPrice: "₹0",
+      price: 0,
       popular: false,
       features: [
         "Business Model Canvas Tool",
@@ -40,6 +44,7 @@ export default function BusinessSubscriptions() {
       desc: "For growing startups seeking investor pitch deck access & mentors.",
       monthlyPrice: "₹1,499",
       yearlyPrice: "₹1,199",
+      price: 1199,
       period: "/ month",
       popular: true,
       features: [
@@ -58,6 +63,7 @@ export default function BusinessSubscriptions() {
       desc: "Comprehensive suite for funded startups & enterprise scale.",
       monthlyPrice: "₹4,999",
       yearlyPrice: "₹3,999",
+      price: 3999,
       period: "/ month",
       popular: false,
       features: [
@@ -77,16 +83,56 @@ export default function BusinessSubscriptions() {
     { id: "INV-2026-006", date: "Jun 01, 2026", amount: "₹1,199", plan: "Pro Growth Pass (Annual)", status: "Paid" },
   ]);
 
+  // =====================================================
+  // GET LOGGED-IN USER FROM SESSION
+  // =====================================================
+  const currentUser = (() => {
+    try {
+      const raw = sessionStorage.getItem("user");
+      return raw ? JSON.parse(raw) : {};
+    } catch {
+      return {};
+    }
+  })();
+
+  // =====================================================
+  // RAZORPAY CHECKOUT HANDLER
+  // =====================================================
+  const handleSubscribePlan = (plan: any) => {
+    if (plan.current || plan.price === 0) return;
+    setCheckoutLoading(plan.id);
+    openRazorpaySubscriptionCheckout({
+      plan: { ...plan, type: "BUSINESS" },
+      user: currentUser,
+      onSuccess: (result: any) => {
+        console.log("Business subscription payment success:", result);
+        setActivePlanName(plan.name);
+        setPlans((prev) =>
+          prev.map((p) => ({
+            ...p,
+            current: p.id === plan.id,
+          }))
+        );
+        alert(`🎉 Payment successful! You are now subscribed to "${plan.name}".`);
+        setCheckoutLoading(null);
+      },
+      onError: (err: any) => {
+        console.error("Payment failed:", err);
+        setCheckoutLoading(null);
+      },
+    });
+  };
+
   useEffect(() => {
     async function loadData() {
       try {
-        const subscriptionsData = await getSubscriptions();
-        if (subscriptionsData && subscriptionsData.length > 0) {
+        const subscriptionsData = await getBusinessSubscriptions();
+        if (Array.isArray(subscriptionsData) && subscriptionsData.length > 0) {
           setPlans(subscriptionsData);
         }
-        
+
         const invoicesData = await getInvoices();
-        if (invoicesData && invoicesData.length > 0) {
+        if (Array.isArray(invoicesData) && invoicesData.length > 0) {
           setInvoices(invoicesData);
         }
       } catch (error) {
@@ -95,6 +141,14 @@ export default function BusinessSubscriptions() {
     }
     loadData();
   }, []);
+
+  const handleDownloadPdf = (inv: any) => {
+    if (inv?.filePath) {
+      window.open(inv.filePath, "_blank", "noopener,noreferrer");
+    } else {
+      alert(`Downloading receipt for Invoice ID: ${inv.id || inv._id || inv.invoiceNumber}`);
+    }
+  };
 
   return (
     <div className="flex min-h-screen bg-slate-50/60 font-sans text-slate-800 antialiased">
@@ -198,7 +252,7 @@ export default function BusinessSubscriptions() {
 
                 <div className="border-t border-slate-100 pt-4 space-y-2.5 text-xs">
                   <p className="font-bold text-slate-700 uppercase text-[10px] tracking-wider">What’s included:</p>
-                  {plan.features.map((feat, idx) => (
+                  {plan.features.map((feat: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined, idx: React.Key | null | undefined) => (
                     <div key={idx} className="flex items-center gap-2.5 font-medium text-slate-600">
                       <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
                       <span>{feat}</span>
@@ -208,7 +262,9 @@ export default function BusinessSubscriptions() {
               </div>
 
               <button
-                className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                onClick={() => handleSubscribePlan(plan)}
+                disabled={plan.current || plan.price === 0 || checkoutLoading === plan.id}
+                className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed ${
                   plan.current
                     ? "bg-slate-100 text-slate-500 cursor-not-allowed border border-slate-200"
                     : plan.popular
@@ -216,7 +272,13 @@ export default function BusinessSubscriptions() {
                     : "bg-slate-900 hover:bg-slate-800 text-white active:scale-95"
                 }`}
               >
-                {plan.current ? "Current Active Plan" : plan.buttonText}
+                {checkoutLoading === plan.id
+                  ? "Opening Checkout..."
+                  : plan.current
+                  ? "✅ Current Active Plan"
+                  : plan.price === 0
+                  ? "Free Plan"
+                  : plan.buttonText}
               </button>
             </div>
           ))}
@@ -252,7 +314,10 @@ export default function BusinessSubscriptions() {
                       <td className="p-3 text-slate-700">{inv.plan}</td>
                       <td className="p-3 font-extrabold text-slate-900">{inv.amount}</td>
                       <td className="p-3 text-right">
-                        <button className="p-1.5 hover:bg-slate-100 text-blue-600 rounded-lg transition-all cursor-pointer flex items-center gap-1 ml-auto font-bold text-[11px]">
+                        <button 
+                          onClick={() => handleDownloadPdf(inv)}
+                          className="p-1.5 hover:bg-slate-100 text-blue-600 rounded-lg transition-all cursor-pointer flex items-center gap-1 ml-auto font-bold text-[11px]"
+                        >
                           <Download className="w-3.5 h-3.5" />
                           <span>PDF</span>
                         </button>

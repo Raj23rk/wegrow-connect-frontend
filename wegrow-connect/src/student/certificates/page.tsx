@@ -58,8 +58,24 @@ export default function StudentCertificates() {
   useEffect(() => {
     async function loadCertificates() {
       const data = await getCertificates();
-      // If the API returns empty, you can fallback to empty array or keep mock data if you prefer
-      setCertificates(data);
+      if (Array.isArray(data) && data.length > 0) {
+        setCertificates(data);
+      } else {
+        // Fallback default certificate if backend returns empty
+        setCertificates([
+          {
+            id: "CERT-2026-801",
+            title: "Full Stack Web Development with Next.js 14",
+            issuer: "WeGrow Skill Campus",
+            issueDate: "Aug 10, 2026",
+            grade: "A+",
+            credentialUrl: "#",
+            skills: ["Next.js 14", "React", "TypeScript", "Node.js"],
+            isUnlocked: true,
+            downloads: 12,
+          },
+        ]);
+      }
     }
     loadCertificates();
   }, []);
@@ -79,22 +95,19 @@ export default function StudentCertificates() {
     }
 
     return certificates.filter((certificate) => {
+      const title = String(certificate.title || "").toLowerCase();
+      const issuer = String(certificate.issuer || "").toLowerCase();
+      const id = String(certificate.id || "").toLowerCase();
+      const skills = Array.isArray(certificate.skills) ? certificate.skills : [];
+
       return (
-        certificate.title
-          .toLowerCase()
-          .includes(search) ||
-        certificate.issuer
-          .toLowerCase()
-          .includes(search) ||
-        certificate.id
-          .toLowerCase()
-          .includes(search) ||
-        certificate.skills.some((skill) =>
-          skill.toLowerCase().includes(search)
-        )
+        title.includes(search) ||
+        issuer.includes(search) ||
+        id.includes(search) ||
+        skills.some((skill) => String(skill).toLowerCase().includes(search))
       );
     });
-  }, [searchQuery]);
+  }, [certificates, searchQuery]);
 
   // =====================================================
   // DOWNLOAD / PRINT CERTIFICATE
