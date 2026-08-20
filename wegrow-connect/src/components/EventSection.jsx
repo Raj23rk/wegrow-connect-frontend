@@ -27,7 +27,7 @@ export default function EventSection({
         setError("");
 
         const token =
-          localStorage.getItem("accessToken");
+          sessionStorage.getItem("accessToken");
 
         console.log(
           "================================="
