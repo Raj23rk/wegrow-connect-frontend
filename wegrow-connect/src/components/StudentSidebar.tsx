@@ -9,7 +9,8 @@ import {
   BarChart3,
   Calendar,
   Settings,
-  LogOut
+  LogOut,
+  CreditCard
 } from "lucide-react";
 
 export default function StudentSidebar() {
@@ -24,6 +25,7 @@ export default function StudentSidebar() {
     { name: "My Booking", href: "/student/workshops", icon: Calendar },
     { name: "Certificates", href: "/student/certificates", icon: Award },
     { name: "Rewards & Badges", href: "/student/rewards", icon: Medal },
+    { name: "Subscriptions", href: "/student/subscriptions", icon: CreditCard },
     { name: "Analytics", href: "/student/analytics", icon: BarChart3 },
     { name: "Settings", href: "/student/settings", icon: Settings },
   ];

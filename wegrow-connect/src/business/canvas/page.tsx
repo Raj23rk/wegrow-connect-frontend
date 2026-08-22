@@ -1,409 +1,1068 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import BusinessSidebar from "../../components/BusinessSidebar";
+import DashboardProfileMenu from "../../components/DashboardProfileMenu";
 import {
-  Palette,
-  Plus,
-  Trash2,
-  Save,
-  Download,
+  BookOpen,
+  PlayCircle,
   CheckCircle2,
-  HelpCircle,
+  Search,
+  ArrowRight,
   Sparkles,
+  BarChart2,
+  MapPin,
+  CalendarDays,
+  IndianRupee,
+  RefreshCw,
+  ImageOff,
+  ChevronLeft,
+  ChevronRight,
+  X,
+  Clock,
   Users,
-  Target,
-  Zap,
-  TrendingUp,
-  DollarSign,
-  Layers,
-  HeartHandshake
+  Building2,
 } from "lucide-react";
 
+// =====================================================
+// TYPES
+// =====================================================
+
+interface Event {
+  _id: string;
+  title: string;
+  description: string;
+  type: string;
+  image?: string;
+  location?: string;
+  date?: string;
+  price?: number;
+  isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+interface Pagination {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+}
+
+interface EventsResponse {
+  success: boolean;
+  message: string;
+  data: {
+    events: Event[];
+    pagination: Pagination;
+  };
+  timestamp: string;
+}
+
+interface EventDetailResponse {
+  success: boolean;
+  message: string;
+  data: Event;
+  timestamp: string;
+}
+
+interface BookingResponse {
+  success: boolean;
+  message: string;
+  data?: any;
+  timestamp?: string;
+}
+
+// =====================================================
+// CONSTANTS & API ENDPOINTS
+// =====================================================
+
+const API_BASE_URL = "https://wegrow-connect-backend-1.onrender.com/api/v1";
+
+const EVENTS_API = `${API_BASE_URL}/events/all-event`;
+const EVENT_DETAIL_API = `${API_BASE_URL}/events`;
+const BOOKING_API = `${API_BASE_URL}/bookings/create-booking`;
+
+const DEFAULT_PAGINATION: Pagination = {
+  total: 0,
+  page: 1,
+  limit: 10,
+  totalPages: 1,
+  hasNextPage: false,
+  hasPreviousPage: false,
+};
+
+// =====================================================
+// COMPONENT
+// =====================================================
+
 export default function BusinessCanvas() {
-  const [savedSuccess, setSavedSuccess] = useState(false);
+  // =====================================================
+  // STATES
+  // =====================================================
 
-  // Business Model Canvas Initial State
-  const [canvasData, setCanvasData] = useState({
-    keyPartners: ["Local Farmers & Collectives", "Tech Advisory Mentors", "Agri Tool Manufacturers"],
-    keyActivities: ["App Development", "Farmer Onboarding", "Market Trend Analysis"],
-    keyResources: ["Proprietary Agri AI Models", "Mentorship Network", "Cloud Infrastructure"],
-    valuePropositions: ["Real-time Crop Advisory", "Direct Market Access", "Affordable Tech Pass"],
-    customerRelationships: ["1-on-1 Mentorship", "Community Webinars", "Automated WhatsApp Alerts"],
-    channels: ["Mobile App Portal", "Agri Institutes", "Social Media Campaigns"],
-    customerSegments: ["AgriTech Startups", "Progressive Farmers", "Agri-Students"],
-    costStructure: ["Server & Cloud Hosting", "Mentor Commission Fees", "Marketing & Growth"],
-    revenueStreams: ["Incubator Annual Pass", "Pro Subscription Plans", "Workshop & Event Fees"],
-  });
+  const [activeTab, setActiveTab] = useState<
+    "enrolled" | "completed" | "explore"
+  >("explore");
 
-  const [inputs, setInputs] = useState<Record<string, string>>({});
+  const [searchQuery, setSearchQuery] = useState("");
 
-  // Add Item to Category
-  const handleAddItem = (category: keyof typeof canvasData) => {
-    const val = inputs[category]?.trim();
-    if (!val) return;
-    setCanvasData({
-      ...canvasData,
-      [category]: [...canvasData[category], val],
-    });
-    setInputs({ ...inputs, [category]: "" });
+  const [events, setEvents] = useState<Event[]>([]);
+
+  const [pagination, setPagination] =
+    useState<Pagination>(DEFAULT_PAGINATION);
+
+  const [loading, setLoading] = useState(false);
+
+  const [error, setError] = useState("");
+
+  // =====================================================
+  // EVENT DETAIL MODAL STATES
+  // =====================================================
+
+  const [selectedEvent, setSelectedEvent] =
+    useState<Event | null>(null);
+
+  const [detailLoading, setDetailLoading] =
+    useState(false);
+
+  const [detailError, setDetailError] =
+    useState("");
+
+  const [isDetailModalOpen, setIsDetailModalOpen] =
+    useState(false);
+
+  // =====================================================
+  // BOOKING STATES
+  // =====================================================
+
+  const [bookingLoading, setBookingLoading] =
+    useState(false);
+
+  const [bookingSuccess, setBookingSuccess] =
+    useState("");
+
+  const [bookingError, setBookingError] =
+    useState("");
+
+  // =====================================================
+  // GET TOKEN FROM SESSION STORAGE
+  // =====================================================
+
+  const getToken = () => {
+    return sessionStorage.getItem("accessToken");
   };
 
-  // Delete Item
-  const handleDeleteItem = (category: keyof typeof canvasData, index: number) => {
-    const updated = canvasData[category].filter((_, i) => i !== index);
-    setCanvasData({ ...canvasData, [category]: updated });
+  // =====================================================
+  // FETCH EVENTS
+  // =====================================================
+
+  const fetchEvents = async (page = 1, search = "") => {
+    try {
+      setLoading(true);
+      setError("");
+
+      const token = getToken();
+
+      if (!token) {
+        setError("Authentication token not found. Please login again.");
+        return;
+      }
+
+      const params = new URLSearchParams();
+      params.append("page", String(page));
+      params.append("limit", "10");
+
+      if (search.trim()) {
+        params.append("search", search.trim());
+      }
+
+      const response = await fetch(`${EVENTS_API}?${params.toString()}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error("Session expired. Please login again.");
+        }
+        throw new Error(`Failed to fetch events. Status: ${response.status}`);
+      }
+
+      const result: EventsResponse = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.message || "Failed to fetch events");
+      }
+
+      setEvents(result.data?.events || []);
+      setPagination(result.data?.pagination || DEFAULT_PAGINATION);
+    } catch (err: any) {
+      console.error("Fetch events error:", err);
+      setError(err?.message || "Something went wrong while loading events.");
+      setEvents([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Save Canvas
-  const handleSave = () => {
-    setSavedSuccess(true);
-    setTimeout(() => setSavedSuccess(false), 3000);
+  // =====================================================
+  // INITIAL LOAD + SEARCH DEBOUNCE
+  // =====================================================
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchEvents(1, searchQuery);
+    }, searchQuery ? 500 : 0);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // =====================================================
+  // FILTER EVENTS
+  // =====================================================
+
+  const filteredEvents = useMemo(() => {
+    if (activeTab === "completed") {
+      return [];
+    }
+    return events.filter((event) => event.isActive);
+  }, [events, activeTab]);
+
+  // =====================================================
+  // STATS
+  // =====================================================
+
+  const totalEvents = pagination.total;
+  const activeEvents = events.filter((event) => event.isActive).length;
+
+  // =====================================================
+  // DATE FORMAT
+  // =====================================================
+
+  const formatDate = (date?: string) => {
+    if (!date) return "Date not available";
+    try {
+      return new Date(date).toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      });
+    } catch {
+      return "Date not available";
+    }
   };
+
+  // =====================================================
+  // TIME FORMAT
+  // =====================================================
+
+  const formatTime = (date?: string) => {
+    if (!date) return "Time not available";
+    try {
+      return new Date(date).toLocaleTimeString("en-IN", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch {
+      return "Time not available";
+    }
+  };
+
+  // =====================================================
+  // PRICE FORMAT
+  // =====================================================
+
+  const formatPrice = (price?: number) => {
+    if (price === undefined || price === null || price === 0) {
+      return "Free";
+    }
+    return `₹${price.toLocaleString("en-IN")}`;
+  };
+
+  // =====================================================
+  // IMAGE ERROR HANDLER
+  // =====================================================
+
+  const handleImageError = (
+    event: React.SyntheticEvent<HTMLImageElement>
+  ) => {
+    const image = event.currentTarget;
+    image.style.display = "none";
+    const fallback = image.parentElement?.querySelector(
+      ".image-fallback"
+    ) as HTMLElement | null;
+    if (fallback) {
+      fallback.style.display = "flex";
+    }
+  };
+
+  // =====================================================
+  // RETRY
+  // =====================================================
+
+  const handleRetry = () => {
+    fetchEvents(pagination.page, searchQuery);
+  };
+
+  // =====================================================
+  // PAGE CHANGE
+  // =====================================================
+
+  const handlePageChange = (page: number) => {
+    if (
+      page < 1 ||
+      page > pagination.totalPages ||
+      page === pagination.page
+    ) {
+      return;
+    }
+
+    fetchEvents(page, searchQuery);
+
+    const mainElement = document.getElementById("business-events-main");
+    if (mainElement) {
+      mainElement.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  // =====================================================
+  // PAGINATION NUMBERS
+  // =====================================================
+
+  const getPaginationNumbers = () => {
+    const totalPages = pagination.totalPages;
+    const currentPage = pagination.page;
+
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, index) => index + 1);
+    }
+
+    if (currentPage <= 4) {
+      return [1, 2, 3, 4, 5, "...", totalPages];
+    }
+
+    if (currentPage >= totalPages - 3) {
+      return [
+        1,
+        "...",
+        totalPages - 4,
+        totalPages - 3,
+        totalPages - 2,
+        totalPages - 1,
+        totalPages,
+      ];
+    }
+
+    return [
+      1,
+      "...",
+      currentPage - 1,
+      currentPage,
+      currentPage + 1,
+      "...",
+      totalPages,
+    ];
+  };
+
+  // =====================================================
+  // OPEN EVENT DETAIL
+  // =====================================================
+
+  const handleViewCourse = async (eventId: string) => {
+    try {
+      setIsDetailModalOpen(true);
+      setDetailLoading(true);
+      setDetailError("");
+      setBookingSuccess("");
+      setBookingError("");
+      setSelectedEvent(null);
+
+      const token = getToken();
+
+      if (!token) {
+        setDetailError("Authentication token not found. Please login again.");
+        return;
+      }
+
+      const response = await fetch(`${EVENT_DETAIL_API}/${eventId}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error("Session expired. Please login again.");
+        }
+        throw new Error(
+          `Failed to fetch event details. Status: ${response.status}`
+        );
+      }
+
+      const result: EventDetailResponse = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.message || "Failed to fetch event details");
+      }
+
+      setSelectedEvent(result.data);
+    } catch (err: any) {
+      console.error("Event detail error:", err);
+      setDetailError(err?.message || "Unable to load event details.");
+    } finally {
+      setDetailLoading(false);
+    }
+  };
+
+  // =====================================================
+  // CLOSE DETAIL MODAL
+  // =====================================================
+
+  const closeDetailModal = () => {
+    if (bookingLoading) return;
+    setIsDetailModalOpen(false);
+    setSelectedEvent(null);
+    setDetailError("");
+    setBookingError("");
+    setBookingSuccess("");
+  };
+
+  // =====================================================
+  // BOOK NOW / REGISTER SEAT
+  // =====================================================
+
+  const handleBookNow = async () => {
+    if (!selectedEvent || bookingLoading) return;
+
+    try {
+      setBookingLoading(true);
+      setBookingError("");
+      setBookingSuccess("");
+
+      const token = getToken();
+
+      if (!token) {
+        setBookingError("Authentication token not found. Please login again.");
+        return;
+      }
+
+      const response = await fetch(BOOKING_API, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          event: selectedEvent._id,
+        }),
+      });
+
+      const result: BookingResponse = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          result.message || `Booking failed. Status: ${response.status}`
+        );
+      }
+
+      if (!result.success) {
+        throw new Error(result.message || "Booking failed.");
+      }
+
+      setBookingSuccess(result.message || "Booking successful!");
+
+      // Refresh event list
+      await fetchEvents(pagination.page, searchQuery);
+
+      // Auto close modal
+      setTimeout(() => {
+        setIsDetailModalOpen(false);
+        setSelectedEvent(null);
+        setBookingSuccess("");
+        setBookingError("");
+      }, 1200);
+    } catch (err: any) {
+      console.error("Booking error:", err);
+      setBookingError(
+        err?.message || "Something went wrong while booking the event."
+      );
+    } finally {
+      setBookingLoading(false);
+    }
+  };
+
+  // =====================================================
+  // RENDER
+  // =====================================================
 
   return (
-    <div className="flex min-h-screen bg-slate-50/60 font-sans text-slate-800 antialiased">
-      {/* Business Sidebar */}
+    <div className="flex min-h-screen h-screen bg-slate-50/60 font-sans text-slate-800 antialiased overflow-hidden">
+      {/* SIDEBAR */}
       <BusinessSidebar />
 
-      {/* Main Content Area */}
-      <main className="flex-1 p-8 space-y-6 overflow-y-auto">
-        {/* Top Header */}
+      {/* MAIN SCROLL CONTAINER */}
+      <main
+        id="business-events-main"
+        className="flex-1 min-w-0 h-screen overflow-y-auto overflow-x-hidden p-8 pb-12 space-y-8"
+      >
+        {/* HEADER */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2.5">
-              <Palette className="w-7 h-7 text-blue-600" />
-              Startup Business Model Canvas
+              <BookOpen className="w-7 h-7 text-teal-600" />
+              My Business Events & Masterclasses
             </h1>
             <p className="text-xs text-slate-500 font-medium mt-1">
-              Design, iterate, and structure your business strategy across the 9 core building blocks.
+              Explore incubator programs, masterclasses, and book investor sessions.
             </p>
           </div>
 
           <div className="flex items-center gap-3">
-            {savedSuccess && (
-              <div className="flex items-center gap-1.5 bg-emerald-50 text-emerald-600 border border-emerald-200 px-3 py-2 rounded-xl text-xs font-bold animate-fade-in">
-                <CheckCircle2 className="w-4 h-4" />
-                <span>Canvas Saved!</span>
+            {/* SEARCH */}
+            <div className="relative">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search business events..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 pr-4 py-2 border border-slate-200/80 rounded-xl text-xs bg-white focus:outline-none focus:border-teal-600 w-64 shadow-2xs font-medium"
+              />
+            </div>
+
+            <button
+              onClick={() => setActiveTab("explore")}
+              className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md shadow-teal-500/20 cursor-pointer"
+            >
+              <span className="flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5" />
+                Explore New
+              </span>
+            </button>
+
+            <DashboardProfileMenu />
+          </div>
+        </div>
+
+        {/* STATS CARDS */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {/* AVAILABLE */}
+          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs flex items-center justify-between">
+            <div>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                Available Masterclasses
+              </span>
+              <p className="text-2xl font-black text-slate-900 mt-1">{totalEvents}</p>
+              <span className="text-[10px] font-bold text-teal-600 mt-1 inline-block">
+                Live sessions
+              </span>
+            </div>
+            <div className="w-11 h-11 bg-teal-50 text-teal-600 rounded-xl flex items-center justify-center">
+              <BookOpen className="w-5 h-5" />
+            </div>
+          </div>
+
+          {/* ACTIVE */}
+          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs flex items-center justify-between">
+            <div>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                Active Events
+              </span>
+              <p className="text-2xl font-black text-slate-900 mt-1">{activeEvents}</p>
+              <span className="text-[10px] font-bold text-emerald-600 mt-1 inline-block">
+                Currently open for booking
+              </span>
+            </div>
+            <div className="w-11 h-11 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center">
+              <CheckCircle2 className="w-5 h-5" />
+            </div>
+          </div>
+
+          {/* PAGE */}
+          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs flex items-center justify-between">
+            <div>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                Event Catalog
+              </span>
+              <p className="text-2xl font-black text-slate-900 mt-1">
+                {pagination.page} / {pagination.totalPages}
+              </p>
+              <span className="text-[10px] font-bold text-purple-600 mt-1 inline-block">
+                Current page
+              </span>
+            </div>
+            <div className="w-11 h-11 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center">
+              <BarChart2 className="w-5 h-5" />
+            </div>
+          </div>
+        </div>
+
+        {/* TABS BAR */}
+        <div className="flex items-center gap-2 border-b border-slate-200/80 pb-3 text-xs overflow-x-auto">
+          {[
+            { id: "enrolled", label: "Active Learning" },
+            { id: "completed", label: "Completed" },
+            { id: "explore", label: `Explore All Catalog (${pagination.total})` },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as "enrolled" | "completed" | "explore")}
+              className={`px-4 py-2 rounded-xl font-extrabold transition-all cursor-pointer shrink-0 ${
+                activeTab === tab.id
+                  ? "bg-slate-900 text-white shadow-2xs"
+                  : "bg-white text-slate-500 border border-slate-200 hover:text-slate-900"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* ERROR STATE */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-2xl p-5">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <h3 className="text-sm font-black text-red-700">Unable to load business events</h3>
+                <p className="text-xs text-red-600 mt-1">{error}</p>
+              </div>
+              <button
+                onClick={handleRetry}
+                className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl text-xs font-bold cursor-pointer"
+              >
+                <RefreshCw className="w-3.5 h-3.5" /> Retry
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* LOADING STATE */}
+        {loading && (
+          <div className="flex justify-center items-center py-16">
+            <div className="flex items-center gap-3 text-slate-500">
+              <RefreshCw className="w-5 h-5 animate-spin text-teal-600" />
+              <span className="text-sm font-semibold">Loading business events...</span>
+            </div>
+          </div>
+        )}
+
+        {/* EMPTY STATE */}
+        {!loading && !error && filteredEvents.length === 0 && (
+          <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center">
+            <BookOpen className="w-12 h-12 mx-auto text-slate-300" />
+            <h3 className="text-base font-black text-slate-800 mt-4">No events found</h3>
+            <p className="text-xs text-slate-500 mt-1">
+              {activeTab === "completed"
+                ? "You haven't completed any events yet."
+                : searchQuery
+                ? `No events found matching "${searchQuery}".`
+                : "No active business events available right now."}
+            </p>
+          </div>
+        )}
+
+        {/* COURSE / EVENT GRID */}
+        {!loading && filteredEvents.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {filteredEvents.map((course) => (
+              <div
+                key={course._id}
+                className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs hover:shadow-md transition-all overflow-hidden group"
+              >
+                {/* IMAGE */}
+                <div className="relative w-full h-52 bg-slate-100 overflow-hidden">
+                  {course.image ? (
+                    <>
+                      <img
+                        src={course.image}
+                        alt={course.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        onError={handleImageError}
+                      />
+                      <div className="image-fallback hidden absolute inset-0 items-center justify-center bg-slate-100">
+                        <div className="text-center">
+                          <ImageOff className="w-10 h-10 mx-auto text-slate-300" />
+                          <p className="text-xs text-slate-400 mt-2 font-semibold">Image unavailable</p>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <div className="text-center">
+                        <ImageOff className="w-10 h-10 mx-auto text-slate-300" />
+                        <p className="text-xs text-slate-400 mt-2 font-semibold">No image available</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* STATUS */}
+                  <div className="absolute top-4 right-4">
+                    <span
+                      className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase border backdrop-blur-sm ${
+                        course.isActive
+                          ? "bg-emerald-50/95 text-emerald-700 border-emerald-200"
+                          : "bg-slate-50/95 text-slate-600 border-slate-200"
+                      }`}
+                    >
+                      {course.isActive ? "Active" : "Inactive"}
+                    </span>
+                  </div>
+
+                  {/* TYPE */}
+                  <div className="absolute bottom-4 left-4">
+                    <span className="px-2.5 py-1 rounded-lg bg-slate-900/80 text-white text-[10px] font-black uppercase backdrop-blur-sm">
+                      {course.type}
+                    </span>
+                  </div>
+                </div>
+
+                {/* CONTENT */}
+                <div className="p-6 space-y-5">
+                  <div>
+                    <span className="text-[10px] font-bold text-teal-600 uppercase tracking-wider flex items-center gap-1">
+                      <Building2 className="w-3 h-3" /> Startup Program
+                    </span>
+                    <h3 className="font-black text-base text-slate-900 group-hover:text-teal-600 transition-colors mt-1 leading-snug">
+                      {course.title}
+                    </h3>
+                  </div>
+
+                  <p className="text-[11px] text-slate-500 leading-relaxed line-clamp-2">
+                    {course.description}
+                  </p>
+
+                  {/* DETAILS GRID */}
+                  <div className="grid grid-cols-2 gap-3">
+                    {/* LOCATION */}
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 bg-teal-50 text-teal-600 rounded-lg flex items-center justify-center shrink-0">
+                        <MapPin className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[9px] text-slate-400 font-bold uppercase">Location</p>
+                        <p className="text-[11px] text-slate-700 font-bold truncate">
+                          {course.location || "Online"}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* DATE */}
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 bg-purple-50 text-purple-600 rounded-lg flex items-center justify-center shrink-0">
+                        <CalendarDays className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[9px] text-slate-400 font-bold uppercase">Date</p>
+                        <p className="text-[11px] text-slate-700 font-bold truncate">
+                          {formatDate(course.date)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* PRICE */}
+                  <div className="flex items-center justify-between bg-slate-50 rounded-xl p-3">
+                    <div>
+                      <p className="text-[9px] text-slate-400 uppercase font-bold">Workshop Fee</p>
+                      <div className="flex items-center gap-1 mt-0.5">
+                        <IndianRupee className="w-4 h-4 text-emerald-600" />
+                        <span className="text-lg font-black text-slate-900">
+                          {formatPrice(course.price)}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="w-9 h-9 rounded-lg bg-white flex items-center justify-center shadow-sm">
+                      <Sparkles className="w-4 h-4 text-teal-600" />
+                    </div>
+                  </div>
+
+                  {/* FOOTER */}
+                  <div className="pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
+                    <span className="text-[10px] font-semibold text-slate-400">
+                      {course.isActive ? "Available for booking" : "Currently unavailable"}
+                    </span>
+
+                    {course.isActive ? (
+                      <button
+                        className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs"
+                        onClick={() => handleViewCourse(course._id)}
+                      >
+                        <PlayCircle className="w-3.5 h-3.5 text-teal-400" />
+                        View Program
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
+                    ) : (
+                      <button
+                        disabled
+                        className="flex items-center gap-1.5 bg-slate-200 text-slate-400 px-4 py-2.5 rounded-xl text-xs font-bold cursor-not-allowed"
+                      >
+                        Unavailable
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* PAGINATION */}
+        {!loading && !error && pagination.totalPages > 1 && (
+          <div className="mt-8 bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="text-[11px] text-slate-500 font-semibold">
+                Showing{" "}
+                <span className="text-slate-900 font-black">
+                  {(pagination.page - 1) * pagination.limit + 1}
+                </span>{" "}
+                -{" "}
+                <span className="text-slate-900 font-black">
+                  {Math.min(pagination.page * pagination.limit, pagination.total)}
+                </span>{" "}
+                of <span className="text-slate-900 font-black">{pagination.total}</span> events
+              </div>
+
+              <div className="flex items-center gap-1.5">
+                <button
+                  disabled={!pagination.hasPreviousPage}
+                  onClick={() => handlePageChange(pagination.page - 1)}
+                  className="flex items-center gap-1 px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  <span className="hidden sm:inline">Previous</span>
+                </button>
+
+                <div className="flex items-center gap-1">
+                  {getPaginationNumbers().map((p, index) => {
+                    if (p === "...") {
+                      return (
+                        <span key={`dots-${index}`} className="w-9 h-9 flex items-center justify-center text-xs font-bold text-slate-400">
+                          ...
+                        </span>
+                      );
+                    }
+                    return (
+                      <button
+                        key={p}
+                        onClick={() => handlePageChange(p as number)}
+                        className={`w-9 h-9 rounded-xl text-xs font-bold transition ${
+                          pagination.page === p
+                            ? "bg-slate-900 text-white shadow-sm"
+                            : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
+                        }`}
+                      >
+                        {p}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <button
+                  disabled={!pagination.hasNextPage}
+                  onClick={() => handlePageChange(pagination.page + 1)}
+                  className="flex items-center gap-1 px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                >
+                  <span className="hidden sm:inline">Next</span>
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="h-4" />
+      </main>
+
+      {/* EVENT DETAIL MODAL */}
+      {isDetailModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+            onClick={() => {
+              if (!bookingLoading) closeDetailModal();
+            }}
+          />
+
+          <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white rounded-3xl shadow-2xl">
+            <button
+              onClick={closeDetailModal}
+              disabled={bookingLoading}
+              className="absolute top-4 right-4 z-20 w-9 h-9 rounded-full bg-white/90 hover:bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600 disabled:opacity-40"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {detailLoading && (
+              <div className="flex flex-col items-center justify-center py-24">
+                <RefreshCw className="w-8 h-8 text-teal-600 animate-spin" />
+                <p className="text-sm font-semibold text-slate-500 mt-4">Loading program details...</p>
               </div>
             )}
 
-            <button
-              onClick={() => window.print()}
-              className="flex items-center gap-2 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer"
-            >
-              <Download className="w-4 h-4 text-slate-500" />
-              <span>Export Strategy</span>
-            </button>
+            {!detailLoading && detailError && (
+              <div className="p-10 text-center">
+                <div className="w-14 h-14 bg-red-50 text-red-600 rounded-full flex items-center justify-center mx-auto">
+                  <X className="w-7 h-7" />
+                </div>
+                <h3 className="text-lg font-black text-slate-900 mt-4">Unable to load program</h3>
+                <p className="text-sm text-red-600 mt-2">{detailError}</p>
+                <button
+                  onClick={closeDetailModal}
+                  className="mt-6 px-5 py-2.5 bg-slate-900 text-white rounded-xl text-sm font-bold"
+                >
+                  Close
+                </button>
+              </div>
+            )}
 
-            <button
-              onClick={handleSave}
-              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 active:scale-95 transition-all text-white px-5 py-2.5 rounded-xl text-xs font-bold shadow-md shadow-blue-500/20 cursor-pointer"
-            >
-              <Save className="w-4 h-4" />
-              <span>Save Canvas</span>
-            </button>
+            {!detailLoading && !detailError && selectedEvent && (
+              <div>
+                <div className="relative h-64 bg-slate-100">
+                  {selectedEvent.image ? (
+                    <img
+                      src={selectedEvent.image}
+                      alt={selectedEvent.title}
+                      className="w-full h-full object-cover"
+                      onError={handleImageError}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <div className="text-center">
+                        <ImageOff className="w-12 h-12 mx-auto text-slate-300" />
+                        <p className="text-sm text-slate-400 mt-2">No image available</p>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-black/70 to-transparent">
+                    <span className="inline-flex px-3 py-1 rounded-lg bg-teal-600 text-white text-[10px] font-black uppercase">
+                      {selectedEvent.type}
+                    </span>
+                    <h2 className="text-2xl font-black text-white mt-2 pr-8">{selectedEvent.title}</h2>
+                  </div>
+                </div>
+
+                <div className="p-6 space-y-6">
+                  {bookingSuccess && (
+                    <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-200 rounded-xl p-4">
+                      <div className="w-9 h-9 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+                        <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-black text-emerald-700">Booking Successful</p>
+                        <p className="text-xs text-emerald-600 mt-0.5">{bookingSuccess}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {bookingError && (
+                    <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+                      <p className="text-sm font-black text-red-700">Booking Failed</p>
+                      <p className="text-xs text-red-600 mt-1">{bookingError}</p>
+                    </div>
+                  )}
+
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wider font-black text-teal-600">
+                      About This Program
+                    </p>
+                    <p className="text-sm text-slate-600 leading-relaxed mt-2">{selectedEvent.description}</p>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="flex items-center gap-3 bg-slate-50 rounded-xl p-4">
+                      <div className="w-10 h-10 bg-teal-100 text-teal-600 rounded-xl flex items-center justify-center">
+                        <MapPin className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="text-[9px] uppercase font-bold text-slate-400">Location</p>
+                        <p className="text-sm font-black text-slate-800">{selectedEvent.location || "Online"}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 bg-slate-50 rounded-xl p-4">
+                      <div className="w-10 h-10 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center">
+                        <CalendarDays className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="text-[9px] uppercase font-bold text-slate-400">Date</p>
+                        <p className="text-sm font-black text-slate-800">{formatDate(selectedEvent.date)}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 bg-slate-50 rounded-xl p-4">
+                      <div className="w-10 h-10 bg-orange-100 text-orange-600 rounded-xl flex items-center justify-center">
+                        <Clock className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="text-[9px] uppercase font-bold text-slate-400">Time</p>
+                        <p className="text-sm font-black text-slate-800">{formatTime(selectedEvent.date)}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 bg-slate-50 rounded-xl p-4">
+                      <div className="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center">
+                        <Users className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="text-[9px] uppercase font-bold text-slate-400">Program Type</p>
+                        <p className="text-sm font-black text-slate-800">{selectedEvent.type}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between bg-slate-900 rounded-2xl p-5">
+                    <div>
+                      <p className="text-[10px] uppercase font-bold text-slate-400">Workshop Fee</p>
+                      <div className="flex items-center gap-1 mt-1">
+                        <IndianRupee className="w-5 h-5 text-emerald-400" />
+                        <span className="text-2xl font-black text-white">{formatPrice(selectedEvent.price)}</span>
+                      </div>
+                    </div>
+                    <Sparkles className="w-7 h-7 text-teal-400" />
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                    <button
+                      onClick={closeDetailModal}
+                      disabled={bookingLoading}
+                      className="flex-1 px-5 py-3 rounded-xl border border-slate-200 bg-white text-slate-700 text-sm font-bold hover:bg-slate-50 disabled:opacity-50"
+                    >
+                      Close
+                    </button>
+                    <button
+                      onClick={handleBookNow}
+                      disabled={bookingLoading || !selectedEvent.isActive}
+                      className="flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-sm font-black shadow-lg shadow-teal-500/20 disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
+                      {bookingLoading ? (
+                        <>
+                          <RefreshCw className="w-4 h-4 animate-spin" />
+                          Booking...
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle2 className="w-4 h-4" />
+                          Book Now
+                          <ArrowRight className="w-4 h-4" />
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
-
-        {/* 9 Blocks Grid Layout */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 text-xs">
-          {/* Col 1: Key Partners */}
-          <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-xs flex flex-col justify-between space-y-3">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                <h3 className="font-extrabold text-slate-900 flex items-center gap-1.5">
-                  <Users className="w-4 h-4 text-blue-600" />
-                  Key Partners
-                </h3>
-              </div>
-              <ul className="space-y-2">
-                {canvasData.keyPartners.map((item, idx) => (
-                  <li key={idx} className="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-100 font-medium text-slate-700 group">
-                    <span>{item}</span>
-                    <button onClick={() => handleDeleteItem("keyPartners", idx)} className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-500 cursor-pointer">
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="flex gap-1.5 pt-2 border-t border-slate-100">
-              <input
-                type="text"
-                placeholder="Add partner..."
-                value={inputs.keyPartners || ""}
-                onChange={(e) => setInputs({ ...inputs, keyPartners: e.target.value })}
-                className="w-full p-2 border border-slate-200 rounded-xl bg-slate-50 outline-none text-xs"
-              />
-              <button onClick={() => handleAddItem("keyPartners")} className="p-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 cursor-pointer">
-                <Plus className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-
-          {/* Col 2: Key Activities & Key Resources */}
-          <div className="space-y-4 flex flex-col justify-between">
-            {/* Activities */}
-            <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-xs space-y-3 flex-1 flex flex-col justify-between">
-              <div className="space-y-2">
-                <h3 className="font-extrabold text-slate-900 flex items-center gap-1.5 border-b border-slate-100 pb-2">
-                  <Zap className="w-4 h-4 text-amber-500" /> Key Activities
-                </h3>
-                <ul className="space-y-1.5">
-                  {canvasData.keyActivities.map((item, idx) => (
-                    <li key={idx} className="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-100 font-medium text-slate-700 group">
-                      <span>{item}</span>
-                      <button onClick={() => handleDeleteItem("keyActivities", idx)} className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-500 cursor-pointer">
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className="flex gap-1.5 pt-2 border-t border-slate-100">
-                <input
-                  type="text"
-                  placeholder="Add activity..."
-                  value={inputs.keyActivities || ""}
-                  onChange={(e) => setInputs({ ...inputs, keyActivities: e.target.value })}
-                  className="w-full p-2 border border-slate-200 rounded-xl bg-slate-50 outline-none text-xs"
-                />
-                <button onClick={() => handleAddItem("keyActivities")} className="p-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 cursor-pointer">
-                  <Plus className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-
-            {/* Resources */}
-            <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-xs space-y-3 flex-1 flex flex-col justify-between">
-              <div className="space-y-2">
-                <h3 className="font-extrabold text-slate-900 flex items-center gap-1.5 border-b border-slate-100 pb-2">
-                  <Layers className="w-4 h-4 text-purple-600" /> Key Resources
-                </h3>
-                <ul className="space-y-1.5">
-                  {canvasData.keyResources.map((item, idx) => (
-                    <li key={idx} className="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-100 font-medium text-slate-700 group">
-                      <span>{item}</span>
-                      <button onClick={() => handleDeleteItem("keyResources", idx)} className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-500 cursor-pointer">
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className="flex gap-1.5 pt-2 border-t border-slate-100">
-                <input
-                  type="text"
-                  placeholder="Add resource..."
-                  value={inputs.keyResources || ""}
-                  onChange={(e) => setInputs({ ...inputs, keyResources: e.target.value })}
-                  className="w-full p-2 border border-slate-200 rounded-xl bg-slate-50 outline-none text-xs"
-                />
-                <button onClick={() => handleAddItem("keyResources")} className="p-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 cursor-pointer">
-                  <Plus className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Col 3: Value Propositions */}
-          <div className="bg-gradient-to-b from-blue-50/50 to-white rounded-2xl border border-blue-200/80 p-4 shadow-xs flex flex-col justify-between space-y-3">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between border-b border-blue-100 pb-2">
-                <h3 className="font-extrabold text-blue-900 flex items-center gap-1.5">
-                  <Sparkles className="w-4 h-4 text-blue-600" />
-                  Value Propositions
-                </h3>
-              </div>
-              <ul className="space-y-2">
-                {canvasData.valuePropositions.map((item, idx) => (
-                  <li key={idx} className="flex items-center justify-between p-2 rounded-xl bg-white border border-blue-100 font-bold text-blue-950 group shadow-xs">
-                    <span>{item}</span>
-                    <button onClick={() => handleDeleteItem("valuePropositions", idx)} className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-500 cursor-pointer">
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="flex gap-1.5 pt-2 border-t border-blue-100">
-              <input
-                type="text"
-                placeholder="Add value prop..."
-                value={inputs.valuePropositions || ""}
-                onChange={(e) => setInputs({ ...inputs, valuePropositions: e.target.value })}
-                className="w-full p-2 border border-blue-200 rounded-xl bg-white outline-none text-xs"
-              />
-              <button onClick={() => handleAddItem("valuePropositions")} className="p-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 cursor-pointer">
-                <Plus className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-
-          {/* Col 4: Relationships & Channels */}
-          <div className="space-y-4 flex flex-col justify-between">
-            {/* Customer Relationships */}
-            <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-xs space-y-3 flex-1 flex flex-col justify-between">
-              <div className="space-y-2">
-                <h3 className="font-extrabold text-slate-900 flex items-center gap-1.5 border-b border-slate-100 pb-2">
-                  <HeartHandshake className="w-4 h-4 text-rose-500" /> Customer Relationships
-                </h3>
-                <ul className="space-y-1.5">
-                  {canvasData.customerRelationships.map((item, idx) => (
-                    <li key={idx} className="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-100 font-medium text-slate-700 group">
-                      <span>{item}</span>
-                      <button onClick={() => handleDeleteItem("customerRelationships", idx)} className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-500 cursor-pointer">
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className="flex gap-1.5 pt-2 border-t border-slate-100">
-                <input
-                  type="text"
-                  placeholder="Add relationship..."
-                  value={inputs.customerRelationships || ""}
-                  onChange={(e) => setInputs({ ...inputs, customerRelationships: e.target.value })}
-                  className="w-full p-2 border border-slate-200 rounded-xl bg-slate-50 outline-none text-xs"
-                />
-                <button onClick={() => handleAddItem("customerRelationships")} className="p-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 cursor-pointer">
-                  <Plus className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-
-            {/* Channels */}
-            <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-xs space-y-3 flex-1 flex flex-col justify-between">
-              <div className="space-y-2">
-                <h3 className="font-extrabold text-slate-900 flex items-center gap-1.5 border-b border-slate-100 pb-2">
-                  <TrendingUp className="w-4 h-4 text-emerald-600" /> Channels
-                </h3>
-                <ul className="space-y-1.5">
-                  {canvasData.channels.map((item, idx) => (
-                    <li key={idx} className="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-100 font-medium text-slate-700 group">
-                      <span>{item}</span>
-                      <button onClick={() => handleDeleteItem("channels", idx)} className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-500 cursor-pointer">
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className="flex gap-1.5 pt-2 border-t border-slate-100">
-                <input
-                  type="text"
-                  placeholder="Add channel..."
-                  value={inputs.channels || ""}
-                  onChange={(e) => setInputs({ ...inputs, channels: e.target.value })}
-                  className="w-full p-2 border border-slate-200 rounded-xl bg-slate-50 outline-none text-xs"
-                />
-                <button onClick={() => handleAddItem("channels")} className="p-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 cursor-pointer">
-                  <Plus className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Col 5: Customer Segments */}
-          <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-xs flex flex-col justify-between space-y-3">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                <h3 className="font-extrabold text-slate-900 flex items-center gap-1.5">
-                  <Target className="w-4 h-4 text-purple-600" />
-                  Customer Segments
-                </h3>
-              </div>
-              <ul className="space-y-2">
-                {canvasData.customerSegments.map((item, idx) => (
-                  <li key={idx} className="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-100 font-medium text-slate-700 group">
-                    <span>{item}</span>
-                    <button onClick={() => handleDeleteItem("customerSegments", idx)} className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-500 cursor-pointer">
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="flex gap-1.5 pt-2 border-t border-slate-100">
-              <input
-                type="text"
-                placeholder="Add segment..."
-                value={inputs.customerSegments || ""}
-                onChange={(e) => setInputs({ ...inputs, customerSegments: e.target.value })}
-                className="w-full p-2 border border-slate-200 rounded-xl bg-slate-50 outline-none text-xs"
-              />
-              <button onClick={() => handleAddItem("customerSegments")} className="p-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 cursor-pointer">
-                <Plus className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Bottom Row: Cost Structure & Revenue Streams */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-          {/* Cost Structure */}
-          <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-xs flex flex-col justify-between space-y-3">
-            <div className="space-y-2">
-              <h3 className="font-extrabold text-slate-900 flex items-center gap-1.5 border-b border-slate-100 pb-2">
-                <DollarSign className="w-4 h-4 text-red-500" /> Cost Structure
-              </h3>
-              <ul className="grid grid-cols-2 gap-2">
-                {canvasData.costStructure.map((item, idx) => (
-                  <li key={idx} className="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-100 font-medium text-slate-700 group">
-                    <span>{item}</span>
-                    <button onClick={() => handleDeleteItem("costStructure", idx)} className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-500 cursor-pointer">
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="flex gap-1.5 pt-2 border-t border-slate-100">
-              <input
-                type="text"
-                placeholder="Add cost item..."
-                value={inputs.costStructure || ""}
-                onChange={(e) => setInputs({ ...inputs, costStructure: e.target.value })}
-                className="w-full p-2 border border-slate-200 rounded-xl bg-slate-50 outline-none text-xs"
-              />
-              <button onClick={() => handleAddItem("costStructure")} className="p-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 cursor-pointer">
-                <Plus className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-
-          {/* Revenue Streams */}
-          <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-xs flex flex-col justify-between space-y-3">
-            <div className="space-y-2">
-              <h3 className="font-extrabold text-slate-900 flex items-center gap-1.5 border-b border-slate-100 pb-2">
-                <DollarSign className="w-4 h-4 text-emerald-600" /> Revenue Streams
-              </h3>
-              <ul className="grid grid-cols-2 gap-2">
-                {canvasData.revenueStreams.map((item, idx) => (
-                  <li key={idx} className="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-100 font-medium text-slate-700 group">
-                    <span>{item}</span>
-                    <button onClick={() => handleDeleteItem("revenueStreams", idx)} className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-500 cursor-pointer">
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="flex gap-1.5 pt-2 border-t border-slate-100">
-              <input
-                type="text"
-                placeholder="Add revenue stream..."
-                value={inputs.revenueStreams || ""}
-                onChange={(e) => setInputs({ ...inputs, revenueStreams: e.target.value })}
-                className="w-full p-2 border border-slate-200 rounded-xl bg-slate-50 outline-none text-xs"
-              />
-              <button onClick={() => handleAddItem("revenueStreams")} className="p-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 cursor-pointer">
-                <Plus className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </main>
+      )}
     </div>
   );
 }

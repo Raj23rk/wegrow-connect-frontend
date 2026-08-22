@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { User, Home, LayoutDashboard, LogOut, ChevronDown } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { logoutUser, clearAuthStorage } from "../services/api";
+import NotificationBell from "./NotificationBell";
 
 export function useDashboardUser() {
   const auth = useAuth();
@@ -85,12 +86,16 @@ export default function DashboardProfileMenu() {
   const initial = (firstName?.[0] || "U").toUpperCase();
 
   return (
-    <div className="relative z-50 select-none" ref={menuRef}>
-      {/* Profile Badge Button */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-white border border-slate-200 shadow-xs hover:border-slate-300 transition-all cursor-pointer focus:outline-none"
-      >
+    <div className="flex items-center gap-3">
+      {/* Notification Bell Icon & Popover */}
+      <NotificationBell />
+
+      <div className="relative z-50 select-none" ref={menuRef}>
+        {/* Profile Badge Button */}
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-white border border-slate-200 shadow-xs hover:border-slate-300 transition-all cursor-pointer focus:outline-none"
+        >
         <div className="relative">
           <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-black text-xs flex items-center justify-center shadow-xs">
             {initial}
@@ -189,6 +194,7 @@ export default function DashboardProfileMenu() {
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 }

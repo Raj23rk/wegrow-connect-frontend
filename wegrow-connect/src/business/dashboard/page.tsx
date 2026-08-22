@@ -1,344 +1,608 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import BusinessSidebar from "../../components/BusinessSidebar";
 import DashboardProfileMenu, { useDashboardUser } from "../../components/DashboardProfileMenu";
+import { getBusinessSubscriptions } from "../../services/api";
+import { openRazorpaySubscriptionCheckout } from "../../services/razorpay";
 import {
-  TrendingUp,
-  Users,
-  CreditCard,
-  Rocket,
-  BarChart3,
-  PieChart as PieIcon,
-  Search,
-  Bell,
-  ArrowUpRight,
-  Calendar,
+  BookOpen,
+  CalendarDays,
+  ShieldCheck,
+  ArrowRight,
+  MapPin,
+  IndianRupee,
+  Loader2,
   CheckCircle2,
-  Clock,
-  Download,
-  Plus
+  XCircle,
+  Clock3,
+  X,
+  Zap,
+  TrendingUp,
+  Briefcase,
+  Building2,
 } from "lucide-react";
 
+// ─── API CONFIG ──────────────────────────────────────────
+const API_BASE = "https://wegrow-connect-backend-1.onrender.com/api/v1";
+
+function getToken() {
+  return sessionStorage.getItem("accessToken") || "";
+}
+
+function authHeaders(): Record<string, string> {
+  return {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${getToken()}`,
+  };
+}
+
+// ─── Types ──────────────────────────────────────────────
+interface EventItem {
+  _id: string;
+  title: string;
+  description?: string;
+  type?: string;
+  image?: string;
+  location?: string;
+  date?: string;
+  price?: number;
+  isActive?: boolean;
+}
+
+// ─── Auto-scroll hook ───────────────────────────────────
+function useAutoScroll(speed = 0.5) {
+  const ref = useRef<HTMLDivElement>(null);
+  const animRef = useRef<number>(0);
+  const pausedRef = useRef(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    function step() {
+      if (!pausedRef.current && el) {
+        el.scrollTop += speed;
+        if (el.scrollTop >= el.scrollHeight / 2) {
+          el.scrollTop = 0;
+        }
+      }
+      animRef.current = requestAnimationFrame(step);
+    }
+
+    animRef.current = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(animRef.current);
+  }, [speed]);
+
+  const pause = () => { pausedRef.current = true; };
+  const resume = () => { pausedRef.current = false; };
+
+  return { ref, pause, resume };
+}
+
+// ─── Subscribe status badge ─────────────────────────────
+function SubscribeBadge({ status }: { status: string }) {
+  if (!status || status === "inactive" || status === "expired") {
+    return (
+      <span className="text-[10px] font-bold text-red-500 mt-1 inline-flex items-center gap-1">
+        <XCircle className="w-3 h-3" /> Not Subscribed
+      </span>
+    );
+  }
+  if (status === "pending") {
+    return (
+      <span className="text-[10px] font-bold text-amber-500 mt-1 inline-flex items-center gap-1">
+        <Clock3 className="w-3 h-3" /> Pending
+      </span>
+    );
+  }
+  return (
+    <span className="text-[10px] font-bold text-emerald-600 mt-1 inline-flex items-center gap-1">
+      <CheckCircle2 className="w-3 h-3" /> Active Pro
+    </span>
+  );
+}
+
+// ─── Compact Event Card ──────────────────────────────────
+function EventCard({ event, index }: { event: EventItem; index: number }) {
+  const isToday = event.date
+    ? new Date(event.date).toDateString() === new Date().toDateString()
+    : false;
+
+  const isNew = index < 3;
+
+  const formattedDate = event.date
+    ? new Date(event.date).toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "short",
+      })
+    : "TBD";
+
+  const formattedTime = event.date
+    ? new Date(event.date).toLocaleTimeString("en-IN", {
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : "";
+
+  return (
+    <div
+      className={`relative p-3.5 rounded-xl border transition-all group ${
+        isToday
+          ? "bg-gradient-to-br from-teal-50 to-emerald-50/60 border-teal-200 shadow-sm shadow-teal-100"
+          : "bg-white/70 border-slate-200 hover:border-teal-200 hover:shadow-sm"
+      }`}
+    >
+      {isNew && (
+        <span
+          className="absolute -top-2 -right-1.5 text-[9px] font-black tracking-widest uppercase
+            bg-gradient-to-r from-orange-500 to-amber-400 text-white
+            px-1.5 py-0.5 rounded-full shadow-md animate-pulse z-10"
+        >
+          NEW
+        </span>
+      )}
+
+      <div className="flex items-center justify-between mb-2">
+        <span
+          className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
+            isToday
+              ? "bg-teal-600 text-white shadow-sm"
+              : "bg-teal-50 text-teal-700 border border-teal-100"
+          }`}
+        >
+          {isToday ? "🔴 TODAY" : formattedDate}
+        </span>
+        {formattedTime && (
+          <span className="text-[10px] font-semibold text-slate-400">{formattedTime}</span>
+        )}
+      </div>
+
+      <h4 className="font-bold text-xs text-slate-800 leading-snug group-hover:text-teal-700 transition-colors">
+        {event.title}
+      </h4>
+
+      <div className="flex items-center gap-3 mt-1.5 flex-wrap">
+        {event.location && (
+          <p className="text-[10px] text-slate-400 flex items-center gap-1">
+            <MapPin className="w-2.5 h-2.5 shrink-0" />
+            {event.location}
+          </p>
+        )}
+        {event.price !== undefined && (
+          <p className="text-[10px] font-bold text-emerald-600 flex items-center gap-0.5">
+            <IndianRupee className="w-2.5 h-2.5 shrink-0" />
+            {event.price === 0 ? "Free" : `₹${event.price}`}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Main Component ──────────────────────────────────────
 export default function BusinessDashboard() {
-  const { firstName } = useDashboardUser();
-  const [selectedPeriod, setSelectedPeriod] = useState("6m");
+  const { firstName, user } = useDashboardUser();
 
-  // Bar Chart Data (Monthly Revenue / Growth)
-  const monthlyData = [
-    { month: "Mar", revenue: 45, target: 50 },
-    { month: "Apr", revenue: 62, target: 60 },
-    { month: "May", revenue: 78, target: 70 },
-    { month: "Jun", revenue: 95, target: 85 },
-    { month: "Jul", revenue: 110, target: 100 },
-    { month: "Aug", revenue: 124, target: 115 },
-  ];
+  const [bookingCount, setBookingCount] = useState<number | null>(null);
+  const [eventCount, setEventCount] = useState<number | null>(null);
+  const [subscriptionStatus, setSubscriptionStatus] = useState<string>("");
+  const [events, setEvents] = useState<EventItem[]>([]);
+  const [eventsLoading, setEventsLoading] = useState(true);
 
-  // Pie Chart Data Categories
-  const revenueSources = [
-    { name: "Incubator Pass", percentage: "45%", value: "₹55,800", color: "bg-blue-600", stroke: "#2563eb" },
-    { name: "Pro Subscriptions", percentage: "30%", value: "₹37,200", color: "bg-emerald-500", stroke: "#10b981" },
-    { name: "Mentor Sessions", percentage: "15%", value: "₹18,600", color: "bg-orange-500", stroke: "#f97316" },
-    { name: "Workshops & Events", percentage: "10%", value: "₹12,400", color: "bg-purple-500", stroke: "#a855f7" },
-  ];
+  // ─── Subscription / Upgrade Modal ───────────────────────
+  const [showSubscribeModal, setShowSubscribeModal] = useState(false);
+  const [businessPlans, setBusinessPlans] = useState<any[]>([]);
+  const [plansLoading, setPlansLoading] = useState(false);
+  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
 
-  // Investor / Pitch Submissions
-  const investorActivity = [
-    { name: "Sequoia Capital India", status: "Pitch Deck Viewed", time: "2 hours ago", badge: "bg-emerald-50 text-emerald-700 border-emerald-200" },
-    { name: "Blume Ventures", status: "Term Sheet Under Review", time: "1 day ago", badge: "bg-blue-50 text-blue-700 border-blue-200" },
-    { name: "Tamil Nadu Startup Fund", status: "Meeting Scheduled", time: "Aug 14, 10:00 AM", badge: "bg-amber-50 text-amber-700 border-amber-200" },
-  ];
+  const { ref: scrollRef, pause, resume } = useAutoScroll(0.5);
+
+  const currentUser = (() => {
+    try {
+      const raw = sessionStorage.getItem("user");
+      return raw ? JSON.parse(raw) : {};
+    } catch {
+      return {};
+    }
+  })();
+
+  // Fetch bookings count
+  useEffect(() => {
+    async function fetchBookings() {
+      try {
+        const res = await fetch(`${API_BASE}/bookings/my-bookings?page=1&limit=1`, {
+          headers: authHeaders(),
+        });
+        const data = await res.json();
+        const total =
+          data?.data?.pagination?.total ??
+          data?.data?.bookings?.length ??
+          0;
+        setBookingCount(total);
+      } catch {
+        setBookingCount(0);
+      }
+    }
+    fetchBookings();
+  }, []);
+
+  // Fetch events count + list
+  useEffect(() => {
+    async function fetchEvents() {
+      try {
+        setEventsLoading(true);
+        const res = await fetch(
+          `${API_BASE}/events/all-event?page=1&limit=50`,
+          { headers: authHeaders() }
+        );
+        const data = await res.json();
+        const list: EventItem[] = Array.isArray(data?.data?.events)
+          ? data.data.events
+          : Array.isArray(data?.data)
+          ? data.data
+          : [];
+        setEvents(list);
+        setEventCount(list.length);
+      } catch {
+        setEvents([]);
+        setEventCount(0);
+      } finally {
+        setEventsLoading(false);
+      }
+    }
+    fetchEvents();
+  }, []);
+
+  // Resolve subscription status from user object
+  useEffect(() => {
+    const anyUser = user as any;
+    const status =
+      anyUser?.subscriptionStatus ||
+      anyUser?.subscription?.status ||
+      anyUser?.plan ||
+      "";
+    setSubscriptionStatus(typeof status === "string" ? status.toLowerCase() : "");
+  }, [user]);
+
+  // Load business plans when modal opens
+  useEffect(() => {
+    if (!showSubscribeModal) return;
+    setPlansLoading(true);
+    getBusinessSubscriptions()
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setBusinessPlans(data);
+        } else {
+          setBusinessPlans([
+            {
+              id: "starter",
+              name: "Starter Founder",
+              type: "BUSINESS",
+              desc: "For early-stage entrepreneurs exploring market validation.",
+              monthlyPrice: "₹0",
+              yearlyPrice: "₹0",
+              price: 0,
+              popular: false,
+              features: [
+                "Business Model Canvas Tool",
+                "Community Access",
+                "Basic Roadmap Tracker",
+                "1 Pitch Deck Review / month"
+              ],
+              buttonText: "Current Free Plan",
+            },
+            {
+              id: "pro",
+              name: "Pro Growth Pass",
+              type: "BUSINESS",
+              desc: "For growing startups seeking investor pitch deck access & mentors.",
+              monthlyPrice: "₹1,499",
+              yearlyPrice: "₹1,199",
+              price: 1199,
+              period: "/ month",
+              popular: true,
+              features: [
+                "All Starter Features",
+                "Unlimited Investor Pitch Downloads",
+                "2 One-on-One Legal/Mentor Sessions",
+                "Real-Time Business Analytics Dashboard",
+                "Priority Statutory Compliance Alerts"
+              ],
+              buttonText: "Upgrade to Pro Pass",
+            },
+          ]);
+        }
+      })
+      .finally(() => setPlansLoading(false));
+  }, [showSubscribeModal]);
+
+  // Razorpay checkout handler for business
+  const handleBusinessSubscribe = (plan: any) => {
+    if (plan.price === 0) return;
+    setCheckoutLoading(plan.id);
+    openRazorpaySubscriptionCheckout({
+      plan: { ...plan, type: "BUSINESS" },
+      user: currentUser,
+      onSuccess: (result: any) => {
+        console.log("Business subscription payment success:", result);
+        setSubscriptionStatus("active");
+        setShowSubscribeModal(false);
+        alert(`🎉 You are now subscribed to "${plan.name}"! Enjoy your WeGrow Business Pro access.`);
+        setCheckoutLoading(null);
+      },
+      onError: (err: any) => {
+        console.error("Business subscription payment failed:", err);
+        setCheckoutLoading(null);
+      },
+    });
+  };
+
+  const safeEvents: EventItem[] = Array.isArray(events) ? events : [];
+  const doubledEvents = [...safeEvents, ...safeEvents];
 
   return (
     <div className="flex min-h-screen bg-slate-50/60 font-sans text-slate-800 antialiased">
-      {/* Business Sidebar Navigation */}
+      {/* Business Sidebar */}
       <BusinessSidebar />
 
-      {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 h-screen max-h-screen overflow-hidden">
-        {/* Full-width Top Header Bar (Matching Uploaded Image Format) */}
+        {/* Header */}
         <header className="bg-white border-b border-slate-200/80 px-8 py-3.5 flex items-center justify-between shadow-2xs shrink-0 w-full z-20">
           <div>
-            <h1 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">Welcome, {firstName}</h1>
-            {/* <p className="text-[11px] font-bold text-slate-500 mt-0.5">
-              Role: <span className="text-[#00a8ec]">Business</span>
-            </p> */}
+            <h1 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+              Welcome, {firstName} <Building2 className="w-5 h-5 text-teal-600" />
+            </h1>
+            <p className="text-[11px] font-bold text-slate-400 mt-0.5">
+              Business Portal · Incubator & Growth Dashboard
+            </p>
           </div>
-
-          <div className="flex items-center gap-3">
-            {/* <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-slate-100 rounded-lg border border-slate-200 text-[11px] font-mono font-bold text-slate-600">
-              <span>WGF26012</span>
-            </div> */}
-            {/* <div className="relative w-64 text-xs">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Search investors, metrics, reports..."
-                className="w-full pl-9 pr-3 py-2.5 border border-slate-200 rounded-xl bg-white outline-none focus:border-[#00a8ec] transition-all shadow-xs"
-              />
-            </div> */}
-            {/* <button className="flex items-center gap-2 bg-[#00a8ec] hover:bg-[#0294d1] active:scale-95 transition-all text-white px-4 py-2.5 rounded-xl text-xs font-bold shadow-md shadow-cyan-500/20 cursor-pointer">
-              <Plus className="w-4 h-4" />
-              <span>New Pitch Deck</span>
-            </button> */}
-            <DashboardProfileMenu />
-          </div>
+          <DashboardProfileMenu />
         </header>
 
-        {/* Scrollable Content Area */}
+        {/* Scrollable Dashboard Body */}
         <main className="flex-1 overflow-y-auto p-8 space-y-8">
-
-        {/* 4 Core Business Metric Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-          {/* Card 1: MRR / Revenue */}
-          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
-            <div className="space-y-1">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Monthly Recurring Revenue</p>
-              <h2 className="text-2xl font-black text-slate-900">₹1,24,500</h2>
-              <div className="flex items-center gap-1 text-[11px] font-extrabold text-emerald-600">
-                <ArrowUpRight className="w-3.5 h-3.5" />
-                <span>+18.4% from last month</span>
-              </div>
-            </div>
-            <div className="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
-              ₹
-            </div>
-          </div>
-
-          {/* Card 2: Active Subscriptions */}
-          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
-            <div className="space-y-1">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Active Paid Clients</p>
-              <h2 className="text-2xl font-black text-slate-900">42 Subscribers</h2>
-              <div className="flex items-center gap-1 text-[11px] font-extrabold text-blue-600">
-                <Users className="w-3.5 h-3.5" />
-                <span>+6 New this week</span>
-              </div>
-            </div>
-            <div className="w-11 h-11 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center">
-              <CreditCard className="w-5 h-5" />
-            </div>
-          </div>
-
-          {/* Card 3: Pitch Deck Views */}
-          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
-            <div className="space-y-1">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Investor Pitch Engagement</p>
-              <h2 className="text-2xl font-black text-slate-900">188 Views</h2>
-              <div className="flex items-center gap-1 text-[11px] font-extrabold text-orange-600">
-                <Rocket className="w-3.5 h-3.5" />
-                <span>12 Term sheet downloads</span>
-              </div>
-            </div>
-            <div className="w-11 h-11 rounded-2xl bg-orange-50 text-orange-600 flex items-center justify-center">
-              <BarChart3 className="w-5 h-5" />
-            </div>
-          </div>
-
-          {/* Card 4: Advisory & Mentorship Hours */}
-          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
-            <div className="space-y-1">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Mentorship Hours</p>
-              <h2 className="text-2xl font-black text-slate-900">24 Hours</h2>
-              <div className="flex items-center gap-1 text-[11px] font-extrabold text-purple-600">
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                <span>Next Session: Tomorrow 5 PM</span>
-              </div>
-            </div>
-            <div className="w-11 h-11 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center">
-              <Clock className="w-5 h-5" />
-            </div>
-          </div>
-        </div>
-
-        {/* Charts & Graphical Analytics Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* BAR CHART: Monthly Revenue & Growth */}
-          <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs space-y-6">
-            <div className="flex justify-between items-center">
-              <div>
-                <h2 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
-                  <BarChart3 className="w-5 h-5 text-blue-600" />
-                  Revenue Performance & Growth Trends
+          {/* 4 Metric Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {/* Card 1: My Business Bookings */}
+            <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between hover:border-[#147A87]/40 transition-all">
+              <div className="space-y-1">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  Business Bookings
+                </p>
+                <h2 className="text-2xl font-black text-slate-900 tracking-tight">
+                  {bookingCount === null ? (
+                    <Loader2 className="w-5 h-5 animate-spin text-slate-400" />
+                  ) : (
+                    bookingCount
+                  )}
                 </h2>
-                <p className="text-xs text-slate-400 mt-0.5">Monthly revenue vs forecast target (in ₹ Thousands)</p>
+                <p className="text-[11px] font-extrabold text-[#147A87]">Masterclasses registered</p>
               </div>
-
-              <div className="flex items-center gap-2">
-                <span className="flex items-center gap-1.5 text-[11px] font-bold text-slate-600">
-                  <span className="w-2.5 h-2.5 rounded-full bg-blue-600"></span> Actual Revenue
-                </span>
-                <span className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400">
-                  <span className="w-2.5 h-2.5 rounded-full bg-slate-200"></span> Target
-                </span>
+              <div className="w-12 h-12 rounded-2xl bg-[#147A87]/10 text-[#147A87] flex items-center justify-center font-bold">
+                <CalendarDays className="w-6 h-6" />
               </div>
             </div>
 
-            {/* Custom SVG Bar Chart */}
-            <div className="pt-4 pb-2">
-              <div className="h-56 flex items-end justify-between gap-4 px-2 border-b border-slate-100 pb-2">
-                {monthlyData.map((d, i) => (
-                  <div key={i} className="flex-1 flex flex-col items-center gap-2 h-full justify-end group cursor-pointer">
-                    {/* Tooltip on hover */}
-                    <div className="opacity-0 group-hover:opacity-100 transition-all bg-slate-900 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-md mb-1">
-                      ₹{d.revenue}k
-                    </div>
+            {/* Card 2: Active Events & Masterclasses */}
+            <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between hover:border-emerald-200 transition-all">
+              <div className="space-y-1">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  Active Masterclasses
+                </p>
+                <h2 className="text-2xl font-black text-slate-900 tracking-tight">
+                  {eventCount === null ? (
+                    <Loader2 className="w-5 h-5 animate-spin text-slate-400" />
+                  ) : (
+                    eventCount
+                  )}
+                </h2>
+                <p className="text-[11px] font-extrabold text-emerald-600">Available live sessions</p>
+              </div>
+              <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+                <BookOpen className="w-6 h-6" />
+              </div>
+            </div>
 
-                    {/* Bars Container */}
-                    <div className="w-full max-w-[42px] flex items-end justify-center gap-1.5 h-full">
-                      {/* Actual Revenue Bar */}
-                      <div
-                        style={{ height: `${(d.revenue / 130) * 100}%` }}
-                        className="w-1/2 bg-blue-600 group-hover:bg-blue-700 rounded-t-lg transition-all duration-300 shadow-sm"
-                      ></div>
-                      {/* Target Bar */}
-                      <div
-                        style={{ height: `${(d.target / 130) * 100}%` }}
-                        className="w-1/2 bg-slate-200 group-hover:bg-slate-300 rounded-t-lg transition-all duration-300"
-                      ></div>
-                    </div>
+            {/* Card 3: Pitch & Roadmap Status */}
+            <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between hover:border-purple-200 transition-all">
+              <div className="space-y-1">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  Growth & Roadmap
+                </p>
+                <h2 className="text-2xl font-black text-slate-900 tracking-tight">Active</h2>
+                <p className="text-[11px] font-extrabold text-purple-600">Incubator track</p>
+              </div>
+              <div className="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold">
+                <Briefcase className="w-6 h-6" />
+              </div>
+            </div>
 
-                    {/* Month Label */}
-                    <span className="text-[11px] font-bold text-slate-500 group-hover:text-blue-600">{d.month}</span>
+            {/* Card 4: Subscription Status */}
+            <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between hover:border-amber-200 transition-all relative">
+              <div className="space-y-1">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  Subscription Status
+                </p>
+                <h2 className="text-2xl font-black text-slate-900 tracking-tight capitalize">
+                  {subscriptionStatus || "Free Tier"}
+                </h2>
+                <SubscribeBadge status={subscriptionStatus} />
+              </div>
+              <div
+                onClick={() => setShowSubscribeModal(true)}
+                className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold cursor-pointer hover:scale-105 transition-all shadow-xs"
+                title="Upgrade Business Plan"
+              >
+                <ShieldCheck className="w-6 h-6" />
+              </div>
+            </div>
+          </div>
+
+          {/* Banner trigger to upgrade */}
+          {subscriptionStatus !== "active" && (
+            <div className="bg-gradient-to-r from-teal-900 via-slate-900 to-teal-950 rounded-2xl p-4 px-6 text-white flex items-center justify-between shadow-lg border border-teal-800/40">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-teal-500/20 text-teal-300 flex items-center justify-center shrink-0">
+                  <Zap className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-sm">Upgrade to Business Pro Pass</h3>
+                  <p className="text-xs text-slate-300">Unlock investor pitch decks, 1-on-1 legal advice & priority support.</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowSubscribeModal(true)}
+                className="bg-teal-500 hover:bg-teal-400 active:scale-95 transition-all text-white px-4 py-2 rounded-xl text-xs font-black shadow-md cursor-pointer shrink-0"
+              >
+                Upgrade Now →
+              </button>
+            </div>
+          )}
+
+          {/* Main Dashboard Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Left Column: Live Workshops & Masterclasses */}
+            <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-base font-extrabold text-slate-900">Upcoming Masterclasses</h2>
+                  <p className="text-xs text-slate-400">Live investor pitch sessions & startup bootcamps</p>
+                </div>
+                <a
+                  href="/business/workshops"
+                  className="text-xs font-bold text-teal-600 hover:text-teal-700 flex items-center gap-1 cursor-pointer"
+                >
+                  View All <ArrowRight className="w-3.5 h-3.5" />
+                </a>
+              </div>
+
+              {eventsLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="w-6 h-6 animate-spin text-teal-600" />
+                  <span className="ml-2 text-xs text-slate-400">Loading masterclasses…</span>
+                </div>
+              ) : safeEvents.length === 0 ? (
+                <p className="text-xs text-slate-400 text-center py-10">No upcoming masterclasses found.</p>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  {safeEvents.slice(0, 4).map((event, idx) => (
+                    <EventCard key={event._id || idx} event={event} index={idx} />
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Right Column: Auto-Scrolling Events Feed */}
+            <div className="lg:col-span-1 bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs flex flex-col h-[420px]">
+              <div className="flex items-center justify-between mb-3 shrink-0">
+                <div>
+                  <h2 className="text-base font-extrabold text-slate-900">Live Events Feed</h2>
+                  <p className="text-xs text-slate-400">Auto-scrolling platform updates</p>
+                </div>
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+              </div>
+
+              <div
+                ref={scrollRef}
+                onMouseEnter={pause}
+                onMouseLeave={resume}
+                className="flex-1 overflow-y-auto space-y-3 pr-1 scrollbar-none"
+              >
+                {doubledEvents.map((ev, idx) => (
+                  <div
+                    key={`${ev._id}-${idx}`}
+                    className="p-3 rounded-xl bg-slate-50/80 border border-slate-100 hover:border-teal-200 transition-all text-xs"
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-teal-50 text-teal-700">
+                        {ev.type || "MASTERCLASS"}
+                      </span>
+                      {ev.date && (
+                        <span className="text-[10px] text-slate-400">
+                          {new Date(ev.date).toLocaleDateString("en-IN", { month: "short", day: "numeric" })}
+                        </span>
+                      )}
+                    </div>
+                    <p className="font-bold text-slate-800 truncate">{ev.title}</p>
+                    {ev.location && (
+                      <p className="text-[10px] text-slate-400 mt-1 flex items-center gap-1">
+                        <MapPin className="w-2.5 h-2.5" /> {ev.location}
+                      </p>
+                    )}
                   </div>
                 ))}
               </div>
             </div>
           </div>
+        </main>
+      </div>
 
-          {/* PIE / DONUT CHART: Revenue Breakdown */}
-          <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs space-y-6 flex flex-col justify-between">
-            <div>
-              <h2 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
-                <PieIcon className="w-5 h-5 text-emerald-600" />
-                Revenue Channels
-              </h2>
-              <p className="text-xs text-slate-400 mt-0.5">Distribution by product source</p>
-            </div>
-
-            {/* Visual SVG Donut Graphic */}
-            <div className="flex justify-center items-center py-2 relative">
-              <svg className="w-40 h-40 transform -rotate-90" viewBox="0 0 36 36">
-                {/* Background Track */}
-                <path
-                  className="text-slate-100"
-                  strokeWidth="4"
-                  stroke="currentColor"
-                  fill="none"
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                />
-                {/* Segment 1: Incubator Pass (45%) */}
-                <path
-                  stroke="#2563eb"
-                  strokeWidth="4.5"
-                  strokeDasharray="45, 100"
-                  strokeLinecap="round"
-                  fill="none"
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                />
-                {/* Segment 2: Pro Subscriptions (30%) */}
-                <path
-                  stroke="#10b981"
-                  strokeWidth="4.5"
-                  strokeDasharray="30, 100"
-                  strokeDashoffset="-45"
-                  strokeLinecap="round"
-                  fill="none"
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                />
-                {/* Segment 3: Mentorship (15%) */}
-                <path
-                  stroke="#f97316"
-                  strokeWidth="4.5"
-                  strokeDasharray="15, 100"
-                  strokeDashoffset="-75"
-                  strokeLinecap="round"
-                  fill="none"
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                />
-              </svg>
-
-              <div className="absolute flex flex-col items-center justify-center text-center">
-                <span className="text-xs font-bold text-slate-400 uppercase">Total MRR</span>
-                <span className="text-base font-black text-slate-900">₹1.24L</span>
-              </div>
-            </div>
-
-            {/* Legend & Breakdown Details */}
-            <div className="space-y-2 text-xs">
-              {revenueSources.map((item, idx) => (
-                <div key={idx} className="flex items-center justify-between p-2 rounded-xl bg-slate-50/80">
-                  <div className="flex items-center gap-2">
-                    <span className={`w-3 h-3 rounded-md ${item.color}`}></span>
-                    <span className="font-bold text-slate-700">{item.name}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-extrabold text-slate-900">{item.value}</span>
-                    <span className="text-[10px] font-bold text-slate-400">({item.percentage})</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Bottom Section: Investor Pipeline & Milestones */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Investor Pipeline Activity */}
-          <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs space-y-4">
-            <div className="flex justify-between items-center">
+      {/* Subscription Modal */}
+      {showSubscribeModal && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 w-full max-w-2xl shadow-2xl space-y-6 border border-slate-100 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center border-b pb-4">
               <div>
-                <h2 className="text-base font-extrabold text-slate-900">Investor & Pitch Pipeline</h2>
-                <p className="text-xs text-slate-400">Venture capital interactions and term sheet updates.</p>
+                <h3 className="font-black text-slate-900 text-lg flex items-center gap-2">
+                  <ShieldCheck className="w-5 h-5 text-teal-600" />
+                  Upgrade Business Subscription
+                </h3>
+                <p className="text-xs text-slate-400">Select a business plan to power your startup growth.</p>
               </div>
-              <button className="text-xs font-bold text-blue-600 hover:text-blue-700 cursor-pointer">
-                View All Pitch Decks →
+              <button
+                onClick={() => setShowSubscribeModal(false)}
+                className="text-slate-400 hover:text-slate-600 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="space-y-3">
-              {investorActivity.map((inv, index) => (
-                <div key={index} className="flex items-center justify-between p-3.5 rounded-xl border border-slate-100 bg-slate-50/40 hover:bg-white hover:shadow-xs transition-all cursor-pointer">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-slate-900 text-white font-black text-xs flex items-center justify-center">
-                      {inv.name.charAt(0)}
-                    </div>
+            {plansLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="w-8 h-8 animate-spin text-teal-600" />
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {businessPlans.map((plan) => (
+                  <div
+                    key={plan.id}
+                    className="p-5 rounded-2xl border border-slate-200 bg-slate-50/50 hover:bg-white hover:shadow-md transition-all flex flex-col justify-between space-y-4"
+                  >
                     <div>
-                      <h4 className="font-bold text-slate-900 text-xs">{inv.name}</h4>
-                      <p className="text-[11px] text-slate-400">{inv.time}</p>
+                      <div className="flex justify-between items-start mb-2">
+                        <h4 className="font-black text-slate-900 text-base">{plan.name}</h4>
+                        <span className="text-xs font-black text-teal-600">
+                          {plan.price === 0 ? "Free" : `₹${plan.price}/mo`}
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-500 mb-3">{plan.desc || plan.description}</p>
+                      <div className="space-y-1.5 text-xs text-slate-600">
+                        {(plan.features || []).map((feat: string, i: number) => (
+                          <p key={i} className="flex items-center gap-2 text-[11px]">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                            {feat}
+                          </p>
+                        ))}
+                      </div>
                     </div>
+
+                    <button
+                      onClick={() => handleBusinessSubscribe(plan)}
+                      disabled={plan.price === 0 || checkoutLoading === plan.id}
+                      className="w-full py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 disabled:bg-slate-200 disabled:text-slate-400 text-white font-extrabold text-xs shadow-md transition-all cursor-pointer"
+                    >
+                      {checkoutLoading === plan.id
+                        ? "Opening Checkout..."
+                        : plan.price === 0
+                        ? "Current Free Plan"
+                        : `Subscribe for ₹${plan.price}`}
+                    </button>
                   </div>
-
-                  <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold border ${inv.badge}`}>
-                    {inv.status}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Business Quick Action Panel */}
-          <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-6 text-white shadow-md flex flex-col justify-between space-y-4">
-            <div className="space-y-2">
-              <span className="px-2.5 py-1 bg-blue-500/20 text-blue-300 border border-blue-400/30 rounded-lg text-[10px] font-extrabold uppercase tracking-wider">
-                Growth Acceleration
-              </span>
-              <h3 className="text-lg font-black tracking-tight">Need Expert Mentorship?</h3>
-              <p className="text-xs text-slate-300 leading-relaxed">
-                Connect with domain experts in AgriTech, Fintech, and SaaS for pitch deck reviews and legal setup.
-              </p>
-            </div>
-
-            <div className="space-y-2 pt-2">
-              <button className="w-full bg-blue-600 hover:bg-blue-500 active:scale-95 transition-all text-white py-2.5 rounded-xl text-xs font-bold shadow-md shadow-blue-500/20 cursor-pointer">
-                Book 1-on-1 Mentor Slot
-              </button>
-              <button className="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer">
-                Download Investor Agreement Template
-              </button>
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
-      </main>
+      )}
     </div>
-  </div>
   );
 }

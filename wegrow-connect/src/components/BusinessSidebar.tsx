@@ -10,7 +10,9 @@ import {
   Scale,
   CreditCard,
   Settings,
-  LogOut
+  LogOut,
+  BookOpen,
+  Calendar
 } from "lucide-react";
 
 export default function BusinessSidebar() {
@@ -21,16 +23,17 @@ export default function BusinessSidebar() {
   const navLinks = [
     { name: "Dashboard", href: "/business/dashboard", icon: LayoutDashboard },
     { name: "My Profile", href: "/home/profile", icon: User },
+    { name: "My Events", href: "/business/canvas", icon: BookOpen },
+    { name: "My Booking", href: "/business/workshops", icon: Calendar },
     { name: "Analytics", href: "/business/analytics", icon: BarChart3 },
-    { name: "Canvas", href: "/business/canvas", icon: Palette },
     { name: "Roadmap", href: "/business/roadmap", icon: Target },
-    { name: "Workshops", href: "/business/workshops", icon: Video },
     { name: "Legal", href: "/business/legal", icon: Scale },
     { name: "Subscriptions", href: "/business/subscriptions", icon: CreditCard },
     { name: "Settings", href: "/business/settings", icon: Settings },
   ];
 
   const handleLogout = () => {
+    sessionStorage.clear();
     localStorage.removeItem("accessToken");
     localStorage.removeItem("user");
     localStorage.removeItem("role");

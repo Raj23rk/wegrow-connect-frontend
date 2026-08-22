@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import BusinessSidebar from "../../components/BusinessSidebar";
+import StudentSidebar from "../../components/StudentSidebar";
 import DashboardProfileMenu, { useDashboardUser } from "../../components/DashboardProfileMenu";
-import { getBusinessSubscriptions, getInvoices } from "../../services/api";
+import { getStudentSubscriptions, getInvoices } from "../../services/api";
 import { openRazorpaySubscriptionCheckout } from "../../services/razorpay";
 import {
   CreditCard,
@@ -10,14 +10,19 @@ import {
   ShieldCheck,
   Download,
   Sparkles,
+  ArrowRight,
+  Clock,
+  AlertCircle,
+  HelpCircle,
+  Plus,
   Loader2,
-  Building2,
+  Award
 } from "lucide-react";
 
-export default function BusinessSubscriptions() {
+export default function StudentSubscriptions() {
   const { user } = useDashboardUser();
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("yearly");
-  const [activePlanName, setActivePlanName] = useState<string>("Starter Founder");
+  const [activePlanName, setActivePlanName] = useState<string>("Student Free");
   const [subscriptionStatus, setSubscriptionStatus] = useState<string>("free");
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -25,68 +30,69 @@ export default function BusinessSubscriptions() {
   // Default fallback plans
   const [plans, setPlans] = useState<any[]>([
     {
-      id: "starter",
-      name: "Starter Founder Pass",
-      type: "BUSINESS",
-      desc: "For early-stage entrepreneurs exploring market validation and incubator resources.",
+      id: "student-free",
+      name: "Student Free Pass",
+      type: "STUDENT",
+      desc: "Basic access to community workshops, learning roadmaps, and free events.",
       monthlyPrice: "₹0",
       yearlyPrice: "₹0",
       price: 0,
       popular: false,
       features: [
-        "Business Model Canvas Tool",
-        "Community Access & Forums",
-        "Basic Roadmap Tracker",
-        "1 Pitch Deck Review / month"
+        "Access to Public Workshops",
+        "Community Chat & Forums",
+        "Basic Skill Track Roadmaps",
+        "1 Free Verified Certificate"
       ],
       buttonText: "Current Free Plan",
       current: true,
     },
     {
-      id: "pro",
-      name: "Pro Growth Pass",
-      type: "BUSINESS",
-      desc: "For growing startups seeking investor pitch deck access, mentor guidance & live analytics.",
-      monthlyPrice: "₹1,499",
-      yearlyPrice: "₹1,199",
-      price: 1199,
+      id: "student-pro",
+      name: "Student Pro Pass",
+      type: "STUDENT",
+      desc: "Unlimited access to all live masterclasses, mentor 1-on-1 sessions & unlimited certificates.",
+      monthlyPrice: "₹499",
+      yearlyPrice: "₹399",
+      price: 499,
       period: "/ month",
       popular: true,
       features: [
-        "All Starter Features Included",
-        "Unlimited Investor Pitch Deck Downloads",
-        "2 One-on-One Legal & Mentor Sessions",
-        "Real-Time Business Analytics Dashboard",
-        "Priority Statutory Compliance & Tax Alerts",
-        "Direct Matchmaking with Angels & Seed VCs"
+        "All Free Features Included",
+        "Unlimited Live Masterclasses & Recordings",
+        "Unlimited Certificate Downloads",
+        "1-on-1 Mentor Guidance & Doubt Solving",
+        "Priority Internship & Job Matchmaking",
+        "Direct Access to Incubator Network"
       ],
       buttonText: "Upgrade to Pro Pass",
       current: false,
     },
     {
-      id: "incubator",
-      name: "Incubator & Scale Pass",
-      type: "BUSINESS",
-      desc: "Comprehensive enterprise suite for funded startups & campus incubators.",
-      monthlyPrice: "₹4,999",
-      yearlyPrice: "₹3,999",
-      price: 3999,
+      id: "student-master",
+      name: "Campus Ambassador & Scale",
+      type: "STUDENT",
+      desc: "For student leaders running campus clubs & seeking exclusive incubator access.",
+      monthlyPrice: "₹1,499",
+      yearlyPrice: "₹1,199",
+      price: 1199,
       period: "/ month",
       popular: false,
       features: [
-        "All Pro Growth Features",
-        "Dedicated Legal & Chartered Accountant Desk",
-        "Direct Investor Matchmaking Pipeline",
-        "Custom Startup Analytics & Board Reports",
-        "24/7 VIP Dedicated Account Manager"
+        "All Student Pro Features",
+        "Campus Ambassador Leadership Kit",
+        "Direct Startup Pitch Deck Submission",
+        "Dedicated Career Mentor Allocation",
+        "Exclusive VIP Masterclasses with Founders"
       ],
-      buttonText: "Join Incubator Scale Pass",
+      buttonText: "Join Campus Leader Pass",
       current: false,
     },
   ]);
 
   const [invoices, setInvoices] = useState<any[]>([]);
 
+  // Logged in user details
   const currentUser = (() => {
     try {
       const raw = sessionStorage.getItem("user");
@@ -96,6 +102,7 @@ export default function BusinessSubscriptions() {
     }
   })();
 
+  // Resolve active subscription status
   useEffect(() => {
     const status =
       currentUser?.subscriptionStatus ||
@@ -105,16 +112,17 @@ export default function BusinessSubscriptions() {
     if (status) {
       setSubscriptionStatus(typeof status === "string" ? status.toLowerCase() : "free");
       if (status.toLowerCase() === "active") {
-        setActivePlanName(currentUser?.plan || "Pro Growth Pass");
+        setActivePlanName(currentUser?.plan || "Student Pro Pass");
       }
     }
   }, [currentUser]);
 
+  // Load plans & invoices from backend API
   useEffect(() => {
     async function loadData() {
       try {
         setLoading(true);
-        const fetchedPlans = await getBusinessSubscriptions();
+        const fetchedPlans = await getStudentSubscriptions();
         if (Array.isArray(fetchedPlans) && fetchedPlans.length > 0) {
           setPlans(fetchedPlans);
         }
@@ -124,7 +132,7 @@ export default function BusinessSubscriptions() {
           setInvoices(invoicesData);
         }
       } catch (error) {
-        console.error("Failed to load business subscription plans", error);
+        console.error("Failed to load student subscription plans", error);
       } finally {
         setLoading(false);
       }
@@ -132,15 +140,16 @@ export default function BusinessSubscriptions() {
     loadData();
   }, []);
 
+  // Razorpay checkout handler for Student
   const handleSubscribePlan = (plan: any) => {
     if (plan.current || plan.price === 0) return;
     setCheckoutLoading(plan.id);
 
     openRazorpaySubscriptionCheckout({
-      plan: { ...plan, type: "BUSINESS" },
+      plan: { ...plan, type: "STUDENT" },
       user: currentUser,
       onSuccess: (result: any) => {
-        console.log("Business subscription payment success:", result);
+        console.log("Student subscription payment success:", result);
         setActivePlanName(plan.name);
         setSubscriptionStatus("active");
 
@@ -171,8 +180,8 @@ export default function BusinessSubscriptions() {
 
   return (
     <div className="flex min-h-screen bg-slate-50/60 font-sans text-slate-800 antialiased">
-      {/* Business Sidebar */}
-      <BusinessSidebar />
+      {/* Student Sidebar */}
+      <StudentSidebar />
 
       {/* Main Subscriptions Content */}
       <div className="flex-1 flex flex-col min-w-0 h-screen max-h-screen overflow-hidden">
@@ -181,10 +190,10 @@ export default function BusinessSubscriptions() {
           <div>
             <h1 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2.5">
               <CreditCard className="w-6 h-6 text-teal-600" />
-              Business Subscriptions & Growth Plans
+              Student Subscriptions & Plans
             </h1>
             <p className="text-[11px] font-bold text-slate-400 mt-0.5">
-              Manage your startup subscription pass, legal support & investor pitch decks.
+              Upgrade your learning pass, access masterclasses & verified certificates.
             </p>
           </div>
           <DashboardProfileMenu />
@@ -197,7 +206,7 @@ export default function BusinessSubscriptions() {
             <div className="space-y-2">
               <div className="flex items-center gap-2.5">
                 <span className="px-3 py-1 bg-teal-500/20 text-teal-300 border border-teal-400/30 rounded-xl text-[10px] font-black uppercase tracking-wider">
-                  {subscriptionStatus === "active" ? "Active Business Plan" : "Starter Free Plan"}
+                  {subscriptionStatus === "active" ? "Active Subscription" : "Free Learning Tier"}
                 </span>
                 {subscriptionStatus === "active" && (
                   <span className="text-xs text-emerald-400 font-bold flex items-center gap-1">
@@ -208,8 +217,8 @@ export default function BusinessSubscriptions() {
               <h2 className="text-2xl font-black tracking-tight">{activePlanName}</h2>
               <p className="text-xs text-slate-300 font-medium">
                 {subscriptionStatus === "active"
-                  ? "Enjoy unlimited access to investor pitch decks, 1-on-1 legal sessions, and incubator analytics."
-                  : "You are currently on the Starter Founder Pass. Upgrade to unlock investor decks & legal support."}
+                  ? "Enjoy unlimited access to masterclasses, certificates, and 1-on-1 mentor guidance."
+                  : "You are currently on the Free Student Pass. Upgrade to unlock verified certificates & masterclasses."}
               </p>
             </div>
 
@@ -232,7 +241,7 @@ export default function BusinessSubscriptions() {
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs">
             <div>
               <h3 className="font-extrabold text-slate-900 text-sm">Choose Subscription Billing</h3>
-              <p className="text-xs text-slate-400 mt-0.5">Save up to 20% on annual business plans</p>
+              <p className="text-xs text-slate-400 mt-0.5">Save up to 20% on annual student plans</p>
             </div>
             <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
               <button
@@ -262,7 +271,7 @@ export default function BusinessSubscriptions() {
           {loading ? (
             <div className="flex items-center justify-center py-16">
               <Loader2 className="w-8 h-8 animate-spin text-teal-600" />
-              <span className="ml-3 text-sm text-slate-500 font-bold">Loading business plans...</span>
+              <span className="ml-3 text-sm text-slate-500 font-bold">Loading student plans...</span>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -283,7 +292,7 @@ export default function BusinessSubscriptions() {
                   >
                     {plan.popular && (
                       <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-teal-600 text-white text-[10px] font-black uppercase tracking-wider px-3.5 py-1 rounded-full shadow-sm flex items-center gap-1">
-                        <Sparkles className="w-3 h-3" /> Recommended for Startups
+                        <Sparkles className="w-3 h-3" /> Recommended for Students
                       </div>
                     )}
 
@@ -335,7 +344,7 @@ export default function BusinessSubscriptions() {
                         : isCurrent
                         ? "✅ Current Active Plan"
                         : plan.price === 0
-                        ? "Free Founder Tier"
+                        ? "Free Student Tier"
                         : plan.buttonText || "Subscribe Now"}
                     </button>
                   </div>
@@ -348,7 +357,7 @@ export default function BusinessSubscriptions() {
           <div className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-xs space-y-4">
             <div className="flex justify-between items-center border-b border-slate-100 pb-4">
               <div>
-                <h2 className="text-base font-black text-slate-900">Business Receipts & Tax Invoices</h2>
+                <h2 className="text-base font-black text-slate-900">Student Receipts & Invoices</h2>
                 <p className="text-xs text-slate-400 mt-0.5">Download your subscription payment receipts and tax invoices.</p>
               </div>
             </div>

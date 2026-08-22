@@ -36,6 +36,7 @@ import StudentCertificates from './student/certificates/page';
 import StudentRewards from './student/rewards/page';
 import StudentAnalytics from './student/analytics/page';
 import StudentWorkshops from './student/workshops/page';
+import StudentSubscriptions from './student/subscriptions/page';
 import StudentSettings from './student/settings/page';
 
 // Business Portal Sub-pages
@@ -520,6 +521,7 @@ export default function App() {
           <Route path="/student/rewards" element={<ProtectedRoute allowedRoles={['student']}><StudentRewards /></ProtectedRoute>} />
           <Route path="/student/analytics" element={<ProtectedRoute allowedRoles={['student']}><StudentAnalytics /></ProtectedRoute>} />
           <Route path="/student/workshops" element={<ProtectedRoute allowedRoles={['student']}><StudentWorkshops /></ProtectedRoute>} />
+          <Route path="/student/subscriptions" element={<ProtectedRoute allowedRoles={['student']}><StudentSubscriptions /></ProtectedRoute>} />
           <Route path="/student/settings" element={<ProtectedRoute allowedRoles={['student']}><StudentSettings /></ProtectedRoute>} />
 
           {/* Business Dashboard Routes (Protected) */}
