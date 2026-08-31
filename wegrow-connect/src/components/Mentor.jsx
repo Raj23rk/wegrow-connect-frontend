@@ -121,7 +121,7 @@ export default function Mentor({ mentorTargetRef, mentorStyle }) {
   const sliderRef = useRef(null);
   const [isPaused, setIsPaused] = useState(false);
 
-  const cardWidth = 344; // 320px width + 24px gap
+  const cardWidth = 310; // card width + gap
   const singleSetWidth = cardWidth * baseMentors.length;
 
   // Custom Smooth Ease-In-Out Smooth Scroll
@@ -164,16 +164,16 @@ export default function Mentor({ mentorTargetRef, mentorStyle }) {
     }
   };
 
-  // 2.5 SECONDS STEP-BY-STEP ULTRA SMOOTH SLIDE
+  // Auto-slide
   useEffect(() => {
     if (isPaused) return;
 
     const interval = setInterval(() => {
       if (sliderRef.current) {
         const target = sliderRef.current.scrollLeft + cardWidth;
-        customSmoothScroll(target, 1200); // 1.2s smooth slide transition time
+        customSmoothScroll(target, 1200);
       }
-    }, 2800); // Trigger every 2.8s
+    }, 2800);
 
     return () => clearInterval(interval);
   }, [isPaused, cardWidth, singleSetWidth]);
@@ -183,41 +183,33 @@ export default function Mentor({ mentorTargetRef, mentorStyle }) {
       ref={mentorTargetRef} 
       id="mentors" 
       style={mentorStyle}
-      className="relative pt-0 pb-16 transition-all duration-300 ease-out transform-gpu"
+      className="relative py-5 sm:py-8 md:py-12 transition-all duration-300 ease-out transform-gpu overflow-hidden"
     >
-      <style>{`
-        @keyframes moveLeftRightLeft {
-          0%, 100% { transform: translateX(0); }
-          50% { transform: translateX(-6px); }
-        }
-        @keyframes moveLeftRightRight {
-          0%, 100% { transform: translateX(0); }
-          50% { transform: translateX(6px); }
-        }
-        .animate-nudge-left {
-          animation: moveLeftRightLeft 1.4s infinite ease-in-out;
-        }
-        .animate-nudge-right {
-          animation: moveLeftRightRight 1.4s infinite ease-in-out;
-        }
-      `}</style>
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 relative">
 
-      <div className="max-w-7xl mx-auto px-4 md:px-6 relative">
-
-        {/* HEADER SECTION - REDUCED TOP/BOTTOM MARGIN */}
-        <div id="mentor-title" className="max-w-4xl mx-auto text-center space-y-2 mb-6">
-          <span className="text-xs uppercase font-black tracking-widest block" style={{ color: theme.orange }}>
+        {/* HEADER */}
+        <div className="max-w-4xl mx-auto text-center mb-4 sm:mb-6 md:mb-8">
+          <span 
+            className="text-xs uppercase font-black tracking-[0.2em] block mb-2" 
+            style={{ color: theme.orange }}
+          >
             WORLD-CLASS GUIDANCE
           </span>
-          <h2 className="text-3xl lg:text-5xl font-extrabold drop-shadow-sm leading-tight" style={{ color: theme.primary }}>
+          <h2 
+            className="text-2xl sm:text-4xl font-black tracking-tight mb-2 sm:mb-3" 
+            style={{ color: theme.primary }}
+          >
             Meet Our Mentors & Instructors
           </h2>
-          <p className="text-sm lg:text-base font-semibold leading-relaxed" style={{ color: theme.textMuted }}>
+          <p 
+            className="text-xs sm:text-sm font-medium leading-relaxed max-w-2xl mx-auto" 
+            style={{ color: theme.textMuted }}
+          >
             Learn directly from top Indian industry veterans and online experts with proven field execution.
           </p>
         </div>
 
-        {/* CAROUSEL WRAPPER WITH PAUSE ON HOVER */}
+        {/* CAROUSEL WRAPPER */}
         <div 
           className="relative w-full"
           onMouseEnter={() => setIsPaused(true)}
@@ -227,15 +219,15 @@ export default function Mentor({ mentorTargetRef, mentorStyle }) {
           {/* LEFT ARROW */}
           <button 
             onClick={() => scroll('left')}
-            className="absolute -left-3 md:-left-7 top-1/2 -translate-y-1/2 z-50 p-1.5 transition-all duration-300 hover:scale-125 focus:outline-none cursor-pointer bg-transparent border-none"
+            className="absolute -left-1 md:left-0 top-1/2 -translate-y-1/2 z-50 w-9 h-9 md:w-11 md:h-11 rounded-full bg-white shadow-lg border border-gray-200 flex items-center justify-center hover:bg-[#104288] hover:text-white hover:border-[#104288] hover:shadow-xl transition-all duration-300 focus:outline-none cursor-pointer group"
             title="Previous"
           >
             <svg 
-              className="w-7 h-7 md:w-9 md:h-9 animate-nudge-left transition-colors" 
+              className="w-4 h-4 md:w-5 md:h-5 text-gray-600 group-hover:text-white transition-colors" 
               viewBox="0 0 24 24" 
               fill="none" 
-              stroke={theme.primary} 
-              strokeWidth="2" 
+              stroke="currentColor" 
+              strokeWidth="2.5" 
               strokeLinecap="round" 
               strokeLinejoin="round"
             >
@@ -246,15 +238,15 @@ export default function Mentor({ mentorTargetRef, mentorStyle }) {
           {/* RIGHT ARROW */}
           <button 
             onClick={() => scroll('right')}
-            className="absolute -right-3 md:-right-7 top-1/2 -translate-y-1/2 z-50 p-1.5 transition-all duration-300 hover:scale-125 focus:outline-none cursor-pointer bg-transparent border-none"
+            className="absolute -right-1 md:right-0 top-1/2 -translate-y-1/2 z-50 w-9 h-9 md:w-11 md:h-11 rounded-full bg-white shadow-lg border border-gray-200 flex items-center justify-center hover:bg-[#104288] hover:text-white hover:border-[#104288] hover:shadow-xl transition-all duration-300 focus:outline-none cursor-pointer group"
             title="Next"
           >
             <svg 
-              className="w-7 h-7 md:w-9 md:h-9 animate-nudge-right transition-colors" 
+              className="w-4 h-4 md:w-5 md:h-5 text-gray-600 group-hover:text-white transition-colors" 
               viewBox="0 0 24 24" 
               fill="none" 
-              stroke={theme.primary} 
-              strokeWidth="2" 
+              stroke="currentColor" 
+              strokeWidth="2.5" 
               strokeLinecap="round" 
               strokeLinejoin="round"
             >
@@ -262,67 +254,76 @@ export default function Mentor({ mentorTargetRef, mentorStyle }) {
             </svg>
           </button>
 
-          {/* INFINITE MENTORS SLIDER CONTAINER */}
+          {/* FADE EDGES */}
+          <div className="pointer-events-none absolute inset-y-0 left-0 w-12 md:w-16 z-40" style={{ background: 'linear-gradient(to right, rgba(244,247,251,1) 0%, rgba(244,247,251,0) 100%)' }} />
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-12 md:w-16 z-40" style={{ background: 'linear-gradient(to left, rgba(244,247,251,1) 0%, rgba(244,247,251,0) 100%)' }} />
+
+          {/* MENTORS SLIDER CONTAINER */}
           <div 
             ref={sliderRef}
-            className="flex gap-6 overflow-x-auto pb-4 pt-1 px-4 md:px-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+            className="flex gap-5 overflow-x-auto pb-3 pt-1 px-10 md:px-14 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
           >
             {infiniteMentors.map((mentor, index) => (
               <div 
                 key={`${mentor.id}-${index}`}
-                className="shrink-0 w-[280px] sm:w-[320px] group backdrop-blur-md rounded-3xl overflow-hidden border shadow-xl p-5 flex flex-col justify-between transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl"
-                style={{ backgroundColor: theme.cardBg, borderColor: theme.cardBorder }}
+                className="shrink-0 w-[220px] sm:w-[245px] md:w-[260px] group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-[0_2px_14px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_28px_rgba(0,0,0,0.12)] hover:-translate-y-1.5 transition-all duration-300 flex flex-col"
               >
-                <div>
-                  {/* FULL WIDTH FIT IMAGE BOX */}
-                  <div className="w-full h-[220px] rounded-2xl overflow-hidden relative mb-4 bg-zinc-900 border border-amber-500/10">
-                    <img 
-                      src={mentor.img} 
-                      alt={mentor.name} 
-                      className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
-                    />
-                    <span 
-                      className="absolute bottom-2 left-2 text-[10px] font-black px-2.5 py-1 rounded-full backdrop-blur-md border shadow-md"
-                      style={{ color: theme.primary, backgroundColor: 'white', borderColor: theme.cardBorder }}
-                    >
-                      ✦ {mentor.experience}
-                    </span>
-                  </div>
+                {/* IMAGE */}
+                <div className="w-full h-[140px] sm:h-[165px] md:h-[180px] overflow-hidden relative bg-gray-100">
+                  <img 
+                    src={mentor.img} 
+                    alt={mentor.name} 
+                    className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
+                  />
+                  {/* Experience Badge */}
+                  <span 
+                    className="absolute bottom-2.5 left-2.5 text-[9px] font-bold px-2.5 py-1 rounded-md shadow-md backdrop-blur-sm"
+                    style={{ 
+                      color: '#ffffff', 
+                      backgroundColor: 'rgba(16,66,136,0.88)',
+                    }}
+                  >
+                    ✦ {mentor.experience}
+                  </span>
+                </div>
 
+                {/* CONTENT */}
+                <div className="p-3.5 flex flex-col flex-1">
                   {/* STAR RATING & REVIEWS */}
-                  <div className="flex items-center gap-1.5 mb-2 text-left">
-                    <span className="text-amber-400 text-sm">★</span>
-                    <span className="text-xs font-black" style={{ color: theme.textBright }}>{mentor.rating}</span>
-                    <span className="text-[11px] font-semibold" style={{ color: theme.textMuted }}>({mentor.reviews} reviews)</span>
+                  <div className="flex items-center gap-1 mb-1.5">
+                    <span className="text-amber-400 text-xs">★</span>
+                    <span className="text-xs font-black text-gray-900">{mentor.rating}</span>
+                    <span className="text-[10px] font-medium text-gray-400">({mentor.reviews})</span>
                   </div>
 
-                  {/* DETAILS */}
-                  <div className="text-left space-y-1">
-                    <h3 className="text-lg font-extrabold truncate" style={{ color: theme.textBright }}>
-                      {mentor.name}
-                    </h3>
-                    <p className="text-[11px] font-bold uppercase tracking-wider truncate" style={{ color: theme.primary }}>
-                      {mentor.role}
-                    </p>
-                    <p className="text-xs leading-relaxed pt-1.5 line-clamp-2" style={{ color: theme.textMain }}>
-                      {mentor.bio}
-                    </p>
+                  {/* NAME & ROLE */}
+                  <h3 className="text-base font-extrabold text-gray-900 truncate mb-0.5 group-hover:text-[#104288] transition-colors duration-300">
+                    {mentor.name}
+                  </h3>
+                  <p 
+                    className="text-[9px] font-bold uppercase tracking-wider truncate mb-1.5"
+                    style={{ color: theme.primary }}
+                  >
+                    {mentor.role}
+                  </p>
+
+                  {/* BIO */}
+                  <p className="text-xs font-medium text-gray-500 leading-relaxed line-clamp-2 mb-2.5 flex-1">
+                    {mentor.bio}
+                  </p>
+
+                  {/* SKILLS */}
+                  <div className="pt-2 border-t border-gray-100 flex flex-wrap gap-1">
+                    {mentor.skills.map((skill, idx) => (
+                      <span 
+                        key={idx} 
+                        className="text-[9px] font-semibold px-2 py-0.5 rounded-md bg-gray-50 text-gray-500 border border-gray-100"
+                      >
+                        {skill}
+                      </span>
+                    ))}
                   </div>
                 </div>
-
-                {/* SKILLS TAGS */}
-                <div className="pt-4 border-t mt-4 flex flex-wrap gap-1.5" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
-                  {mentor.skills.map((skill, idx) => (
-                    <span 
-                      key={idx} 
-                      className="text-[10px] font-semibold px-2 py-0.5 rounded-md"
-                      style={{ backgroundColor: 'rgba(255,255,255,0.05)', color: theme.textMuted }}
-                    >
-                      #{skill}
-                    </span>
-                  ))}
-                </div>
-
               </div>
             ))}
           </div>

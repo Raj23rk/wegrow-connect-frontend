@@ -671,20 +671,12 @@ export default function SetPasswordScreen() {
 
           {/* LOGO */}
 
-          <div className="flex items-center justify-center mb-6">
-
+          <div className="flex items-center justify-center mb-6 cursor-pointer" onClick={() => navigate('/home')}>
             <img
-              src="/login/logo.jpg"
-              alt="Logo Icon"
-              className="w-12 h-12 object-contain relative z-10"
+              src="/wegrow-logo.png"
+              alt="WeGrow B School"
+              className="w-[180px] sm:w-[200px] h-[58px] sm:h-[64px] object-contain"
             />
-
-            <img
-              src="/login/wegrow-logo.png"
-              alt="WeGrow Text Logo"
-              className="w-[160px] h-[48px] object-contain -ml-6 relative z-0"
-            />
-
           </div>
 
           {/* =================================================

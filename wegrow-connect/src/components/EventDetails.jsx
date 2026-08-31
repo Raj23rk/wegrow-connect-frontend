@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import toast from "react-hot-toast";
 
 // ─── Constants ──────────────────────────────────────────
 const API_BASE_URL = "https://wegrow-connect-backend-1.onrender.com/api/v1";
@@ -106,13 +107,13 @@ export default function EventDetails() {
     const token = getToken();
 
     if (!token) {
-      alert("Please login to book this event.");
+      toast.error("Please login to book this event.");
       navigate("/home/login");
       return;
     }
 
     if (!event?._id) {
-      alert("Event information is missing.");
+      toast.error("Event information is missing.");
       return;
     }
 
@@ -120,8 +121,6 @@ export default function EventDetails() {
 
     try {
       setBooking(true);
-
-      console.log("[BookNow] event:", event._id);
 
       const res = await fetch(`${API_BASE_URL}/bookings/create-booking`, {
         method: "POST",
@@ -133,7 +132,6 @@ export default function EventDetails() {
       });
 
       const json = await res.json();
-      console.log("[BookNow] response:", res.status, json);
 
       // ── Already booked ───────────────────────────────
       if (
@@ -141,14 +139,14 @@ export default function EventDetails() {
         (json?.message || "").toLowerCase().includes("already")
       ) {
         setAlreadyBooked(true);
-        alert("You have already booked this event!");
+        toast.error("You have already booked this event!");
         return;
       }
 
       // ── Session expired ──────────────────────────────
       if (res.status === 401 || res.status === 403) {
         sessionStorage.removeItem("accessToken");
-        alert("Your session expired. Please login again.");
+        toast.error("Your session expired. Please login again.");
         navigate("/home/login");
         return;
       }
@@ -158,15 +156,15 @@ export default function EventDetails() {
         setBookingResult(json?.data || {});
         setAlreadyBooked(true);
         setShowSuccess(true);
+        toast.success("Event booked successfully!");
         return;
       }
 
       // ── Other API error ──────────────────────────────
-      alert(json?.message || json?.error || "Unable to create booking.");
+      toast.error(json?.message || json?.error || "Unable to create booking.");
 
     } catch (err) {
-      console.error("[BookNow] error:", err);
-      alert("Network error. Please check your connection and try again.");
+      toast.error("Network error. Please check your connection and try again.");
     } finally {
       setBooking(false);
     }

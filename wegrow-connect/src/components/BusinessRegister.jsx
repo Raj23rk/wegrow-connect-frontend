@@ -499,10 +499,12 @@
 
 
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function BusinessRegister() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const queryCommunity = new URLSearchParams(location.search).get('community');
 
   // =====================================================
   // API CONFIGURATION
@@ -522,19 +524,19 @@ export default function BusinessRegister() {
 
   const businessSlides = [
     {
-      img: 'https://images.unsplash.com/photo-1553413077-190dd305871c?w=1000&auto=format&fit=crop&q=80',
-      title: 'Accelerate Your Business Growth',
-      desc: 'Connect with skilled interns, find qualified talent, and scale your operations with WeGrow.',
+      img: '/student_startup_founder.jpg',
+      title: 'Student Startup Founder',
+      desc: 'Empowering student visionaries and college founders with hands-on incubation, business plan guidance, and startup ecosystems.',
     },
     {
-      img: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=1000&auto=format&fit=crop&q=80',
-      title: 'Post Opportunities & Find Talent',
-      desc: 'Easily post internships and job openings to a vast network of verified students and graduates.',
+      img: '/women_entrepreneurs_comm.jpg',
+      title: 'Women Entrepreneurs Community',
+      desc: 'Dedicated network supporting women business leaders, innovators, and founders with scaling strategies and community mentorship.',
     },
     {
-      img: 'https://images.unsplash.com/photo-1606857521015-7f9fcf423740?w=1000&auto=format&fit=crop&q=80',
-      title: 'Build Your Employer Brand',
-      desc: 'Showcase your company culture, attract top-tier talent, and establish your industry presence.',
+      img: '/sivakasi_entrepreneurs_comm.jpg',
+      title: 'Sivakasi Entrepreneurs Community',
+      desc: 'Uniting Sivakasi industrial pioneers, business owners, and SMEs to collaborate, modernize, and accelerate regional business growth.',
     },
   ];
 
@@ -559,6 +561,7 @@ export default function BusinessRegister() {
     designation: '',
     experience: '',
     website: '',
+    communityGroup: queryCommunity || 'Sivakasi Entrepreneurs Community',
   });
 
   const [idProofFile, setIdProofFile] = useState(null);
@@ -903,6 +906,12 @@ export default function BusinessRegister() {
   // =====================================================
 
   const optionsList = {
+    communityGroup: [
+      'Student Startup Founder',
+      'Women Entrepreneurs Community',
+      'Sivakasi Entrepreneurs Community',
+    ],
+
     businessType: [
       'Software Development',
       'IT Services',
@@ -1149,17 +1158,11 @@ export default function BusinessRegister() {
 
           <div className="relative z-10 flex items-center justify-between">
 
-            <div className="flex items-center">
+            <div className="flex items-center cursor-pointer" onClick={() => navigate('/home')}>
               <img
-                src="/login/logo.jpg"
-                alt="Logo Icon"
-                className="w-12 h-12 object-contain relative z-10"
-              />
-
-              <img
-                src="/login/wegrow-logo.png"
-                alt="WeGrow Text Logo"
-                className="w-[160px] h-[48px] object-contain -ml-6 relative z-0"
+                src="/wegrow-logo.png"
+                alt="WeGrow B School"
+                className="w-[170px] sm:w-[190px] h-[56px] sm:h-[60px] object-contain"
               />
             </div>
 
@@ -1557,6 +1560,19 @@ export default function BusinessRegister() {
                 )}
               </div>
 
+            </div>
+
+            {/* COMMUNITY GROUP SELECTION */}
+            <div className="w-full flex flex-col gap-1.5 pt-1">
+              <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider flex items-center justify-between">
+                <span>Select Community Group to Join</span>
+                <span className="text-[#f97316] font-extrabold text-[10px]">✨ Required Community</span>
+              </label>
+
+              {renderCustomDropdown(
+                'communityGroup',
+                'Select community group'
+              )}
             </div>
 
             {/* REGISTER BUTTON */}

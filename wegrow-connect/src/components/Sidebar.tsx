@@ -14,7 +14,8 @@ import {
   BarChart3,
   Bell,
   Settings,
-  LogOut
+  LogOut,
+  Image
 } from "lucide-react";
 
 export default function Sidebar() {
@@ -29,6 +30,7 @@ export default function Sidebar() {
     { name: "Roles & Permissions", href: "/admin/roles", icon: ShieldCheck },
     { name: "Booking", href: "/admin/workshops", icon: BookOpen },
     { name: "Events & Bootcamps", href: "/admin/events", icon: Calendar },
+    { name: "Gallery Photos", href: "/admin/gallery", icon: Image },
     { name: "Subscriptions", href: "/admin/subscriptions", icon: CreditCard },
     { name: "Payments & Invoices", href: "/admin/payments", icon: Receipt },
     { name: "Certificates", href: "/admin/certificates", icon: Award },

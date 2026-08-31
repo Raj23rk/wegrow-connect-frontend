@@ -114,7 +114,7 @@ export default function Hero({ heroTransform, scrollToEvents, scrollToSeminars }
     <section 
       id="hero-section" 
       style={heroTransform} 
-      className="min-h-[calc(100vh-60px)] relative flex flex-col justify-between pt-2 pb-2 transition-transform duration-100 ease-out overflow-hidden animate-hero-reveal"
+      className="min-h-[calc(100vh-100px)] relative flex flex-col justify-between py-4 sm:py-6 transition-transform duration-100 ease-out overflow-hidden animate-hero-reveal"
     >
       <style>{`
         @keyframes heroReveal {
@@ -158,7 +158,7 @@ export default function Hero({ heroTransform, scrollToEvents, scrollToSeminars }
         {/* ROW 1: Moving Left */}
         <div className="animate-marquee-left gap-4">
           {[...backgroundCollageImages, ...backgroundCollageImages].map((imgUrl, index) => (
-            <div key={`row1-${index}`} className="w-64 h-40 rounded-2xl overflow-hidden shadow-lg shrink-0 border-2 border-white/20">
+            <div key={`row1-${index}`} className="w-40 h-24 sm:w-64 sm:h-36 rounded-2xl overflow-hidden shadow-lg shrink-0 border-2 border-white/20">
               <img src={imgUrl} alt="Collage Item" className="w-full h-full object-cover filter contrast-100 hover:scale-105 transition duration-500" />
             </div>
           ))}
@@ -167,7 +167,7 @@ export default function Hero({ heroTransform, scrollToEvents, scrollToSeminars }
         {/* ROW 2: Moving Right */}
         <div className="animate-marquee-right gap-4">
           {[...backgroundCollageImages.reverse(), ...backgroundCollageImages].map((imgUrl, index) => (
-            <div key={`row2-${index}`} className="w-64 h-40 rounded-2xl overflow-hidden shadow-lg shrink-0 border-2 border-white/20">
+            <div key={`row2-${index}`} className="w-40 h-24 sm:w-64 sm:h-36 rounded-2xl overflow-hidden shadow-lg shrink-0 border-2 border-white/20">
               <img src={imgUrl} alt="Collage Item" className="w-full h-full object-cover filter contrast-100 hover:scale-105 transition duration-500" />
             </div>
           ))}
@@ -176,7 +176,7 @@ export default function Hero({ heroTransform, scrollToEvents, scrollToSeminars }
         {/* ROW 3: Moving Left */}
         <div className="animate-marquee-left gap-4" style={{ animationDuration: '45s' }}>
           {[...backgroundCollageImages, ...backgroundCollageImages].map((imgUrl, index) => (
-            <div key={`row3-${index}`} className="w-64 h-40 rounded-2xl overflow-hidden shadow-lg shrink-0 border-2 border-white/20">
+            <div key={`row3-${index}`} className="w-40 h-24 sm:w-64 sm:h-36 rounded-2xl overflow-hidden shadow-lg shrink-0 border-2 border-white/20">
               <img src={imgUrl} alt="Collage Item" className="w-full h-full object-cover filter contrast-100 hover:scale-105 transition duration-500" />
             </div>
           ))}
@@ -187,14 +187,14 @@ export default function Hero({ heroTransform, scrollToEvents, scrollToSeminars }
       </div>
 
       {/* MAIN CONTAINER */}
-      <div className="max-w-5xl mx-auto w-full px-6 my-auto py-2 relative z-20 flex flex-col items-center text-center">
+      <div className="max-w-5xl mx-auto w-full px-4 sm:px-6 my-auto py-1 sm:py-2 relative z-20 flex flex-col items-center text-center">
         
         {/* CONTENT WRAPPER */}
-        <div className="flex flex-col items-center space-y-5 w-full">
+        <div className="flex flex-col items-center space-y-3 sm:space-y-4 w-full">
           
           {/* STATIC BADGE */}
           <div 
-            className="inline-flex items-center gap-2 px-6 py-2 rounded-full border text-xs md:text-sm font-black uppercase tracking-wider shadow-lg backdrop-blur-md"
+            className="inline-flex items-center gap-2 px-3 py-1 sm:px-5 sm:py-1.5 rounded-full border text-[10px] sm:text-xs md:text-sm font-black uppercase tracking-wider shadow-md backdrop-blur-md"
             style={{ 
               borderColor: theme.cardBorder, 
               backgroundColor: theme.cardBg, 
@@ -205,10 +205,10 @@ export default function Hero({ heroTransform, scrollToEvents, scrollToSeminars }
           </div>
           
           {/* TITLE & SUBTITLE WITH SLOW SMOOTH FADE TRANSITION */}
-          <div className={`flex flex-col items-center space-y-3 w-full transition-opacity duration-1000 ease-in-out ${fade ? 'opacity-100' : 'opacity-0'}`}>
+          <div className={`flex flex-col items-center space-y-2.5 w-full transition-opacity duration-1000 ease-in-out ${fade ? 'opacity-100' : 'opacity-0'}`}>
             
             {/* MAIN HEADING */}
-            <h1 className="text-3xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight drop-shadow-md" style={{ color: theme.primary }}>
+            <h1 className="text-xl sm:text-3xl md:text-5xl lg:text-5.5xl font-black tracking-tight leading-tight drop-shadow-sm" style={{ color: theme.primary }}>
               {slide.title.includes("Learn") ? (
                 <>Learn. Connect. <br /><span style={{ color: theme.orange }}>Grow Your Future.</span></>
               ) : slide.title.includes("Scale") ? (
@@ -219,7 +219,7 @@ export default function Hero({ heroTransform, scrollToEvents, scrollToSeminars }
             </h1>
             
             {/* SUBTITLE */}
-            <p className="text-sm md:text-base max-w-3xl leading-relaxed font-bold" style={{ color: theme.textMuted }}>
+            <p className="text-xs sm:text-sm md:text-base max-w-2xl leading-relaxed font-semibold" style={{ color: theme.textMuted }}>
               {slide.description}
             </p>
 
@@ -229,7 +229,7 @@ export default function Hero({ heroTransform, scrollToEvents, scrollToSeminars }
           <div className="flex flex-wrap items-center justify-center gap-3 pt-1">
             <button 
               onClick={handleExploreClick} 
-              className="font-extrabold px-8 py-3 rounded-full transition-all duration-300 shadow-xl hover:scale-105 transform focus:outline-none text-sm md:text-base cursor-pointer"
+              className="font-extrabold px-5 sm:px-8 py-2 sm:py-3 rounded-full transition-all duration-300 shadow-xl hover:scale-105 transform focus:outline-none text-xs sm:text-sm md:text-base cursor-pointer"
               style={{ backgroundColor: theme.primary, color: theme.accentBtnText || '#ffffff' }}
             >
               Explore Workshops
@@ -237,18 +237,18 @@ export default function Hero({ heroTransform, scrollToEvents, scrollToSeminars }
             
             <button 
               onClick={handleJoinMembershipClick} 
-              className="font-extrabold px-8 py-3 rounded-full transition-all duration-300 shadow-lg border focus:outline-none hover:scale-105 hover:shadow-2xl hover:border-transparent text-sm md:text-base cursor-pointer"
+              className="font-extrabold px-5 sm:px-8 py-2 sm:py-3 rounded-full transition-all duration-300 shadow-md border focus:outline-none hover:scale-105 hover:shadow-xl hover:border-transparent text-xs sm:text-sm md:text-base cursor-pointer"
               style={{ 
                 borderColor: theme.primary, 
                 color: theme.primary,
-                backgroundColor: 'rgba(255, 255, 255, 0.7)'
+                backgroundColor: 'rgba(255, 255, 255, 0.85)'
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor = theme.primary;
                 e.currentTarget.style.color = '#ffffff';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.7)';
+                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.85)';
                 e.currentTarget.style.color = theme.primary;
               }}
             >
@@ -257,11 +257,11 @@ export default function Hero({ heroTransform, scrollToEvents, scrollToSeminars }
           </div>
 
           {/* CONSTANT METRICS */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t text-xs md:text-sm max-w-3xl w-full font-bold" style={{ borderColor: theme.cardBorder, color: theme.textMuted }}>
-            <div><strong className="block text-sm font-extrabold" style={{ color: theme.textBright }}>Startup</strong> Growth Ideas</div>
-            <div><strong className="block text-sm font-extrabold" style={{ color: theme.textBright }}>Student</strong> Business Plans</div>
-            <div><strong className="block text-sm font-extrabold" style={{ color: theme.textBright }}>Global</strong> Networking Hub</div>
-            <div><strong className="block text-sm font-extrabold" style={{ color: theme.textBright }}>Verified</strong> Certificates</div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-3 border-t text-[11px] sm:text-xs md:text-sm max-w-2xl w-full font-bold" style={{ borderColor: theme.cardBorder, color: theme.textMuted }}>
+            <div><strong className="block text-xs sm:text-sm font-extrabold" style={{ color: theme.textBright }}>Startup</strong> Growth Ideas</div>
+            <div><strong className="block text-xs sm:text-sm font-extrabold" style={{ color: theme.textBright }}>Student</strong> Business Plans</div>
+            <div><strong className="block text-xs sm:text-sm font-extrabold" style={{ color: theme.textBright }}>Global</strong> Networking Hub</div>
+            <div><strong className="block text-xs sm:text-sm font-extrabold" style={{ color: theme.textBright }}>Verified</strong> Certificates</div>
           </div>
 
         </div>
@@ -269,9 +269,9 @@ export default function Hero({ heroTransform, scrollToEvents, scrollToSeminars }
       </div>
 
       {/* BOUNCING ARROW LINKED TO EVENT SECTION */}
-      <div className="flex justify-center pb-2 pt-0 relative z-20">
-        <button onClick={handleEventScroll} className="bounce-arrow transition p-2 focus:outline-none cursor-pointer" style={{ color: theme.primary }}>
-          <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div className="flex justify-center pb-1 pt-0 relative z-20">
+        <button onClick={handleEventScroll} className="bounce-arrow transition p-1.5 focus:outline-none cursor-pointer" style={{ color: theme.primary }}>
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path>
           </svg>
         </button>

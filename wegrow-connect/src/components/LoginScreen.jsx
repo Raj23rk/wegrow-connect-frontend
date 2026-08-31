@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import toast from "react-hot-toast";
 
 export default function LoginScreen() {
   const navigate = useNavigate();
@@ -30,37 +31,25 @@ export default function LoginScreen() {
     // ===================================================
 
     if (!email.trim()) {
-      alert("Please enter your email.");
+      toast.error("Please enter your email.");
       return;
     }
 
     if (!password.trim()) {
-      alert("Please enter your password.");
+      toast.error("Please enter your password.");
       return;
     }
 
     setLoading(true);
 
     try {
-      console.log("====================================");
-      console.log("LOGIN API");
-      console.log("====================================");
-      console.log("API URL:", `${API_BASE_URL}api/v1/auth/login`);
-      console.log("Email:", email.trim());
-
-      // =================================================
-      // API REQUEST
-      // =================================================
-
       const response = await fetch(
         `${API_BASE_URL}api/v1/auth/login`,
         {
           method: "POST",
-
           headers: {
             "Content-Type": "application/json",
           },
-
           body: JSON.stringify({
             email: email.trim(),
             password: password,
@@ -68,89 +57,29 @@ export default function LoginScreen() {
         }
       );
 
-      // =================================================
-      // RESPONSE
-      // =================================================
-
       const data = await response.json();
-
-      console.log("Login Response:", data);
-      console.log("Status:", response.status);
-
-      // =================================================
-      // LOGIN SUCCESS
-      // =================================================
 
       if (response.ok && data?.success) {
         const accessToken = data?.data?.accessToken;
         const user = data?.data?.user;
 
-        // -----------------------------------------------
-        // CHECK TOKEN
-        // -----------------------------------------------
-
         if (!accessToken) {
-          console.error(
-            "Access token missing from response:",
-            data
-          );
-
-          alert(
-            "Login successful, but access token was not received."
-          );
-
+          toast.error("Login successful, but access token was not received.");
           return;
         }
 
-        // =================================================
-        // SAVE TO CONTEXT AND LOCALSTORAGE
-        // =================================================
-
         login(accessToken, user);
-
-        // =================================================
-        // DEBUG
-        // =================================================
-
-        console.log("====================================");
-        console.log("LOGIN SUCCESS");
-        console.log("====================================");
-        console.log("Access Token:", accessToken);
-        console.log("User:", user);
-        console.log("Role (Normalized):", user?.role?.toLowerCase());
-
-        // =================================================
-        // REDIRECT TO HOME PAGE
-        // =================================================
-
+        toast.success(`Welcome back, ${user?.firstName || 'Learner'}!`);
         navigate("/home");
       } else {
-        // =================================================
-        // LOGIN FAILED
-        // =================================================
-
-        console.error(
-          "Login failed:",
-          data
-        );
-
-        alert(
+        toast.error(
           data?.message ||
             data?.error ||
             "Invalid email or password."
         );
       }
     } catch (error) {
-      // =================================================
-      // NETWORK ERROR
-      // =================================================
-
-      console.error(
-        "Login API Error:",
-        error
-      );
-
-      alert(
+      toast.error(
         "Unable to connect to the server. Please make sure the backend is running."
       );
     } finally {
@@ -289,20 +218,12 @@ export default function LoginScreen() {
               WEGROW LOGO
           ===================================================== */}
 
-          <div className="flex items-center justify-center mb-6">
-
+          <div className="flex items-center justify-center mb-6 cursor-pointer" onClick={() => navigate('/home')}>
             <img
-              src="/login/logo.jpg"
-              alt="Logo Icon"
-              className="w-12 h-12 object-contain relative z-10"
+              src="/wegrow-logo.png"
+              alt="WeGrow B School"
+              className="w-[180px] sm:w-[200px] h-[58px] sm:h-[64px] object-contain"
             />
-
-            <img
-              src="/login/wegrow-logo.png"
-              alt="WeGrow Text Logo"
-              className="w-[160px] h-[48px] object-contain -ml-6 relative z-0"
-            />
-
           </div>
 
           {/* =====================================================

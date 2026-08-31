@@ -65,28 +65,28 @@ export default function RewardSection({ rewardTargetRef, rewardStyle }) {
       ref={rewardTargetRef} 
       id="rewards" 
       style={rewardStyle}
-      className="relative pt-0 pb-20 transition-all duration-300 ease-out transform-gpu"
+      className="relative pt-2 pb-8 sm:pb-14 transition-all duration-300 ease-out transform-gpu"
     >
-      <div className="max-w-7xl mx-auto px-6">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6">
 
         {/* HEADER SECTION */}
-        <div id="reward-title" className="max-w-4xl mx-auto text-center space-y-3 pt-0 mb-14">
+        <div id="reward-title" className="max-w-4xl mx-auto text-center space-y-2 pt-0 mb-5 sm:mb-8 md:mb-10">
           <span className="text-xs uppercase font-black tracking-widest block" style={{ color: theme.orange }}>
             PERFORMANCE & RECOGNITION
           </span>
-          <h2 className="text-3xl lg:text-5xl font-extrabold drop-shadow-sm leading-tight" style={{ color: theme.primary }}>
+          <h2 className="text-xl sm:text-3xl lg:text-5xl font-extrabold drop-shadow-sm leading-tight" style={{ color: theme.primary }}>
             Earn While You Learn
           </h2>
-          <p className="text-sm lg:text-base font-semibold leading-relaxed" style={{ color: theme.textMuted }}>
+          <p className="text-xs sm:text-sm lg:text-base font-semibold leading-relaxed max-w-2xl mx-auto" style={{ color: theme.textMuted }}>
             Every workshop you attend, task you complete, and project you deliver adds up to your personal Skill Credit Score. Turn your dedication into tangible perks & career recognition!
           </p>
         </div>
 
         {/* MAIN INTERACTIVE HOVER GRID */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start relative">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8 items-start relative">
           
           {/* LEFT SIDE: PARAGRAPHS */}
-          <div className="lg:col-span-7 text-left space-y-8 text-sm md:text-base font-medium leading-relaxed" onMouseLeave={handleMouseLeave}>
+          <div className="lg:col-span-7 text-left space-y-4 sm:space-y-5 text-xs sm:text-sm md:text-base font-medium leading-relaxed" onMouseLeave={handleMouseLeave}>
             
             {/* PARAGRAPH 1 */}
             <p 
@@ -99,7 +99,6 @@ export default function RewardSection({ rewardTargetRef, rewardStyle }) {
               As you navigate workshops, our platform automatically tracks your progress through an automated
               {' '}
               <span className="inline-flex items-center align-middle font-normal">
-                
                 Skill Credit Engine
               </span>{' '}
               that rewards every single quiz and project milestone you submit.
@@ -115,7 +114,6 @@ export default function RewardSection({ rewardTargetRef, rewardStyle }) {
             >
               Consistency is turned into proof. Every active learner builds a transparent{' '}
               <span className="inline-flex items-center align-middle font-normal">
-                
                 Dynamic Career Score
               </span>{' '}
               which acts as your verified badge of technical competency for partner companies.
@@ -131,7 +129,6 @@ export default function RewardSection({ rewardTargetRef, rewardStyle }) {
             >
               Accumulated credits aren't just numbers. You can directly redeem credits for{' '}
               <span className="inline-flex items-center align-middle font-normal">
-                
                 Exclusive Perks & Pass
               </span>{' '}
               including 1-on-1 industry mentor guidance, pro dev software, and VIP event tickets.
@@ -147,7 +144,6 @@ export default function RewardSection({ rewardTargetRef, rewardStyle }) {
             >
               High performers receive fast-track visibility through{' '}
               <span className="inline-flex items-center align-middle font-normal">
-                
                 Direct Hiring Referrals
               </span>{' '}
               giving your profile priority routing to top corporate recruitment desks.
@@ -163,7 +159,6 @@ export default function RewardSection({ rewardTargetRef, rewardStyle }) {
             >
               Share your achievements effortlessly with a full{' '}
               <span className="inline-flex items-center align-middle font-normal">
-                
                 Verified Credential Hub
               </span>{' '}
               designed to showcase shareable digital credentials on LinkedIn and personal portfolios.
