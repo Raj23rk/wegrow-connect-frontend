@@ -137,7 +137,13 @@ export default function StudentFoundersCommunity() {
     yearOfStudy: '',
     course: '',
     courseStartYear: '',
-    courseEndYear: ''
+    courseEndYear: '',
+    readiness: '',
+    hasIdea: '',
+    seriousness: '',
+    lookingForFunding: '',
+    readyToLearn: '',
+    industryNiche: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [registered, setRegistered] = useState(false);
@@ -166,6 +172,12 @@ export default function StudentFoundersCommunity() {
         course: form.course?.trim() || undefined,
         courseStartYear: form.courseStartYear ? Number(form.courseStartYear) : undefined,
         courseEndYear: form.courseEndYear ? Number(form.courseEndYear) : undefined,
+        readiness: form.readiness || undefined,
+        hasIdea: form.hasIdea || undefined,
+        seriousness: form.seriousness || undefined,
+        lookingForFunding: form.lookingForFunding || undefined,
+        readyToLearn: form.readyToLearn || undefined,
+        industryNiche: form.industryNiche || undefined,
       };
 
       const res = await registerStudentFounder(payload);
@@ -735,6 +747,130 @@ export default function StudentFoundersCommunity() {
                       placeholder="e.g. 2026 or 2027"
                       className="w-full px-4 py-3 rounded-xl border border-[#E7E1D4] bg-[#FBF6EE] text-[#1B2140] text-sm focus:outline-none focus:ring-2 focus:ring-[#F0791E]"
                     />
+                  </div>
+                </div>
+
+                {/* Questionnaire Section Divider */}
+                <div className="pt-4 border-t border-[#E7E1D4]">
+                  <h4 className="text-sm font-extrabold text-[#16225E] mb-4 flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-[#F0791E]" /> Entrepreneurial Readiness & Business Interest
+                  </h4>
+                  <div className="space-y-4">
+                    {/* Q1: Readiness */}
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-[#16225E] mb-2">
+                        1. Are you ready to begin your entrepreneurial journey?
+                      </label>
+                      <select
+                        name="readiness"
+                        value={form.readiness}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 rounded-xl border border-[#E7E1D4] bg-[#FBF6EE] text-[#1B2140] text-sm focus:outline-none focus:ring-2 focus:ring-[#F0791E]"
+                      >
+                        <option value="">— Select an Option —</option>
+                        <option value="Yes, I’m ready to start">Yes, I’m ready to start</option>
+                        <option value="Yes, but I need guidance">Yes, but I need guidance</option>
+                      </select>
+                    </div>
+
+                    {/* Q2: Business Idea */}
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-[#16225E] mb-2">
+                        2. Do you currently have a business idea?
+                      </label>
+                      <select
+                        name="hasIdea"
+                        value={form.hasIdea}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 rounded-xl border border-[#E7E1D4] bg-[#FBF6EE] text-[#1B2140] text-sm focus:outline-none focus:ring-2 focus:ring-[#F0791E]"
+                      >
+                        <option value="">— Select an Option —</option>
+                        <option value="Yes, I have a clear idea">Yes, I have a clear idea</option>
+                        <option value="I have a rough idea">I have a rough idea</option>
+                        <option value="I have multiple ideas">I have multiple ideas</option>
+                      </select>
+                    </div>
+
+                    {/* Q3: Seriousness / Timeline */}
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-[#16225E] mb-2">
+                        3. How serious are you about starting your business?
+                      </label>
+                      <select
+                        name="seriousness"
+                        value={form.seriousness}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 rounded-xl border border-[#E7E1D4] bg-[#FBF6EE] text-[#1B2140] text-sm focus:outline-none focus:ring-2 focus:ring-[#F0791E]"
+                      >
+                        <option value="">— Select an Option —</option>
+                        <option value="I want to start soon">I want to start soon</option>
+                        <option value="I plan to start within 6 months">I plan to start within 6 months</option>
+                        <option value="I plan to start within 6–12 months">I plan to start within 6–12 months</option>
+                      </select>
+                    </div>
+
+                    {/* Q4 & Q5 in 2 cols */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {/* Q4: Looking for funding */}
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-wider text-[#16225E] mb-2">
+                          4. Looking for funding or an investor?
+                        </label>
+                        <select
+                          name="lookingForFunding"
+                          value={form.lookingForFunding}
+                          onChange={handleChange}
+                          className="w-full px-4 py-3 rounded-xl border border-[#E7E1D4] bg-[#FBF6EE] text-[#1B2140] text-sm focus:outline-none focus:ring-2 focus:ring-[#F0791E]"
+                        >
+                          <option value="">— Select —</option>
+                          <option value="Yes">Yes</option>
+                          <option value="No">No</option>
+                        </select>
+                      </div>
+
+                      {/* Q5: Ready to learn */}
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-wider text-[#16225E] mb-2">
+                          5. Ready to learn skills required?
+                        </label>
+                        <select
+                          name="readyToLearn"
+                          value={form.readyToLearn}
+                          onChange={handleChange}
+                          className="w-full px-4 py-3 rounded-xl border border-[#E7E1D4] bg-[#FBF6EE] text-[#1B2140] text-sm focus:outline-none focus:ring-2 focus:ring-[#F0791E]"
+                        >
+                          <option value="">— Select —</option>
+                          <option value="Yes">Yes</option>
+                          <option value="No">No</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Q6: Industry Niche */}
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-[#16225E] mb-2">
+                        6. Which industry niche is your business idea related to?
+                      </label>
+                      <select
+                        name="industryNiche"
+                        value={form.industryNiche}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 rounded-xl border border-[#E7E1D4] bg-[#FBF6EE] text-[#1B2140] text-sm focus:outline-none focus:ring-2 focus:ring-[#F0791E]"
+                      >
+                        <option value="">— Select Industry Niche —</option>
+                        <option value="Technology / IT">Technology / IT</option>
+                        <option value="E-commerce / D2C">E-commerce / D2C</option>
+                        <option value="Food & Beverage">Food & Beverage</option>
+                        <option value="Education">Education</option>
+                        <option value="Finance">Finance</option>
+                        <option value="Healthcare">Healthcare</option>
+                        <option value="Fashion / Lifestyle">Fashion / Lifestyle</option>
+                        <option value="Agriculture">Agriculture</option>
+                        <option value="Media / Content">Media / Content</option>
+                        <option value="Manufacturing">Manufacturing</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
 

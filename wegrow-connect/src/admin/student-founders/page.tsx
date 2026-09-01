@@ -612,10 +612,47 @@ export default function AdminStudentFounders() {
                   </div>
                 </div>
 
-                <div>
-                  <span className="text-slate-400 font-bold uppercase tracking-wider block">Status</span>
-                  <span className="font-bold text-[#F0791E] capitalize">{viewingItem.status || 'Registered'}</span>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <span className="text-slate-400 font-bold uppercase tracking-wider block">Status</span>
+                    <span className="font-bold text-[#F0791E] capitalize">{viewingItem.status || 'Registered'}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 font-bold uppercase tracking-wider block">Industry Niche</span>
+                    <span className="font-semibold text-slate-800">{viewingItem.industryNiche || '—'}</span>
+                  </div>
                 </div>
+
+                {/* Entrepreneurial Survey Responses */}
+                {(viewingItem.readiness || viewingItem.hasIdea || viewingItem.seriousness || viewingItem.lookingForFunding || viewingItem.readyToLearn) && (
+                  <div className="p-3.5 bg-orange-50/60 rounded-2xl border border-orange-100 space-y-2">
+                    <span className="text-xs font-black uppercase tracking-wider text-[#F0791E] block mb-1">
+                      Entrepreneurial Survey Responses
+                    </span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                      <div>
+                        <span className="text-slate-500 font-medium block">Ready to Begin:</span>
+                        <span className="font-bold text-slate-800">{viewingItem.readiness || '—'}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-500 font-medium block">Business Idea:</span>
+                        <span className="font-bold text-slate-800">{viewingItem.hasIdea || '—'}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-500 font-medium block">Timeline / Seriousness:</span>
+                        <span className="font-bold text-slate-800">{viewingItem.seriousness || '—'}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-500 font-medium block">Looking for Funding:</span>
+                        <span className="font-bold text-slate-800">{viewingItem.lookingForFunding || '—'}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-500 font-medium block">Ready to Learn:</span>
+                        <span className="font-bold text-slate-800">{viewingItem.readyToLearn || '—'}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {viewingItem.notes && (
                   <div>
