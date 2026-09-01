@@ -21,6 +21,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { registerWomenEntrepreneur } from '../services/api';
 
 export default function WomensCommunity() {
   // 1. Live Countdown Timer to Event Date: Fri, Sep 11, 2026 11:00 AM IST
@@ -139,24 +140,42 @@ export default function WomensCommunity() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
     if (!formData.fullName.trim() || !formData.phone.trim()) {
       toast.error('Please provide your name and phone number!');
       return;
     }
-    if (formData.phone.length < 10) {
+    if (formData.phone.replace(/\D/g, '').length < 10) {
       toast.error('Please enter a valid 10-digit mobile number.');
       return;
     }
 
     setIsSubmitting(true);
-    // Simulate API registration call
-    setTimeout(() => {
+    try {
+      const payload = {
+        fullName: formData.fullName.trim(),
+        phone: formData.phone.trim(),
+        email: formData.email.trim() || undefined,
+        businessStage: formData.businessStage,
+        category: formData.category,
+        note: formData.note?.trim() || undefined,
+      };
+
+      const res = await registerWomenEntrepreneur(payload);
+      if (res && (res.success || res.status === 'success' || res._id || res.data)) {
+        setIsRegistered(true);
+        toast.success('Registration successful! Welcome to WeGrow Women Community 🎉');
+      } else {
+        const errMsg = res?.message || 'Registration failed. Please try again.';
+        toast.error(errMsg);
+      }
+    } catch (err) {
+      console.error('Registration error:', err);
+      toast.error('Unable to connect to server. Please try again later.');
+    } finally {
       setIsSubmitting(false);
-      setIsRegistered(true);
-      toast.success('Registration successful! Welcome to WeGrow Community 🎉');
-    }, 1000);
+    }
   };
 
   // FAQs Data

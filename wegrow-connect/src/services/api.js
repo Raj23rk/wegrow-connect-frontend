@@ -899,3 +899,232 @@ export async function markNotificationRead(notificationId) {
   }
 }
 
+// =====================================================
+// WOMEN ENTREPRENEURS COMMUNITY API
+// =====================================================
+
+export async function registerWomenEntrepreneur(formData) {
+  try {
+    const response = await fetch(`${API_BASE}/women-entrepreneurs/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('registerWomenEntrepreneur error:', error);
+    throw error;
+  }
+}
+
+export async function fetchWomenEntrepreneurs({ page = 1, limit = 10, search = '', businessStage = '', category = '', status = '' } = {}) {
+  try {
+    const params = new URLSearchParams();
+    if (page) params.append('page', String(page));
+    if (limit) params.append('limit', String(limit));
+    if (search) params.append('search', search);
+    if (businessStage) params.append('businessStage', businessStage);
+    if (category) params.append('category', category);
+    if (status) params.append('status', status);
+
+    const response = await fetch(`${API_BASE}/women-entrepreneurs?${params.toString()}`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('fetchWomenEntrepreneurs error:', error);
+    throw error;
+  }
+}
+
+export async function fetchWomenEntrepreneursStats() {
+  try {
+    const response = await fetch(`${API_BASE}/women-entrepreneurs/stats`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('fetchWomenEntrepreneursStats error:', error);
+    throw error;
+  }
+}
+
+export async function exportWomenEntrepreneursCsv() {
+  try {
+    const response = await fetch(`${API_BASE}/women-entrepreneurs/export`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) throw new Error('Failed to export CSV');
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `women_entrepreneurs_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+    return true;
+  } catch (error) {
+    console.error('exportWomenEntrepreneursCsv error:', error);
+    throw error;
+  }
+}
+
+export async function getWomenEntrepreneurById(id) {
+  try {
+    const response = await fetch(`${API_BASE}/women-entrepreneurs/${id}`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('getWomenEntrepreneurById error:', error);
+    throw error;
+  }
+}
+
+export async function updateWomenEntrepreneur(id, data) {
+  try {
+    const response = await fetch(`${API_BASE}/women-entrepreneurs/${id}`, {
+      method: 'PATCH',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('updateWomenEntrepreneur error:', error);
+    throw error;
+  }
+}
+
+export async function deleteWomenEntrepreneur(id) {
+  try {
+    const response = await fetch(`${API_BASE}/women-entrepreneurs/${id}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('deleteWomenEntrepreneur error:', error);
+    throw error;
+  }
+}
+
+// =====================================================
+// STUDENT FOUNDERS COMMUNITY API
+// =====================================================
+
+export async function registerStudentFounder(formData) {
+  try {
+    const response = await fetch(`${API_BASE}/student-founders/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('registerStudentFounder error:', error);
+    throw error;
+  }
+}
+
+export async function fetchStudentFounders({ page = 1, limit = 10, search = '', yearOfStudy = '', collegeName = '', status = '' } = {}) {
+  try {
+    const params = new URLSearchParams();
+    if (page) params.append('page', String(page));
+    if (limit) params.append('limit', String(limit));
+    if (search) params.append('search', search);
+    if (yearOfStudy) params.append('yearOfStudy', yearOfStudy);
+    if (collegeName) params.append('collegeName', collegeName);
+    if (status) params.append('status', status);
+
+    const response = await fetch(`${API_BASE}/student-founders?${params.toString()}`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('fetchStudentFounders error:', error);
+    throw error;
+  }
+}
+
+export async function fetchStudentFoundersStats() {
+  try {
+    const response = await fetch(`${API_BASE}/student-founders/stats`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('fetchStudentFoundersStats error:', error);
+    throw error;
+  }
+}
+
+export async function exportStudentFoundersCsv() {
+  try {
+    const response = await fetch(`${API_BASE}/student-founders/export`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) throw new Error('Failed to export CSV');
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `student_founders_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+    return true;
+  } catch (error) {
+    console.error('exportStudentFoundersCsv error:', error);
+    throw error;
+  }
+}
+
+export async function getStudentFounderById(id) {
+  try {
+    const response = await fetch(`${API_BASE}/student-founders/${id}`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('getStudentFounderById error:', error);
+    throw error;
+  }
+}
+
+export async function updateStudentFounder(id, data) {
+  try {
+    const response = await fetch(`${API_BASE}/student-founders/${id}`, {
+      method: 'PATCH',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('updateStudentFounder error:', error);
+    throw error;
+  }
+}
+
+export async function deleteStudentFounder(id) {
+  try {
+    const response = await fetch(`${API_BASE}/student-founders/${id}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('deleteStudentFounder error:', error);
+    throw error;
+  }
+}

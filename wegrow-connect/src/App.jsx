@@ -72,6 +72,8 @@ import AdminSettings from './admin/settings/page';
 import AdminSubscriptions from './admin/subscriptions/page';
 import AdminUsers from './admin/users/page';
 import AdminWorkshops from './admin/workshops/page';
+import AdminWomenEntrepreneurs from './admin/women-entrepreneurs/page';
+import AdminStudentFounders from './admin/student-founders/page';
 
 // Main Home Component
 function MainHomePage() {
@@ -673,6 +675,8 @@ export default function App() {
             <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/users" element={<ProtectedRoute allowedRoles={['admin']}><AdminUsers /></ProtectedRoute>} />
             <Route path="/admin/roles" element={<ProtectedRoute allowedRoles={['admin']}><AdminRoles /></ProtectedRoute>} />
+            <Route path="/admin/women-entrepreneurs" element={<ProtectedRoute allowedRoles={['admin']}><AdminWomenEntrepreneurs /></ProtectedRoute>} />
+            <Route path="/admin/student-founders" element={<ProtectedRoute allowedRoles={['admin']}><AdminStudentFounders /></ProtectedRoute>} />
             <Route path="/admin/workshops" element={<ProtectedRoute allowedRoles={['admin']}><AdminWorkshops /></ProtectedRoute>} />
             <Route path="/admin/events" element={<ProtectedRoute allowedRoles={['admin']}><AdminEvents /></ProtectedRoute>} />
             <Route path="/admin/gallery" element={<ProtectedRoute allowedRoles={['admin']}><AdminGalleryPage /></ProtectedRoute>} />

@@ -15,7 +15,9 @@ import {
   Bell,
   Settings,
   LogOut,
-  Image
+  Image,
+  GraduationCap,
+  Sparkles
 } from "lucide-react";
 
 export default function Sidebar() {
@@ -28,6 +30,8 @@ export default function Sidebar() {
     { name: "My Profile", href: "/home/profile", icon: User },
     { name: "Users", href: "/admin/users", icon: Users },
     { name: "Roles & Permissions", href: "/admin/roles", icon: ShieldCheck },
+    { name: "Women Entrepreneurs", href: "/admin/women-entrepreneurs", icon: Sparkles },
+    { name: "Student Founders", href: "/admin/student-founders", icon: GraduationCap },
     { name: "Booking", href: "/admin/workshops", icon: BookOpen },
     { name: "Events & Bootcamps", href: "/admin/events", icon: Calendar },
     { name: "Gallery Photos", href: "/admin/gallery", icon: Image },

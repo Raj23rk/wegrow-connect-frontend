@@ -22,6 +22,7 @@ import {
   Headphones
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { registerStudentFounder } from '../services/api';
 import CommunityPageFooter from './CommunityPageFooter';
 
 export default function StudentFoundersCommunity() {
@@ -143,7 +144,7 @@ export default function StudentFoundersCommunity() {
 
   const handleChange = e => setForm(p => ({ ...p, [e.target.name]: e.target.value }));
 
-  const handleSubmit = e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.fullName.trim() || !form.phone.trim() || !form.email.trim()) {
       toast.error('Please provide your name, phone number, and email address!');
@@ -153,12 +154,34 @@ export default function StudentFoundersCommunity() {
       toast.error('Please enter a valid 10-digit mobile number.');
       return;
     }
+
     setIsSubmitting(true);
-    setTimeout(() => {
+    try {
+      const payload = {
+        fullName: form.fullName.trim(),
+        phone: form.phone.trim(),
+        email: form.email.trim(),
+        collegeName: form.collegeName?.trim() || undefined,
+        yearOfStudy: form.yearOfStudy || undefined,
+        course: form.course?.trim() || undefined,
+        courseStartYear: form.courseStartYear ? Number(form.courseStartYear) : undefined,
+        courseEndYear: form.courseEndYear ? Number(form.courseEndYear) : undefined,
+      };
+
+      const res = await registerStudentFounder(payload);
+      if (res && (res.success || res.status === 'success' || res._id || res.data)) {
+        setRegistered(true);
+        toast.success('Registration confirmed! See you on 12 Sep 🎓');
+      } else {
+        const errMsg = res?.message || 'Registration failed. Please try again.';
+        toast.error(errMsg);
+      }
+    } catch (err) {
+      console.error('Registration error:', err);
+      toast.error('Unable to connect to server. Please try again later.');
+    } finally {
       setIsSubmitting(false);
-      setRegistered(true);
-      toast.success('Registration confirmed! See you on 12 Sep 🎓');
-    }, 1000);
+    }
   };
 
   // ─── Content data ─────────────────────────────────────────────────────────────
