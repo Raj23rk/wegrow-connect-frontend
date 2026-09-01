@@ -29,6 +29,8 @@ import BusinessRegister from './components/BusinessRegister';
 import ForgotPasswordScreen from './components/ForgotPasswordScreen';
 import SetPasswordScreen from './components/SetPasswordScreen';
 import EventDetails from "./components/EventDetails";
+import WomensCommunity from './components/WomensCommunity';
+import StudentFoundersCommunity from './components/StudentFoundersCommunity';
 
 // Auth Context, Theme Context and Guard
 import { AuthProvider, ProtectedRoute } from './context/AuthContext';
@@ -638,6 +640,14 @@ export default function App() {
             <Route path="/gallery" element={<GalleryPage />} />
             <Route path="/home/profile" element={<ProfilePage />} />
             <Route path="/home/events/:eventId" element={<EventDetails />} />
+            <Route path="/womens-community" element={<WomensCommunity />} />
+            <Route path="/events/womens-community" element={<WomensCommunity />} />
+            <Route path="/orientation" element={<WomensCommunity />} />
+
+            {/* Student Founders Community */}
+            <Route path="/student-founders" element={<StudentFoundersCommunity />} />
+            <Route path="/student-community" element={<StudentFoundersCommunity />} />
+            <Route path="/events/student-founders" element={<StudentFoundersCommunity />} />
 
             {/* Student Dashboard Routes (Protected) */}
             <Route path="/student/dashboard" element={<ProtectedRoute allowedRoles={['student']}><StudentDashboard /></ProtectedRoute>} />
