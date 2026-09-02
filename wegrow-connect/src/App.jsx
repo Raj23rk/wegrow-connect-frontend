@@ -75,6 +75,7 @@ import AdminUsers from './admin/users/page';
 import AdminWorkshops from './admin/workshops/page';
 import AdminWomenEntrepreneurs from './admin/women-entrepreneurs/page';
 import AdminStudentFounders from './admin/student-founders/page';
+import AdminBusinessFounders from './admin/business-founders/page';
 
 // Main Home Component
 function MainHomePage() {
@@ -684,6 +685,7 @@ export default function App() {
             <Route path="/admin/roles" element={<ProtectedRoute allowedRoles={['admin']}><AdminRoles /></ProtectedRoute>} />
             <Route path="/admin/women-entrepreneurs" element={<ProtectedRoute allowedRoles={['admin']}><AdminWomenEntrepreneurs /></ProtectedRoute>} />
             <Route path="/admin/student-founders" element={<ProtectedRoute allowedRoles={['admin']}><AdminStudentFounders /></ProtectedRoute>} />
+            <Route path="/admin/business-founders" element={<ProtectedRoute allowedRoles={['admin']}><AdminBusinessFounders /></ProtectedRoute>} />
             <Route path="/admin/workshops" element={<ProtectedRoute allowedRoles={['admin']}><AdminWorkshops /></ProtectedRoute>} />
             <Route path="/admin/events" element={<ProtectedRoute allowedRoles={['admin']}><AdminEvents /></ProtectedRoute>} />
             <Route path="/admin/gallery" element={<ProtectedRoute allowedRoles={['admin']}><AdminGalleryPage /></ProtectedRoute>} />

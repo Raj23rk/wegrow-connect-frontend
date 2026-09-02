@@ -1032,6 +1032,112 @@ export async function registerBusinessFounder(formData) {
   }
 }
 
+export async function fetchBusinessFounders({
+  page = 1,
+  limit = 10,
+  search = '',
+  industry = '',
+  yearsInBusiness = '',
+  biggestPriority = '',
+  status = ''
+} = {}) {
+  try {
+    const params = new URLSearchParams();
+    if (page) params.append('page', String(page));
+    if (limit) params.append('limit', String(limit));
+    if (search) params.append('search', search);
+    if (industry) params.append('industry', industry);
+    if (yearsInBusiness) params.append('yearsInBusiness', yearsInBusiness);
+    if (biggestPriority) params.append('biggestPriority', biggestPriority);
+    if (status) params.append('status', status);
+
+    const response = await fetch(`${API_BASE}/business-founders?${params.toString()}`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('fetchBusinessFounders error:', error);
+    throw error;
+  }
+}
+
+export async function fetchBusinessFoundersStats() {
+  try {
+    const response = await fetch(`${API_BASE}/business-founders/stats`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('fetchBusinessFoundersStats error:', error);
+    throw error;
+  }
+}
+
+export async function exportBusinessFoundersCsv() {
+  try {
+    const response = await fetch(`${API_BASE}/business-founders/export`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) throw new Error('Failed to export CSV');
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `business_founders_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+    return true;
+  } catch (error) {
+    console.error('exportBusinessFoundersCsv error:', error);
+    throw error;
+  }
+}
+
+export async function getBusinessFounderById(id) {
+  try {
+    const response = await fetch(`${API_BASE}/business-founders/${id}`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('getBusinessFounderById error:', error);
+    throw error;
+  }
+}
+
+export async function updateBusinessFounder(id, data) {
+  try {
+    const response = await fetch(`${API_BASE}/business-founders/${id}`, {
+      method: 'PATCH',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('updateBusinessFounder error:', error);
+    throw error;
+  }
+}
+
+export async function deleteBusinessFounder(id) {
+  try {
+    const response = await fetch(`${API_BASE}/business-founders/${id}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('deleteBusinessFounder error:', error);
+    throw error;
+  }
+}
+
 // =====================================================
 // STUDENT FOUNDERS COMMUNITY API
 // =====================================================

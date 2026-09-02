@@ -17,7 +17,8 @@ import {
   LogOut,
   Image,
   GraduationCap,
-  Sparkles
+  Sparkles,
+  Briefcase
 } from "lucide-react";
 
 export default function Sidebar() {
@@ -32,6 +33,7 @@ export default function Sidebar() {
     { name: "Roles & Permissions", href: "/admin/roles", icon: ShieldCheck },
     { name: "Women Entrepreneurs", href: "/admin/women-entrepreneurs", icon: Sparkles },
     { name: "Student Founders", href: "/admin/student-founders", icon: GraduationCap },
+    { name: "Business Founders", href: "/admin/business-founders", icon: Briefcase },
     { name: "Booking", href: "/admin/workshops", icon: BookOpen },
     { name: "Events & Bootcamps", href: "/admin/events", icon: Calendar },
     { name: "Gallery Photos", href: "/admin/gallery", icon: Image },
