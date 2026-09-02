@@ -149,7 +149,7 @@ export default function WomensCommunity() {
   ];
 
   const fullAddress = '193/1A, Ground Floor, Ayyapan Kovil Opp. Police Station Road, Sivakasi – 626 123';
-
+  const venueAddress = 'Ayyapan Kovil Opposite, Sivakasi';
   return (
     <div className="min-h-screen bg-[#FBF6EE] text-[#1B2140] font-sans antialiased selection:bg-[#F0791E] selection:text-white overflow-x-hidden">
       {/* Navigation */}
@@ -256,8 +256,10 @@ export default function WomensCommunity() {
               </div>
               <div className="flex items-center gap-2.5 text-sm font-bold text-[#16225E]">
                 <MapPin className="w-5 h-5 text-[#F0791E] flex-shrink-0" />
-                <span className="line-clamp-1" title={fullAddress}>Ayyapan Kovil Opp., Sivakasi</span>
+                <span>Ayyapan Kovil, Sivakasi</span>
               </div>
+
+
             </div>
           </div>
 
@@ -351,8 +353,7 @@ export default function WomensCommunity() {
               <Users className="w-3.5 h-3.5 text-[#F0791E]" /> Who This Is For
             </span>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-[#16225E]">
-              Network Forum இல்ல, Real Learning Community
-            </h2>
+              Not a Network Forum But a Real Learning Community            </h2>
             <p className="text-[#666C87] text-base">
               Built for two kinds of ambitious women in one collaborative room. Come as you are, leave with clarity.
             </p>
@@ -364,7 +365,7 @@ export default function WomensCommunity() {
                 <Target className="w-7 h-7 text-[#F0791E]" />
               </div>
               <h3 className="text-xl font-extrabold text-[#16225E] mb-3">
-                1. Aspiring Entrepreneurs (தொழில் தொடங்க விரும்புவோர்)
+                1. Aspiring Entrepreneurs 
               </h3>
               <p className="text-[#666C87] text-sm leading-relaxed mb-4">
                 You have an idea, skill, or passion (baking, tailoring, digital services, crafts, coaching) but feel stuck on how to register, price, get first customers, or handle finance.
@@ -788,7 +789,7 @@ export default function WomensCommunity() {
               <form onSubmit={handleFormSubmit} className="space-y-5">
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-[#16225E] mb-2">
-                    Full Name (முழு பெயர்) *
+                    Full Name*
                   </label>
                   <input
                     type="text"
@@ -797,7 +798,7 @@ export default function WomensCommunity() {
                     value={formData.fullName}
                     onChange={handleInputChange}
                     placeholder="e.g. Priya Sundaram"
-                    className="w-full px-4 py-3 rounded-xl border border-[#E7E1D4] bg-[#FBF6EE] text-[#1B2140] text-sm focus:outline-none focus:ring-2 focus:ring-[#F0791E]"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm placeholder:text-slate-400 focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm"
                   />
                 </div>
 
@@ -813,7 +814,7 @@ export default function WomensCommunity() {
                       value={formData.phone}
                       onChange={handleInputChange}
                       placeholder="e.g. 9876543210"
-                      className="w-full px-4 py-3 rounded-xl border border-[#E7E1D4] bg-[#FBF6EE] text-[#1B2140] text-sm focus:outline-none focus:ring-2 focus:ring-[#F0791E]"
+                      className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm placeholder:text-slate-400 focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm font-mono"
                     />
                   </div>
 
@@ -827,7 +828,7 @@ export default function WomensCommunity() {
                       value={formData.email}
                       onChange={handleInputChange}
                       placeholder="e.g. priya@gmail.com"
-                      className="w-full px-4 py-3 rounded-xl border border-[#E7E1D4] bg-[#FBF6EE] text-[#1B2140] text-sm focus:outline-none focus:ring-2 focus:ring-[#F0791E]"
+                      className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm placeholder:text-slate-400 focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm"
                     />
                   </div>
                 </div>
@@ -841,9 +842,9 @@ export default function WomensCommunity() {
                       name="businessStage"
                       value={formData.businessStage}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 rounded-xl border border-[#E7E1D4] bg-[#FBF6EE] text-[#1B2140] text-sm focus:outline-none focus:ring-2 focus:ring-[#F0791E]"
+                      className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm cursor-pointer"
                     >
-                      <option value="planning">Idea / Planning Stage (ஆரம்பிக்க யோசிக்கிறேன்)</option>
+                      <option value="planning">Idea / Planning Stage</option>
                       <option value="just_started">Just Started (1-12 months)</option>
                       <option value="running">Running Business (1-3 years)</option>
                       <option value="established">Established Business (3+ years)</option>
@@ -858,7 +859,7 @@ export default function WomensCommunity() {
                       name="category"
                       value={formData.category}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 rounded-xl border border-[#E7E1D4] bg-[#FBF6EE] text-[#1B2140] text-sm focus:outline-none focus:ring-2 focus:ring-[#F0791E]"
+                      className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm cursor-pointer"
                     >
                       <option value="retail_boutique">Boutique / Tailoring / Apparel</option>
                       <option value="food_baking">Food / Baking / Catering</option>

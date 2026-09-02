@@ -139,12 +139,12 @@ export default function BusinessFoundersCommunity() {
   // ─── Agenda Schedule ────────────────────────────────────────────────────────
   const agenda = [
     {
-      time: '10:30 AM – 11:00 AM',
+      time: '11:00 AM – 11:15 AM',
       title: 'Welcome & Founder Check-in',
       desc: 'Arrival, badge collection, morning refreshments, and casual founder-to-founder networking.'
     },
     {
-      time: '11:00 AM – 11:45 AM',
+      time: '11:15 AM – 11:45 AM',
       title: 'Keynote: From Operator to True Business Owner',
       desc: 'How to break free from daily fire-fighting and build a self-sustaining business model.'
     },
@@ -362,7 +362,7 @@ export default function BusinessFoundersCommunity() {
                 </li>
                 <li className="flex items-center gap-2">
                   <Clock className="w-5 h-5 text-[#F0791E] flex-shrink-0" />
-                  <span>11:00 AM onward</span>
+                  <span>11:00 AM to 1:00 PM</span>
                 </li>
               </ul>
             </div>
@@ -385,9 +385,9 @@ export default function BusinessFoundersCommunity() {
                 />
                 <div className="mt-3 py-2 px-3 bg-[#FBF6EE] rounded-xl flex items-center justify-between text-xs font-bold text-[#16225E]">
                   <span className="flex items-center gap-1.5 text-[#F0791E]">
-                    <Sparkles className="w-4 h-4" /> Sivakasi Orientation
+                    <Sparkles className="w-4 h-4" /> Business Founders Orientation
                   </span>
-                  <span>Advance Booking</span>
+                  <span>16 September 2026</span>
                 </div>
               </div>
             </div>
@@ -404,8 +404,7 @@ export default function BusinessFoundersCommunity() {
               Who this is for
             </span>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-[#16225E]">
-              Network forum illa learning community
-            </h2>
+              Not a Network Forum But a Real Learning Community            </h2>
             <p className="text-[#666C87] text-base leading-relaxed">
               This orientation is built for businessmen who are already running something — not looking for a first step,
               but the next one. Come as you are.
@@ -798,7 +797,7 @@ export default function BusinessFoundersCommunity() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Clock className="w-4 h-4 text-[#F0791E]" />
-                    <span><strong>Timing:</strong> 11:00 AM onward</span>
+                    <span><strong>Timing:</strong> 11:00 AM to 1:00 AM</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <MapPin className="w-4 h-4 text-[#F0791E] mt-0.5" />
@@ -836,7 +835,7 @@ export default function BusinessFoundersCommunity() {
                     value={form.fullName}
                     onChange={handleInputChange}
                     placeholder="e.g. R. Soundararajan"
-                    className="w-full px-4 py-3 rounded-xl border border-[#E7E1D4] bg-[#FBF6EE] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F0791E] text-sm text-[#1B2140] transition"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm placeholder:text-slate-400 focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm"
                   />
                 </div>
 
@@ -852,7 +851,7 @@ export default function BusinessFoundersCommunity() {
                     value={form.phone}
                     onChange={handleInputChange}
                     placeholder="e.g. 9876543210"
-                    className="w-full px-4 py-3 rounded-xl border border-[#E7E1D4] bg-[#FBF6EE] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F0791E] text-sm text-[#1B2140] transition font-mono"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm placeholder:text-slate-400 focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm font-mono"
                   />
                 </div>
 
@@ -867,7 +866,7 @@ export default function BusinessFoundersCommunity() {
                     value={form.email}
                     onChange={handleInputChange}
                     placeholder="e.g. founder@mybusiness.com"
-                    className="w-full px-4 py-3 rounded-xl border border-[#E7E1D4] bg-[#FBF6EE] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F0791E] text-sm text-[#1B2140] transition"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm placeholder:text-slate-400 focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm"
                   />
                 </div>
 
@@ -882,7 +881,7 @@ export default function BusinessFoundersCommunity() {
                     value={form.businessName}
                     onChange={handleInputChange}
                     placeholder="e.g. Sri Meenakshi Industries"
-                    className="w-full px-4 py-3 rounded-xl border border-[#E7E1D4] bg-[#FBF6EE] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F0791E] text-sm text-[#1B2140] transition"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm placeholder:text-slate-400 focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm"
                   />
                 </div>
 
@@ -896,7 +895,7 @@ export default function BusinessFoundersCommunity() {
                       name="industry"
                       value={form.industry}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 rounded-xl border border-[#E7E1D4] bg-[#FBF6EE] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F0791E] text-sm text-[#1B2140] transition"
+                      className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm cursor-pointer"
                     >
                       <option value="manufacturing">Manufacturing</option>
                       <option value="printing_packaging">Printing &amp; Packaging</option>
@@ -918,7 +917,7 @@ export default function BusinessFoundersCommunity() {
                       name="yearsInBusiness"
                       value={form.yearsInBusiness}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 rounded-xl border border-[#E7E1D4] bg-[#FBF6EE] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F0791E] text-sm text-[#1B2140] transition"
+                      className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm cursor-pointer"
                     >
                       <option value="less_than_1_year">&lt; 1 Year</option>
                       <option value="1_to_3_years">1 – 3 Years</option>
@@ -937,7 +936,7 @@ export default function BusinessFoundersCommunity() {
                     name="biggestPriority"
                     value={form.biggestPriority}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-xl border border-[#E7E1D4] bg-[#FBF6EE] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F0791E] text-sm text-[#1B2140] transition"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm cursor-pointer"
                   >
                     <option value="More Sales">More Sales</option>
                     <option value="More Customers">More Customers</option>
@@ -957,7 +956,7 @@ export default function BusinessFoundersCommunity() {
                     name="growthBlocker"
                     value={form.growthBlocker}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-xl border border-[#E7E1D4] bg-[#FBF6EE] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F0791E] text-sm text-[#1B2140] transition"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm cursor-pointer"
                   >
                     <option value="Lack of Customers">Lack of Customers</option>
                     <option value="Lack of Sales">Lack of Sales</option>
@@ -978,7 +977,7 @@ export default function BusinessFoundersCommunity() {
                     name="hasTeam"
                     value={form.hasTeam}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-xl border border-[#E7E1D4] bg-[#FBF6EE] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F0791E] text-sm text-[#1B2140] transition"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm cursor-pointer"
                   >
                     <option value="Yes">Yes</option>
                     <option value="No">No</option>
@@ -995,7 +994,7 @@ export default function BusinessFoundersCommunity() {
                     name="futureVision"
                     value={form.futureVision}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-xl border border-[#E7E1D4] bg-[#FBF6EE] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F0791E] text-sm text-[#1B2140] transition"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm cursor-pointer"
                   >
                     <option value="Bigger Sales">Bigger Sales</option>
                     <option value="Bigger Team">Bigger Team</option>
@@ -1018,7 +1017,7 @@ export default function BusinessFoundersCommunity() {
                     value={form.growthChallenge}
                     onChange={handleInputChange}
                     placeholder="e.g. Scaling dealer network, reducing owner dependency, improving margins..."
-                    className="w-full px-4 py-3 rounded-xl border border-[#E7E1D4] bg-[#FBF6EE] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F0791E] text-sm text-[#1B2140] transition resize-none"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm placeholder:text-slate-400 focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm resize-none"
                   />
                 </div>
 

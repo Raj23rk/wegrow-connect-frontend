@@ -252,12 +252,12 @@ export default function StudentFoundersCommunity() {
             </div>
 
             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-[#16225E] leading-tight tracking-tight">
-              Student <span className="text-[#F0791E]">Founders</span> Community
+              Student <span className="text-[#F0791E]">Start-up</span> Community
             </h1>
 
             <div className="bg-[#F0791E]/10 border border-[#F0791E]/20 px-4 py-2.5 rounded-2xl inline-block max-w-xl text-left">
               <p className="text-xs sm:text-base font-semibold text-[#16225E] leading-relaxed">
-                College படிக்கும் போதே உங்க Business-ஐ Start பண்ணி Grow பண்ணணுமா? Join our Student Founders Community.
+                College படிக்கும் போதே உங்க Business-ஐ Start பண்ணி Grow பண்ணணுமா? Join our Student Start-up Community.
               </p>
             </div>
 
@@ -289,8 +289,7 @@ export default function StudentFoundersCommunity() {
               </div>
               <div className="flex items-center gap-2.5 text-sm font-bold text-[#16225E]">
                 <MapPin className="w-5 h-5 text-[#F0791E] flex-shrink-0" />
-                <span className="line-clamp-1" title={venueAddress}>WeGrow B School, Sivakasi</span>
-              </div>
+                <span>Ayyapan Kovil, Sivakasi</span>              </div>
             </div>
           </div>
 
@@ -714,7 +713,7 @@ export default function StudentFoundersCommunity() {
                     value={form.fullName}
                     onChange={handleChange}
                     placeholder="e.g. Arjun Rajan"
-                    className="w-full px-4 py-3 rounded-xl border border-[#E7E1D4] bg-[#FBF6EE] text-[#1B2140] text-sm focus:outline-none focus:ring-2 focus:ring-[#F0791E]"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm placeholder:text-slate-400 focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm"
                   />
                 </div>
 
@@ -731,7 +730,7 @@ export default function StudentFoundersCommunity() {
                       value={form.phone}
                       onChange={handleChange}
                       placeholder="e.g. 9876543210"
-                      className="w-full px-4 py-3 rounded-xl border border-[#E7E1D4] bg-[#FBF6EE] text-[#1B2140] text-sm focus:outline-none focus:ring-2 focus:ring-[#F0791E]"
+                      className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm placeholder:text-slate-400 focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm font-mono"
                     />
                   </div>
                   <div>
@@ -745,7 +744,7 @@ export default function StudentFoundersCommunity() {
                       value={form.email}
                       onChange={handleChange}
                       placeholder="e.g. arjun@example.com"
-                      className="w-full px-4 py-3 rounded-xl border border-[#E7E1D4] bg-[#FBF6EE] text-[#1B2140] text-sm focus:outline-none focus:ring-2 focus:ring-[#F0791E]"
+                      className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm placeholder:text-slate-400 focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm"
                     />
                   </div>
                 </div>
@@ -763,7 +762,7 @@ export default function StudentFoundersCommunity() {
                       value={form.collegeName}
                       onChange={handleChange}
                       placeholder="e.g. Ayya Nadar Janaki Ammal College"
-                      className="w-full px-4 py-3 rounded-xl border border-[#E7E1D4] bg-[#FBF6EE] text-[#1B2140] text-sm focus:outline-none focus:ring-2 focus:ring-[#F0791E]"
+                      className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm placeholder:text-slate-400 focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm"
                     />
                   </div>
                   <div>
@@ -775,7 +774,7 @@ export default function StudentFoundersCommunity() {
                       required
                       value={form.yearOfStudy}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-xl border border-[#E7E1D4] bg-[#FBF6EE] text-[#1B2140] text-sm focus:outline-none focus:ring-2 focus:ring-[#F0791E]"
+                      className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm cursor-pointer"
                     >
                       <option value="">— Select Year of Study —</option>
                       <option value="1st Year">1st Year</option>
@@ -800,7 +799,7 @@ export default function StudentFoundersCommunity() {
                     value={form.course}
                     onChange={handleChange}
                     placeholder="e.g. B.Com, B.E CSE, B.Sc Maths, MBA"
-                    className="w-full px-4 py-3 rounded-xl border border-[#E7E1D4] bg-[#FBF6EE] text-[#1B2140] text-sm focus:outline-none focus:ring-2 focus:ring-[#F0791E]"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm placeholder:text-slate-400 focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm"
                   />
                 </div>
 
@@ -819,7 +818,7 @@ export default function StudentFoundersCommunity() {
                       value={form.courseStartYear}
                       onChange={handleChange}
                       placeholder="e.g. 2023"
-                      className="w-full px-4 py-3 rounded-xl border border-[#E7E1D4] bg-[#FBF6EE] text-[#1B2140] text-sm focus:outline-none focus:ring-2 focus:ring-[#F0791E]"
+                      className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm placeholder:text-slate-400 focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm font-mono"
                     />
                   </div>
                   <div>
@@ -835,7 +834,7 @@ export default function StudentFoundersCommunity() {
                       value={form.courseEndYear}
                       onChange={handleChange}
                       placeholder="e.g. 2026 or 2027"
-                      className="w-full px-4 py-3 rounded-xl border border-[#E7E1D4] bg-[#FBF6EE] text-[#1B2140] text-sm focus:outline-none focus:ring-2 focus:ring-[#F0791E]"
+                      className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm placeholder:text-slate-400 focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm font-mono"
                     />
                   </div>
                 </div>
@@ -855,7 +854,7 @@ export default function StudentFoundersCommunity() {
                         name="readiness"
                         value={form.readiness}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-xl border border-[#E7E1D4] bg-[#FBF6EE] text-[#1B2140] text-sm focus:outline-none focus:ring-2 focus:ring-[#F0791E]"
+                        className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm cursor-pointer"
                       >
                         <option value="">— Select an Option —</option>
                         <option value="Yes, I’m ready to start">Yes, I’m ready to start</option>
@@ -872,7 +871,7 @@ export default function StudentFoundersCommunity() {
                         name="hasIdea"
                         value={form.hasIdea}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-xl border border-[#E7E1D4] bg-[#FBF6EE] text-[#1B2140] text-sm focus:outline-none focus:ring-2 focus:ring-[#F0791E]"
+                        className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm cursor-pointer"
                       >
                         <option value="">— Select an Option —</option>
                         <option value="Yes, I have a clear idea">Yes, I have a clear idea</option>
@@ -890,7 +889,7 @@ export default function StudentFoundersCommunity() {
                         name="seriousness"
                         value={form.seriousness}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-xl border border-[#E7E1D4] bg-[#FBF6EE] text-[#1B2140] text-sm focus:outline-none focus:ring-2 focus:ring-[#F0791E]"
+                        className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm cursor-pointer"
                       >
                         <option value="">— Select an Option —</option>
                         <option value="I want to start soon">I want to start soon</option>
@@ -910,7 +909,7 @@ export default function StudentFoundersCommunity() {
                           name="lookingForFunding"
                           value={form.lookingForFunding}
                           onChange={handleChange}
-                          className="w-full px-4 py-3 rounded-xl border border-[#E7E1D4] bg-[#FBF6EE] text-[#1B2140] text-sm focus:outline-none focus:ring-2 focus:ring-[#F0791E]"
+                          className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm cursor-pointer"
                         >
                           <option value="">— Select —</option>
                           <option value="Yes">Yes</option>
@@ -927,7 +926,7 @@ export default function StudentFoundersCommunity() {
                           name="readyToLearn"
                           value={form.readyToLearn}
                           onChange={handleChange}
-                          className="w-full px-4 py-3 rounded-xl border border-[#E7E1D4] bg-[#FBF6EE] text-[#1B2140] text-sm focus:outline-none focus:ring-2 focus:ring-[#F0791E]"
+                          className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm cursor-pointer"
                         >
                           <option value="">— Select —</option>
                           <option value="Yes">Yes</option>
@@ -945,7 +944,7 @@ export default function StudentFoundersCommunity() {
                         name="industryNiche"
                         value={form.industryNiche}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-xl border border-[#E7E1D4] bg-[#FBF6EE] text-[#1B2140] text-sm focus:outline-none focus:ring-2 focus:ring-[#F0791E]"
+                        className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm cursor-pointer"
                       >
                         <option value="">— Select Industry Niche —</option>
                         <option value="Technology / IT">Technology / IT</option>
