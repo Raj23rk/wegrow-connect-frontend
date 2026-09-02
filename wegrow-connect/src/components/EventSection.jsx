@@ -257,7 +257,7 @@ export default function EventSection({
         </p>
 
         <h2
-          className="text-2xl sm:text-4xl font-black tracking-tight mb-2 sm:mb-3"
+          className="text-2xl sm:text-4xl font-black tracking-tight mb-2 sm:mb-3 dark:text-white"
           style={{
             color: theme.primary,
           }}
@@ -265,7 +265,7 @@ export default function EventSection({
           Expand Your Knowledge With Expert-Led Events
         </h2>
 
-        <p className="text-xs sm:text-sm font-medium text-gray-500 max-w-2xl mx-auto leading-relaxed">
+        <p className="text-xs sm:text-sm font-medium text-gray-500 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed">
           Discover interactive workshops, professional seminars, and hands-on industrial experiences designed to accelerate your career growth.
         </p>
       </div>
@@ -277,7 +277,7 @@ export default function EventSection({
       {loading && (
         <div className="py-14 flex flex-col items-center gap-4">
           <div className="w-10 h-10 border-4 border-gray-200 border-t-[#104288] rounded-full animate-spin" />
-          <span className="text-sm font-semibold text-gray-500">
+          <span className="text-sm font-semibold text-gray-500 dark:text-slate-400">
             Loading events...
           </span>
         </div>
@@ -288,8 +288,8 @@ export default function EventSection({
       ===================================================== */}
 
       {!loading && error && (
-        <div className="w-full max-w-xl bg-red-50 border border-red-200 rounded-2xl p-6 text-center">
-          <p className="text-sm font-bold text-red-600">
+        <div className="w-full max-w-xl bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-2xl p-6 text-center">
+          <p className="text-sm font-bold text-red-600 dark:text-red-400">
             {error}
           </p>
         </div>
@@ -302,7 +302,7 @@ export default function EventSection({
       {!loading &&
         !error &&
         events.length === 0 && (
-          <div className="py-14 text-sm font-semibold text-gray-500 text-center">
+          <div className="py-14 text-sm font-semibold text-gray-500 dark:text-slate-400 text-center">
             No events available at the moment.
           </div>
         )}
@@ -332,13 +332,13 @@ export default function EventSection({
                     return (
                       <div
                         key={`${event._id}-${index}`}
-                        className="group bg-white rounded-2xl shadow-[0_2px_16px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_32px_rgba(0,0,0,0.12)] transition-all duration-300 flex flex-col overflow-hidden border border-gray-100 hover:border-gray-200"
+                        className="group bg-white dark:bg-slate-800/90 rounded-2xl shadow-[0_2px_16px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_32px_rgba(0,0,0,0.12)] transition-all duration-300 flex flex-col overflow-hidden border border-gray-100 dark:border-slate-700/60 hover:border-gray-200 dark:hover:border-slate-600"
                         style={{
                           borderLeft: `4px solid ${accentColor}`,
                         }}
                       >
                         {/* IMAGE AREA */}
-                        <div className="relative w-full h-36 sm:h-40 md:h-44 overflow-hidden bg-gray-100">
+                        <div className="relative w-full h-36 sm:h-40 md:h-44 overflow-hidden bg-gray-100 dark:bg-slate-700">
                           <img
                             src={
                               event.image ||
@@ -356,11 +356,11 @@ export default function EventSection({
                           />
 
                           {/* DATE BADGE */}
-                          <div className="absolute top-2.5 left-2.5 bg-white rounded-xl shadow-lg px-2.5 py-1 text-center min-w-[46px]">
+                          <div className="absolute top-2.5 left-2.5 bg-white dark:bg-slate-900 rounded-xl shadow-lg px-2.5 py-1 text-center min-w-[46px] border border-black/5 dark:border-white/10">
                             <span className="block text-base font-black leading-tight" style={{ color: theme.primary }}>
                               {dateParts.day}
                             </span>
-                            <span className="block text-[9px] font-bold tracking-wider text-gray-500">
+                            <span className="block text-[9px] font-bold tracking-wider text-gray-500 dark:text-slate-400">
                               {dateParts.month}
                             </span>
                           </div>
@@ -394,19 +394,19 @@ export default function EventSection({
                         <div className="flex flex-col flex-1 p-3 sm:p-4">
 
                           {/* TITLE */}
-                          <h3 className="text-base font-extrabold text-gray-900 mb-1 leading-snug line-clamp-1 group-hover:text-[#104288] transition-colors duration-300">
+                          <h3 className="text-base font-extrabold text-gray-900 dark:text-white mb-1 leading-snug line-clamp-1 group-hover:text-[#104288] dark:group-hover:text-[#60a5fa] transition-colors duration-300">
                             {event.title}
                           </h3>
 
                           {/* DESCRIPTION */}
-                          <p className="text-xs font-medium text-gray-500 leading-relaxed mb-3 line-clamp-2 flex-1">
+                          <p className="text-xs font-medium text-gray-500 dark:text-slate-300 leading-relaxed mb-3 line-clamp-2 flex-1">
                             {event.description}
                           </p>
 
                           {/* INFO ROW */}
                           <div className="flex flex-col gap-1.5 mb-3 text-xs">
-                            <div className="flex items-center gap-2 text-gray-500">
-                              <svg className="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <div className="flex items-center gap-2 text-gray-500 dark:text-slate-400">
+                              <svg className="w-3.5 h-3.5 text-gray-400 dark:text-slate-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                               </svg>
@@ -415,8 +415,8 @@ export default function EventSection({
                               </span>
                             </div>
 
-                            <div className="flex items-center gap-2 text-gray-500">
-                              <svg className="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <div className="flex items-center gap-2 text-gray-500 dark:text-slate-400">
+                              <svg className="w-3.5 h-3.5 text-gray-400 dark:text-slate-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                               </svg>
                               <span className="font-semibold">
@@ -426,12 +426,12 @@ export default function EventSection({
                           </div>
 
                           {/* DIVIDER */}
-                          <div className="border-t border-gray-100 pt-3">
+                          <div className="border-t border-gray-100 dark:border-slate-700/60 pt-3">
                             <div className="flex items-center justify-between">
 
                               {/* PRICE */}
                               <div>
-                                <span className="block text-[9px] font-semibold text-gray-400 uppercase tracking-wider mb-0.5">
+                                <span className="block text-[9px] font-semibold text-gray-400 dark:text-slate-400 uppercase tracking-wider mb-0.5">
                                   Seat Fee
                                 </span>
                                 <span className="text-lg font-black" style={{ color: theme.primary }}>
@@ -477,7 +477,7 @@ export default function EventSection({
 
                 <button
                   onClick={handlePrev}
-                  className="w-11 h-11 rounded-full bg-white border border-gray-200 text-gray-600 font-black flex items-center justify-center shadow-sm hover:bg-[#104288] hover:text-white hover:border-[#104288] hover:shadow-lg transition-all duration-300 cursor-pointer"
+                  className="w-11 h-11 rounded-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-200 font-black flex items-center justify-center shadow-sm hover:bg-[#104288] hover:text-white hover:border-[#104288] hover:shadow-lg transition-all duration-300 cursor-pointer"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -498,7 +498,7 @@ export default function EventSection({
                           index ===
                           currentIndex
                             ? "w-8 bg-[#f3a812]"
-                            : "w-2 bg-gray-300 hover:bg-gray-400"
+                            : "w-2 bg-gray-300 dark:bg-slate-600 hover:bg-gray-400"
                         }`}
                       />
                     )
@@ -507,7 +507,7 @@ export default function EventSection({
 
                 <button
                   onClick={handleNext}
-                  className="w-11 h-11 rounded-full bg-white border border-gray-200 text-gray-600 font-black flex items-center justify-center shadow-sm hover:bg-[#104288] hover:text-white hover:border-[#104288] hover:shadow-lg transition-all duration-300 cursor-pointer"
+                  className="w-11 h-11 rounded-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-200 font-black flex items-center justify-center shadow-sm hover:bg-[#104288] hover:text-white hover:border-[#104288] hover:shadow-lg transition-all duration-300 cursor-pointer"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />

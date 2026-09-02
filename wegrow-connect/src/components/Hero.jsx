@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { theme } from '../theme';
+import { useTheme } from '../context/ThemeContext';
 
 const carouselSlides = [
   {
@@ -56,6 +57,7 @@ const backgroundCollageImages = [
 
 export default function Hero({ heroTransform, scrollToEvents, scrollToSeminars }) {
   const navigate = useNavigate();
+  const { isDarkMode } = useTheme();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [fade, setFade] = useState(true);
 
@@ -183,7 +185,14 @@ export default function Hero({ heroTransform, scrollToEvents, scrollToSeminars }
         </div>
 
         {/* Smooth gradient overlay */}
-        <div className="absolute inset-0 z-10" style={{ background: 'linear-gradient(to bottom, rgba(242,244,248,0.78) 0%, rgba(242,244,248,0.65) 50%, rgba(242,244,248,0.82) 100%)' }}></div>
+        <div 
+          className="absolute inset-0 z-10 transition-colors duration-500" 
+          style={{ 
+            background: isDarkMode 
+              ? 'linear-gradient(to bottom, rgba(6,19,37,0.92) 0%, rgba(6,19,37,0.80) 50%, rgba(6,19,37,0.96) 100%)' 
+              : 'linear-gradient(to bottom, rgba(242,244,248,0.78) 0%, rgba(242,244,248,0.65) 50%, rgba(242,244,248,0.82) 100%)' 
+          }}
+        />
       </div>
 
       {/* MAIN CONTAINER */}
@@ -194,11 +203,11 @@ export default function Hero({ heroTransform, scrollToEvents, scrollToSeminars }
           
           {/* STATIC BADGE */}
           <div 
-            className="inline-flex items-center gap-2 px-3 py-1 sm:px-5 sm:py-1.5 rounded-full border text-[10px] sm:text-xs md:text-sm font-black uppercase tracking-wider shadow-md backdrop-blur-md"
+            className="inline-flex items-center gap-2 px-3 py-1 sm:px-5 sm:py-1.5 rounded-full border text-[10px] sm:text-xs md:text-sm font-black uppercase tracking-wider shadow-md backdrop-blur-md transition-all duration-300"
             style={{ 
-              borderColor: theme.cardBorder, 
-              backgroundColor: theme.cardBg, 
-              color: theme.primary 
+              borderColor: isDarkMode ? 'rgba(243, 168, 18, 0.45)' : theme.cardBorder, 
+              backgroundColor: isDarkMode ? 'rgba(15, 23, 42, 0.85)' : theme.cardBg, 
+              color: isDarkMode ? '#f3a812' : theme.primary 
             }}
           >
             {slide.badge}
@@ -208,7 +217,10 @@ export default function Hero({ heroTransform, scrollToEvents, scrollToSeminars }
           <div className={`flex flex-col items-center space-y-2.5 w-full transition-opacity duration-1000 ease-in-out ${fade ? 'opacity-100' : 'opacity-0'}`}>
             
             {/* MAIN HEADING */}
-            <h1 className="text-xl sm:text-3xl md:text-5xl lg:text-5.5xl font-black tracking-tight leading-tight drop-shadow-sm" style={{ color: theme.primary }}>
+            <h1 
+              className="text-xl sm:text-3xl md:text-5xl lg:text-5.5xl font-black tracking-tight leading-tight drop-shadow-sm transition-colors duration-300" 
+              style={{ color: isDarkMode ? '#ffffff' : theme.primary }}
+            >
               {slide.title.includes("Learn") ? (
                 <>Learn. Connect. <br /><span style={{ color: theme.orange }}>Grow Your Future.</span></>
               ) : slide.title.includes("Scale") ? (
@@ -219,7 +231,10 @@ export default function Hero({ heroTransform, scrollToEvents, scrollToSeminars }
             </h1>
             
             {/* SUBTITLE */}
-            <p className="text-xs sm:text-sm md:text-base max-w-2xl leading-relaxed font-semibold" style={{ color: theme.textMuted }}>
+            <p 
+              className="text-xs sm:text-sm md:text-base max-w-2xl leading-relaxed font-semibold transition-colors duration-300" 
+              style={{ color: isDarkMode ? '#cbd5e1' : theme.textMuted }}
+            >
               {slide.description}
             </p>
 
@@ -230,7 +245,7 @@ export default function Hero({ heroTransform, scrollToEvents, scrollToSeminars }
             <button 
               onClick={handleExploreClick} 
               className="font-extrabold px-5 sm:px-8 py-2 sm:py-3 rounded-full transition-all duration-300 shadow-xl hover:scale-105 transform focus:outline-none text-xs sm:text-sm md:text-base cursor-pointer"
-              style={{ backgroundColor: theme.primary, color: theme.accentBtnText || '#ffffff' }}
+              style={{ backgroundColor: isDarkMode ? '#1d4ed8' : theme.primary, color: '#ffffff' }}
             >
               Explore Workshops
             </button>
@@ -239,17 +254,17 @@ export default function Hero({ heroTransform, scrollToEvents, scrollToSeminars }
               onClick={handleJoinMembershipClick} 
               className="font-extrabold px-5 sm:px-8 py-2 sm:py-3 rounded-full transition-all duration-300 shadow-md border focus:outline-none hover:scale-105 hover:shadow-xl hover:border-transparent text-xs sm:text-sm md:text-base cursor-pointer"
               style={{ 
-                borderColor: theme.primary, 
-                color: theme.primary,
-                backgroundColor: 'rgba(255, 255, 255, 0.85)'
+                borderColor: isDarkMode ? 'rgba(243, 168, 18, 0.6)' : theme.primary, 
+                color: isDarkMode ? '#ffffff' : theme.primary,
+                backgroundColor: isDarkMode ? 'rgba(15, 23, 42, 0.85)' : 'rgba(255, 255, 255, 0.85)'
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = theme.primary;
+                e.currentTarget.style.backgroundColor = isDarkMode ? '#f3a812' : theme.primary;
                 e.currentTarget.style.color = '#ffffff';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.85)';
-                e.currentTarget.style.color = theme.primary;
+                e.currentTarget.style.backgroundColor = isDarkMode ? 'rgba(15, 23, 42, 0.85)' : 'rgba(255, 255, 255, 0.85)';
+                e.currentTarget.style.color = isDarkMode ? '#ffffff' : theme.primary;
               }}
             >
               Join Membership 🌟
@@ -257,11 +272,17 @@ export default function Hero({ heroTransform, scrollToEvents, scrollToSeminars }
           </div>
 
           {/* CONSTANT METRICS */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-3 border-t text-[11px] sm:text-xs md:text-sm max-w-2xl w-full font-bold" style={{ borderColor: theme.cardBorder, color: theme.textMuted }}>
-            <div><strong className="block text-xs sm:text-sm font-extrabold" style={{ color: theme.textBright }}>Startup</strong> Growth Ideas</div>
-            <div><strong className="block text-xs sm:text-sm font-extrabold" style={{ color: theme.textBright }}>Student</strong> Business Plans</div>
-            <div><strong className="block text-xs sm:text-sm font-extrabold" style={{ color: theme.textBright }}>Global</strong> Networking Hub</div>
-            <div><strong className="block text-xs sm:text-sm font-extrabold" style={{ color: theme.textBright }}>Verified</strong> Certificates</div>
+          <div 
+            className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-3 border-t text-[11px] sm:text-xs md:text-sm max-w-2xl w-full font-bold transition-colors duration-300" 
+            style={{ 
+              borderColor: isDarkMode ? 'rgba(255, 255, 255, 0.15)' : theme.cardBorder, 
+              color: isDarkMode ? '#cbd5e1' : theme.textMuted 
+            }}
+          >
+            <div><strong className="block text-xs sm:text-sm font-extrabold" style={{ color: isDarkMode ? '#ffffff' : theme.textBright }}>Startup</strong> Growth Ideas</div>
+            <div><strong className="block text-xs sm:text-sm font-extrabold" style={{ color: isDarkMode ? '#ffffff' : theme.textBright }}>Student</strong> Business Plans</div>
+            <div><strong className="block text-xs sm:text-sm font-extrabold" style={{ color: isDarkMode ? '#ffffff' : theme.textBright }}>Global</strong> Networking Hub</div>
+            <div><strong className="block text-xs sm:text-sm font-extrabold" style={{ color: isDarkMode ? '#ffffff' : theme.textBright }}>Verified</strong> Certificates</div>
           </div>
 
         </div>
@@ -270,7 +291,7 @@ export default function Hero({ heroTransform, scrollToEvents, scrollToSeminars }
 
       {/* BOUNCING ARROW LINKED TO EVENT SECTION */}
       <div className="flex justify-center pb-1 pt-0 relative z-20">
-        <button onClick={handleEventScroll} className="bounce-arrow transition p-1.5 focus:outline-none cursor-pointer" style={{ color: theme.primary }}>
+        <button onClick={handleEventScroll} className="bounce-arrow transition p-1.5 focus:outline-none cursor-pointer" style={{ color: isDarkMode ? '#f3a812' : theme.primary }}>
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path>
           </svg>

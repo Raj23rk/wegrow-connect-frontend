@@ -2,6 +2,38 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --wegrow-primary: #104288;
+  --wegrow-primary-hover: #0a2e61;
+  --wegrow-orange: #f3a812;
+  --wegrow-orange-hover: #d9920a;
+  --wegrow-text-main: #1e293b;
+  --wegrow-text-muted: #50637f;
+  --wegrow-text-bright: #0f172a;
+  --wegrow-card-bg: rgba(255, 255, 255, 0.90);
+  --wegrow-card-border: rgba(16, 66, 136, 0.15);
+  --wegrow-bg-dark: #f4f7fb;
+  --wegrow-bg-overlay: linear-gradient(90deg, rgba(244,247,251,0.92) 0%, rgba(235,241,250,0.85) 50%, rgba(244,247,251,0.70) 100%);
+  --wegrow-hero-overlay: linear-gradient(to bottom, rgba(242,244,248,0.78) 0%, rgba(242,244,248,0.65) 50%, rgba(242,244,248,0.82) 100%);
+  --wegrow-dropdown-bg: rgba(255, 255, 255, 0.98);
+}
+
+html.dark {
+  --wegrow-primary: #60a5fa;
+  --wegrow-primary-hover: #93c5fd;
+  --wegrow-orange: #f3a812;
+  --wegrow-orange-hover: #fbbf24;
+  --wegrow-text-main: #f8fafc;
+  --wegrow-text-muted: #cbd5e1;
+  --wegrow-text-bright: #ffffff;
+  --wegrow-card-bg: rgba(15, 23, 42, 0.85);
+  --wegrow-card-border: rgba(148, 163, 184, 0.20);
+  --wegrow-bg-dark: #061325;
+  --wegrow-bg-overlay: linear-gradient(180deg, rgba(6, 19, 37, 0.96) 0%, rgba(4, 12, 24, 0.98) 100%);
+  --wegrow-hero-overlay: linear-gradient(to bottom, rgba(6,19,37,0.88) 0%, rgba(6,19,37,0.78) 50%, rgba(6,19,37,0.94) 100%);
+  --wegrow-dropdown-bg: rgba(15, 23, 42, 0.98);
+}
+
 @keyframes floatArrow {
   0%, 100% { transform: translateY(0); opacity: 0.8; }
   50% { transform: translateY(10px); opacity: 1; }
