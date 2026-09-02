@@ -295,20 +295,28 @@ export default function StudentFoundersCommunity() {
           </div>
 
           {/* Right column — mascot visual */}
-          <div className="lg:col-span-5 relative text-center">
+          <div className="lg:col-span-5 relative text-center flex justify-center">
             <div
-              className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[88%] h-[78%] bg-[#F0791E] opacity-15 blur-3xl rounded-full pointer-events-none"
+              className="absolute inset-0 m-auto w-4/5 h-4/5 rounded-full bg-[#F0791E]/20 filter blur-3xl pointer-events-none"
               aria-hidden="true"
             />
-            <img
-              src="/wegrow-mascot.jpg"
-              alt="WeGrow B School mascot giving a thumbs up"
-              className="relative max-h-[480px] lg:max-h-[540px] mx-auto w-auto object-contain drop-shadow-xl"
-              onError={e => { e.target.src = '/student_startup_founder.jpg'; }}
-            />
+            <div className="relative z-10 w-full max-w-sm sm:max-w-md bg-white p-3 sm:p-4 rounded-3xl shadow-2xl border-2 border-[#E7E1D4] hover:border-[#F0791E]/60 transition-all duration-300 transform hover:scale-[1.02]">
+              <img
+                src="/wegrow-mascot.jpeg"
+                alt="WeGrow B School mascot giving a thumbs up"
+                className="w-full h-auto object-cover rounded-2xl shadow-sm"
+                onError={e => { e.target.src = '/student_startup_founder.jpg'; }}
+              />
+              <div className="mt-3 py-2 px-3 bg-[#FBF6EE] rounded-xl flex items-center justify-between text-xs font-bold text-[#16225E]">
+                <span className="flex items-center gap-1.5 text-[#F0791E]">
+                  <Sparkles className="w-4 h-4" /> Student Founders Orientation
+                </span>
+                <span>Sat, 12 Sep 2026</span>
+              </div>
+            </div>
 
             {/* Floating stat badge */}
-            <div className="hidden sm:flex items-center gap-3 absolute -bottom-4 -left-4 bg-white p-3.5 rounded-2xl shadow-xl border border-[#E7E1D4] z-20">
+            <div className="hidden sm:flex items-center gap-3 absolute -bottom-5 -left-4 bg-white p-3.5 rounded-2xl shadow-xl border border-[#E7E1D4] z-20">
               <div className="w-10 h-10 rounded-xl bg-[#16225E] text-[#F0791E] flex items-center justify-center font-black">
                 <Users className="w-5 h-5" />
               </div>
@@ -510,7 +518,7 @@ export default function StudentFoundersCommunity() {
             {/* Featured Large Tile */}
             <div className="col-span-2 row-span-2 relative rounded-2xl overflow-hidden group shadow-md border border-[#E7E1D4] bg-[#EFE7D6]">
               <img
-                src="/student_startup_founder.jpg"
+                src="/events/student.jpeg"
                 alt="Student Founders Community Meet"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 onError={(e) => {

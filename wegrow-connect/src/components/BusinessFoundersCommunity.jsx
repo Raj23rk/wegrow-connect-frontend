@@ -375,7 +375,7 @@ export default function BusinessFoundersCommunity() {
               />
               <div className="relative z-10 w-full max-w-sm sm:max-w-md bg-white p-3 sm:p-4 rounded-3xl shadow-2xl border border-[#E7E1D4] transform hover:scale-[1.02] transition-transform duration-300">
                 <img
-                  src="/wegrow-mascot.jpg"
+                  src="/wegrow-mascot.jpeg"
                   alt="WeGrow B School mascot giving a thumbs up"
                   className="w-full h-auto object-cover rounded-2xl"
                   onError={(e) => {
@@ -625,7 +625,7 @@ export default function BusinessFoundersCommunity() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="col-span-2 row-span-2 rounded-2xl overflow-hidden border border-[#E7E1D4] shadow-md group relative min-h-[260px] sm:min-h-[320px]">
               <img
-                src="/sivakasi_entrepreneurs_comm.jpg"
+                src="/events/bussines founder.JPG"
                 alt="WeGrow Business Founders Community"
                 className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
                 onError={(e) => {
@@ -741,9 +741,8 @@ export default function BusinessFoundersCommunity() {
                   >
                     <span>{faq.q}</span>
                     <span
-                      className={`w-7 h-7 rounded-full border-2 border-[#16225E] flex items-center justify-center flex-shrink-0 transition-transform duration-200 ${
-                        isOpen ? 'rotate-45 border-[#F0791E] text-[#F0791E]' : ''
-                      }`}
+                      className={`w-7 h-7 rounded-full border-2 border-[#16225E] flex items-center justify-center flex-shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-45 border-[#F0791E] text-[#F0791E]' : ''
+                        }`}
                     >
                       +
                     </span>
