@@ -18,7 +18,7 @@ import { API_BASE } from './config';
 // =====================================================
 
 export function getAuthHeaders() {
-  const token = sessionStorage.getItem('accessToken');
+  const token = sessionStorage.getItem('accessToken') || localStorage.getItem('accessToken');
 
   return {
     'Content-Type': 'application/json',
@@ -35,7 +35,7 @@ export function getAuthHeaders() {
 // =====================================================
 
 export function getAccessToken() {
-  return sessionStorage.getItem('accessToken');
+  return sessionStorage.getItem('accessToken') || localStorage.getItem('accessToken');
 }
 
 // =====================================================
@@ -43,7 +43,7 @@ export function getAccessToken() {
 // =====================================================
 
 export function isAuthenticated() {
-  return Boolean(sessionStorage.getItem('accessToken'));
+  return Boolean(sessionStorage.getItem('accessToken') || localStorage.getItem('accessToken'));
 }
 
 // =====================================================

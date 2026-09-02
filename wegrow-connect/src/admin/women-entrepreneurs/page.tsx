@@ -73,8 +73,19 @@ export default function AdminWomenEntrepreneurs() {
     try {
       setStatsLoading(true);
       const res = await fetchWomenEntrepreneursStats();
-      if (res && (res.data || res.stats || res.total !== undefined)) {
-        setStats(res.data || res.stats || res);
+      if (res) {
+        const statsData =
+          res?.data?.stats ||
+          res?.data?.summary ||
+          res?.data?.counts ||
+          res?.data ||
+          res?.stats ||
+          res?.summary ||
+          res?.counts ||
+          res;
+        if (statsData) {
+          setStats((prev: any) => ({ ...prev, ...statsData }));
+        }
       }
     } catch (err) {
       console.error('Failed to load stats:', err);
@@ -97,19 +108,46 @@ export default function AdminWomenEntrepreneurs() {
       });
 
       if (res) {
-        const items = Array.isArray(res.data)
+        const rawData =
+          res?.data?.data !== undefined
+            ? res.data.data
+            : res?.data !== undefined
+            ? res.data
+            : res;
+
+        const items = Array.isArray(rawData)
+          ? rawData
+          : Array.isArray(res?.data?.data)
+          ? res.data.data
+          : Array.isArray(res?.data)
           ? res.data
-          : Array.isArray(res.registrations)
+          : Array.isArray(res?.registrations)
           ? res.registrations
-          : Array.isArray(res.results)
+          : Array.isArray(res?.data?.registrations)
+          ? res.data.registrations
+          : Array.isArray(res?.results)
           ? res.results
           : Array.isArray(res)
           ? res
           : [];
 
+        const pagination = res?.data?.pagination || res?.pagination;
+        const summary =
+          res?.data?.summary ||
+          res?.data?.counts ||
+          res?.data?.stats ||
+          res?.summary ||
+          res?.counts ||
+          res?.stats;
+        const total = pagination?.total ?? summary?.totalFounders ?? summary?.total ?? items.length;
+        const pages = pagination?.totalPages ?? pagination?.pages ?? Math.ceil(total / limit) ?? 1;
+
         setData(items);
-        setTotalPages(res.totalPages || res.pages || Math.ceil((res.total || items.length) / limit) || 1);
-        setTotalCount(res.total || res.totalCount || res.count || items.length);
+        setTotalPages(pages || 1);
+        setTotalCount(total);
+        if (summary) {
+          setStats((prev: any) => ({ ...prev, ...summary }));
+        }
       }
     } catch (err) {
       console.error('Failed to load women entrepreneurs:', err);
@@ -289,8 +327,8 @@ export default function AdminWomenEntrepreneurs() {
             <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
               <div>
                 <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Total Registrations</p>
-                <h3 className="text-2xl font-black text-slate-900 mt-1">
-                  {statsLoading ? '…' : stats?.total ?? totalCount}
+                <h3 className="text-2xl font-black text-slate-900 mt-1 font-mono">
+                  {statsLoading ? '…' : stats?.totalFounders ?? stats?.total ?? totalCount}
                 </h3>
               </div>
               <div className="w-12 h-12 rounded-2xl bg-pink-50 text-pink-600 flex items-center justify-center">
@@ -300,9 +338,21 @@ export default function AdminWomenEntrepreneurs() {
 
             <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
               <div>
-                <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Planning / Idea</p>
-                <h3 className="text-2xl font-black text-amber-600 mt-1">
-                  {statsLoading ? '…' : stats?.byStage?.planning ?? stats?.planning ?? '0'}
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Confirmed</p>
+                <h3 className="text-2xl font-black text-emerald-600 mt-1 font-mono">
+                  {statsLoading ? '…' : stats?.confirmed ?? stats?.counts?.confirmed ?? stats?.byStatus?.confirmed ?? 0}
+                </h3>
+              </div>
+              <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <CheckCircle2 className="w-6 h-6" />
+              </div>
+            </div>
+
+            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-500">New Registrations</p>
+                <h3 className="text-2xl font-black text-amber-600 mt-1 font-mono">
+                  {statsLoading ? '…' : stats?.newRegs ?? stats?.registered ?? stats?.byStage?.planning ?? 0}
                 </h3>
               </div>
               <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center">
@@ -312,25 +362,13 @@ export default function AdminWomenEntrepreneurs() {
 
             <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
               <div>
-                <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Early Stage</p>
-                <h3 className="text-2xl font-black text-blue-600 mt-1">
-                  {statsLoading ? '…' : stats?.byStage?.early_stage ?? stats?.early_stage ?? '0'}
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Attended / Active</p>
+                <h3 className="text-2xl font-black text-purple-600 mt-1 font-mono">
+                  {statsLoading ? '…' : stats?.attended ?? stats?.attend ?? stats?.byStatus?.attended ?? 0}
                 </h3>
               </div>
-              <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center">
                 <Briefcase className="w-6 h-6" />
-              </div>
-            </div>
-
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-              <div>
-                <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Confirmed / Attended</p>
-                <h3 className="text-2xl font-black text-emerald-600 mt-1">
-                  {statsLoading ? '…' : (stats?.byStatus?.confirmed || 0) + (stats?.byStatus?.attended || 0) || '0'}
-                </h3>
-              </div>
-              <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                <CheckCircle2 className="w-6 h-6" />
               </div>
             </div>
           </div>

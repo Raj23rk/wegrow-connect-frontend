@@ -84,8 +84,19 @@ export default function AdminBusinessFounders() {
     try {
       setStatsLoading(true);
       const res = await fetchBusinessFoundersStats();
-      if (res && (res.data || res.stats || res.total !== undefined)) {
-        setStats(res.data || res.stats || res);
+      if (res) {
+        const statsData =
+          res?.data?.stats ||
+          res?.data?.summary ||
+          res?.data?.counts ||
+          res?.data ||
+          res?.stats ||
+          res?.summary ||
+          res?.counts ||
+          res;
+        if (statsData) {
+          setStats((prev: any) => ({ ...prev, ...statsData }));
+        }
       }
     } catch (err) {
       console.error('Failed to load business founders stats:', err);
@@ -109,21 +120,48 @@ export default function AdminBusinessFounders() {
       });
 
       if (res) {
-        const items = Array.isArray(res.data)
+        const rawData =
+          res?.data?.data !== undefined
+            ? res.data.data
+            : res?.data !== undefined
+            ? res.data
+            : res;
+
+        const items = Array.isArray(rawData)
+          ? rawData
+          : Array.isArray(res?.data?.data)
+          ? res.data.data
+          : Array.isArray(res?.data)
           ? res.data
-          : Array.isArray(res.registrations)
+          : Array.isArray(res?.registrations)
           ? res.registrations
-          : Array.isArray(res.founders)
+          : Array.isArray(res?.data?.registrations)
+          ? res.data.registrations
+          : Array.isArray(res?.founders)
           ? res.founders
-          : Array.isArray(res.results)
+          : Array.isArray(res?.results)
           ? res.results
           : Array.isArray(res)
           ? res
           : [];
 
+        const pagination = res?.data?.pagination || res?.pagination;
+        const summary =
+          res?.data?.summary ||
+          res?.data?.counts ||
+          res?.data?.stats ||
+          res?.summary ||
+          res?.counts ||
+          res?.stats;
+        const total = pagination?.total ?? summary?.totalFounders ?? summary?.total ?? items.length;
+        const pages = pagination?.totalPages ?? pagination?.pages ?? Math.ceil(total / limit) ?? 1;
+
         setData(items);
-        setTotalPages(res.totalPages || res.pages || Math.ceil((res.total || items.length) / limit) || 1);
-        setTotalCount(res.total || res.totalCount || res.count || items.length);
+        setTotalPages(pages || 1);
+        setTotalCount(total);
+        if (summary) {
+          setStats((prev: any) => ({ ...prev, ...summary }));
+        }
       }
     } catch (err) {
       console.error('Failed to load business founders:', err);
@@ -359,7 +397,7 @@ export default function AdminBusinessFounders() {
               <div>
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Founders</p>
                 <p className="text-2xl font-black text-slate-900 mt-0.5 font-mono">
-                  {statsLoading ? '...' : stats?.total || stats?.totalCount || totalCount}
+                  {statsLoading ? '...' : stats?.totalFounders ?? stats?.total ?? stats?.totalCount ?? totalCount}
                 </p>
               </div>
             </div>
@@ -371,7 +409,7 @@ export default function AdminBusinessFounders() {
               <div>
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Confirmed</p>
                 <p className="text-2xl font-black text-emerald-600 mt-0.5 font-mono">
-                  {statsLoading ? '...' : stats?.confirmed || 0}
+                  {statsLoading ? '...' : stats?.confirmed ?? stats?.counts?.confirmed ?? stats?.byStatus?.confirmed ?? 0}
                 </p>
               </div>
             </div>
@@ -383,7 +421,7 @@ export default function AdminBusinessFounders() {
               <div>
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Attended</p>
                 <p className="text-2xl font-black text-blue-600 mt-0.5 font-mono">
-                  {statsLoading ? '...' : stats?.attended || 0}
+                  {statsLoading ? '...' : stats?.attended ?? stats?.attend ?? stats?.byStatus?.attended ?? 0}
                 </p>
               </div>
             </div>
@@ -395,7 +433,7 @@ export default function AdminBusinessFounders() {
               <div>
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">New Registrations</p>
                 <p className="text-2xl font-black text-amber-600 mt-0.5 font-mono">
-                  {statsLoading ? '...' : stats?.registered || stats?.pending || 0}
+                  {statsLoading ? '...' : stats?.newRegs ?? stats?.registered ?? stats?.pending ?? 0}
                 </p>
               </div>
             </div>
