@@ -1015,6 +1015,24 @@ export async function deleteWomenEntrepreneur(id) {
 }
 
 // =====================================================
+// BUSINESS FOUNDERS COMMUNITY API
+// =====================================================
+
+export async function registerBusinessFounder(formData) {
+  try {
+    const response = await fetch(`${API_BASE}/business-founders/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('registerBusinessFounder error:', error);
+    throw error;
+  }
+}
+
+// =====================================================
 // STUDENT FOUNDERS COMMUNITY API
 // =====================================================
 

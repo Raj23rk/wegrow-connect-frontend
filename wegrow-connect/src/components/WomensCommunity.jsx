@@ -562,7 +562,7 @@ export default function WomensCommunity() {
                 alt="Women Founders Community Meet"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 onError={(e) => {
-                  e.target.style.display = 'none';
+                  e.target.src = '/sivakasi_entrepreneurs_comm.jpg';
                 }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#0C1338]/85 via-[#0C1338]/30 to-transparent opacity-90 group-hover:opacity-100 transition-opacity" />
@@ -728,9 +728,8 @@ export default function WomensCommunity() {
                 >
                   <span>{faq.q}</span>
                   <ChevronDown
-                    className={`w-5 h-5 text-[#F0791E] transition-transform duration-200 flex-shrink-0 ${
-                      openFaq === idx ? 'rotate-180' : ''
-                    }`}
+                    className={`w-5 h-5 text-[#F0791E] transition-transform duration-200 flex-shrink-0 ${openFaq === idx ? 'rotate-180' : ''
+                      }`}
                   />
                 </button>
                 {openFaq === idx && (

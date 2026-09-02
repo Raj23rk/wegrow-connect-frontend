@@ -166,6 +166,11 @@ export default function CommunityPageFooter({
                 </Link>
               </li>
               <li>
+                <Link to="/business-founders" className="hover:text-white transition inline-flex items-center gap-1.5">
+                  <span className="text-[#F0791E] text-[10px]">➔</span> Business Founders
+                </Link>
+              </li>
+              <li>
                 <Link to="/student-founders" className="hover:text-white transition inline-flex items-center gap-1.5">
                   <span className="text-[#F0791E] text-[10px]">➔</span> Student Founders
                 </Link>

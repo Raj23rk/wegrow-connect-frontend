@@ -31,6 +31,7 @@ import SetPasswordScreen from './components/SetPasswordScreen';
 import EventDetails from "./components/EventDetails";
 import WomensCommunity from './components/WomensCommunity';
 import StudentFoundersCommunity from './components/StudentFoundersCommunity';
+import BusinessFoundersCommunity from './components/BusinessFoundersCommunity';
 
 // Auth Context, Theme Context and Guard
 import { AuthProvider, ProtectedRoute } from './context/AuthContext';
@@ -650,6 +651,12 @@ export default function App() {
             <Route path="/student-founders" element={<StudentFoundersCommunity />} />
             <Route path="/student-community" element={<StudentFoundersCommunity />} />
             <Route path="/events/student-founders" element={<StudentFoundersCommunity />} />
+
+            {/* Business Founders Community */}
+            <Route path="/business-founders" element={<BusinessFoundersCommunity />} />
+            <Route path="/business-community" element={<BusinessFoundersCommunity />} />
+            <Route path="/events/business-founders" element={<BusinessFoundersCommunity />} />
+            <Route path="/founders-orientation" element={<BusinessFoundersCommunity />} />
 
             {/* Student Dashboard Routes (Protected) */}
             <Route path="/student/dashboard" element={<ProtectedRoute allowedRoles={['student']}><StudentDashboard /></ProtectedRoute>} />
