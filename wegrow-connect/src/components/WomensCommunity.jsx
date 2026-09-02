@@ -16,9 +16,7 @@ import {
   Building2,
   Headphones,
   Star,
-  ChevronLeft,
-  ChevronRight,
-  Sparkles
+  Image as ImageIcon
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { registerWomenEntrepreneur } from '../services/api';
@@ -54,59 +52,6 @@ export default function WomensCommunity() {
     const interval = setInterval(calculateTime, 1000);
     return () => clearInterval(interval);
   }, [eventDate]);
-
-  // 2. Women Entrepreneur Hero Image Slider
-  const sliderImages = [
-    {
-      url: '/women_entrepreneurs_comm.jpg',
-      title: 'Women Founders Community',
-      subtitle: 'Collaboration, Learning & Scaling Together',
-      tag: 'Orientation 2026'
-    },
-    {
-      url: '/sivakasi_entrepreneurs_comm.jpg',
-      title: 'Active Business Meet & Mentorship',
-      subtitle: 'Sivakasi & Regional Entrepreneur Network',
-      tag: 'Live Session'
-    },
-    {
-      url: '/student_startup_founder.jpg',
-      title: 'Aspiring Startup Founders',
-      subtitle: 'From Idea Validation to First Paying Customers',
-      tag: 'Incubation'
-    },
-    {
-      url: '/Images/dm 1.jpg',
-      title: 'Digital Marketing & Sales Masterclass',
-      subtitle: 'Reaching Global Markets from Hometown',
-      tag: 'Workshop'
-    },
-    {
-      url: '/Images/fu 1.jpg',
-      title: 'Financial Planning & Pricing Clinics',
-      subtitle: 'Managing Cashflows & Business Growth',
-      tag: 'Practical Learning'
-    }
-  ];
-
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [isHovered, setIsHovered] = useState(false);
-
-  useEffect(() => {
-    if (isHovered) return;
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % sliderImages.length);
-    }, 4000);
-    return () => clearInterval(timer);
-  }, [isHovered, sliderImages.length]);
-
-  const prevSlide = () => {
-    setCurrentSlide((prev) => (prev === 0 ? sliderImages.length - 1 : prev - 1));
-  };
-
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % sliderImages.length);
-  };
 
   // Smooth scroll to target section ID
   const scrollToSection = (e, sectionId) => {
@@ -205,7 +150,7 @@ export default function WomensCommunity() {
   const fullAddress = '193/1A, Ground Floor, Ayyapan Kovil Opp. Police Station Road, Sivakasi – 626 123';
 
   return (
-    <div className="min-h-screen bg-[#FBF6EE] text-[#1B2140] font-sans antialiased selection:bg-[#F0791E] selection:text-white">
+    <div className="min-h-screen bg-[#FBF6EE] text-[#1B2140] font-sans antialiased selection:bg-[#F0791E] selection:text-white overflow-x-hidden">
       {/* Navigation */}
       <nav className="sticky top-0 z-50 bg-[#FBF6EE]/95 backdrop-blur-md border-b border-[#E7E1D4] px-4 lg:px-8 py-3 transition-all">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
@@ -230,7 +175,7 @@ export default function WomensCommunity() {
             </div>
           </Link>
 
-          <div className="flex items-center gap-4 lg:gap-6">
+          <div className="flex items-center gap-3 sm:gap-4 lg:gap-6">
             <a
               href="tel:+919344337331"
               className="flex items-center gap-2 text-sm font-semibold text-[#16225E] hover:text-[#F0791E] transition-colors"
@@ -243,7 +188,7 @@ export default function WomensCommunity() {
             <a
               href="#register"
               onClick={(e) => scrollToSection(e, 'register')}
-              className="inline-flex items-center justify-center px-5 py-2.5 rounded-full font-bold text-sm text-white bg-[#F0791E] hover:bg-[#D9600B] shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all cursor-pointer"
+              className="inline-flex items-center justify-center px-4 sm:px-5 py-2 sm:py-2.5 rounded-full font-bold text-xs sm:text-sm text-white bg-[#F0791E] hover:bg-[#D9600B] shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all cursor-pointer"
             >
               Register Now
             </a>
@@ -252,54 +197,54 @@ export default function WomensCommunity() {
       </nav>
 
       {/* Hero Section */}
-      <header className="relative overflow-hidden pt-10 pb-16 lg:pt-16 lg:pb-24">
+      <header className="relative overflow-hidden pt-8 pb-14 sm:pt-12 sm:pb-18 lg:pt-16 lg:pb-24">
         {/* Background ambient glow */}
         <div
           className="absolute -top-32 -right-32 w-[550px] h-[550px] bg-gradient-to-br from-[#FDE6CE] to-[#FBF6EE] rounded-full pointer-events-none opacity-80"
           aria-hidden="true"
         />
 
-        <div className="max-w-6xl mx-auto px-4 lg:px-8 relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-10 lg:gap-12 items-center">
           {/* Left Column: Heading & Copy */}
-          <div className="lg:col-span-7 space-y-6">
-            <div className="inline-flex items-center gap-2.5 bg-[#16225E] text-white px-4 py-2 rounded-full text-xs sm:text-sm font-semibold shadow-sm">
+          <div className="lg:col-span-7 space-y-5 sm:space-y-6 text-center lg:text-left">
+            <div className="inline-flex items-center gap-2.5 bg-[#16225E] text-white px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-semibold shadow-sm">
               <span className="w-2 h-2 rounded-full bg-[#F0791E] animate-pulse" />
               WeGrow B School Orientation
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-[#16225E] leading-tight tracking-tight">
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-[#16225E] leading-tight tracking-tight">
               Women's <span className="text-[#F0791E]">Entrepreneurship</span> Community
             </h1>
 
-            <div className="bg-[#F0791E]/10 border border-[#F0791E]/20 px-4 py-2.5 rounded-2xl inline-block max-w-xl">
-              <p className="text-sm sm:text-base font-semibold text-[#16225E] leading-relaxed">
+            <div className="bg-[#F0791E]/10 border border-[#F0791E]/20 px-4 py-2.5 rounded-2xl inline-block max-w-xl text-left">
+              <p className="text-xs sm:text-base font-semibold text-[#16225E] leading-relaxed">
                 மகளிர் தொழில் முனைவோர் சமூகம் — நெட்வொர்க் ஃபோரம் இல்ல லேர்னிங் கம்யூனிட்டி
               </p>
             </div>
 
-            <p className="text-[#666C87] text-base sm:text-lg leading-relaxed max-w-xl">
+            <p className="text-[#666C87] text-sm sm:text-base lg:text-lg leading-relaxed max-w-xl mx-auto lg:mx-0">
               An exclusive orientation session for women starting out or already running a business in Sivakasi & Tamil Nadu. Meet mentors, connect with fellow founders, and explore structured growth roadmaps with WeGrow B School.
             </p>
 
-            <div className="flex flex-wrap gap-4 pt-2">
+            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 sm:gap-4 pt-2">
               <a
                 href="#register"
                 onClick={(e) => scrollToSection(e, 'register')}
-                className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full font-bold text-base text-white bg-[#F0791E] hover:bg-[#D9600B] shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all cursor-pointer"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full font-bold text-sm sm:text-base text-white bg-[#F0791E] hover:bg-[#D9600B] shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all cursor-pointer"
               >
                 Register Now <ArrowRight className="w-4 h-4" />
               </a>
               <a
                 href="#event-details"
                 onClick={(e) => scrollToSection(e, 'event-details')}
-                className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full font-bold text-base text-[#16225E] bg-transparent border-2 border-[#16225E] hover:bg-[#16225E] hover:text-white transition-all cursor-pointer"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full font-bold text-sm sm:text-base text-[#16225E] bg-transparent border-2 border-[#16225E] hover:bg-[#16225E] hover:text-white transition-all cursor-pointer"
               >
                 Venue & Details
               </a>
             </div>
 
             {/* Quick Meta Badges */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-6 border-t border-[#E7E1D4]">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-6 border-t border-[#E7E1D4] text-left">
               <div className="flex items-center gap-2.5 text-sm font-bold text-[#16225E]">
                 <Calendar className="w-5 h-5 text-[#F0791E] flex-shrink-0" />
                 <span>Fri, 11 Sep 2026</span>
@@ -315,91 +260,27 @@ export default function WomensCommunity() {
             </div>
           </div>
 
-          {/* Right Column: Women Entrepreneur Image Slider / Carousel */}
-          <div className="lg:col-span-5 relative">
+          {/* Right Column: Hero Mascot / Visual */}
+          <div className="lg:col-span-5 relative text-center">
             <div
-              className="relative w-full aspect-[4/3] sm:aspect-[1/1] lg:aspect-[4/4] rounded-3xl overflow-hidden shadow-2xl border-4 border-white bg-[#16225E] group"
-              onMouseEnter={() => setIsHovered(true)}
-              onMouseLeave={() => setIsHovered(false)}
-            >
-              {/* Slide Images */}
-              {sliderImages.map((slide, index) => (
-                <div
-                  key={index}
-                  className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
-                    index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'
-                  }`}
-                >
-                  <img
-                    src={slide.url}
-                    alt={slide.title}
-                    className="w-full h-full object-cover object-center transform group-hover:scale-105 transition-transform duration-700"
-                    onError={(e) => {
-                      e.target.src = '/women_entrepreneurs_comm.jpg';
-                    }}
-                  />
-                  {/* Gradient Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0C1338]/90 via-[#0C1338]/40 to-transparent" />
-
-                  {/* Top Badge */}
-                  <div className="absolute top-4 right-4 z-20">
-                    <span className="bg-[#F0791E] text-white text-xs font-black uppercase px-3 py-1.5 rounded-full shadow-md tracking-wider">
-                      {slide.tag}
-                    </span>
-                  </div>
-
-                  {/* Caption & Title at Bottom */}
-                  <div className="absolute bottom-4 left-4 right-4 z-20 text-white space-y-1 p-3 bg-black/30 backdrop-blur-md rounded-2xl border border-white/20">
-                    <div className="flex items-center gap-1.5 text-xs text-[#F0791E] font-bold uppercase tracking-wider">
-                      <Sparkles className="w-3.5 h-3.5" /> WeGrow B School
-                    </div>
-                    <h4 className="font-extrabold text-base sm:text-lg leading-snug text-white">
-                      {slide.title}
-                    </h4>
-                    <p className="text-xs text-[#E7E1D4] leading-normal line-clamp-2">
-                      {slide.subtitle}
-                    </p>
-                  </div>
-                </div>
-              ))}
-
-              {/* Navigation Arrows */}
-              <button
-                onClick={prevSlide}
-                aria-label="Previous Slide"
-                className="absolute left-3 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-white/80 hover:bg-white text-[#16225E] flex items-center justify-center shadow-lg transition-all hover:scale-110 cursor-pointer"
-              >
-                <ChevronLeft className="w-6 h-6" />
-              </button>
-              <button
-                onClick={nextSlide}
-                aria-label="Next Slide"
-                className="absolute right-3 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-white/80 hover:bg-white text-[#16225E] flex items-center justify-center shadow-lg transition-all hover:scale-110 cursor-pointer"
-              >
-                <ChevronRight className="w-6 h-6" />
-              </button>
-
-              {/* Slider Dots */}
-              <div className="absolute bottom-1.5 left-0 right-0 z-30 flex justify-center gap-1.5">
-                {sliderImages.map((_, dotIdx) => (
-                  <button
-                    key={dotIdx}
-                    onClick={() => setCurrentSlide(dotIdx)}
-                    aria-label={`Go to slide ${dotIdx + 1}`}
-                    className={`h-1.5 rounded-full transition-all cursor-pointer ${
-                      dotIdx === currentSlide ? 'w-6 bg-[#F0791E]' : 'w-2 bg-white/50 hover:bg-white'
-                    }`}
-                  />
-                ))}
-              </div>
-            </div>
+              className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[88%] h-[78%] bg-[#F0791E] opacity-15 blur-3xl rounded-full pointer-events-none"
+              aria-hidden="true"
+            />
+            <img
+              src="/wegrow-mascot.jpg"
+              alt="WeGrow B School mascot giving a thumbs up"
+              className="relative max-h-[480px] lg:max-h-[540px] mx-auto w-auto object-contain drop-shadow-xl"
+              onError={(e) => {
+                e.target.src = '/women_entrepreneurs_comm.jpg';
+              }}
+            />
 
             {/* Quick Floating Stat Badge */}
-            <div className="hidden sm:flex items-center gap-3 absolute -bottom-5 -left-5 bg-white p-3.5 rounded-2xl shadow-xl border border-[#E7E1D4] z-30">
+            <div className="hidden sm:flex items-center gap-3 absolute -bottom-4 -left-4 bg-white p-3.5 rounded-2xl shadow-xl border border-[#E7E1D4] z-20">
               <div className="w-10 h-10 rounded-xl bg-[#16225E] text-[#F0791E] flex items-center justify-center font-black">
                 <Users className="w-5 h-5" />
               </div>
-              <div>
+              <div className="text-left">
                 <div className="font-extrabold text-sm text-[#16225E]">500+ Women Founders</div>
                 <div className="text-[11px] text-[#666C87]">Trained & Mentored at WeGrow</div>
               </div>
@@ -597,11 +478,173 @@ export default function WomensCommunity() {
               </a>
             </div>
           </div>
+
+          {/* Agenda Schedule */}
+          <div className="mt-12 border border-[#E7E1D4] rounded-3xl overflow-hidden bg-[#FBF6EE] shadow-sm">
+            <div className="bg-[#16225E] text-white px-6 py-4 flex items-center justify-between">
+              <span className="font-extrabold text-sm uppercase tracking-wider flex items-center gap-2">
+                <Clock className="w-4 h-4 text-[#F0791E]" /> Orientation Session Agenda
+              </span>
+              <span className="text-xs text-[#C9CEEB] font-semibold">11:00 AM – 1:00 PM</span>
+            </div>
+            <div className="divide-y divide-[#E7E1D4]">
+              {[
+                {
+                  time: '11:00 AM',
+                  title: 'Welcome and registration',
+                  desc: 'Check-in, seating, light refreshments'
+                },
+                {
+                  time: '11:15 AM',
+                  title: 'What is WeGrow B School',
+                  desc: 'Programs, mentors, and how the community works'
+                },
+                {
+                  time: '11:30 AM',
+                  title: 'Founder panel',
+                  desc: 'Women entrepreneurs share what actually worked'
+                },
+                {
+                  time: '12:15 PM',
+                  title: 'Open networking',
+                  desc: 'Meet mentors and fellow participants'
+                },
+                {
+                  time: '12:45 PM',
+                  title: 'Enrolment desk opens',
+                  desc: "Sign up for the full program if it's a fit"
+                }
+              ].map((item, idx) => (
+                <div
+                  key={idx}
+                  className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 px-6 py-4.5 hover:bg-white/60 transition-colors"
+                >
+                  <div className="font-mono font-bold text-[#F0791E] text-sm sm:w-28 flex-shrink-0">
+                    {item.time}
+                  </div>
+                  <div>
+                    <strong className="block text-[#16225E] text-sm sm:text-base font-bold">
+                      {item.title}
+                    </strong>
+                    <span className="text-[#666C87] text-xs sm:text-sm">
+                      {item.desc}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Gallery Section */}
+      <section className="py-20 px-4 lg:px-8 bg-[#FBF6EE]">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
+            <div>
+              <span className="inline-flex items-center gap-2 bg-[#16225E] text-white text-xs font-bold px-3.5 py-1.5 rounded-full">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#F0791E]" /> Gallery
+              </span>
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-[#16225E] mt-3">
+                Moments From Past Sessions
+              </h2>
+            </div>
+            <p className="text-[#666C87] text-sm sm:text-base max-w-md">
+              Highlights from previous WeGrow women entrepreneurship meets, workshops, and founder mentorship sessions.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 auto-rows-[160px] sm:auto-rows-[180px] lg:auto-rows-[200px]">
+            {/* Featured Large Tile */}
+            <div className="col-span-2 row-span-2 relative rounded-2xl overflow-hidden group shadow-md border border-[#E7E1D4] bg-[#EFE7D6]">
+              <img
+                src="/women_entrepreneurs_comm.jpg"
+                alt="Women Founders Community Meet"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0C1338]/85 via-[#0C1338]/30 to-transparent opacity-90 group-hover:opacity-100 transition-opacity" />
+              <div className="absolute bottom-4 left-4 right-4 text-white">
+                <span className="bg-[#F0791E] text-[11px] font-bold uppercase px-2.5 py-1 rounded-full tracking-wider">
+                  Orientation Meet
+                </span>
+                <h4 className="font-extrabold text-base sm:text-lg mt-1.5 text-white">
+                  Women Founders Circle & Mentorship
+                </h4>
+              </div>
+            </div>
+
+            {/* Tile 2 */}
+            <div className="relative rounded-2xl overflow-hidden group shadow-md border border-[#E7E1D4] bg-[#EFE7D6]">
+              <img
+                src="/sivakasi_entrepreneurs_comm.jpg"
+                alt="Sivakasi Business Meet"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0C1338]/80 via-transparent to-transparent opacity-80" />
+              <div className="absolute bottom-2.5 left-2.5 right-2.5 text-white">
+                <p className="font-bold text-xs sm:text-sm text-white line-clamp-1">Regional Founder Network</p>
+              </div>
+            </div>
+
+            {/* Tile 3 */}
+            <div className="relative rounded-2xl overflow-hidden group shadow-md border border-[#E7E1D4] bg-[#EFE7D6]">
+              <img
+                src="/student_startup_founder.jpg"
+                alt="Aspiring Startup Founders"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0C1338]/80 via-transparent to-transparent opacity-80" />
+              <div className="absolute bottom-2.5 left-2.5 right-2.5 text-white">
+                <p className="font-bold text-xs sm:text-sm text-white line-clamp-1">Idea Validation & Pitching</p>
+              </div>
+            </div>
+
+            {/* Tile 4 */}
+            <div className="relative rounded-2xl overflow-hidden group shadow-md border border-[#E7E1D4] bg-[#EFE7D6]">
+              <img
+                src="/Images/dm 1.jpg"
+                alt="Digital Marketing Masterclass"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0C1338]/80 via-transparent to-transparent opacity-80" />
+              <div className="absolute bottom-2.5 left-2.5 right-2.5 text-white">
+                <p className="font-bold text-xs sm:text-sm text-white line-clamp-1">Digital Marketing Clinic</p>
+              </div>
+            </div>
+
+            {/* Tile 5 */}
+            <div className="relative rounded-2xl overflow-hidden group shadow-md border border-[#E7E1D4] bg-[#EFE7D6]">
+              <img
+                src="/Images/fu 1.jpg"
+                alt="Financial Planning Workshop"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0C1338]/80 via-transparent to-transparent opacity-80" />
+              <div className="absolute bottom-2.5 left-2.5 right-2.5 text-white">
+                <p className="font-bold text-xs sm:text-sm text-white line-clamp-1">Finance & Growth Strategies</p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-20 px-4 lg:px-8">
+      <section className="py-20 px-4 lg:px-8 bg-white border-t border-[#E7E1D4]">
         <div className="max-w-6xl mx-auto">
           <div className="text-center max-w-2xl mx-auto mb-14 space-y-3">
             <span className="inline-block bg-[#16225E] text-white text-xs font-bold px-3.5 py-1.5 rounded-full">
