@@ -819,7 +819,7 @@ export default function WomensCommunity() {
 
                   <div>
                     <label className="block text-xs font-bold uppercase tracking-wider text-[#16225E] mb-2">
-                      Email Address (Optional)
+                      Email Address *
                     </label>
                     <input
                       type="email"

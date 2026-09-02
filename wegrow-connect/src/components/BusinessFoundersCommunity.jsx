@@ -859,7 +859,7 @@ export default function BusinessFoundersCommunity() {
                 {/* Email Address */}
                 <div>
                   <label className="block text-xs font-bold text-[#16225E] uppercase tracking-wider mb-1.5">
-                    Email Address (Optional)
+                    Email Address *
                   </label>
                   <input
                     type="email"
