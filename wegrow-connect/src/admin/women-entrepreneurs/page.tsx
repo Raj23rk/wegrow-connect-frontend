@@ -447,30 +447,29 @@ export default function AdminWomenEntrepreneurs() {
 
           {/* ─── Table ───────────────────────────────────────────────────────── */}
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
+            <div className="w-full overflow-hidden">
+              <table className="w-full table-fixed text-left border-collapse">
                 <thead>
                   <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-black uppercase tracking-wider text-slate-500">
-                    <th className="py-3.5 px-4">Participant</th>
-                    <th className="py-3.5 px-4">Contact</th>
-                    <th className="py-3.5 px-4">Category</th>
-                    <th className="py-3.5 px-4">Stage</th>
-                    <th className="py-3.5 px-4">Status</th>
-                    <th className="py-3.5 px-4">Registered Date</th>
-                    <th className="py-3.5 px-4 text-right">Actions</th>
+                    <th className="w-[26%] py-3.5 px-4">Participant &amp; Contact</th>
+                    <th className="w-[22%] py-3.5 px-4">Category</th>
+                    <th className="w-[16%] py-3.5 px-4">Stage</th>
+                    <th className="w-[14%] py-3.5 px-4">Status</th>
+                    <th className="w-[12%] py-3.5 px-4">Registered Date</th>
+                    <th className="w-[10%] py-3.5 px-4 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-xs text-slate-700">
                   {loading ? (
                     <tr>
-                      <td colSpan={7} className="py-12 text-center text-slate-400">
+                      <td colSpan={6} className="py-12 text-center text-slate-400">
                         <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-pink-500" />
                         Loading registrations...
                       </td>
                     </tr>
                   ) : data.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="py-12 text-center text-slate-400">
+                      <td colSpan={6} className="py-12 text-center text-slate-400">
                         <AlertCircle className="w-8 h-8 mx-auto mb-2 text-slate-300" />
                         No registrations found matching your criteria.
                       </td>
@@ -484,38 +483,48 @@ export default function AdminWomenEntrepreneurs() {
 
                       return (
                         <tr key={id} className="hover:bg-slate-50/60 transition">
-                          {/* Name & Note */}
+                          {/* Participant Name & Contact */}
                           <td className="py-3.5 px-4">
-                            <div className="font-bold text-slate-900">{item.fullName}</div>
-                            {item.note && (
-                              <div className="text-[11px] text-slate-400 line-clamp-1 italic max-w-xs" title={item.note}>
-                                "{item.note}"
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div className="w-9 h-9 rounded-full bg-pink-100 text-pink-700 flex items-center justify-center font-bold text-xs font-mono flex-shrink-0 shadow-sm">
+                                {item.fullName
+                                  ? item.fullName
+                                      .split(' ')
+                                      .map((n: string) => n[0])
+                                      .slice(0, 2)
+                                      .join('')
+                                      .toUpperCase()
+                                  : 'WE'}
                               </div>
-                            )}
-                          </td>
-
-                          {/* Contact */}
-                          <td className="py-3.5 px-4">
-                            <div className="font-mono font-semibold text-slate-800 flex items-center gap-1.5">
-                              <Phone className="w-3.5 h-3.5 text-slate-400" />
-                              <a href={`tel:${item.phone}`} className="hover:text-pink-600">{item.phone}</a>
+                              <div className="min-w-0 flex-1">
+                                <strong className="text-slate-900 font-bold block text-xs sm:text-sm truncate" title={item.fullName}>
+                                  {item.fullName}
+                                </strong>
+                                <div className="flex flex-col text-[11px] text-slate-500 font-mono mt-0.5 leading-tight">
+                                  <a href={`tel:${item.phone}`} className="hover:text-pink-600 transition flex items-center gap-1 truncate">
+                                    <Phone className="w-3 h-3 text-slate-400 flex-shrink-0" />
+                                    <span>{item.phone}</span>
+                                  </a>
+                                  {item.email && (
+                                    <span className="text-slate-400 truncate text-[10.5px]" title={item.email}>
+                                      {item.email}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
                             </div>
-                            {item.email && (
-                              <div className="text-[11px] text-slate-500 flex items-center gap-1.5 mt-0.5">
-                                <Mail className="w-3.5 h-3.5 text-slate-400" />
-                                <a href={`mailto:${item.email}`} className="hover:underline">{item.email}</a>
-                              </div>
-                            )}
                           </td>
 
                           {/* Category */}
                           <td className="py-3.5 px-4">
-                            <span className="font-medium text-slate-800">{categoryName}</span>
+                            <span className="font-medium text-slate-800 truncate block" title={categoryName}>
+                              {categoryName}
+                            </span>
                           </td>
 
                           {/* Stage */}
                           <td className="py-3.5 px-4">
-                            <span className={`inline-block px-2.5 py-1 rounded-full text-[10px] font-bold border ${stageInfo.color}`}>
+                            <span className={`inline-block px-2.5 py-1 rounded-full text-[10px] font-bold border truncate max-w-full ${stageInfo.color}`}>
                               {stageInfo.label}
                             </span>
                           </td>
@@ -534,27 +543,27 @@ export default function AdminWomenEntrepreneurs() {
 
                           {/* Actions */}
                           <td className="py-3.5 px-4 text-right">
-                            <div className="inline-flex items-center gap-1">
+                            <div className="inline-flex items-center justify-end gap-1">
                               <button
                                 onClick={() => handleView(item)}
-                                className="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition"
+                                className="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition cursor-pointer"
                                 title="View Details"
                               >
-                                <Eye className="w-4 h-4" />
+                                <Eye className="w-3.5 h-3.5" />
                               </button>
                               <button
                                 onClick={() => handleOpenEdit(item)}
-                                className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition"
+                                className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition cursor-pointer"
                                 title="Edit / Update Status"
                               >
-                                <Edit2 className="w-4 h-4" />
+                                <Edit2 className="w-3.5 h-3.5" />
                               </button>
                               <button
                                 onClick={() => setDeletingId(id)}
-                                className="p-1.5 text-rose-600 hover:text-rose-800 hover:bg-rose-50 rounded-lg transition"
+                                className="p-1.5 text-rose-600 hover:text-rose-800 hover:bg-rose-50 rounded-lg transition cursor-pointer"
                                 title="Delete"
                               >
-                                <Trash2 className="w-4 h-4" />
+                                <Trash2 className="w-3.5 h-3.5" />
                               </button>
                             </div>
                           </td>
