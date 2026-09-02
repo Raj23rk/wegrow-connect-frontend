@@ -191,12 +191,12 @@ export default function BusinessFoundersCommunity() {
     phone: '',
     email: '',
     businessName: '',
-    industry: 'manufacturing',
-    yearsInBusiness: '1_to_3_years',
-    biggestPriority: 'More Sales',
-    growthBlocker: 'Lack of Customers',
-    hasTeam: 'Small Team',
-    futureVision: 'A Business That Runs Without Me',
+    industry: '',
+    yearsInBusiness: '',
+    biggestPriority: '',
+    growthBlocker: '',
+    hasTeam: '',
+    futureVision: '',
     growthChallenge: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -769,9 +769,7 @@ export default function BusinessFoundersCommunity() {
             <h2 className="text-3xl sm:text-4xl font-black text-white">
               Reserve Your Orientation Seat
             </h2>
-            <p className="text-[#FFE7D2] text-sm sm:text-base">
-              Fill out this quick form to receive your session confirmation and direct venue directions.
-            </p>
+           
           </div>
 
           {/* Registration Card Panel */}
@@ -897,6 +895,7 @@ export default function BusinessFoundersCommunity() {
                       onChange={handleInputChange}
                       className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm cursor-pointer"
                     >
+                      <option value="">— Please Select Business Sector —</option>
                       <option value="manufacturing">Manufacturing</option>
                       <option value="printing_packaging">Printing &amp; Packaging</option>
                       <option value="fireworks_matches">Fireworks &amp; Matches</option>
@@ -919,6 +918,7 @@ export default function BusinessFoundersCommunity() {
                       onChange={handleInputChange}
                       className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm cursor-pointer"
                     >
+                      <option value="">— Please Select Experience —</option>
                       <option value="less_than_1_year">&lt; 1 Year</option>
                       <option value="1_to_3_years">1 – 3 Years</option>
                       <option value="3_to_5_years">3 – 5 Years</option>
@@ -934,10 +934,12 @@ export default function BusinessFoundersCommunity() {
                   </label>
                   <select
                     name="biggestPriority"
+                    required
                     value={form.biggestPriority}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm cursor-pointer"
                   >
+                    <option value="">— Please Select Priority —</option>
                     <option value="More Sales">More Sales</option>
                     <option value="More Customers">More Customers</option>
                     <option value="More Profit">More Profit</option>
@@ -954,10 +956,12 @@ export default function BusinessFoundersCommunity() {
                   </label>
                   <select
                     name="growthBlocker"
+                    required
                     value={form.growthBlocker}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm cursor-pointer"
                   >
+                    <option value="">— Please Select Growth Blocker —</option>
                     <option value="Lack of Customers">Lack of Customers</option>
                     <option value="Lack of Sales">Lack of Sales</option>
                     <option value="Lack of Team">Lack of Team</option>
@@ -975,10 +979,12 @@ export default function BusinessFoundersCommunity() {
                   </label>
                   <select
                     name="hasTeam"
+                    required
                     value={form.hasTeam}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm cursor-pointer"
                   >
+                    <option value="">— Please Select Team Status —</option>
                     <option value="Yes">Yes</option>
                     <option value="No">No</option>
                     <option value="Small Team">Small Team</option>
@@ -992,10 +998,12 @@ export default function BusinessFoundersCommunity() {
                   </label>
                   <select
                     name="futureVision"
+                    required
                     value={form.futureVision}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm cursor-pointer"
                   >
+                    <option value="">— Please Select Future Vision —</option>
                     <option value="Bigger Sales">Bigger Sales</option>
                     <option value="Bigger Team">Bigger Team</option>
                     <option value="More Branches">More Branches</option>
@@ -1007,7 +1015,7 @@ export default function BusinessFoundersCommunity() {
                 </div>
 
                 {/* Optional Growth Challenge Note */}
-                <div>
+                {/* <div>
                   <label className="block text-xs font-bold text-[#16225E] uppercase tracking-wider mb-1.5">
                     Any specific question or challenge you want to ask the mentors? (Optional)
                   </label>
@@ -1019,7 +1027,7 @@ export default function BusinessFoundersCommunity() {
                     placeholder="e.g. Scaling dealer network, reducing owner dependency, improving margins..."
                     className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm placeholder:text-slate-400 focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm resize-none"
                   />
-                </div>
+                </div> */}
 
                 {/* Submit Button */}
                 <button
