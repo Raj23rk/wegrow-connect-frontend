@@ -1594,3 +1594,32 @@ export async function sendSubmissionOffer(id, customMessage) {
     throw error;
   }
 }
+
+
+export async function uploadTaskQuestions(id, questions) {
+  try {
+    const response = await fetch(`${API_BASE}/tasks/${id}/questions`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ questions }),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('uploadTaskQuestions error:', error);
+    throw error;
+  }
+}
+
+export async function uploadTaskAnswerKey(id, answerKey) {
+  try {
+    const response = await fetch(`${API_BASE}/tasks/${id}/answer-key`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ answerKey }),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('uploadTaskAnswerKey error:', error);
+    throw error;
+  }
+}

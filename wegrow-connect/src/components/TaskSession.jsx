@@ -28,6 +28,16 @@ export default function TaskSession() {
   const [session, setSession] = useState(null);
   const [task, setTask] = useState(null);
   const [answer, setAnswer] = useState('');
+  const [selectedAnswers, setSelectedAnswers] = useState({});
+  const [activeQuestionIdx, setActiveQuestionIdx] = useState(0);
+
+  const handleSelectOption = (qId, optionVal) => {
+    const nextAnswers = { ...selectedAnswers, [qId]: optionVal };
+    setSelectedAnswers(nextAnswers);
+    const jsonStr = JSON.stringify(nextAnswers);
+    setAnswer(jsonStr);
+    answerRef.current = jsonStr;
+  };
   const [errorMsg, setErrorMsg] = useState('');
 
   // ── Timer ────────────────────────────────────────────────────────────────
@@ -79,6 +89,14 @@ export default function TaskSession() {
           setSession(existing);
           setTask(existing.taskId || existing.task);
           setAnswer(existing.answerText || '');
+        if (existing.answerText) {
+          try {
+            const parsed = JSON.parse(existing.answerText);
+            if (typeof parsed === 'object' && parsed !== null) {
+              setSelectedAnswers(parsed);
+            }
+          } catch {}
+        }
           violationsRef.current = existing.violationCount || 0;
           setViolations(existing.violationCount || 0);
 
@@ -559,23 +577,139 @@ export default function TaskSession() {
         </aside>
 
         {/* Right: Answer Editor Panel */}
-        <main className="flex-1 flex flex-col p-4 sm:p-6 bg-slate-50 overflow-hidden">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-black uppercase tracking-wider text-slate-500">Your Response</span>
-            <span className="text-xs font-mono font-semibold text-slate-400">{answer.length} characters</span>
-          </div>
+        <main className="flex-1 flex flex-col p-4 sm:p-6 bg-slate-50 overflow-y-auto">
+          {Array.isArray(task?.questions) && task.questions.length > 0 ? (
+            /* Structured Questions UI */
+            <div className="flex-1 flex flex-col gap-4">
+              {/* Question Navigation Palette */}
+              <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-black uppercase tracking-wider text-slate-500">
+                      Question {activeQuestionIdx + 1} of {task.questions.length}
+                    </span>
+                    <span className="px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-xs font-bold">
+                      {task.questions[activeQuestionIdx]?.marks || 10} Marks
+                    </span>
+                  </div>
+                  <span className="text-xs font-semibold text-slate-400">
+                    {Object.keys(selectedAnswers).length}/{task.questions.length} Answered
+                  </span>
+                </div>
 
-          <textarea
-            className="task-answer flex-1 w-full bg-white border border-slate-300 rounded-2xl p-5 text-sm sm:text-base font-medium text-slate-800 outline-none focus:border-[#104288] focus:ring-2 focus:ring-blue-100 shadow-sm transition resize-none leading-relaxed"
-            id="task-answer-textarea"
-            placeholder="Type your comprehensive response here...&#10;&#10;Structure your points clearly. Formatting and analytical thought are evaluated."
-            value={answer}
-            onChange={(e) => setAnswer(e.target.value)}
-            onCopy={(e) => e.preventDefault()}
-            onPaste={(e) => e.preventDefault()}
-            onCut={(e) => e.preventDefault()}
-            spellCheck
-          />
+                {/* Question Numbers Jump Bar */}
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {task.questions.map((q, idx) => {
+                    const isAnswered = selectedAnswers[q.id] !== undefined && selectedAnswers[q.id] !== '';
+                    const isActive = idx === activeQuestionIdx;
+                    return (
+                      <button
+                        key={q.id || idx}
+                        type="button"
+                        onClick={() => setActiveQuestionIdx(idx)}
+                        className={`w-8 h-8 rounded-lg text-xs font-bold transition flex items-center justify-center cursor-pointer ${
+                          isActive
+                            ? 'bg-[#104288] text-white ring-2 ring-blue-300'
+                            : isAnswered
+                            ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200'
+                        }`}
+                      >
+                        {idx + 1}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Active Question Card */}
+              {task.questions[activeQuestionIdx] && (() => {
+                const currentQ = task.questions[activeQuestionIdx];
+                const currentAns = selectedAnswers[currentQ.id];
+                return (
+                  <div className="flex-1 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col">
+                    <div className="mb-4">
+                      <span className="text-xs font-bold text-[#104288] uppercase tracking-wide">Question {activeQuestionIdx + 1}</span>
+                      <h2 className="text-base sm:text-lg font-bold text-slate-900 mt-1 leading-snug">
+                        {currentQ.question}
+                      </h2>
+                    </div>
+
+                    {/* Options */}
+                    <div className="flex flex-col gap-3 my-auto">
+                      {(currentQ.options || []).map((opt, optIdx) => {
+                        const optLetter = ['A', 'B', 'C', 'D'][optIdx] || String(optIdx + 1);
+                        const isSelected = currentAns === opt;
+                        return (
+                          <button
+                            key={optIdx}
+                            type="button"
+                            onClick={() => handleSelectOption(currentQ.id, opt)}
+                            className={`w-full text-left p-4 rounded-xl border transition flex items-center gap-3 cursor-pointer ${
+                              isSelected
+                                ? 'bg-blue-50/80 border-[#104288] text-[#104288] shadow-xs'
+                                : 'bg-slate-50/60 border-slate-200 hover:bg-slate-100/80 text-slate-700'
+                            }`}
+                          >
+                            <span className={`w-7 h-7 rounded-lg text-xs font-black flex items-center justify-center ${
+                              isSelected ? 'bg-[#104288] text-white' : 'bg-slate-200 text-slate-600'
+                            }`}>
+                              {optLetter}
+                            </span>
+                            <span className="text-sm font-semibold flex-1">{opt}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Question Step Controls */}
+                    <div className="flex items-center justify-between pt-6 border-t border-slate-100 mt-4">
+                      <button
+                        type="button"
+                        disabled={activeQuestionIdx === 0}
+                        onClick={() => setActiveQuestionIdx(prev => Math.max(0, prev - 1))}
+                        className="px-4 py-2 rounded-xl border border-slate-300 text-slate-700 text-xs font-bold hover:bg-slate-50 disabled:opacity-40 cursor-pointer"
+                      >
+                        ← Previous
+                      </button>
+
+                      {activeQuestionIdx < task.questions.length - 1 ? (
+                        <button
+                          type="button"
+                          onClick={() => setActiveQuestionIdx(prev => Math.min(task.questions.length - 1, prev + 1))}
+                          className="px-5 py-2 rounded-xl bg-[#104288] text-white text-xs font-bold hover:bg-[#0c336b] cursor-pointer"
+                        >
+                          Next Question →
+                        </button>
+                      ) : (
+                        <span className="text-xs text-emerald-600 font-bold">✓ All questions reviewed</span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+          ) : (
+            /* Fallback: Free-form Textarea */
+            <>
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-black uppercase tracking-wider text-slate-500">Your Response</span>
+                <span className="text-xs font-mono font-semibold text-slate-400">{answer.length} characters</span>
+              </div>
+
+              <textarea
+                className="task-answer flex-1 w-full bg-white border border-slate-300 rounded-2xl p-5 text-sm sm:text-base font-medium text-slate-800 outline-none focus:border-[#104288] focus:ring-2 focus:ring-blue-100 shadow-sm transition resize-none leading-relaxed"
+                id="task-answer-textarea"
+                placeholder="Type your comprehensive response here...&#10;&#10;Structure your points clearly. Formatting and analytical thought are evaluated."
+                value={answer}
+                onChange={(e) => setAnswer(e.target.value)}
+                onCopy={(e) => e.preventDefault()}
+                onPaste={(e) => e.preventDefault()}
+                onCut={(e) => e.preventDefault()}
+                spellCheck
+              />
+            </>
+          )}
 
           {/* Action Row */}
           <div className="mt-4 flex items-center justify-between gap-3 pt-2">

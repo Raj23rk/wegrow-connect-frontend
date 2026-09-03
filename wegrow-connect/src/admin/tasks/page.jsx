@@ -5,7 +5,7 @@ import {
   ToggleLeft, ToggleRight, Clock, Award, Target, Search
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { getCampaignTasks, createCampaignTask, updateCampaignTask, updateCampaignTaskStatus, getCampaigns } from '../../services/api';
+import { getCampaignTasks, createCampaignTask, updateCampaignTask, updateCampaignTaskStatus, getCampaigns, uploadTaskQuestions, uploadTaskAnswerKey } from '../../services/api';
 
 const EMPTY_FORM = {
   title: '', description: '', instructions: '', category: 'Business',
@@ -28,6 +28,128 @@ export default function AdminTasks() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState('');
+
+  // Questions & Answer Key Management Modal
+  const [qTask, setQTask] = useState(null);
+  const [qTab, setQTab] = useState('visual'); // 'visual' | 'questions_json' | 'answers_json'
+  const [questionsList, setQuestionsList] = useState([]);
+  const [answerKeyList, setAnswerKeyList] = useState([]);
+  const [rawQuestionsJson, setRawQuestionsJson] = useState('');
+  const [rawAnswersJson, setRawAnswersJson] = useState('');
+  const [savingQA, setSavingQA] = useState(false);
+
+  const openQAModal = (t) => {
+    setQTask(t);
+    const qs = Array.isArray(t.questions) && t.questions.length > 0 ? t.questions : [
+      { id: 'q1', question: '', type: 'MCQ', options: ['', '', '', ''], marks: 10 }
+    ];
+    setQuestionsList(qs);
+    setAnswerKeyList(Array.isArray(t.answerKey) ? t.answerKey : []);
+    setRawQuestionsJson(JSON.stringify(qs, null, 2));
+    setRawAnswersJson(JSON.stringify(Array.isArray(t.answerKey) ? t.answerKey : [], null, 2));
+    setQTab('visual');
+  };
+
+  const addQuestionRow = () => {
+    const nextId = 'q' + (questionsList.length + 1);
+    setQuestionsList([
+      ...questionsList,
+      { id: nextId, question: '', type: 'MCQ', options: ['', '', '', ''], marks: 10 }
+    ]);
+  };
+
+  const removeQuestionRow = (idx) => {
+    const updated = questionsList.filter((_, i) => i !== idx);
+    setQuestionsList(updated);
+  };
+
+  const updateQuestionText = (idx, val) => {
+    const updated = [...questionsList];
+    updated[idx].question = val;
+    setQuestionsList(updated);
+  };
+
+  const updateOptionText = (qIdx, optIdx, val) => {
+    const updated = [...questionsList];
+    const opts = [...(updated[qIdx].options || ['', '', '', ''])];
+    opts[optIdx] = val;
+    updated[qIdx].options = opts;
+    setQuestionsList(updated);
+  };
+
+  const updateQuestionMarks = (idx, val) => {
+    const updated = [...questionsList];
+    updated[idx].marks = Number(val) || 1;
+    setQuestionsList(updated);
+  };
+
+  const getCorrectAnswerForQ = (qId) => {
+    const found = answerKeyList.find(a => String(a.questionId) === String(qId));
+    return found ? found.correctAnswer : '';
+  };
+
+  const setCorrectAnswerForQ = (qId, answerVal, marksVal = 10) => {
+    const existingIdx = answerKeyList.findIndex(a => String(a.questionId) === String(qId));
+    if (existingIdx >= 0) {
+      const updated = [...answerKeyList];
+      updated[existingIdx] = { ...updated[existingIdx], correctAnswer: answerVal };
+      setAnswerKeyList(updated);
+    } else {
+      setAnswerKeyList([...answerKeyList, { questionId: qId, correctAnswer: answerVal, marks: marksVal }]);
+    }
+  };
+
+  const handleSaveVisualQA = async () => {
+    if (!qTask?._id) return;
+    setSavingQA(true);
+    try {
+      // 1. Upload Questions
+      await uploadTaskQuestions(qTask._id, questionsList);
+      // 2. Upload Answer Key
+      await uploadTaskAnswerKey(qTask._id, answerKeyList);
+      toast.success('Questions and Answer Key saved successfully!');
+      setQTask(null);
+      load();
+    } catch (err) {
+      toast.error(err?.message || 'Failed to save questions');
+    } finally {
+      setSavingQA(false);
+    }
+  };
+
+  const handleUploadQuestionsJson = async () => {
+    if (!qTask?._id) return;
+    try {
+      const parsed = JSON.parse(rawQuestionsJson);
+      if (!Array.isArray(parsed)) throw new Error('Questions must be a JSON array');
+      setSavingQA(true);
+      await uploadTaskQuestions(qTask._id, parsed);
+      toast.success(`Uploaded ${parsed.length} questions!`);
+      setQTask(null);
+      load();
+    } catch (err) {
+      toast.error(err?.message || 'Invalid JSON format');
+    } finally {
+      setSavingQA(false);
+    }
+  };
+
+  const handleUploadAnswersJson = async () => {
+    if (!qTask?._id) return;
+    try {
+      const parsed = JSON.parse(rawAnswersJson);
+      if (!Array.isArray(parsed)) throw new Error('Answer Key must be a JSON array');
+      setSavingQA(true);
+      await uploadTaskAnswerKey(qTask._id, parsed);
+      toast.success(`Uploaded ${parsed.length} answer keys!`);
+      setQTask(null);
+      load();
+    } catch (err) {
+      toast.error(err?.message || 'Invalid JSON format');
+    } finally {
+      setSavingQA(false);
+    }
+  };
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -292,4 +414,16 @@ const S = {
   row: { display: 'flex', gap: 12, flexWrap: 'wrap' },
   cancelBtn: { flex: 1, padding: '10px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, color: '#94a3b8', fontSize: 13, fontWeight: 600, cursor: 'pointer' },
   saveBtn: { flex: 2, padding: '10px', background: 'linear-gradient(135deg, #104288, #1d4ed8)', border: 'none', borderRadius: 10, color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 },
+  manageQBtn: { display: 'inline-flex', alignItems: 'center', gap: 5, background: 'rgba(59,130,246,0.12)', border: '1px solid rgba(59,130,246,0.3)', borderRadius: 8, padding: '5px 9px', color: '#60a5fa', fontSize: 11, fontWeight: 700, cursor: 'pointer' },
+  autoGradedBadge: { display: 'inline-flex', alignItems: 'center', gap: 4, background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.25)', borderRadius: 20, padding: '2px 8px', color: '#22c55e', fontSize: 10, fontWeight: 600 },
+  qaModal: { background: '#0f172a', border: '1.5px solid rgba(255,255,255,0.12)', borderRadius: 24, padding: '28px', width: '100%', maxWidth: 760, boxShadow: '0 32px 80px rgba(0,0,0,0.6)', maxHeight: '90vh', overflowY: 'auto' },
+  tabBar: { display: 'flex', gap: 8, borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: 12, marginBottom: 16, flexWrap: 'wrap' },
+  tabActive: { display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', background: 'rgba(59,130,246,0.15)', border: '1px solid #3b82f6', borderRadius: 8, color: '#60a5fa', fontSize: 12, fontWeight: 700, cursor: 'pointer' },
+  tabInactive: { display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, color: '#94a3b8', fontSize: 12, fontWeight: 500, cursor: 'pointer' },
+  addQBtn: { display: 'inline-flex', alignItems: 'center', gap: 5, padding: '6px 12px', background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: 8, color: '#22c55e', fontSize: 12, fontWeight: 700, cursor: 'pointer' },
+  questionCard: { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 14, padding: '16px', display: 'flex', flexDirection: 'column' },
+  qNumberBadge: { background: 'rgba(59,130,246,0.15)', color: '#60a5fa', borderRadius: 6, padding: '2px 8px', fontSize: 11, fontWeight: 700 },
+  delBtn: { background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 6, padding: '4px', color: '#f87171', cursor: 'pointer' },
+  optionRow: { display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, padding: '2px 8px' },
+  sampleBtn: { padding: '4px 10px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 6, color: '#94a3b8', fontSize: 11, cursor: 'pointer' },
 };
