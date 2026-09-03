@@ -18,7 +18,10 @@ import {
   Image,
   GraduationCap,
   Sparkles,
-  Briefcase
+  Briefcase,
+  QrCode,
+  ClipboardList,
+  FileText
 } from "lucide-react";
 
 export default function Sidebar() {
@@ -44,6 +47,13 @@ export default function Sidebar() {
     { name: "Reports & Analytics", href: "/admin/reports", icon: BarChart3 },
     { name: "Notifications", href: "/admin/notifications", icon: Bell },
     { name: "Settings", href: "/admin/settings", icon: Settings },
+  ];
+
+  const campaignItems = [
+    { name: "Campaigns", href: "/admin/campaigns", icon: QrCode },
+    { name: "Campaign Students", href: "/admin/students", icon: Users },
+    { name: "Tasks", href: "/admin/tasks", icon: ClipboardList },
+    { name: "Submissions", href: "/admin/submissions", icon: FileText },
   ];
 
   const handleLogout = () => {
@@ -82,6 +92,29 @@ export default function Sidebar() {
         {/* Navigation Links Area */}
         <nav className="px-3 py-2 space-y-1">
           {menuItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={item.name}
+                to={item.href}
+                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all duration-150 cursor-pointer ${
+                  isActive
+                    ? "bg-white/25 text-white shadow-sm border border-white/30 backdrop-blur-xs font-black"
+                    : "text-white/90 hover:bg-white/15 hover:text-white"
+                }`}
+              >
+                <Icon className="w-4 h-4 text-white" />
+                <span>{item.name}</span>
+              </Link>
+            );
+          })}
+
+          {/* Campaign Platform Section */}
+          <div className="pt-3 pb-1">
+            <p className="px-3.5 text-[10px] font-black uppercase tracking-widest text-white/40 mb-1">Campaign Platform</p>
+          </div>
+          {campaignItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
             return (

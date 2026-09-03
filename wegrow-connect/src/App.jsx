@@ -77,6 +77,17 @@ import AdminWomenEntrepreneurs from './admin/women-entrepreneurs/page';
 import AdminStudentFounders from './admin/student-founders/page';
 import AdminBusinessFounders from './admin/business-founders/page';
 
+// Campaign Platform (Public)
+import CampaignLanding from './components/CampaignLanding';
+import CampaignRegister from './components/CampaignRegister';
+import TaskSession from './components/TaskSession';
+
+// Campaign Platform (Admin)
+import AdminCampaigns from './admin/campaigns/page';
+import AdminCampaignStudents from './admin/students/page';
+import AdminTasks from './admin/tasks/page';
+import AdminSubmissions from './admin/submissions/page';
+
 // Main Home Component
 function MainHomePage() {
   const { isDarkMode } = useTheme();
@@ -696,6 +707,17 @@ export default function App() {
             <Route path="/admin/reports" element={<ProtectedRoute allowedRoles={['admin']}><AdminReports /></ProtectedRoute>} />
             <Route path="/admin/notifications" element={<ProtectedRoute allowedRoles={['admin']}><AdminNotifications /></ProtectedRoute>} />
             <Route path="/admin/settings" element={<ProtectedRoute allowedRoles={['admin']}><AdminSettings /></ProtectedRoute>} />
+
+            {/* Campaign Platform — Public */}
+            <Route path="/campaign/:campaignId" element={<CampaignLanding />} />
+            <Route path="/campaign/:campaignId/register" element={<CampaignRegister />} />
+            <Route path="/task" element={<TaskSession />} />
+
+            {/* Campaign Platform — Admin (Protected) */}
+            <Route path="/admin/campaigns" element={<ProtectedRoute allowedRoles={['admin']}><AdminCampaigns /></ProtectedRoute>} />
+            <Route path="/admin/students" element={<ProtectedRoute allowedRoles={['admin']}><AdminCampaignStudents /></ProtectedRoute>} />
+            <Route path="/admin/tasks" element={<ProtectedRoute allowedRoles={['admin']}><AdminTasks /></ProtectedRoute>} />
+            <Route path="/admin/submissions" element={<ProtectedRoute allowedRoles={['admin']}><AdminSubmissions /></ProtectedRoute>} />
 
             {/* Catch all redirecting to home */}
             <Route path="*" element={<MainHomePage />} />

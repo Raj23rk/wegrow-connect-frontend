@@ -1252,3 +1252,345 @@ export async function deleteStudentFounder(id) {
     throw error;
   }
 }
+
+// =====================================================
+// CAMPAIGN PLATFORM API
+// =====================================================
+
+// ── Campaigns ─────────────────────────────────────────
+export async function createCampaign(data) {
+  try {
+    const response = await fetch(`${API_BASE}/campaigns`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('createCampaign error:', error);
+    throw error;
+  }
+}
+
+export async function getCampaigns() {
+  try {
+    const response = await fetch(`${API_BASE}/campaigns`, {
+      headers: getAuthHeaders(),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('getCampaigns error:', error);
+    throw error;
+  }
+}
+
+export async function getCampaignByLookup(campaignId) {
+  try {
+    const response = await fetch(`${API_BASE}/campaigns/lookup/${campaignId}`, {
+      headers: { 'Content-Type': 'application/json' },
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('getCampaignByLookup error:', error);
+    throw error;
+  }
+}
+
+export async function updateCampaign(id, data) {
+  try {
+    const response = await fetch(`${API_BASE}/campaigns/${id}`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('updateCampaign error:', error);
+    throw error;
+  }
+}
+
+// ── Campaign Students ────────────────────────────────────
+export async function registerCampaignStudent(data) {
+  try {
+    const response = await fetch(`${API_BASE}/students/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('registerCampaignStudent error:', error);
+    throw error;
+  }
+}
+
+export async function getCampaignStudents(params = {}) {
+  try {
+    const qs = new URLSearchParams(params).toString();
+    const response = await fetch(`${API_BASE}/students${qs ? '?' + qs : ''}`, {
+      headers: getAuthHeaders(),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('getCampaignStudents error:', error);
+    throw error;
+  }
+}
+
+export async function getCampaignStudentById(id) {
+  try {
+    const response = await fetch(`${API_BASE}/students/${id}`, {
+      headers: getAuthHeaders(),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('getCampaignStudentById error:', error);
+    throw error;
+  }
+}
+
+export async function exportCampaignStudents() {
+  try {
+    const token = sessionStorage.getItem('accessToken') || localStorage.getItem('accessToken');
+    const response = await fetch(`${API_BASE}/students/export`, {
+      headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+    });
+    if (!response.ok) throw new Error('Export failed');
+    return response.blob();
+  } catch (error) {
+    console.error('exportCampaignStudents error:', error);
+    throw error;
+  }
+}
+
+// ── Tasks ─────────────────────────────────────────────
+export async function createCampaignTask(data) {
+  try {
+    const response = await fetch(`${API_BASE}/tasks`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('createCampaignTask error:', error);
+    throw error;
+  }
+}
+
+export async function getCampaignTasks() {
+  try {
+    const response = await fetch(`${API_BASE}/tasks`, {
+      headers: getAuthHeaders(),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('getCampaignTasks error:', error);
+    throw error;
+  }
+}
+
+export async function getCampaignTaskById(id) {
+  try {
+    const response = await fetch(`${API_BASE}/tasks/${id}`, {
+      headers: getAuthHeaders(),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('getCampaignTaskById error:', error);
+    throw error;
+  }
+}
+
+export async function updateCampaignTask(id, data) {
+  try {
+    const response = await fetch(`${API_BASE}/tasks/${id}`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('updateCampaignTask error:', error);
+    throw error;
+  }
+}
+
+export async function updateCampaignTaskStatus(id, data) {
+  try {
+    const response = await fetch(`${API_BASE}/tasks/${id}/status`, {
+      method: 'PATCH',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('updateCampaignTaskStatus error:', error);
+    throw error;
+  }
+}
+
+// ── Task Sessions ─────────────────────────────────────
+export async function startTaskSession(data) {
+  try {
+    const response = await fetch(`${API_BASE}/task-sessions/start`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('startTaskSession error:', error);
+    throw error;
+  }
+}
+
+export async function getActiveTaskSession(studentId) {
+  try {
+    const response = await fetch(`${API_BASE}/task-sessions/active/${studentId}`, {
+      headers: { 'Content-Type': 'application/json' },
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('getActiveTaskSession error:', error);
+    throw error;
+  }
+}
+
+export async function getTaskSessionById(id) {
+  try {
+    const response = await fetch(`${API_BASE}/task-sessions/${id}`, {
+      headers: { 'Content-Type': 'application/json' },
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('getTaskSessionById error:', error);
+    throw error;
+  }
+}
+
+export async function saveTaskSessionDraft(id, answer) {
+  try {
+    const response = await fetch(`${API_BASE}/task-sessions/${id}/save`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ answer }),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('saveTaskSessionDraft error:', error);
+    throw error;
+  }
+}
+
+export async function logTaskSessionEvent(id, eventType, details) {
+  try {
+    const response = await fetch(`${API_BASE}/task-sessions/${id}/log-event`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ eventType, details }),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('logTaskSessionEvent error:', error);
+    throw error;
+  }
+}
+
+export async function submitTaskSession(id, answer) {
+  try {
+    const response = await fetch(`${API_BASE}/task-sessions/${id}/submit`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ answer }),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('submitTaskSession error:', error);
+    throw error;
+  }
+}
+
+// ── Submissions ────────────────────────────────────────
+export async function getSubmissions(params = {}) {
+  try {
+    const qs = new URLSearchParams(params).toString();
+    const response = await fetch(`${API_BASE}/submissions${qs ? '?' + qs : ''}`, {
+      headers: getAuthHeaders(),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('getSubmissions error:', error);
+    throw error;
+  }
+}
+
+export async function getSubmissionById(id) {
+  try {
+    const response = await fetch(`${API_BASE}/submissions/${id}`, {
+      headers: getAuthHeaders(),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('getSubmissionById error:', error);
+    throw error;
+  }
+}
+
+export async function evaluateSubmission(id, data) {
+  try {
+    const response = await fetch(`${API_BASE}/submissions/${id}/evaluate`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('evaluateSubmission error:', error);
+    throw error;
+  }
+}
+
+
+export async function sendStudentTaskLink(studentId, taskId) {
+  try {
+    const response = await fetch(`${API_BASE}/students/${studentId}/send-task-link`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ taskId }),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('sendStudentTaskLink error:', error);
+    throw error;
+  }
+}
+
+export async function sendBulkStudentTaskLinks(studentIds) {
+  try {
+    const response = await fetch(`${API_BASE}/students/send-task-links`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ studentIds }),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('sendBulkStudentTaskLinks error:', error);
+    throw error;
+  }
+}
+
+export async function sendSubmissionOffer(id, customMessage) {
+  try {
+    const response = await fetch(`${API_BASE}/submissions/${id}/send-offer`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ customMessage }),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('sendSubmissionOffer error:', error);
+    throw error;
+  }
+}
