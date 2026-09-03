@@ -365,7 +365,7 @@ export default function WomensCommunity() {
                 <Target className="w-7 h-7 text-[#F0791E]" />
               </div>
               <h3 className="text-xl font-extrabold text-[#16225E] mb-3">
-                1. Aspiring Entrepreneurs 
+                1. Aspiring Entrepreneurs
               </h3>
               <p className="text-[#666C87] text-sm leading-relaxed mb-4">
                 You have an idea, skill, or passion (baking, tailoring, digital services, crafts, coaching) but feel stuck on how to register, price, get first customers, or handle finance.
@@ -500,12 +500,12 @@ export default function WomensCommunity() {
             <div className="divide-y divide-[#E7E1D4]">
               {[
                 {
-                  time: '11:00 AM',
+                  time: '10:45 AM',
                   title: 'Welcome and registration',
                   desc: 'Check-in, seating, light refreshments'
                 },
                 {
-                  time: '11:15 AM',
+                  time: '11:00 AM',
                   title: 'What is WeGrow B School',
                   desc: 'Programs, mentors, and how the community works'
                 },

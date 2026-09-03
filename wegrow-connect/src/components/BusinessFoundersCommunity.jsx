@@ -139,12 +139,12 @@ export default function BusinessFoundersCommunity() {
   // ─── Agenda Schedule ────────────────────────────────────────────────────────
   const agenda = [
     {
-      time: '11:00 AM – 11:15 AM',
+      time: '10:45 AM – 11:00 AM',
       title: 'Welcome & Founder Check-in',
       desc: 'Arrival, badge collection, morning refreshments, and casual founder-to-founder networking.'
     },
     {
-      time: '11:15 AM – 11:45 AM',
+      time: '11:00 AM – 11:45 AM',
       title: 'Keynote: From Operator to True Business Owner',
       desc: 'How to break free from daily fire-fighting and build a self-sustaining business model.'
     },

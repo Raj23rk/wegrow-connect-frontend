@@ -449,12 +449,12 @@ export default function StudentFoundersCommunity() {
             <div className="divide-y divide-[#E7E1D4]">
               {[
                 {
-                  time: '11:00 AM',
+                  time: '10:45 AM',
                   title: 'Welcome and registration',
                   desc: 'Check-in, seating, networking & refreshments'
                 },
                 {
-                  time: '11:15 AM',
+                  time: '11:00 AM',
                   title: 'What is WeGrow B School',
                   desc: 'Student startup programs, mentors & how the community works'
                 },
