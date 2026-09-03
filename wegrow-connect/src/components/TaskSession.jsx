@@ -2,12 +2,13 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
   Clock, Camera, Mic, AlertTriangle, Shield, CheckCircle2,
-  Loader2, Eye, EyeOff, Send, Save, Video, ArrowRight, ShieldCheck
+  Loader2, Eye, EyeOff, Send, Save, Video, VideoOff, ArrowRight, ShieldCheck
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import {
   startTaskSession,
   getActiveTaskSession,
+  checkTaskSessionStatus,
   getTaskSessionById,
   saveTaskSessionDraft,
   logTaskSessionEvent,
@@ -30,6 +31,7 @@ export default function TaskSession() {
   const [answer, setAnswer] = useState('');
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [activeQuestionIdx, setActiveQuestionIdx] = useState(0);
+  const [completedData, setCompletedData] = useState(null);
 
   const handleSelectOption = (qId, optionVal) => {
     const nextAnswers = { ...selectedAnswers, [qId]: optionVal };
@@ -66,7 +68,7 @@ export default function TaskSession() {
   const [submitting, setSubmitting] = useState(false);
 
   /* ─────────────────────────────────────────────────────────────────────────
-     1. INITIAL LOAD
+     1. INITIAL LOAD & ALREADY-COMPLETED VALIDATION
   ───────────────────────────────────────────────────────────────────────── */
   useEffect(() => {
     if (!studentId || !taskId) {
@@ -75,56 +77,59 @@ export default function TaskSession() {
       return;
     }
 
-    // Check if session already exists for this student/task
-    getActiveTaskSession(studentId, taskId)
+    // Check if task session/submission is already completed or in-progress
+    checkTaskSessionStatus(studentId, taskId)
       .then((res) => {
-        const existing = res?.data?.session || res?.data;
-        if (existing) {
-          if (existing.status === 'SUBMITTED' || existing.status === 'EVALUATED') {
-            setPhase('submitted');
-            return;
-          }
+        const data = res?.data || res;
+
+        // If student has already submitted this task, show already-completed screen
+        if (data?.alreadyCompleted) {
+          setCompletedData(data);
+          setTask(data.task || data.session?.taskId);
+          setPhase('already_completed');
+          return;
+        }
+
+        const existing = data?.session;
+        if (existing && existing.status === 'IN_PROGRESS' && !data.isExpired) {
           // Resume in-progress session
           sessionRef.current = existing;
           setSession(existing);
-          setTask(existing.taskId || existing.task);
-          setAnswer(existing.answerText || '');
-        if (existing.answerText) {
-          try {
-            const parsed = JSON.parse(existing.answerText);
-            if (typeof parsed === 'object' && parsed !== null) {
-              setSelectedAnswers(parsed);
-            }
-          } catch {}
-        }
-          violationsRef.current = existing.violationCount || 0;
-          setViolations(existing.violationCount || 0);
+          setTask(data.task || existing.taskId || existing.task);
+          const ansStr = existing.latestAnswer || existing.answerText || '';
+          setAnswer(ansStr);
+          if (ansStr) {
+            try {
+              const parsed = JSON.parse(ansStr);
+              if (typeof parsed === 'object' && parsed !== null) {
+                setSelectedAnswers(parsed);
+              }
+            } catch {}
+          }
+          violationsRef.current = existing.suspiciousActivity?.length || existing.violationCount || 0;
+          setViolations(violationsRef.current);
 
-          // Calculate remaining time
-          const startedTime = existing.startedAt ? new Date(existing.startedAt).getTime() : Date.now();
-          const elapsed = isNaN(startedTime) ? 0 : Math.floor((Date.now() - startedTime) / 1000);
-          const durationMins = Number(existing.durationMinutes) || Number(existing.taskId?.duration) || 60;
-          const totalSecs = durationMins * 60;
-          const remaining = isNaN(elapsed) ? totalSecs : Math.max(0, totalSecs - elapsed);
+          const remaining = Number(data.remainingSeconds) || 0;
           setSecondsLeft(remaining);
 
           if (remaining <= 0) {
-            handleSubmit('TIMEOUT');
+            setCompletedData({ ...data, message: 'Assessment time has expired.' });
+            setPhase('already_completed');
             return;
           }
 
-          // Request camera and resume
           requestCamera().then(() => {
             setPhase('active');
             startTimer(remaining);
           });
         } else {
-          // New session — show permissions screen
+          // Not started yet — show permissions screen
+          setTask(data?.task);
           setPhase('permissions');
         }
       })
-      .catch((err) => {
-        // If 404, it means no active session yet → start fresh
+      .catch(() => {
+        // Fallback to start fresh
         setPhase('permissions');
       });
   }, [studentId, taskId]);
@@ -134,22 +139,70 @@ export default function TaskSession() {
   ───────────────────────────────────────────────────────────────────────── */
   const requestCamera = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { width: 320, height: 240, facingMode: 'user' },
-        audio: true,
-      });
+      if (streamRef.current && streamRef.current.active) {
+        setCameraOn(true);
+        if (videoRef.current) {
+          videoRef.current.srcObject = streamRef.current;
+          videoRef.current.play().catch(() => {});
+        }
+        return streamRef.current;
+      }
+
+      let stream;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' },
+          audio: false,
+        });
+      } catch (e1) {
+        stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      }
+
       streamRef.current = stream;
       setCameraOn(true);
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
+        videoRef.current.play().catch(() => {});
       }
       return stream;
     } catch (err) {
-      console.warn('Camera/Mic permission denied or unavailable:', err);
-      setCamError('Camera access not detected. Please enable permissions if possible.');
+      console.warn('Camera permission denied or unavailable:', err);
+      setCamError('Camera access not detected. Please enable camera in your browser.');
+      setCameraOn(false);
       return null;
     }
   };
+
+  const handleVideoRef = useCallback((node) => {
+    videoRef.current = node;
+    if (node && streamRef.current) {
+      node.srcObject = streamRef.current;
+      node.play().catch(() => {});
+    }
+  }, []);
+
+  // When active phase mounts or camera stream is active, ensure stream is attached to video
+  useEffect(() => {
+    if (phase === 'active') {
+      if (!streamRef.current || !streamRef.current.active) {
+        requestCamera();
+      } else if (videoRef.current) {
+        if (videoRef.current.srcObject !== streamRef.current) {
+          videoRef.current.srcObject = streamRef.current;
+        }
+        videoRef.current.play().catch(() => {});
+      }
+    }
+  }, [phase, cameraOn]);
+
+  // Clean up tracks when unmounted
+  useEffect(() => {
+    return () => {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track) => track.stop());
+      }
+    };
+  }, []);
 
   /* ─────────────────────────────────────────────────────────────────────────
      3. START SESSION
@@ -160,15 +213,25 @@ export default function TaskSession() {
 
     try {
       const res = await startTaskSession({ studentId, taskId });
-      const data = res?.data?.session || res?.data || res;
-      sessionRef.current = data;
-      setSession(data);
-      setTask(data.taskId || data.task);
-      const durationMins = Number(data.durationMinutes) || Number(data.taskId?.duration) || Number(data.task?.duration) || 60;
-      const totalSecs = durationMins * 60;
-      setSecondsLeft(totalSecs);
+      const data = res?.data || res;
+
+      // If backend reports already completed
+      if (data?.alreadyCompleted) {
+        setCompletedData(data);
+        setTask(data.task || data.session?.taskId);
+        setPhase('already_completed');
+        toast.error('You have already completed this task!');
+        return;
+      }
+
+      const sess = data.session || data;
+      sessionRef.current = sess;
+      setSession(sess);
+      setTask(sess.taskId || sess.task || data.task);
+      const remaining = Number(data.remainingSeconds) || (Number(sess.taskId?.duration || 60) * 60);
+      setSecondsLeft(remaining);
       setPhase('active');
-      startTimer(totalSecs);
+      startTimer(remaining);
     } catch (err) {
       setErrorMsg(err?.message || 'Failed to initialize your assessment session. Please try again.');
       setPhase('error');
@@ -444,6 +507,92 @@ export default function TaskSession() {
     );
   }
 
+  /* ── Already Completed Screen / Popup ─── */
+  if (phase === 'already_completed') {
+    const submission = completedData?.submission;
+    const sessionInfo = completedData?.session;
+    const taskInfo = task || completedData?.task;
+    const submittedDate = submission?.submittedAt || sessionInfo?.submittedAt;
+    const scoreVal = submission?.score;
+
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-b from-[#f8fafc] via-[#f1f6fe] to-[#f8fafc] font-['Inter',sans-serif] px-4 py-8 relative">
+        <div className="bg-white rounded-3xl p-8 sm:p-10 max-w-lg w-full text-center shadow-2xl border border-slate-200/90 relative z-10">
+          <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-5 text-emerald-600 border border-emerald-100 shadow-inner">
+            <CheckCircle2 className="w-10 h-10" />
+          </div>
+
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold mb-3">
+            <CheckCircle2 className="w-3.5 h-3.5" /> Assessment Already Submitted
+          </span>
+
+          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 mb-2">
+            Task Already Completed!
+          </h2>
+
+          <p className="text-sm font-medium text-slate-600 mb-6 leading-relaxed">
+            You have already completed and submitted your response for this assessment. Multiple attempts are strictly disabled.
+          </p>
+
+          {/* Assessment Summary Box */}
+          <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-5 text-left mb-6 space-y-3">
+            <div className="flex items-center justify-between text-xs sm:text-sm">
+              <span className="text-slate-500 font-medium">Task:</span>
+              <span className="font-bold text-slate-800">{taskInfo?.title || 'Skill Assessment'}</span>
+            </div>
+
+            {submittedDate && (
+              <div className="flex items-center justify-between text-xs sm:text-sm">
+                <span className="text-slate-500 font-medium">Completed On:</span>
+                <span className="font-semibold text-slate-700">
+                  {new Date(submittedDate).toLocaleString('en-IN', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </span>
+              </div>
+            )}
+
+            <div className="flex items-center justify-between text-xs sm:text-sm pt-2.5 border-t border-slate-200/70">
+              <span className="text-slate-500 font-medium">Evaluation Status:</span>
+              {scoreVal !== null && scoreVal !== undefined ? (
+                <span className="font-bold text-emerald-600">
+                  Score: {scoreVal} / {taskInfo?.maxMarks || 100} (Evaluated)
+                </span>
+              ) : (
+                <span className="font-semibold text-amber-600">
+                  Under Review by Academic Team
+                </span>
+              )}
+            </div>
+          </div>
+
+          <div className="p-4 bg-blue-50/70 border border-blue-100 rounded-2xl mb-6 text-xs text-slate-600 text-left leading-relaxed">
+            💡 <strong>Next Steps:</strong> If your score qualifies for our scholarship or branch gift offers, our team will send an official invitation email to meet at the WeGrow branch.
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button
+              onClick={() => navigate('/home')}
+              className="flex-1 py-3.5 px-6 rounded-2xl bg-[#104288] hover:bg-[#0c336b] text-white font-extrabold text-sm transition-all shadow-md hover:shadow-lg cursor-pointer"
+            >
+              Return to Home
+            </button>
+            <a
+              href="mailto:enquiry@wegrowcampus.in"
+              className="py-3.5 px-6 rounded-2xl border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold text-sm transition-all flex items-center justify-center cursor-pointer"
+            >
+              Contact Support
+            </a>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   /* ── Submitted ─── */
   if (phase === 'submitted') {
     return (
@@ -517,11 +666,25 @@ export default function TaskSession() {
           ) : null}
 
           {/* Proctoring camera preview */}
-          <div className="w-14 h-10 rounded-lg border border-slate-300 overflow-hidden bg-slate-900 flex items-center justify-center shadow-xs">
-            {cameraOn ? (
-              <video ref={videoRef} className="w-full h-full object-cover" muted autoPlay playsInline />
-            ) : (
-              <Video className="w-4 h-4 text-slate-500" />
+          <div
+            className="w-16 h-11 rounded-xl border border-slate-300 overflow-hidden bg-slate-900 flex items-center justify-center shadow-xs relative"
+            title={cameraOn ? 'Webcam active — automated proctoring live' : 'Camera off or permission not granted'}
+          >
+            <video
+              ref={handleVideoRef}
+              className={`w-full h-full object-cover ${cameraOn ? 'block' : 'hidden'}`}
+              muted
+              autoPlay
+              playsInline
+            />
+            {!cameraOn && (
+              <div className="flex flex-col items-center justify-center text-center p-1">
+                <VideoOff className="w-3.5 h-3.5 text-slate-400 mb-0.5" />
+                <span className="text-[9px] font-bold text-slate-400 leading-tight">Cam Off</span>
+              </div>
+            )}
+            {cameraOn && (
+              <span className="absolute bottom-1 right-1 w-2 h-2 rounded-full bg-emerald-500 border border-slate-900 animate-pulse" />
             )}
           </div>
         </div>

@@ -1623,3 +1623,17 @@ export async function uploadTaskAnswerKey(id, answerKey) {
     throw error;
   }
 }
+
+
+export async function checkTaskSessionStatus(studentId, taskId) {
+  try {
+    const qs = new URLSearchParams({ studentId, taskId }).toString();
+    const response = await fetch(`${API_BASE}/task-sessions/check?${qs}`, {
+      headers: { 'Content-Type': 'application/json' },
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('checkTaskSessionStatus error:', error);
+    throw error;
+  }
+}
