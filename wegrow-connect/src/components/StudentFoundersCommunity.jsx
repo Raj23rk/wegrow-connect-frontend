@@ -289,7 +289,7 @@ export default function StudentFoundersCommunity() {
               </div>
               <div className="flex items-center gap-2.5 text-sm font-bold text-[#16225E]">
                 <MapPin className="w-5 h-5 text-[#F0791E] flex-shrink-0" />
-                <span>Ayyapan Kovil, Sivakasi</span>              </div>
+                <span>WeGrow B School , Sivakasi</span>              </div>
             </div>
           </div>
 
@@ -308,22 +308,22 @@ export default function StudentFoundersCommunity() {
               />
               <div className="mt-3 py-2 px-3 bg-[#FBF6EE] rounded-xl flex items-center justify-between text-xs font-bold text-[#16225E]">
                 <span className="flex items-center gap-1.5 text-[#F0791E]">
-                  <Sparkles className="w-4 h-4" /> Student Founders Orientation
+                  <Sparkles className="w-4 h-4" /> Student Start-up Orientation
                 </span>
                 <span>Sat, 12 Sep 2026</span>
               </div>
             </div>
 
             {/* Floating stat badge */}
-            <div className="hidden sm:flex items-center gap-3 absolute -bottom-5 -left-4 bg-white p-3.5 rounded-2xl shadow-xl border border-[#E7E1D4] z-20">
+            {/* <div className="hidden sm:flex items-center gap-3 absolute -bottom-5 -left-4 bg-white p-3.5 rounded-2xl shadow-xl border border-[#E7E1D4] z-20">
               <div className="w-10 h-10 rounded-xl bg-[#16225E] text-[#F0791E] flex items-center justify-center font-black">
                 <Users className="w-5 h-5" />
-              </div>
-              <div className="text-left">
+              </div> */}
+            {/* <div className="text-left">
                 <div className="font-extrabold text-sm text-[#16225E]">12 Sep · Limited Seats</div>
                 <div className="text-[11px] text-[#666C87]">Register now · Confirmation on WhatsApp</div>
-              </div>
-            </div>
+              </div> */}
+            {/* </div> */}
           </div>
         </div>
       </header>

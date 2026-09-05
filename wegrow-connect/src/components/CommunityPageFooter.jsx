@@ -32,7 +32,7 @@ export default function CommunityPageFooter({
       email: 'wegrowskillcampus@gmail.com',
       hours: 'Mon – Sat: 10:00 AM – 7:00 PM',
       mapUrl:
-        'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3935.5323!2d77.7984786!3d9.456045!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3b06cefba12a6f25%3A0x74020b3129888e1a!2sBell%20Hotels!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin'
+        'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d113966.51090516936!2d77.73595015!3d9.462178849999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3b06cfe49f178549%3A0xca869a1e42541fd5!2sWeGrow%20BSchool!5e1!3m2!1sen!2sin!4v1788624069321!5m2!1sen!2sin'
     },
     srivilliputtur: {
       label: 'Srivilliputhur',
@@ -209,11 +209,10 @@ export default function CommunityPageFooter({
                 <button
                   key={key}
                   onClick={() => setActiveBranch(key)}
-                  className={`px-3 py-1 rounded-full text-[10px] font-black transition-all cursor-pointer ${
-                    activeBranch === key
-                      ? 'bg-[#F0791E] text-white shadow-md'
-                      : 'text-[#9AA0C4] hover:text-white'
-                  }`}
+                  className={`px-3 py-1 rounded-full text-[10px] font-black transition-all cursor-pointer ${activeBranch === key
+                    ? 'bg-[#F0791E] text-white shadow-md'
+                    : 'text-[#9AA0C4] hover:text-white'
+                    }`}
                 >
                   {val.label}
                 </button>
