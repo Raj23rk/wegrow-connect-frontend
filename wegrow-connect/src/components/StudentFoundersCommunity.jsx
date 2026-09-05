@@ -920,7 +920,7 @@ export default function StudentFoundersCommunity() {
                       {/* Q5: Ready to learn */}
                       <div>
                         <label className="block text-xs font-bold uppercase tracking-wider text-[#16225E] mb-2">
-                          5. Ready to learn skills required?
+                          5. Skills which you want to learn?
                         </label>
                         <select
                           name="readyToLearn"
@@ -929,8 +929,12 @@ export default function StudentFoundersCommunity() {
                           className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm cursor-pointer"
                         >
                           <option value="">— Select —</option>
-                          <option value="Yes">Yes</option>
-                          <option value="No">No</option>
+                          <option value="Business Strategy & Decision Making">Business Strategy & Decision Making</option>
+                          <option value="Marketing & Customer Acquisition">Marketing & Customer Acquisition</option>
+                          <option value="Sales & Negotiation">Sales & Negotiation</option>
+                          <option value="Financial Management">Financial Management</option>
+                          <option value="Leadership & Team Management">Leadership & Team Management</option>
+                          <option value="Operations & Business Management">Operations & Business Management</option>
                         </select>
                       </div>
                     </div>
