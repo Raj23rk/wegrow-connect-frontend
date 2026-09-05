@@ -358,7 +358,7 @@ export default function BusinessFoundersCommunity() {
                 </li>
                 <li className="flex items-center gap-2">
                   <MapPin className="w-5 h-5 text-[#F0791E] flex-shrink-0" />
-                  <span>Ayyapan Kovil, Sivakasi</span>
+                  <span>WeGrow B School, Sivakasi</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <Clock className="w-5 h-5 text-[#F0791E] flex-shrink-0" />
@@ -769,7 +769,7 @@ export default function BusinessFoundersCommunity() {
             <h2 className="text-3xl sm:text-4xl font-black text-white">
               Reserve Your Orientation Seat
             </h2>
-           
+
           </div>
 
           {/* Registration Card Panel */}
