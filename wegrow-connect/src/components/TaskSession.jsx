@@ -462,7 +462,7 @@ export default function TaskSession() {
           {/* Header Brand */}
           <div className="flex flex-col items-center text-center mb-6">
             <div className="p-2 rounded-xl bg-slate-50 border border-slate-100 mb-3">
-              <img src="/wegrow-logo.png" alt="WeGrow B School" className="h-9 w-auto object-contain" onError={(e) => { e.target.style.display = 'none'; }} />
+              <img src="/wegrow-logo.webp" alt="WeGrow B School" className="h-9 w-auto object-contain" onError={(e) => { e.target.style.display = 'none'; }} />
             </div>
             <div className="w-14 h-14 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center mb-3 text-[#104288]">
               <Shield className="w-7 h-7" />
@@ -631,7 +631,7 @@ export default function TaskSession() {
       <header className="flex items-center justify-between px-4 sm:px-6 py-3 bg-white border-b border-slate-200 sticky top-0 z-50 shadow-xs flex-wrap gap-3">
         <div className="flex items-center gap-3">
           <div className="px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg">
-            <img src="/wegrow-logo.png" alt="WeGrow B School" className="h-6 w-auto object-contain" onError={(e) => { e.target.style.display = 'none'; }} />
+            <img src="/wegrow-logo.webp" alt="WeGrow B School" className="h-6 w-auto object-contain" onError={(e) => { e.target.style.display = 'none'; }} />
           </div>
           <span className="font-bold text-slate-800 text-sm max-w-[200px] truncate">{task?.title || 'Assessment Task'}</span>
         </div>

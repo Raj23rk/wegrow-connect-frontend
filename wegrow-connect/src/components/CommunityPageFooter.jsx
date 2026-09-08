@@ -109,7 +109,7 @@ export default function CommunityPageFooter({
             <Link to="/home" className="inline-flex">
               <div className="bg-white/95 px-3 py-1.5 rounded-xl shadow-md border border-white/20 inline-flex items-center">
                 <img
-                  src="/wegrow-logo.png"
+                  src="/wegrow-logo.webp"
                   alt="WeGrow B School"
                   className="h-10 w-auto object-contain"
                   onError={(e) => {

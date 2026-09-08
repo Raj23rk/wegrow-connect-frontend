@@ -30,33 +30,33 @@ export default function VisitSection({ visitTargetRef, visitStyle }) {
               
               {/* Image 1: Main Classroom View (Large Vertical Left) */}
               <div className="col-span-1 row-span-2 overflow-hidden rounded-2xl border" style={{ borderColor: theme.cardBorder }}>
-                <img src="/visit/Image 1.jpg" alt="Classroom View" className="w-full h-full object-cover hover:scale-105 transition duration-500" />
+                <img src="/visit/Image 1.webp" alt="Classroom View" className="w-full h-full object-cover hover:scale-105 transition duration-500" />
               </div>
 
               {/* Image 2 & Image 3: Mentorship Close-ups (Top Middle Stack) */}
               <div className="col-span-1 row-span-1 overflow-hidden rounded-2xl border" style={{ borderColor: theme.cardBorder }}>
-                <img src="/visit/Image 2.jpg" alt="Screen Interaction" className="w-full h-full object-cover hover:scale-105 transition duration-500" />
+                <img src="/visit/Image 2.webp" alt="Screen Interaction" className="w-full h-full object-cover hover:scale-105 transition duration-500" />
               </div>
               <div className="col-span-1 row-span-1 overflow-hidden rounded-2xl border" style={{ borderColor: theme.cardBorder }}>
-                <img src="/visit/Image 3.jpg" alt="Personal Mentorship" className="w-full h-full object-cover hover:scale-105 transition duration-500" />
+                <img src="/visit/Image 3.webp" alt="Personal Mentorship" className="w-full h-full object-cover hover:scale-105 transition duration-500" />
               </div>
 
               {/* Image 4: Presentation Shot (Wide Middle Banner) */}
               <div className="col-span-2 row-span-1 overflow-hidden rounded-2xl border" style={{ borderColor: theme.cardBorder }}>
-                <img src="/visit/Image 4.jpg" alt="Screen Presentation" className="w-full h-full object-cover hover:scale-105 transition duration-500" />
+                <img src="/visit/Image 4.webp" alt="Screen Presentation" className="w-full h-full object-cover hover:scale-105 transition duration-500" />
               </div>
 
               {/* Image 5 & 6: Lab Row & Students Working (Bottom Left / Center) */}
               <div className="col-span-1 row-span-1 overflow-hidden rounded-2xl border" style={{ borderColor: theme.cardBorder }}>
-                <img src="/visit/Image 5.jpg" alt="Lab Infrastructure" className="w-full h-full object-cover hover:scale-105 transition duration-500" />
+                <img src="/visit/Image 5.webp" alt="Lab Infrastructure" className="w-full h-full object-cover hover:scale-105 transition duration-500" />
               </div>
               <div className="col-span-1 row-span-1 overflow-hidden rounded-2xl border" style={{ borderColor: theme.cardBorder }}>
-                <img src="/visit/Image 6.jpg" alt="Students Working" className="w-full h-full object-cover hover:scale-105 transition duration-500" />
+                <img src="/visit/Image 6.webp" alt="Students Working" className="w-full h-full object-cover hover:scale-105 transition duration-500" />
               </div>
 
               {/* Image 7 & 8: Guidance & Instructor (Right Stack) */}
               <div className="col-span-1 row-span-1 overflow-hidden rounded-2xl border" style={{ borderColor: theme.cardBorder }}>
-                <img src="/visit/Image 7.jpg" alt="Desk Guidance" className="w-full h-full object-cover hover:scale-105 transition duration-500" />
+                <img src="/visit/Image 7.webp" alt="Desk Guidance" className="w-full h-full object-cover hover:scale-105 transition duration-500" />
               </div>
 
             </div>

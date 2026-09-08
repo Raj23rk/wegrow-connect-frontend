@@ -15,12 +15,12 @@
 //   { id: 9, title: "Success Journey & Growth", founder: "Student Testimonials", company: "WeGrow Alumni", videoUrl: "/videos/video9.mp4" }
 // ];
 
-// // Generate 15 certificate/image stories array (public/story/img1.png to img15.png)
+// // Generate 15 certificate/image stories array (public/story/img1.webp to img15.webp)
 // const baseStories = Array.from({ length: 15 }, (_, i) => ({
 //   id: `story-${i + 1}`,
 //   title: `Success Milestone #${i + 1}`,
 //   subtitle: 'Certificate Awarded',
-//   image: `/story/img${i + 1}.png`
+//   image: `/story/img${i + 1}.webp`
 // }));
 
 // // Tripled array for infinite continuous loop
@@ -466,7 +466,7 @@ const baseStories = Array.from({ length: 15 }, (_, i) => ({
   id: `story-${i + 1}`,
   title: `Success Milestone #${i + 1}`,
   subtitle: 'Certificate Awarded',
-  image: `/story/img${i + 1}.png`,
+  image: `/story/img${i + 1}.webp`,
 }));
 
 // Duplicate the stories for infinite continuous scrolling

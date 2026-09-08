@@ -10,7 +10,7 @@ export const DEFAULT_GALLERY_ITEMS = [
     category: 'workshop',
     title: 'Full Stack Live Bootcamp',
     subtitle: 'Hands-on web architecture, API integration & project deployment',
-    image: '/Images/fu 1.jpg',
+    image: '/Images/fu 1.webp',
     badge: 'Workshop',
     date: '2026-02-15'
   },
@@ -19,7 +19,7 @@ export const DEFAULT_GALLERY_ITEMS = [
     category: 'workshop',
     title: 'Practical Coding & Debugging Lab',
     subtitle: 'Students building interactive React applications',
-    image: '/Images/fu 2.jpg',
+    image: '/Images/fu 2.webp',
     badge: 'Workshop',
     date: '2026-02-10'
   },
@@ -28,7 +28,7 @@ export const DEFAULT_GALLERY_ITEMS = [
     category: 'workshop',
     title: 'AI & Machine Learning Practical',
     subtitle: 'Model training, data preprocessing & machine vision demo',
-    image: '/Images/ai 1.jpeg',
+    image: '/Images/ai 1.webp',
     badge: 'Workshop',
     date: '2026-01-28'
   },
@@ -37,7 +37,7 @@ export const DEFAULT_GALLERY_ITEMS = [
     category: 'workshop',
     title: 'Deep Learning & Neural Networks',
     subtitle: 'Hands-on implementation of intelligent algorithms',
-    image: '/Images/ai 2.jpeg',
+    image: '/Images/ai 2.webp',
     badge: 'Workshop',
     date: '2026-01-20'
   },
@@ -46,7 +46,7 @@ export const DEFAULT_GALLERY_ITEMS = [
     category: 'workshop',
     title: 'Digital Marketing & Growth Lab',
     subtitle: 'Campaign optimization, meta ads & analytics tracking',
-    image: '/Images/dm 1.jpg',
+    image: '/Images/dm 1.webp',
     badge: 'Workshop',
     date: '2026-01-12'
   },
@@ -55,7 +55,7 @@ export const DEFAULT_GALLERY_ITEMS = [
     category: 'workshop',
     title: 'SEO & Performance Funnels',
     subtitle: 'Keyword research and practical organic ranking masterclass',
-    image: '/Images/dm 2.jpg',
+    image: '/Images/dm 2.webp',
     badge: 'Workshop',
     date: '2026-01-05'
   },
@@ -64,7 +64,7 @@ export const DEFAULT_GALLERY_ITEMS = [
     category: 'activity',
     title: 'Tech Talk & Industry Keynote',
     subtitle: 'Senior tech leads sharing real-world software architecture advice',
-    image: '/Images/tt 1.jpeg',
+    image: '/Images/tt 1.webp',
     badge: 'Activity',
     date: '2025-12-22'
   },
@@ -73,7 +73,7 @@ export const DEFAULT_GALLERY_ITEMS = [
     category: 'activity',
     title: 'Campus Leadership & Interactive Session',
     subtitle: 'Q&A session with founder mentors & industry veterans',
-    image: '/Images/tt 2.jpeg',
+    image: '/Images/tt 2.webp',
     badge: 'Activity',
     date: '2025-12-15'
   },
@@ -82,7 +82,7 @@ export const DEFAULT_GALLERY_ITEMS = [
     category: 'activity',
     title: 'Annual Technology Symposium',
     subtitle: 'Showcasing student innovation & technical prototypes',
-    image: '/seminar/1.png',
+    image: '/seminar/1.webp',
     badge: 'Activity',
     date: '2025-11-30'
   },
@@ -91,7 +91,7 @@ export const DEFAULT_GALLERY_ITEMS = [
     category: 'activity',
     title: 'Business Idea Pitch & Brainstorming',
     subtitle: 'Team debates and creative startup ideation sessions',
-    image: '/seminar/2.png',
+    image: '/seminar/2.webp',
     badge: 'Activity',
     date: '2025-11-18'
   },
@@ -100,7 +100,7 @@ export const DEFAULT_GALLERY_ITEMS = [
     category: 'student',
     title: 'Student Project Presentation',
     subtitle: 'Demonstrating web & mobile apps to industry judges',
-    image: '/story/1.png',
+    image: '/story/1.webp',
     badge: 'Student',
     date: '2025-11-02'
   },
@@ -109,7 +109,7 @@ export const DEFAULT_GALLERY_ITEMS = [
     category: 'business',
     title: 'Corporate Networking & Partnership Meet',
     subtitle: 'Connecting business leaders with campus talent',
-    image: '/visit/1.png',
+    image: '/visit/1.webp',
     badge: 'Business',
     date: '2025-10-25'
   }

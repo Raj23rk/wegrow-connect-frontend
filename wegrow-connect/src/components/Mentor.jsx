@@ -11,7 +11,7 @@ const baseMentors = [
     experience: '8+ Yrs Exp',
     bio: 'Specializes in Machine Learning models, Deep Learning architectures, and scaling AI pipelines.',
     skills: ['Python', 'PyTorch', 'System Design'],
-    img: '/mentor/s1.jpg'
+    img: '/mentor/s1.webp'
   },
   {
     id: 'm2',
@@ -22,7 +22,7 @@ const baseMentors = [
     experience: '10+ Yrs Exp',
     bio: 'Expert in modern Web Development, microservices, and high-performance web systems.',
     skills: ['React', 'Node.js', 'AWS'],
-    img: '/mentor/g1.jpg'
+    img: '/mentor/g1.webp'
   },
   {
     id: 'm3',
@@ -33,7 +33,7 @@ const baseMentors = [
     experience: '6+ Yrs Exp',
     bio: 'Passionate about data-driven Digital Marketing, growth hacking strategies, and ads.',
     skills: ['SEO', 'Performance Ads', 'Analytics'],
-    img: '/mentor/s2.jpg'
+    img: '/mentor/s2.webp'
   },
   {
     id: 'm4',
@@ -44,7 +44,7 @@ const baseMentors = [
     experience: '7+ Yrs Exp',
     bio: 'Crafting intuitive digital products, wireframes, and enterprise design systems.',
     skills: ['Figma', 'User Research', 'Prototyping'],
-    img: '/mentor/g2.jpg'
+    img: '/mentor/g2.webp'
   },
   {
     id: 'm5',
@@ -55,7 +55,7 @@ const baseMentors = [
     experience: '12+ Yrs Exp',
     bio: 'Building automated CI/CD deployment pipelines and Kubernetes infrastructure.',
     skills: ['Docker', 'Kubernetes', 'AWS'],
-    img: '/mentor/s3.jpg'
+    img: '/mentor/s3.webp'
   },
   {
     id: 'm6',
@@ -66,7 +66,7 @@ const baseMentors = [
     experience: '8+ Yrs Exp',
     bio: 'Turning big data into actionable insights and predictive analytical dashboards.',
     skills: ['Pandas', 'SQL', 'Tableau'],
-    img: '/mentor/g3.jpg'
+    img: '/mentor/g3.webp'
   },
   {
     id: 'm7',
@@ -77,7 +77,7 @@ const baseMentors = [
     experience: '9+ Yrs Exp',
     bio: 'Specializing in penetration testing, network security protocols, and ethical hacking.',
     skills: ['Ethical Hacking', 'SIEM', 'Network Sec'],
-    img: '/mentor/s4.jpg'
+    img: '/mentor/s4.webp'
   },
   {
     id: 'm8',
@@ -88,7 +88,7 @@ const baseMentors = [
     experience: '7+ Yrs Exp',
     bio: 'Bridging technical engineering execution with high-impact business roadmap development.',
     skills: ['Agile', 'Scrum', 'Product Strategy'],
-    img: '/mentor/g4.jpg'
+    img: '/mentor/g4.webp'
   },
   {
     id: 'm9',
@@ -99,7 +99,7 @@ const baseMentors = [
     experience: '5+ Yrs Exp',
     bio: 'Architecting Web3 applications, smart contracts, and decentralized finance protocols.',
     skills: ['Solidity', 'Ethereum', 'Web3.js'],
-    img: '/mentor/s5.jpg'
+    img: '/mentor/s5.webp'
   },
   {
     id: 'm10',
@@ -110,7 +110,7 @@ const baseMentors = [
     experience: '9+ Yrs Exp',
     bio: 'Building cross-platform mobile apps with native performance and smooth UI animations.',
     skills: ['Flutter', 'React Native', 'Swift'],
-    img: '/mentor/g5.jpg'
+    img: '/mentor/g5.webp'
   }
 ];
 

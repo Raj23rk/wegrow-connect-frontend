@@ -41,11 +41,11 @@ export default function Splash() {
       >
         <div className="w-full h-full flex items-center justify-center overflow-hidden p-0 m-0">
           <img 
-            src="/splash.png" 
+            src="/splash.webp" 
             alt="Splash Screen Logo" 
             className="w-[98%] md:w-[88%] h-[98%] md:h-[88%] object-contain animate-splash-in"
             onError={(e) => {
-              e.target.src = '/image_4e0ce4.jpg';
+              e.target.src = '/image_4e0ce4.webp';
             }}
           />
         </div>
