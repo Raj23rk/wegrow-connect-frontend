@@ -131,8 +131,8 @@
           
 //           {/* WEGROW LOGO WITH REDUCED GAP & NO ROUND WRAPPER */}
 //           <div className="flex items-center justify-center mb-6">
-//             <img src="/login/logo.jpg" alt="Logo Icon" className="w-12 h-12 object-contain relative z-10" />
-//             <img src="/login/wegrow-logo.png" alt="WeGrow Text Logo" className="w-[160px] h-[48px] object-contain -ml-6 relative z-0" />
+//             <img src="/login/logo.webp" alt="Logo Icon" className="w-12 h-12 object-contain relative z-10" />
+//             <img src="/login/wegrow-logo.webp" alt="WeGrow Text Logo" className="w-[160px] h-[48px] object-contain -ml-6 relative z-0" />
 //           </div>
           
 //           <form onSubmit={handleVerifyEmail} className="w-full flex flex-col items-center">
@@ -469,7 +469,7 @@ const handleVerifyEmail = async (e) => {
 
           <div className="flex items-center justify-center mb-6 cursor-pointer" onClick={() => navigate('/home')}>
             <img
-              src="/wegrow-logo.png"
+              src="/wegrow-logo.webp"
               alt="WeGrow B School"
               className="w-[180px] sm:w-[200px] h-[58px] sm:h-[64px] object-contain"
             />

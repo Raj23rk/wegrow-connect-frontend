@@ -2,11 +2,11 @@ import React from 'react';
 import { theme } from '../theme';
 
 const seminarData = [
-  { img: "seminar/1.png", title: "Industry Expert Talks", desc: "Keynotes from tech leaders & innovators." },
-  { img: "seminar/2.png", title: "Live Demonstrations", desc: "Real-time project & tech architecture breakdowns." },
-  { img: "seminar/3.png", title: "Interactive Q&A", desc: "Direct guidance and career mentoring." },
-  { img: "seminar/4.png", title: "Networking Hub", desc: "Connect with like-minded ambitious peers." },
-  { img: "seminar/5.png", title: "Certification & Guidance", desc: "Insights on future career roadmaps." }
+  { img: "seminar/1.webp", title: "Industry Expert Talks", desc: "Keynotes from tech leaders & innovators." },
+  { img: "seminar/2.webp", title: "Live Demonstrations", desc: "Real-time project & tech architecture breakdowns." },
+  { img: "seminar/3.webp", title: "Interactive Q&A", desc: "Direct guidance and career mentoring." },
+  { img: "seminar/4.webp", title: "Networking Hub", desc: "Connect with like-minded ambitious peers." },
+  { img: "seminar/5.webp", title: "Certification & Guidance", desc: "Insights on future career roadmaps." }
 ];
 
 export default function SeminarSection({ seminarTargetRef, seminarStyle }) {

@@ -1,0 +1,113 @@
+﻿D:\Raj\wegrow-connect-frontend\wegrow-connect\src\admin\campaigns\page.jsx:145: link.download = `wegrow-qr-${campaign.campaignId}.png`;
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\admin\events\page.tsx:2316: placeholder="https://example.com/images/python-bootcamp.jpg"
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\BusinessFoundersCommunity.jsx:266: src="/wegrow-logo.png"
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\BusinessFoundersCommunity.jsx:271: e.target.src = '/logo.jpg';
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\BusinessFoundersCommunity.jsx:378: src="/wegrow-mascot.jpeg"
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\BusinessFoundersCommunity.jsx:383: e.target.src = '/wegrow-mascot.jpg';
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\BusinessFoundersCommunity.jsx:627: src="/events/bussines founder.JPG"
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\BusinessFoundersCommunity.jsx:632: e.target.src = '/wegrow-mascot.jpg';
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\BusinessRegister.jsx:317: //               <img src="/login/logo.jpg" alt="Logo Icon" className="w-12 h-12 object-contain relative z-10" />
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\BusinessRegister.jsx:318: //               <img src="/login/wegrow-logo.png" alt="WeGrow Text Logo" className="w-[160px] h-[48px] object-contain -ml-6 relative z-0" />
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\BusinessRegister.jsx:527: img: '/student_startup_founder.jpg',
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\BusinessRegister.jsx:532: img: '/women_entrepreneurs_comm.jpg',
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\BusinessRegister.jsx:537: img: '/sivakasi_entrepreneurs_comm.jpg',
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\BusinessRegister.jsx:575: // https://your-domain.com/uploads/visiting-card.jpg
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\BusinessRegister.jsx:1163: src="/wegrow-logo.png"
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\BusinessRegister.jsx:1526: placeholder="https://example.com/visiting-card.jpg"
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\BusinessSidebar.tsx:54: src="/logo.jpg"
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\BusinessSidebar.tsx:60: src="/wegrow-logo.png"
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\CampaignLanding.jsx:112: src="/wegrow-logo.png"
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\CampaignRegister.jsx:193: src="/wegrow-logo.png"
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\CommunityPageFooter.jsx:112: src="/wegrow-logo.png"
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\Footer.jsx:85: src="/wegrow-logo.png"
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\ForgotPasswordScreen.jsx:134: //             <img src="/login/logo.jpg" alt="Logo Icon" className="w-12 h-12 object-contain relative z-10" />
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\ForgotPasswordScreen.jsx:135: //             <img src="/login/wegrow-logo.png" alt="WeGrow Text Logo" className="w-[160px] h-[48px] object-contain -ml-6 relative z-0" />
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\ForgotPasswordScreen.jsx:472: src="/wegrow-logo.png"
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\GalleryPage.jsx:13: image: '/Images/fu 1.jpg',
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\GalleryPage.jsx:22: image: '/Images/fu 2.jpg',
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\GalleryPage.jsx:31: image: '/Images/ai 1.jpeg',
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\GalleryPage.jsx:40: image: '/Images/ai 2.jpeg',
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\GalleryPage.jsx:49: image: '/Images/dm 1.jpg',
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\GalleryPage.jsx:58: image: '/Images/dm 2.jpg',
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\GalleryPage.jsx:67: image: '/Images/tt 1.jpeg',
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\GalleryPage.jsx:76: image: '/Images/tt 2.jpeg',
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\GalleryPage.jsx:85: image: '/seminar/1.png',
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\GalleryPage.jsx:94: image: '/seminar/2.png',
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\GalleryPage.jsx:103: image: '/story/1.png',
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\GalleryPage.jsx:112: image: '/visit/1.png',
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\LoginScreen.jsx:223: src="/wegrow-logo.png"
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\Mentor.jsx:14: img: '/mentor/s1.jpg'
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\Mentor.jsx:25: img: '/mentor/g1.jpg'
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\Mentor.jsx:36: img: '/mentor/s2.jpg'
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\Mentor.jsx:47: img: '/mentor/g2.jpg'
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\Mentor.jsx:58: img: '/mentor/s3.jpg'
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\Mentor.jsx:69: img: '/mentor/g3.jpg'
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\Mentor.jsx:80: img: '/mentor/s4.jpg'
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\Mentor.jsx:91: img: '/mentor/g4.jpg'
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\Mentor.jsx:102: img: '/mentor/s5.jpg'
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\Mentor.jsx:113: img: '/mentor/g5.jpg'
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\Navbar.jsx:147: src="/wegrow-logo.png"
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\RegisterSelection.jsx:17: image: '/student_startup_founder.jpg',
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\RegisterSelection.jsx:32: image: '/women_entrepreneurs_comm.jpg',
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\RegisterSelection.jsx:47: image: '/sivakasi_entrepreneurs_comm.jpg',
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\SeminarSection.jsx:5: { img: "seminar/1.png", title: "Industry Expert Talks", desc: "Keynotes from tech leaders & innovators." },
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\SeminarSection.jsx:6: { img: "seminar/2.png", title: "Live Demonstrations", desc: "Real-time project & tech architecture breakdowns." },
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\SeminarSection.jsx:7: { img: "seminar/3.png", title: "Interactive Q&A", desc: "Direct guidance and career mentoring." },
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\SeminarSection.jsx:8: { img: "seminar/4.png", title: "Networking Hub", desc: "Connect with like-minded ambitious peers." },
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\SeminarSection.jsx:9: { img: "seminar/5.png", title: "Certification & Guidance", desc: "Insights on future career roadmaps." }
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\SetPasswordScreen.jsx:161: //             <img src="/login/logo.jpg" alt="Logo Icon" className="w-12 h-12 object-contain relative z-10" />
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\SetPasswordScreen.jsx:162: //             <img src="/login/wegrow-logo.png" alt="WeGrow Text Logo" className="w-[160px] h-[48px] object-contain -ml-6 relative z-0" />
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\SetPasswordScreen.jsx:676: src="/wegrow-logo.png"
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\Sidebar.tsx:77: src="/logo.jpg"
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\Sidebar.tsx:83: src="/wegrow-logo.png"
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\Splash.jsx:44: src="/splash.png"
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\Splash.jsx:48: e.target.src = '/image_4e0ce4.jpg';
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\StudentFoundersCommunity.jsx:212: src="/wegrow-logo.png"
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\StudentFoundersCommunity.jsx:304: src="/wegrow-mascot.jpeg"
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\StudentFoundersCommunity.jsx:307: onError={e => { e.target.src = '/student_startup_founder.jpg'; }}
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\StudentFoundersCommunity.jsx:520: src="/events/student.jpeg"
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\StudentFoundersCommunity.jsx:541: src="/Images/ai 1.jpeg"
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\StudentFoundersCommunity.jsx:557: src="/Images/tt 1.jpeg"
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\StudentFoundersCommunity.jsx:573: src="/Images/iv 1.jpeg"
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\StudentFoundersCommunity.jsx:589: src="/story/img1.png"
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\StudentRegister.jsx:320: //               <img src="/login/logo.jpg" alt="Logo Icon" className="w-12 h-12 object-contain relative z-10" />
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\StudentRegister.jsx:321: //               <img src="/login/wegrow-logo.png" alt="WeGrow Text Logo" className="w-[160px] h-[48px] object-contain -ml-6 relative z-0" />
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\StudentRegister.jsx:530: img: '/student_startup_founder.jpg',
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\StudentRegister.jsx:535: img: '/women_entrepreneurs_comm.jpg',
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\StudentRegister.jsx:540: img: '/sivakasi_entrepreneurs_comm.jpg',
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\StudentRegister.jsx:1301: src="/wegrow-logo.png"
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\StudentSidebar.tsx:52: src="/wegrow-logo.png"
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\SuccessStories.jsx:18: // // Generate 15 certificate/image stories array (public/story/img1.png to img15.png)
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\SuccessStories.jsx:23: //   image: `/story/img${i + 1}.png`
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\SuccessStories.jsx:469: image: `/story/img${i + 1}.png`,
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\TaskSession.jsx:465: <img src="/wegrow-logo.png" alt="WeGrow B School" className="h-9 w-auto object-contain" onError={(e) => { e.target.style.display = 'none'; }} />
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\TaskSession.jsx:634: <img src="/wegrow-logo.png" alt="WeGrow B School" className="h-6 w-auto object-contain" onError={(e) => { e.target.style.display = 'none'; }} />
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\VisitSection.jsx:33: <img src="/visit/Image 1.jpg" alt="Classroom View" className="w-full h-full object-cover hover:scale-105 transition duration-500" />
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\VisitSection.jsx:38: <img src="/visit/Image 2.jpg" alt="Screen Interaction" className="w-full h-full object-cover hover:scale-105 transition duration-500" />
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\VisitSection.jsx:41: <img src="/visit/Image 3.jpg" alt="Personal Mentorship" className="w-full h-full object-cover hover:scale-105 transition duration-500" />
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\VisitSection.jsx:46: <img src="/visit/Image 4.jpg" alt="Screen Presentation" className="w-full h-full object-cover hover:scale-105 transition duration-500" />
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\VisitSection.jsx:51: <img src="/visit/Image 5.jpg" alt="Lab Infrastructure" className="w-full h-full object-cover hover:scale-105 transition duration-500" />
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\VisitSection.jsx:54: <img src="/visit/Image 6.jpg" alt="Students Working" className="w-full h-full object-cover hover:scale-105 transition duration-500" />
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\VisitSection.jsx:59: <img src="/visit/Image 7.jpg" alt="Desk Guidance" className="w-full h-full object-cover hover:scale-105 transition duration-500" />
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\WomensCommunity.jsx:160: src="/wegrow-logo.png"
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\WomensCommunity.jsx:274: src="/wegrow-mascot.jpeg"
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\WomensCommunity.jsx:278: e.target.src = '/women_entrepreneurs_comm.jpg';
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\WomensCommunity.jsx:570: src="/events/womenmetting.JPG"
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\WomensCommunity.jsx:574: e.target.src = '/women_entrepreneurs_comm.jpg';
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\WomensCommunity.jsx:591: src="/events/group.JPG"
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\WomensCommunity.jsx:607: src="/events/help.jpg"
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\WomensCommunity.jsx:623: src="/Images/dm 1.jpg"
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\components\WomensCommunity.jsx:639: src="/Images/fu 1.jpg"
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\data\workshopsData.js:5: leftImg: "Images/dm 1.jpg",
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\data\workshopsData.js:8: rightImg: "Images/dm 2.jpg",
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\data\workshopsData.js:15: leftImg: "Images/ai 1.jpeg",
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\data\workshopsData.js:18: rightImg: "Images/ai 2.jpeg",
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\data\workshopsData.js:25: leftImg: "Images/fu 1.jpg",
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\data\workshopsData.js:28: rightImg: "Images/fu 2.jpg",
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\data\workshopsData.js:35: leftImg: "Images/iv 1.jpeg",
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\data\workshopsData.js:38: rightImg: "Images/iv 2.jpeg",
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\data\workshopsData.js:45: leftImg: "Images/tt 1.jpeg",
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\data\workshopsData.js:48: rightImg: "Images/tt 2.jpeg",
+D:\Raj\wegrow-connect-frontend\wegrow-connect\src\services\razorpay.js:81: image: "https://wegrow-connect.com/logo.png",
+D:\Raj\wegrow-connect-frontend\wegrow-connect\index.html:7: <link rel="icon" type="image/jpeg" href="/wegrow-mascot.jpeg" />
+D:\Raj\wegrow-connect-frontend\wegrow-connect\index.html:8: <link rel="apple-touch-icon" href="/wegrow-mascot.jpeg" />

@@ -109,7 +109,7 @@ export default function CampaignLanding() {
             className="group cursor-pointer bg-white hover:bg-slate-50/90 backdrop-blur-md px-7 py-3.5 rounded-2xl shadow-sm hover:shadow-md border border-slate-200/80 transition-all duration-300 flex items-center justify-center mb-4"
           >
             <img 
-              src="/wegrow-logo.png" 
+              src="/wegrow-logo.webp" 
               alt="WeGrow B School" 
               className="h-11 sm:h-14 w-auto object-contain transition-transform duration-300 group-hover:scale-[1.02]"
               onError={(e) => {

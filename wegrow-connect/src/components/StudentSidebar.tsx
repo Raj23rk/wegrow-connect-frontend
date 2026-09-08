@@ -49,7 +49,7 @@ export default function StudentSidebar() {
             <div className="flex items-center justify-center gap-1.5 w-full">
               <div className="logo">
                 <img
-                  src="/wegrow-logo.png"
+                  src="/wegrow-logo.webp"
                   alt="WeGrow"
                 />
               </div>

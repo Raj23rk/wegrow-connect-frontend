@@ -144,7 +144,7 @@ export default function Navbar({
           >
             <div className="flex items-center bg-white/95 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl shadow-sm border border-white/40">
               <img 
-                src="/wegrow-logo.png" 
+                src="/wegrow-logo.webp" 
                 alt="WeGrow B School" 
                 className="w-[105px] sm:w-[125px] lg:w-[135px] h-[30px] sm:h-[36px] lg:h-[38px] object-contain max-w-none" 
               />

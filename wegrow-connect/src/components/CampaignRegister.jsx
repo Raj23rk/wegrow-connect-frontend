@@ -46,7 +46,7 @@ export default function CampaignRegister() {
     if (!campaignId) return;
     getCampaignByLookup(campaignId)
       .then((res) => setCampaign(res?.data?.campaign || res?.data || res))
-      .catch(() => {});
+      .catch(() => { });
   }, [campaignId]);
 
   const setField = (key, val) => {
@@ -107,7 +107,7 @@ export default function CampaignRegister() {
           <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-5 text-emerald-600 border border-emerald-100 shadow-inner">
             <CheckCircle2 className="w-10 h-10" />
           </div>
-          
+
           <h2 className="text-2xl sm:text-3xl font-black text-slate-900 mb-2">You're Registered! 🎉</h2>
           <p className="text-sm font-medium text-slate-600 mb-6 leading-relaxed">
             Thank you, <strong className="text-[#104288]">{form.name}</strong>!<br />
@@ -150,7 +150,7 @@ export default function CampaignRegister() {
 
       {/* Main Card Container */}
       <main className="w-full max-w-2xl mx-auto px-4 sm:px-6 pt-8 sm:pt-10 pb-12 relative z-10 flex flex-col items-center">
-        
+
         {/* Top Header Row with Back Button */}
         <div className="w-full flex items-center justify-between mb-6">
           <button
@@ -179,18 +179,17 @@ export default function CampaignRegister() {
         {/* Card */}
         <div className="w-full bg-white rounded-3xl p-6 sm:p-10 shadow-xl border border-slate-200/90 relative overflow-hidden">
           {/* Top colored accent line */}
-          <div className={`absolute top-0 left-0 right-0 h-2 bg-gradient-to-r ${
-            isSchool ? 'from-[#104288] to-[#3b82f6]' : 'from-[#f3a812] to-[#ea580c]'
-          }`} />
+          <div className={`absolute top-0 left-0 right-0 h-2 bg-gradient-to-r ${isSchool ? 'from-[#104288] to-[#3b82f6]' : 'from-[#f3a812] to-[#ea580c]'
+            }`} />
 
           {/* Logo & Headline */}
           <div className="flex flex-col items-center text-center mb-8">
-            <div 
+            <div
               onClick={() => navigate('/home')}
               className="cursor-pointer p-2 rounded-xl hover:bg-slate-50 transition mb-3"
             >
               <img
-                src="/wegrow-logo.png"
+                src="/wegrow-logo.webp"
                 alt="WeGrow B School"
                 className="h-10 sm:h-12 w-auto object-contain"
                 onError={(e) => { e.target.style.display = 'none'; }}
@@ -205,7 +204,7 @@ export default function CampaignRegister() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-            
+
             {/* ── Section: Personal Info ── */}
             <div>
               <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-slate-400 pb-2 border-b border-slate-100 mb-4">
@@ -219,9 +218,8 @@ export default function CampaignRegister() {
                     id="reg-name"
                     type="text"
                     placeholder="Enter your full name"
-                    className={`w-full px-4 py-3 rounded-xl border text-sm font-semibold text-slate-800 bg-white outline-none transition ${
-                      errors.name ? 'border-red-500 ring-1 ring-red-100' : 'border-slate-300 focus:border-[#104288] focus:ring-2 focus:ring-blue-100'
-                    }`}
+                    className={`w-full px-4 py-3 rounded-xl border text-sm font-semibold text-slate-800 bg-white outline-none transition ${errors.name ? 'border-red-500 ring-1 ring-red-100' : 'border-slate-300 focus:border-[#104288] focus:ring-2 focus:ring-blue-100'
+                      }`}
                     value={form.name}
                     onChange={(e) => setField('name', e.target.value)}
                   />
@@ -232,9 +230,8 @@ export default function CampaignRegister() {
                     id="reg-email"
                     type="email"
                     placeholder="name@example.com"
-                    className={`w-full px-4 py-3 rounded-xl border text-sm font-semibold text-slate-800 bg-white outline-none transition ${
-                      errors.email ? 'border-red-500 ring-1 ring-red-100' : 'border-slate-300 focus:border-[#104288] focus:ring-2 focus:ring-blue-100'
-                    }`}
+                    className={`w-full px-4 py-3 rounded-xl border text-sm font-semibold text-slate-800 bg-white outline-none transition ${errors.email ? 'border-red-500 ring-1 ring-red-100' : 'border-slate-300 focus:border-[#104288] focus:ring-2 focus:ring-blue-100'
+                      }`}
                     value={form.email}
                     onChange={(e) => setField('email', e.target.value)}
                   />
@@ -248,9 +245,8 @@ export default function CampaignRegister() {
                     type="tel"
                     maxLength={10}
                     placeholder="10-digit mobile number"
-                    className={`w-full px-4 py-3 rounded-xl border text-sm font-semibold text-slate-800 bg-white outline-none transition ${
-                      errors.mobile ? 'border-red-500 ring-1 ring-red-100' : 'border-slate-300 focus:border-[#104288] focus:ring-2 focus:ring-blue-100'
-                    }`}
+                    className={`w-full px-4 py-3 rounded-xl border text-sm font-semibold text-slate-800 bg-white outline-none transition ${errors.mobile ? 'border-red-500 ring-1 ring-red-100' : 'border-slate-300 focus:border-[#104288] focus:ring-2 focus:ring-blue-100'
+                      }`}
                     value={form.mobile}
                     onChange={(e) => setField('mobile', e.target.value.replace(/\D/g, ''))}
                   />
@@ -277,9 +273,8 @@ export default function CampaignRegister() {
                         type="tel"
                         maxLength={10}
                         placeholder="WhatsApp number"
-                        className={`w-full px-4 py-3 rounded-xl border text-sm font-semibold text-slate-800 bg-white outline-none transition ${
-                          errors.whatsapp ? 'border-red-500 ring-1 ring-red-100' : 'border-slate-300 focus:border-[#104288] focus:ring-2 focus:ring-blue-100'
-                        }`}
+                        className={`w-full px-4 py-3 rounded-xl border text-sm font-semibold text-slate-800 bg-white outline-none transition ${errors.whatsapp ? 'border-red-500 ring-1 ring-red-100' : 'border-slate-300 focus:border-[#104288] focus:ring-2 focus:ring-blue-100'
+                          }`}
                         value={form.whatsapp}
                         onChange={(e) => setField('whatsapp', e.target.value.replace(/\D/g, ''))}
                       />
@@ -304,9 +299,8 @@ export default function CampaignRegister() {
                         id="reg-school"
                         type="text"
                         placeholder="e.g. St. Joseph Higher Secondary School"
-                        className={`w-full px-4 py-3 rounded-xl border text-sm font-semibold text-slate-800 bg-white outline-none transition ${
-                          errors.schoolName ? 'border-red-500 ring-1 ring-red-100' : 'border-slate-300 focus:border-[#104288] focus:ring-2 focus:ring-blue-100'
-                        }`}
+                        className={`w-full px-4 py-3 rounded-xl border text-sm font-semibold text-slate-800 bg-white outline-none transition ${errors.schoolName ? 'border-red-500 ring-1 ring-red-100' : 'border-slate-300 focus:border-[#104288] focus:ring-2 focus:ring-blue-100'
+                          }`}
                         value={form.schoolName}
                         onChange={(e) => setField('schoolName', e.target.value)}
                       />
@@ -316,9 +310,8 @@ export default function CampaignRegister() {
                     <Field label="Class" id="reg-class" required error={errors.class}>
                       <select
                         id="reg-class"
-                        className={`w-full px-4 py-3 rounded-xl border text-sm font-semibold text-slate-800 bg-white outline-none cursor-pointer transition ${
-                          errors.class ? 'border-red-500 ring-1 ring-red-100' : 'border-slate-300 focus:border-[#104288] focus:ring-2 focus:ring-blue-100'
-                        }`}
+                        className={`w-full px-4 py-3 rounded-xl border text-sm font-semibold text-slate-800 bg-white outline-none cursor-pointer transition ${errors.class ? 'border-red-500 ring-1 ring-red-100' : 'border-slate-300 focus:border-[#104288] focus:ring-2 focus:ring-blue-100'
+                          }`}
                         value={form.class}
                         onChange={(e) => setField('class', e.target.value)}
                       >
@@ -335,9 +328,8 @@ export default function CampaignRegister() {
                       id="reg-college"
                       type="text"
                       placeholder="e.g. WeGrow College / Institute of Technology"
-                      className={`w-full px-4 py-3 rounded-xl border text-sm font-semibold text-slate-800 bg-white outline-none transition ${
-                        errors.collegeName ? 'border-red-500 ring-1 ring-red-100' : 'border-slate-300 focus:border-[#f3a812] focus:ring-2 focus:ring-amber-100'
-                      }`}
+                      className={`w-full px-4 py-3 rounded-xl border text-sm font-semibold text-slate-800 bg-white outline-none transition ${errors.collegeName ? 'border-red-500 ring-1 ring-red-100' : 'border-slate-300 focus:border-[#f3a812] focus:ring-2 focus:ring-amber-100'
+                        }`}
                       value={form.collegeName}
                       onChange={(e) => setField('collegeName', e.target.value)}
                     />
@@ -347,9 +339,8 @@ export default function CampaignRegister() {
                     <Field label="Department / Discipline" id="reg-dept" required error={errors.department}>
                       <select
                         id="reg-dept"
-                        className={`w-full px-4 py-3 rounded-xl border text-sm font-semibold text-slate-800 bg-white outline-none cursor-pointer transition ${
-                          errors.department ? 'border-red-500 ring-1 ring-red-100' : 'border-slate-300 focus:border-[#f3a812] focus:ring-2 focus:ring-amber-100'
-                        }`}
+                        className={`w-full px-4 py-3 rounded-xl border text-sm font-semibold text-slate-800 bg-white outline-none cursor-pointer transition ${errors.department ? 'border-red-500 ring-1 ring-red-100' : 'border-slate-300 focus:border-[#f3a812] focus:ring-2 focus:ring-amber-100'
+                          }`}
                         value={form.department}
                         onChange={(e) => setField('department', e.target.value)}
                       >
@@ -361,9 +352,8 @@ export default function CampaignRegister() {
                     <Field label="Year of Study" id="reg-year" required error={errors.year}>
                       <select
                         id="reg-year"
-                        className={`w-full px-4 py-3 rounded-xl border text-sm font-semibold text-slate-800 bg-white outline-none cursor-pointer transition ${
-                          errors.year ? 'border-red-500 ring-1 ring-red-100' : 'border-slate-300 focus:border-[#f3a812] focus:ring-2 focus:ring-amber-100'
-                        }`}
+                        className={`w-full px-4 py-3 rounded-xl border text-sm font-semibold text-slate-800 bg-white outline-none cursor-pointer transition ${errors.year ? 'border-red-500 ring-1 ring-red-100' : 'border-slate-300 focus:border-[#f3a812] focus:ring-2 focus:ring-amber-100'
+                          }`}
                         value={form.year}
                         onChange={(e) => setField('year', e.target.value)}
                       >
@@ -382,11 +372,10 @@ export default function CampaignRegister() {
                 id="btn-register-submit"
                 type="submit"
                 disabled={submitting}
-                className={`w-full py-4 px-6 rounded-2xl font-black text-sm sm:text-base flex items-center justify-center gap-2 transition-all duration-300 shadow-md hover:shadow-xl cursor-pointer ${
-                  isSchool
+                className={`w-full py-4 px-6 rounded-2xl font-black text-sm sm:text-base flex items-center justify-center gap-2 transition-all duration-300 shadow-md hover:shadow-xl cursor-pointer ${isSchool
                     ? 'bg-[#104288] hover:bg-[#0c336b] text-white'
                     : 'bg-[#f3a812] hover:bg-[#d9920a] text-white'
-                } ${submitting ? 'opacity-70 cursor-not-allowed' : ''}`}
+                  } ${submitting ? 'opacity-70 cursor-not-allowed' : ''}`}
               >
                 {submitting ? (
                   <>

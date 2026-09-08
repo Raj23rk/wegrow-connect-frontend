@@ -317,8 +317,8 @@
 //           <div className="relative z-10 flex items-center justify-between">
 //             {/* ROUND SHAPE REMOVED & GAP REDUCED */}
 //             <div className="flex items-center">
-//               <img src="/login/logo.jpg" alt="Logo Icon" className="w-12 h-12 object-contain relative z-10" />
-//               <img src="/login/wegrow-logo.png" alt="WeGrow Text Logo" className="w-[160px] h-[48px] object-contain -ml-6 relative z-0" />
+//               <img src="/login/logo.webp" alt="Logo Icon" className="w-12 h-12 object-contain relative z-10" />
+//               <img src="/login/wegrow-logo.webp" alt="WeGrow Text Logo" className="w-[160px] h-[48px] object-contain -ml-6 relative z-0" />
 //             </div>
 //             <button 
 //               type="button"
@@ -527,17 +527,17 @@ export default function StudentRegister() {
 
   const studentSlides = [
     {
-      img: '/student_startup_founder.jpg',
+      img: '/student_startup_founder.webp',
       title: 'Student Startup Founder',
       desc: 'Empowering student visionaries and college founders with hands-on incubation, business plan guidance, and startup ecosystems.',
     },
     {
-      img: '/women_entrepreneurs_comm.jpg',
+      img: '/women_entrepreneurs_comm.webp',
       title: 'Women Entrepreneurs Community',
       desc: 'Dedicated network supporting women business leaders, innovators, and founders with scaling strategies and community mentorship.',
     },
     {
-      img: '/sivakasi_entrepreneurs_comm.jpg',
+      img: '/sivakasi_entrepreneurs_comm.webp',
       title: 'Sivakasi Entrepreneurs Community',
       desc: 'Uniting Sivakasi industrial pioneers, business owners, and SMEs to collaborate, modernize, and accelerate regional business growth.',
     },
@@ -1298,7 +1298,7 @@ export default function StudentRegister() {
 
             <div className="flex items-center cursor-pointer" onClick={() => navigate('/home')}>
               <img
-                src="/wegrow-logo.png"
+                src="/wegrow-logo.webp"
                 alt="WeGrow B School"
                 className="w-[170px] sm:w-[190px] h-[56px] sm:h-[60px] object-contain"
               />

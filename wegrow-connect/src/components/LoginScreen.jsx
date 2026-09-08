@@ -220,7 +220,7 @@ export default function LoginScreen() {
 
           <div className="flex items-center justify-center mb-6 cursor-pointer" onClick={() => navigate('/home')}>
             <img
-              src="/wegrow-logo.png"
+              src="/wegrow-logo.webp"
               alt="WeGrow B School"
               className="w-[180px] sm:w-[200px] h-[58px] sm:h-[64px] object-contain"
             />

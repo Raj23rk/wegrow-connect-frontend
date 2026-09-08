@@ -157,7 +157,7 @@ export default function WomensCommunity() {
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <Link to="/home" className="flex items-center gap-3">
             <img
-              src="/wegrow-logo.png"
+              src="/wegrow-logo.webp"
               alt="WeGrow B School Logo"
               className="h-10 w-auto object-contain"
               onError={(e) => {
@@ -271,11 +271,11 @@ export default function WomensCommunity() {
             />
             <div className="relative z-10 w-full max-w-sm sm:max-w-md bg-white p-3 sm:p-4 rounded-3xl shadow-2xl border-2 border-[#E7E1D4] hover:border-[#F0791E]/60 transition-all duration-300 transform hover:scale-[1.02]">
               <img
-                src="/wegrow-mascot.jpeg"
+                src="/wegrow-mascot.webp"
                 alt="WeGrow B School mascot giving a thumbs up"
                 className="w-full h-auto object-cover rounded-2xl shadow-sm"
                 onError={(e) => {
-                  e.target.src = '/women_entrepreneurs_comm.jpg';
+                  e.target.src = '/women_entrepreneurs_comm.webp';
                 }}
               />
               <div className="mt-3 py-2 px-3 bg-[#FBF6EE] rounded-xl flex items-center justify-between text-xs font-bold text-[#16225E]">
@@ -567,11 +567,11 @@ export default function WomensCommunity() {
             {/* Featured Large Tile */}
             <div className="col-span-2 row-span-2 relative rounded-2xl overflow-hidden group shadow-md border border-[#E7E1D4] bg-[#EFE7D6]">
               <img
-                src="/events/womenmetting.JPG"
+                src="/events/womenmetting.webp"
                 alt="Women Founders Community Meet"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 onError={(e) => {
-                  e.target.src = '/women_entrepreneurs_comm.jpg';
+                  e.target.src = '/women_entrepreneurs_comm.webp';
                 }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#0C1338]/85 via-[#0C1338]/30 to-transparent opacity-90 group-hover:opacity-100 transition-opacity" />
@@ -588,7 +588,7 @@ export default function WomensCommunity() {
             {/* Tile 2 */}
             <div className="relative rounded-2xl overflow-hidden group shadow-md border border-[#E7E1D4] bg-[#EFE7D6]">
               <img
-                src="/events/group.JPG"
+                src="/events/group.webp"
                 alt="Sivakasi Business Meet"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 onError={(e) => {
@@ -604,7 +604,7 @@ export default function WomensCommunity() {
             {/* Tile 3 */}
             <div className="relative rounded-2xl overflow-hidden group shadow-md border border-[#E7E1D4] bg-[#EFE7D6]">
               <img
-                src="/events/help.jpg"
+                src="/events/help.webp"
                 alt="Aspiring Startup Founders"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 onError={(e) => {
@@ -620,7 +620,7 @@ export default function WomensCommunity() {
             {/* Tile 4 */}
             <div className="relative rounded-2xl overflow-hidden group shadow-md border border-[#E7E1D4] bg-[#EFE7D6]">
               <img
-                src="/Images/dm 1.jpg"
+                src="/Images/dm 1.webp"
                 alt="Digital Marketing Masterclass"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 onError={(e) => {
@@ -636,7 +636,7 @@ export default function WomensCommunity() {
             {/* Tile 5 */}
             <div className="relative rounded-2xl overflow-hidden group shadow-md border border-[#E7E1D4] bg-[#EFE7D6]">
               <img
-                src="/Images/fu 1.jpg"
+                src="/Images/fu 1.webp"
                 alt="Financial Planning Workshop"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 onError={(e) => {

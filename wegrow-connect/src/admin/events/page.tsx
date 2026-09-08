@@ -2313,7 +2313,7 @@ export default function EventsBootcampsPage() {
                     id="event-image"
                     type="url"
                     required
-                    placeholder="https://example.com/images/python-bootcamp.jpg"
+                    placeholder="https://example.com/images/python-bootcamp.webp"
                     value={
                       formData.image
                     }

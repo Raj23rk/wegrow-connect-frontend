@@ -51,13 +51,13 @@ export default function BusinessSidebar() {
           >
             <div className="flex items-center justify-center gap-1.5 w-full">
               {/* <img
-                src="/logo.jpg"
+                src="/logo.webp"
                 alt="WeGrow Emblem"
                 className="w-8 h-8 object-contain shrink-0"
               /> */}
               <div className="logo">
                 <img
-                  src="/wegrow-logo.png"
+                  src="/wegrow-logo.webp"
                   alt="WeGrow"
                 />
               </div>

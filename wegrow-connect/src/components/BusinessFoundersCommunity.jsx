@@ -263,12 +263,12 @@ export default function BusinessFoundersCommunity() {
         <div className="max-w-[1180px] mx-auto px-4 sm:px-7 py-3.5 flex items-center justify-between">
           <Link to="/home" className="flex items-center gap-3">
             <img
-              src="/wegrow-logo.png"
+              src="/wegrow-logo.webp"
               alt="WeGrow B School"
               className="h-10 w-auto object-contain"
               onError={(e) => {
                 e.target.onerror = null;
-                e.target.src = '/logo.jpg';
+                e.target.src = '/logo.webp';
               }}
             />
           </Link>
@@ -375,12 +375,12 @@ export default function BusinessFoundersCommunity() {
               />
               <div className="relative z-10 w-full max-w-sm sm:max-w-md bg-white p-3 sm:p-4 rounded-3xl shadow-2xl border border-[#E7E1D4] transform hover:scale-[1.02] transition-transform duration-300">
                 <img
-                  src="/wegrow-mascot.jpeg"
+                  src="/wegrow-mascot.webp"
                   alt="WeGrow B School mascot giving a thumbs up"
                   className="w-full h-auto object-cover rounded-2xl"
                   onError={(e) => {
                     e.target.onerror = null;
-                    e.target.src = '/wegrow-mascot.jpg';
+                    e.target.src = '/wegrow-mascot.webp';
                   }}
                 />
                 <div className="mt-3 py-2 px-3 bg-[#FBF6EE] rounded-xl flex items-center justify-between text-xs font-bold text-[#16225E]">
@@ -624,12 +624,12 @@ export default function BusinessFoundersCommunity() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="col-span-2 row-span-2 rounded-2xl overflow-hidden border border-[#E7E1D4] shadow-md group relative min-h-[260px] sm:min-h-[320px]">
               <img
-                src="/events/bussines founder.JPG"
+                src="/events/bussines founder.webp"
                 alt="WeGrow Business Founders Community"
                 className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
                 onError={(e) => {
                   e.target.onerror = null;
-                  e.target.src = '/wegrow-mascot.jpg';
+                  e.target.src = '/wegrow-mascot.webp';
                 }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#16225E]/90 via-transparent to-transparent flex items-end p-5 text-white">

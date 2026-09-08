@@ -209,7 +209,7 @@ export default function StudentFoundersCommunity() {
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <Link to="/home" className="flex items-center gap-3">
             <img
-              src="/wegrow-logo.png"
+              src="/wegrow-logo.webp"
               alt="WeGrow B School"
               className="h-10 w-auto object-contain"
               onError={e => { e.target.style.display = 'none'; e.target.nextElementSibling.style.display = 'flex'; }}
@@ -301,10 +301,10 @@ export default function StudentFoundersCommunity() {
             />
             <div className="relative z-10 w-full max-w-sm sm:max-w-md bg-white p-3 sm:p-4 rounded-3xl shadow-2xl border-2 border-[#E7E1D4] hover:border-[#F0791E]/60 transition-all duration-300 transform hover:scale-[1.02]">
               <img
-                src="/wegrow-mascot.jpeg"
+                src="/wegrow-mascot.webp"
                 alt="WeGrow B School mascot giving a thumbs up"
                 className="w-full h-auto object-cover rounded-2xl shadow-sm"
-                onError={e => { e.target.src = '/student_startup_founder.jpg'; }}
+                onError={e => { e.target.src = '/student_startup_founder.webp'; }}
               />
               <div className="mt-3 py-2 px-3 bg-[#FBF6EE] rounded-xl flex items-center justify-between text-xs font-bold text-[#16225E]">
                 <span className="flex items-center gap-1.5 text-[#F0791E]">
@@ -517,7 +517,7 @@ export default function StudentFoundersCommunity() {
             {/* Featured Large Tile */}
             <div className="col-span-2 row-span-2 relative rounded-2xl overflow-hidden group shadow-md border border-[#E7E1D4] bg-[#EFE7D6]">
               <img
-                src="/events/student.jpeg"
+                src="/events/student.webp"
                 alt="Student Founders Community Meet"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 onError={(e) => {
@@ -538,7 +538,7 @@ export default function StudentFoundersCommunity() {
             {/* Tile 2 */}
             <div className="relative rounded-2xl overflow-hidden group shadow-md border border-[#E7E1D4] bg-[#EFE7D6]">
               <img
-                src="/Images/ai 1.jpeg"
+                src="/Images/ai 1.webp"
                 alt="AI &amp; Tech Entrepreneurship"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 onError={(e) => {
@@ -554,7 +554,7 @@ export default function StudentFoundersCommunity() {
             {/* Tile 3 */}
             <div className="relative rounded-2xl overflow-hidden group shadow-md border border-[#E7E1D4] bg-[#EFE7D6]">
               <img
-                src="/Images/tt 1.jpeg"
+                src="/Images/tt 1.webp"
                 alt="Mentor-Led Learning"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 onError={(e) => {
@@ -570,7 +570,7 @@ export default function StudentFoundersCommunity() {
             {/* Tile 4 */}
             <div className="relative rounded-2xl overflow-hidden group shadow-md border border-[#E7E1D4] bg-[#EFE7D6]">
               <img
-                src="/Images/iv 1.jpeg"
+                src="/Images/iv 1.webp"
                 alt="Industrial Exposure"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 onError={(e) => {
@@ -586,7 +586,7 @@ export default function StudentFoundersCommunity() {
             {/* Tile 5 */}
             <div className="relative rounded-2xl overflow-hidden group shadow-md border border-[#E7E1D4] bg-[#EFE7D6]">
               <img
-                src="/story/img1.png"
+                src="/story/img1.webp"
                 alt="WeGrow Success Stories"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 onError={(e) => {
