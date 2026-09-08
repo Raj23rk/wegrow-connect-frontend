@@ -49,28 +49,28 @@ export default function MissionVisionSection({ missionVisionTargetRef, missionVi
     >
       <div className="max-w-7xl mx-auto w-full">
         {/* SECTION HEADER */}
-        <div className="text-center mb-5 sm:mb-8 md:mb-10">
+        <div className="text-center mb-6 sm:mb-9 md:mb-12">
           <div 
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest mb-2.5 shadow-sm border"
+            className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-[11px] font-black uppercase tracking-widest mb-3 shadow-xs border"
             style={{ 
-              backgroundColor: 'rgba(16, 66, 136, 0.08)', 
-              color: theme.primary || '#104288',
-              borderColor: 'rgba(16, 66, 136, 0.2)' 
+              backgroundColor: 'rgba(255, 200, 98, 0.15)', 
+              borderColor: 'rgba(243, 168, 18, 0.4)',
+              color: '#B46E00'
             }}
           >
             <span>🌟</span>
-            <span>About WeGrow B School</span>
+            <span>About WeGrow B-School</span>
           </div>
 
           <h2 
-            className="text-xl sm:text-3xl md:text-5xl font-black tracking-tight"
+            className="font-serif text-2xl sm:text-4xl md:text-5xl font-semibold tracking-tight"
             style={{ color: theme.primary || '#104288' }}
           >
-            Our <span style={{ color: theme.orange || '#f3a812' }}>Mission & Vision</span>
+            Our <span className="italic" style={{ color: theme.orange || '#f3a812' }}>Mission & Vision</span>
           </h2>
 
           <p 
-            className="mt-2.5 text-xs sm:text-sm font-semibold max-w-2xl mx-auto leading-relaxed"
+            className="mt-2.5 text-xs sm:text-sm font-medium max-w-2xl mx-auto leading-relaxed"
             style={{ color: theme.textMuted || '#50637f' }}
           >
             Transforming ambitious minds into high-impact industry leaders and entrepreneurs through 
@@ -83,20 +83,19 @@ export default function MissionVisionSection({ missionVisionTargetRef, missionVi
           
           {/* 1. MISSION CARD */}
           <div 
-            className="relative overflow-hidden rounded-3xl p-4 sm:p-6 md:p-8 shadow-xl border transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 group"
+            className="relative overflow-hidden rounded-3xl p-5 sm:p-7 md:p-9 shadow-lg hover:shadow-2xl border transition-all duration-300 hover:-translate-y-1 group bg-[#FDFBF5] dark:bg-[#0c2340]"
             style={{ 
-              backgroundColor: theme.cardBg || 'rgba(255, 255, 255, 0.95)',
-              borderColor: theme.cardBorder || 'rgba(16, 66, 136, 0.15)'
+              borderColor: '#E5DED0'
             }}
           >
             {/* Top Accent Gradient Line */}
             <div 
-              className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-blue-700 via-blue-600 to-blue-400"
+              className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#104288] via-[#1E5FB4] to-[#FF6A45]"
             ></div>
 
             <div className="flex items-center gap-4 mb-6">
               <div 
-                className="w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-lg shrink-0 transform group-hover:scale-110 transition-transform"
+                className="w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-lg shrink-0 transform group-hover:scale-105 transition-transform"
                 style={{ backgroundColor: theme.primary || '#104288' }}
               >
                 <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -105,14 +104,14 @@ export default function MissionVisionSection({ missionVisionTargetRef, missionVi
               </div>
 
               <div>
-                <span className="text-xs font-extrabold uppercase tracking-widest text-blue-700">Our Purpose</span>
-                <h3 className="text-2xl sm:text-3xl font-black" style={{ color: theme.primary || '#104288' }}>
+                <span className="text-[11px] font-black uppercase tracking-widest text-[#104288] dark:text-[#60a5fa]">Our Purpose</span>
+                <h3 className="font-serif text-2xl sm:text-3xl font-semibold" style={{ color: theme.primary || '#104288' }}>
                   Our Mission
                 </h3>
               </div>
             </div>
 
-            <p className="text-sm sm:text-base font-semibold leading-relaxed mb-6" style={{ color: theme.textMain || '#1e293b' }}>
+            <p className="text-sm sm:text-base font-normal leading-relaxed mb-6" style={{ color: theme.textMain || '#1e293b' }}>
               To bridge the critical divide between academia and modern enterprise requirements by delivering 
               rigorous, real-world skill training in Business Leadership, Technology, and Applied Analytics.
             </p>
@@ -141,20 +140,19 @@ export default function MissionVisionSection({ missionVisionTargetRef, missionVi
 
           {/* 2. VISION CARD */}
           <div 
-            className="relative overflow-hidden rounded-3xl p-8 sm:p-10 shadow-xl border transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 group"
+            className="relative overflow-hidden rounded-3xl p-5 sm:p-7 md:p-9 shadow-lg hover:shadow-2xl border transition-all duration-300 hover:-translate-y-1 group bg-[#FDFBF5] dark:bg-[#0c2340]"
             style={{ 
-              backgroundColor: theme.cardBg || 'rgba(255, 255, 255, 0.95)',
-              borderColor: theme.cardBorder || 'rgba(16, 66, 136, 0.15)'
+              borderColor: '#E5DED0'
             }}
           >
             {/* Top Accent Gradient Line */}
             <div 
-              className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-400"
+              className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#FFC862] via-[#F3A812] to-[#FF6A45]"
             ></div>
 
             <div className="flex items-center gap-4 mb-6">
               <div 
-                className="w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-lg shrink-0 transform group-hover:scale-110 transition-transform"
+                className="w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-lg shrink-0 transform group-hover:scale-105 transition-transform"
                 style={{ backgroundColor: theme.orange || '#f3a812' }}
               >
                 <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -164,34 +162,34 @@ export default function MissionVisionSection({ missionVisionTargetRef, missionVi
               </div>
 
               <div>
-                <span className="text-xs font-extrabold uppercase tracking-widest text-amber-700">Our Future</span>
-                <h3 className="text-2xl sm:text-3xl font-black" style={{ color: theme.primary || '#104288' }}>
+                <span className="text-[11px] font-black uppercase tracking-widest text-[#F3A812]">Our Future</span>
+                <h3 className="font-serif text-2xl sm:text-3xl font-semibold" style={{ color: theme.primary || '#104288' }}>
                   Our Vision
                 </h3>
               </div>
             </div>
 
-            <p className="text-sm sm:text-base font-semibold leading-relaxed mb-6" style={{ color: theme.textMain || '#1e293b' }}>
+            <p className="text-sm sm:text-base font-normal leading-relaxed mb-6" style={{ color: theme.textMain || '#1e293b' }}>
               To become South India's premier B-School and Skill Development Ecosystem, cultivating 
               creative thinkers, innovative entrepreneurs, and technology trailblazers recognized worldwide.
             </p>
 
-            <div className="space-y-3 pt-4 border-t border-gray-100">
+            <div className="space-y-3 pt-4 border-t border-[#E5DED0]/60">
               <div className="flex items-start gap-3">
                 <span className="w-5 h-5 rounded-full bg-orange-100 text-orange-800 flex items-center justify-center text-xs font-black shrink-0 mt-0.5">✓</span>
-                <span className="text-xs sm:text-sm font-semibold" style={{ color: theme.textMuted }}>
+                <span className="text-xs sm:text-sm font-medium" style={{ color: theme.textMuted }}>
                   Build an unmatched network of industry-ready graduates and innovative business leaders.
                 </span>
               </div>
               <div className="flex items-start gap-3">
                 <span className="w-5 h-5 rounded-full bg-orange-100 text-orange-800 flex items-center justify-center text-xs font-black shrink-0 mt-0.5">✓</span>
-                <span className="text-xs sm:text-sm font-semibold" style={{ color: theme.textMuted }}>
+                <span className="text-xs sm:text-sm font-medium" style={{ color: theme.textMuted }}>
                   Expand state-of-the-art incubation and technology labs across regional hubs.
                 </span>
               </div>
               <div className="flex items-start gap-3">
                 <span className="w-5 h-5 rounded-full bg-orange-100 text-orange-800 flex items-center justify-center text-xs font-black shrink-0 mt-0.5">✓</span>
-                <span className="text-xs sm:text-sm font-semibold" style={{ color: theme.textMuted }}>
+                <span className="text-xs sm:text-sm font-medium" style={{ color: theme.textMuted }}>
                   Foster lifelong alumni connections and collaborative corporate ecosystems.
                 </span>
               </div>
@@ -203,38 +201,37 @@ export default function MissionVisionSection({ missionVisionTargetRef, missionVi
         {/* CORE VALUES GRID */}
         <div>
           <div className="text-center mb-8">
-            <h4 className="text-xl sm:text-2xl font-black" style={{ color: theme.primary || '#104288' }}>
+            <h4 className="font-serif text-2xl sm:text-3xl font-semibold" style={{ color: theme.primary || '#104288' }}>
               Our Core Pillars of Excellence
             </h4>
-            <p className="text-xs sm:text-sm font-semibold mt-1" style={{ color: theme.textMuted }}>
+            <p className="text-xs sm:text-sm font-medium mt-1" style={{ color: theme.textMuted }}>
               The foundational values that guide every classroom, workshop, and corporate partnership at WeGrow.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {coreValues.map((val, idx) => (
               <div 
                 key={idx}
-                className="rounded-2xl p-6 border shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group flex flex-col justify-between"
+                className="rounded-2xl p-6 border shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group flex flex-col justify-between bg-[#FDFBF5] dark:bg-[#0c2340]"
                 style={{ 
-                  backgroundColor: theme.cardBg || 'rgba(255, 255, 255, 0.95)',
-                  borderColor: theme.cardBorder || 'rgba(16, 66, 136, 0.15)'
+                  borderColor: '#E5DED0'
                 }}
               >
                 <div>
                   <div 
-                    className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-colors duration-300"
+                    className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-colors duration-300 shadow-xs"
                     style={{ 
-                      backgroundColor: 'rgba(16, 66, 136, 0.08)',
-                      color: theme.primary || '#104288'
+                      backgroundColor: 'rgba(255, 200, 98, 0.2)',
+                      color: '#B46E00'
                     }}
                   >
                     {val.icon}
                   </div>
-                  <h5 className="font-extrabold text-base mb-2" style={{ color: theme.primary || '#104288' }}>
+                  <h5 className="font-serif font-semibold text-lg mb-2" style={{ color: theme.primary || '#104288' }}>
                     {val.title}
                   </h5>
-                  <p className="text-xs font-semibold leading-relaxed" style={{ color: theme.textMuted }}>
+                  <p className="text-xs font-normal leading-relaxed text-gray-600 dark:text-slate-300">
                     {val.desc}
                   </p>
                 </div>

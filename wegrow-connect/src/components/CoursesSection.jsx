@@ -310,13 +310,13 @@ export default function CoursesSection({ coursesTargetRef, coursesStyle, scrollT
       <div className="max-w-7xl mx-auto w-full">
         
         {/* SECTION HEADER */}
-        <div className="text-center mb-5 sm:mb-8 md:mb-10">
+        <div className="text-center mb-6 sm:mb-9 md:mb-12">
           <div 
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest mb-2.5 shadow-sm border"
+            className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-[11px] font-black uppercase tracking-widest mb-3 shadow-xs border"
             style={{ 
-              backgroundColor: 'rgba(16, 66, 136, 0.08)', 
-              color: theme.primary || '#104288',
-              borderColor: 'rgba(16, 66, 136, 0.2)' 
+              backgroundColor: 'rgba(255, 200, 98, 0.15)', 
+              borderColor: 'rgba(243, 168, 18, 0.4)',
+              color: '#B46E00'
             }}
           >
             <span>📚</span>
@@ -324,14 +324,14 @@ export default function CoursesSection({ coursesTargetRef, coursesStyle, scrollT
           </div>
 
           <h2 
-            className="text-xl sm:text-3xl md:text-5xl font-black tracking-tight"
+            className="font-serif text-2xl sm:text-4xl md:text-5xl font-semibold tracking-tight"
             style={{ color: theme.primary || '#104288' }}
           >
-            Featured <span style={{ color: theme.orange || '#f3a812' }}>Courses & Masterclasses</span>
+            Featured <span className="italic" style={{ color: theme.orange || '#f3a812' }}>Courses & Masterclasses</span>
           </h2>
 
           <p 
-            className="mt-2.5 text-xs sm:text-sm font-semibold max-w-2xl mx-auto leading-relaxed"
+            className="mt-2.5 text-xs sm:text-sm font-medium max-w-2xl mx-auto leading-relaxed"
             style={{ color: theme.textMuted || '#50637f' }}
           >
             Industry-aligned curriculum curated by experienced practitioners to help you gain in-demand skills, 
@@ -344,10 +344,10 @@ export default function CoursesSection({ coursesTargetRef, coursesStyle, scrollT
               <button
                 key={cat.id}
                 onClick={() => setActiveCategory(cat.id)}
-                className={`px-3 sm:px-5 py-1.5 sm:py-2 rounded-full text-[11px] sm:text-sm font-extrabold transition-all duration-300 shadow-sm cursor-pointer ${
+                className={`px-3.5 sm:px-5 py-1.5 sm:py-2 rounded-full text-[11px] sm:text-xs font-bold transition-all duration-300 shadow-xs cursor-pointer ${
                   activeCategory === cat.id 
                     ? 'text-white scale-105 shadow-md' 
-                    : 'bg-white/80 hover:bg-white text-gray-700 border border-gray-200 hover:border-gray-300'
+                    : 'bg-[#FDFBF5] hover:bg-white text-gray-700 border border-[#E5DED0] hover:border-[#F3A812]'
                 }`}
                 style={{
                   backgroundColor: activeCategory === cat.id ? (theme.primary || '#104288') : undefined,
@@ -374,9 +374,9 @@ export default function CoursesSection({ coursesTargetRef, coursesStyle, scrollT
               {visibleCourses.map(course => (
                 <div 
                   key={course.id}
-                  className="rounded-3xl border p-4 sm:p-5 md:p-6 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1.5 flex flex-col justify-between group relative overflow-hidden bg-white"
+                  className="rounded-3xl border p-4 sm:p-5 md:p-6 shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-1.5 flex flex-col justify-between group relative overflow-hidden bg-[#FDFBF5] dark:bg-[#0c2340]"
                   style={{ 
-                    borderColor: theme.cardBorder || 'rgba(16, 66, 136, 0.15)'
+                    borderColor: '#E5DED0'
                   }}
                 >
                   {/* TOP HEADER */}
@@ -413,36 +413,36 @@ export default function CoursesSection({ coursesTargetRef, coursesStyle, scrollT
                     )}
 
                     <h3 
-                      className="text-xl font-black mb-2 line-clamp-2 leading-snug group-hover:text-blue-900 transition-colors"
+                      className="font-serif text-xl font-semibold mb-2 line-clamp-2 leading-snug group-hover:text-[#104288] dark:group-hover:text-[#60a5fa] transition-colors"
                       style={{ color: theme.primary || '#104288' }}
                     >
                       {course.title}
                     </h3>
 
                     {/* METADATA PILLS */}
-                    <div className="flex flex-wrap items-center gap-2 mb-4 text-[11px] font-bold text-gray-600">
-                      <span className="px-2.5 py-1 bg-gray-100 rounded-lg flex items-center gap-1">
+                    <div className="flex flex-wrap items-center gap-2 mb-4 text-[11px] font-medium text-gray-600 dark:text-slate-300">
+                      <span className="px-2.5 py-1 bg-[#FAF6ED] dark:bg-slate-800 border border-[#E5DED0]/70 rounded-lg flex items-center gap-1">
                         ⏱️ {course.duration}
                       </span>
-                      <span className="px-2.5 py-1 bg-gray-100 rounded-lg flex items-center gap-1">
+                      <span className="px-2.5 py-1 bg-[#FAF6ED] dark:bg-slate-800 border border-[#E5DED0]/70 rounded-lg flex items-center gap-1">
                         📍 {course.mode}
                       </span>
-                      <span className="px-2.5 py-1 bg-amber-50 text-amber-800 rounded-lg flex items-center gap-1">
+                      <span className="px-2.5 py-1 bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200/60 rounded-lg flex items-center gap-1">
                         ⭐ {course.rating} ({course.reviews})
                       </span>
                     </div>
 
-                    <p className="text-xs font-semibold leading-relaxed mb-5" style={{ color: theme.textMuted }}>
+                    <p className="text-xs font-normal leading-relaxed mb-5 text-gray-600 dark:text-slate-300">
                       {course.description}
                     </p>
 
                     {/* CURRICULUM HIGHLIGHTS */}
-                    <div className="space-y-2 mb-6 pt-4 border-t border-gray-100">
-                      <span className="text-[11px] font-black uppercase tracking-wider text-gray-500 block mb-2">Key Modules Included:</span>
+                    <div className="space-y-2 mb-6 pt-4 border-t border-[#E5DED0]/60">
+                      <span className="text-[11px] font-black uppercase tracking-wider text-gray-500 dark:text-slate-400 block mb-2">Key Modules Included:</span>
                       {course.highlights.map((item, idx) => (
                         <div key={idx} className="flex items-start gap-2">
                           <span className="w-4 h-4 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-[10px] font-black shrink-0 mt-0.5">✓</span>
-                          <span className="text-xs font-semibold text-gray-700 leading-tight">{item}</span>
+                          <span className="text-xs font-medium text-gray-700 dark:text-slate-300 leading-tight">{item}</span>
                         </div>
                       ))}
                     </div>
@@ -452,19 +452,20 @@ export default function CoursesSection({ coursesTargetRef, coursesStyle, scrollT
                   <div className="pt-2">
                     <button
                       onClick={scrollToContact}
-                      className="w-full py-3 rounded-full font-black text-xs uppercase tracking-wider transition-all duration-300 shadow-md hover:shadow-lg cursor-pointer transform hover:scale-[1.02]"
+                      className="w-full py-3 rounded-full font-bold text-xs uppercase tracking-wider transition-all duration-300 shadow-md hover:shadow-lg cursor-pointer transform hover:scale-[1.02] flex items-center justify-center gap-2"
                       style={{
-                        backgroundColor: theme.orange || '#f3a812',
+                        backgroundColor: '#104288',
                         color: '#ffffff'
                       }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = theme.primary || '#104288';
+                        e.currentTarget.style.backgroundColor = '#FF6A45';
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = theme.orange || '#f3a812';
+                        e.currentTarget.style.backgroundColor = '#104288';
                       }}
                     >
-                      Enroll / Enquire Now →
+                      <span>Enroll / Enquire Now</span>
+                      <span>→</span>
                     </button>
                   </div>
                 </div>

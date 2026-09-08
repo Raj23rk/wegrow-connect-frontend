@@ -246,23 +246,26 @@ export default function EventSection({
           HEADER
       ===================================================== */}
 
-      <div className="text-center mb-5 sm:mb-7 md:mb-9">
-        <p
-          className="text-xs font-black tracking-[0.2em] uppercase mb-2"
-          style={{
-            color: theme.orange,
+      <div className="text-center mb-6 sm:mb-8 md:mb-10">
+        <div 
+          className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-[11px] font-black tracking-widest uppercase mb-3 shadow-xs border"
+          style={{ 
+            backgroundColor: 'rgba(255, 200, 98, 0.15)', 
+            borderColor: 'rgba(243, 168, 18, 0.4)',
+            color: '#B46E00'
           }}
         >
-          UPCOMING EVENTS & SESSIONS
-        </p>
+          <span className="w-2 h-2 rounded-full bg-[#F3A812] animate-pulse"></span>
+          <span>UPCOMING EVENTS & SESSIONS</span>
+        </div>
 
         <h2
-          className="text-2xl sm:text-4xl font-black tracking-tight mb-2 sm:mb-3 dark:text-white"
+          className="font-serif text-2xl sm:text-4xl md:text-5xl font-semibold tracking-tight mb-2 sm:mb-3 dark:text-white"
           style={{
             color: theme.primary,
           }}
         >
-          Expand Your Knowledge With Expert-Led Events
+          Expand Your Knowledge With <span className="italic" style={{ color: theme.orange }}>Expert-Led Events</span>
         </h2>
 
         <p className="text-xs sm:text-sm font-medium text-gray-500 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed">
@@ -332,9 +335,9 @@ export default function EventSection({
                     return (
                       <div
                         key={`${event._id}-${index}`}
-                        className="group bg-white dark:bg-slate-800/90 rounded-2xl shadow-[0_2px_16px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_32px_rgba(0,0,0,0.12)] transition-all duration-300 flex flex-col overflow-hidden border border-gray-100 dark:border-slate-700/60 hover:border-gray-200 dark:hover:border-slate-600"
+                        className="group bg-[#FDFBF5] dark:bg-[#0c2340] rounded-2xl shadow-[0_2px_16px_rgba(0,0,0,0.06)] hover:shadow-[0_12px_36px_rgba(16,66,136,0.14)] transition-all duration-300 flex flex-col overflow-hidden border border-[#E5DED0] dark:border-slate-700/60 hover:border-[#F3A812]/50 hover:-translate-y-1"
                         style={{
-                          borderLeft: `4px solid ${accentColor}`,
+                          borderTop: `3px solid ${accentColor}`,
                         }}
                       >
                         {/* IMAGE AREA */}

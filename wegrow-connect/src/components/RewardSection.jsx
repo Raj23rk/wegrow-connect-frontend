@@ -70,14 +70,22 @@ export default function RewardSection({ rewardTargetRef, rewardStyle }) {
       <div className="max-w-7xl mx-auto px-3 sm:px-6">
 
         {/* HEADER SECTION */}
-        <div id="reward-title" className="max-w-4xl mx-auto text-center space-y-2 pt-0 mb-5 sm:mb-8 md:mb-10">
-          <span className="text-xs uppercase font-black tracking-widest block" style={{ color: theme.orange }}>
-            PERFORMANCE & RECOGNITION
-          </span>
-          <h2 className="text-xl sm:text-3xl lg:text-5xl font-extrabold drop-shadow-sm leading-tight" style={{ color: theme.primary }}>
-            Earn While You Learn
+        <div id="reward-title" className="max-w-4xl mx-auto text-center space-y-2 pt-0 mb-6 sm:mb-9 md:mb-12">
+          <div 
+            className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-[11px] font-black uppercase tracking-widest mb-3 shadow-xs border"
+            style={{ 
+              backgroundColor: 'rgba(255, 200, 98, 0.15)', 
+              borderColor: 'rgba(243, 168, 18, 0.4)',
+              color: '#B46E00'
+            }}
+          >
+            <span>🪙</span>
+            <span>PERFORMANCE & RECOGNITION</span>
+          </div>
+          <h2 className="font-serif text-2xl sm:text-4xl md:text-5xl font-semibold tracking-tight" style={{ color: theme.primary }}>
+            Earn While <span className="italic" style={{ color: theme.orange }}>You Learn</span>
           </h2>
-          <p className="text-xs sm:text-sm lg:text-base font-semibold leading-relaxed max-w-2xl mx-auto" style={{ color: theme.textMuted }}>
+          <p className="text-xs sm:text-sm md:text-base font-medium leading-relaxed max-w-2xl mx-auto text-gray-600 dark:text-slate-300">
             Every workshop you attend, task you complete, and project you deliver adds up to your personal Skill Credit Score. Turn your dedication into tangible perks & career recognition!
           </p>
         </div>

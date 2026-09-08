@@ -16,6 +16,31 @@
   --wegrow-bg-overlay: linear-gradient(90deg, rgba(244,247,251,0.92) 0%, rgba(235,241,250,0.85) 50%, rgba(244,247,251,0.70) 100%);
   --wegrow-hero-overlay: linear-gradient(to bottom, rgba(242,244,248,0.78) 0%, rgba(242,244,248,0.65) 50%, rgba(242,244,248,0.82) 100%);
   --wegrow-dropdown-bg: rgba(255, 255, 255, 0.98);
+
+  /* WeGrow B-School Editorial Theme Variables */
+  --serif: 'Fraunces', 'Iowan Old Style', serif;
+  --sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --ink: #104288;
+  --ink-deep: #061325;
+  --ink-soft: #334155;
+  --forest: #104288;
+  --forest-2: #0c336b;
+  --forest-deep: #061325;
+  --paper: #FAF6ED;
+  --paper-2: #F0E9D6;
+  --paper-3: #FDFBF5;
+  --white: #FFFEFA;
+  --brass: #C9821E;
+  --brass-light: #FFC862;
+  --brass-pale: #FBE3AE;
+  --coral: #FF6A45;
+  --coral-light: #FF8A69;
+  --sage: #64748B;
+  --line: rgba(16, 66, 136, 0.12);
+  --line-on-dark: rgba(255, 254, 250, 0.16);
+  --shadow-soft: 0 30px 60px -35px rgba(10, 25, 47, 0.28);
+  --ease: cubic-bezier(.22, .68, .2, 1);
+  --container: 1240px;
 }
 
 html.dark {
@@ -32,11 +57,49 @@ html.dark {
   --wegrow-bg-overlay: linear-gradient(180deg, rgba(6, 19, 37, 0.96) 0%, rgba(4, 12, 24, 0.98) 100%);
   --wegrow-hero-overlay: linear-gradient(to bottom, rgba(6,19,37,0.88) 0%, rgba(6,19,37,0.78) 50%, rgba(6,19,37,0.94) 100%);
   --wegrow-dropdown-bg: rgba(15, 23, 42, 0.98);
+
+  --paper: #0b172a;
+  --paper-2: #0f213c;
+  --paper-3: #081426;
+  --ink-deep: #040c1a;
+  --ink-soft: #94a3b8;
+  --line: rgba(148, 163, 184, 0.18);
 }
 
 @keyframes floatArrow {
   0%, 100% { transform: translateY(0); opacity: 0.8; }
   50% { transform: translateY(10px); opacity: 1; }
+}
+
+@keyframes marqueeScroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@keyframes mascotFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-14px); }
+}
+
+@keyframes scrollDrop {
+  0% { top: -34px; }
+  70%, 100% { top: 34px; }
+}
+
+@keyframes nuPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: .4; transform: scale(1.4); }
+}
+
+.font-serif {
+  font-family: var(--serif);
+}
+
+.h-display {
+  font-family: var(--serif);
+  font-weight: 560;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
 }
 
 .bounce-arrow { 

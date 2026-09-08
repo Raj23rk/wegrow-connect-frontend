@@ -48,13 +48,13 @@ export default function GallerySection({ galleryTargetRef, galleryStyle }) {
       <div className="max-w-7xl mx-auto w-full">
         
         {/* SECTION HEADER */}
-        <div className="text-center mb-5 sm:mb-8 md:mb-10">
+        <div className="text-center mb-6 sm:mb-9 md:mb-12">
           <div 
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest mb-2.5 shadow-sm border"
+            className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-[11px] font-black uppercase tracking-widest mb-3 shadow-xs border"
             style={{ 
-              backgroundColor: 'rgba(16, 66, 136, 0.08)', 
-              color: theme.primary || '#104288',
-              borderColor: 'rgba(16, 66, 136, 0.2)' 
+              backgroundColor: 'rgba(255, 200, 98, 0.15)', 
+              borderColor: 'rgba(243, 168, 18, 0.4)',
+              color: '#B46E00'
             }}
           >
             <span>📸</span>
@@ -62,14 +62,14 @@ export default function GallerySection({ galleryTargetRef, galleryStyle }) {
           </div>
 
           <h2 
-            className="text-xl sm:text-3xl md:text-5xl font-black tracking-tight"
+            className="font-serif text-2xl sm:text-4xl md:text-5xl font-semibold tracking-tight"
             style={{ color: theme.primary || '#104288' }}
           >
-            WeGrow <span style={{ color: theme.orange || '#f3a812' }}>Gallery</span>
+            WeGrow <span className="italic" style={{ color: theme.orange || '#f3a812' }}>Gallery</span>
           </h2>
 
           <p 
-            className="mt-2.5 text-xs sm:text-sm font-semibold max-w-2xl mx-auto leading-relaxed"
+            className="mt-2.5 text-xs sm:text-sm font-medium max-w-2xl mx-auto leading-relaxed"
             style={{ color: theme.textMuted || '#50637f' }}
           >
             A vibrant glimpse into our interactive workshops, campus activities, student achievements, 
@@ -77,15 +77,15 @@ export default function GallerySection({ galleryTargetRef, galleryStyle }) {
           </p>
 
           {/* 4 MENU CATEGORY TABS (Workshop, Activity, Student, Business) */}
-          <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mt-4 sm:mt-6">
+          <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-2.5 mt-4 sm:mt-6">
             {filterTabs.map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveFilter(tab.id)}
-                className={`px-3 sm:px-5 py-1.5 sm:py-2 rounded-full text-[11px] sm:text-sm font-extrabold flex items-center gap-1.5 sm:gap-2 transition-all duration-300 shadow-sm cursor-pointer ${
+                className={`px-3.5 sm:px-5 py-1.5 sm:py-2 rounded-full text-[11px] sm:text-xs font-bold flex items-center gap-1.5 sm:gap-2 transition-all duration-300 shadow-xs cursor-pointer ${
                   activeFilter === tab.id 
                     ? 'text-white scale-105 shadow-md' 
-                    : 'bg-white/80 hover:bg-white text-gray-700 border border-gray-200 hover:border-gray-300'
+                    : 'bg-[#FDFBF5] hover:bg-white text-gray-700 border border-[#E5DED0] hover:border-[#F3A812]'
                 }`}
                 style={{
                   backgroundColor: activeFilter === tab.id ? (theme.primary || '#104288') : undefined,
@@ -104,8 +104,8 @@ export default function GallerySection({ galleryTargetRef, galleryStyle }) {
             <div 
               key={item.id}
               onClick={() => setSelectedImage(item)}
-              className="group relative rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-1.5 cursor-pointer border bg-white"
-              style={{ borderColor: theme.cardBorder || 'rgba(16, 66, 136, 0.15)' }}
+              className="group relative rounded-3xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-500 hover:-translate-y-1.5 cursor-pointer border bg-[#FDFBF5] dark:bg-[#0c2340]"
+              style={{ borderColor: '#E5DED0' }}
             >
               {/* IMAGE WRAPPER */}
               <div className="w-full h-44 sm:h-52 overflow-hidden relative bg-gray-100">
