@@ -339,11 +339,11 @@ export default function Hero({ heroTransform, scrollToEvents, scrollToSeminars }
             {/* Mascot Image with Float Animation */}
             <div className="relative max-w-[280px] sm:max-w-[340px] lg:max-w-[420px] w-full flex flex-col items-center animate-[mascotFloat_6s_ease-in-out_infinite]">
               <img 
-                src="/mascot.png" 
+                src="/mascot.webp" 
                 alt="Grow — WeGrow B-School Mascot Squirrel" 
                 className="w-full h-auto max-h-[460px] lg:max-h-[530px] object-contain drop-shadow-[0_25px_40px_rgba(0,0,0,0.50)] hover:scale-105 transition-transform duration-500 cursor-pointer"
                 onError={(e) => {
-                  e.currentTarget.src = "/wegrow-mascot.jpeg";
+                  e.currentTarget.src = "/wegrow-mascot.webp";
                 }}
               />
 
