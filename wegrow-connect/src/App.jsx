@@ -32,6 +32,7 @@ import EventDetails from "./components/EventDetails";
 import WomensCommunity from './components/WomensCommunity';
 import StudentFoundersCommunity from './components/StudentFoundersCommunity';
 import BusinessFoundersCommunity from './components/BusinessFoundersCommunity';
+import VinayagarCompetition from './components/VinayagarCompetition';
 
 // Auth Context, Theme Context and Guard
 import { AuthProvider, ProtectedRoute } from './context/AuthContext';
@@ -76,6 +77,7 @@ import AdminWorkshops from './admin/workshops/page';
 import AdminWomenEntrepreneurs from './admin/women-entrepreneurs/page';
 import AdminStudentFounders from './admin/student-founders/page';
 import AdminBusinessFounders from './admin/business-founders/page';
+import AdminArtCompetition from './admin/art-competition/page';
 
 // Campaign Platform (Public)
 import CampaignLanding from './components/CampaignLanding';
@@ -670,6 +672,11 @@ export default function App() {
             <Route path="/events/business-founders" element={<BusinessFoundersCommunity />} />
             <Route path="/founders-orientation" element={<BusinessFoundersCommunity />} />
 
+            {/* Vinayagar Chaturthi Drawing Competition */}
+            <Route path="/vinayagar-chaturthi" element={<VinayagarCompetition />} />
+            <Route path="/drawing-competition" element={<VinayagarCompetition />} />
+            <Route path="/events/vinayagar-chaturthi" element={<VinayagarCompetition />} />
+
             {/* Student Dashboard Routes (Protected) */}
             <Route path="/student/dashboard" element={<ProtectedRoute allowedRoles={['student']}><StudentDashboard /></ProtectedRoute>} />
             <Route path="/student/courses" element={<ProtectedRoute allowedRoles={['student']}><StudentCourses /></ProtectedRoute>} />
@@ -697,6 +704,8 @@ export default function App() {
             <Route path="/admin/women-entrepreneurs" element={<ProtectedRoute allowedRoles={['admin']}><AdminWomenEntrepreneurs /></ProtectedRoute>} />
             <Route path="/admin/student-founders" element={<ProtectedRoute allowedRoles={['admin']}><AdminStudentFounders /></ProtectedRoute>} />
             <Route path="/admin/business-founders" element={<ProtectedRoute allowedRoles={['admin']}><AdminBusinessFounders /></ProtectedRoute>} />
+            <Route path="/admin/art-competition" element={<ProtectedRoute allowedRoles={['admin']}><AdminArtCompetition /></ProtectedRoute>} />
+            <Route path="/admin/drawing-competition" element={<ProtectedRoute allowedRoles={['admin']}><AdminArtCompetition /></ProtectedRoute>} />
             <Route path="/admin/workshops" element={<ProtectedRoute allowedRoles={['admin']}><AdminWorkshops /></ProtectedRoute>} />
             <Route path="/admin/events" element={<ProtectedRoute allowedRoles={['admin']}><AdminEvents /></ProtectedRoute>} />
             <Route path="/admin/gallery" element={<ProtectedRoute allowedRoles={['admin']}><AdminGalleryPage /></ProtectedRoute>} />

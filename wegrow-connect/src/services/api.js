@@ -1637,3 +1637,145 @@ export async function checkTaskSessionStatus(studentId, taskId) {
     throw error;
   }
 }
+
+// =====================================================
+// ART COMPETITION (PUBLIC & ADMIN)
+// =====================================================
+
+export async function registerArtParticipant(data) {
+  try {
+    const response = await fetch(`${API_BASE}/art-competition/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('registerArtParticipant error:', error);
+    throw error;
+  }
+}
+
+export async function fetchArtParticipants({
+  page = 1,
+  limit = 10,
+  search = '',
+  collegeName = '',
+  preferredArtMedium = '',
+  status = '',
+  attended = '',
+  startDate = '',
+  endDate = '',
+  sortBy = 'createdAt',
+  sortOrder = 'desc',
+} = {}) {
+  try {
+    const params = new URLSearchParams();
+    if (page) params.append('page', String(page));
+    if (limit) params.append('limit', String(limit));
+    if (search) params.append('search', search);
+    if (collegeName) params.append('collegeName', collegeName);
+    if (preferredArtMedium) params.append('preferredArtMedium', preferredArtMedium);
+    if (status) params.append('status', status);
+    if (attended !== '' && attended !== undefined && attended !== null) {
+      params.append('attended', String(attended));
+    }
+    if (startDate) params.append('startDate', startDate);
+    if (endDate) params.append('endDate', endDate);
+    if (sortBy) params.append('sortBy', sortBy);
+    if (sortOrder) params.append('sortOrder', sortOrder);
+
+    const response = await fetch(`${API_BASE}/art-competition?${params.toString()}`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('fetchArtParticipants error:', error);
+    throw error;
+  }
+}
+
+export async function fetchArtParticipantsStats() {
+  try {
+    const response = await fetch(`${API_BASE}/art-competition/stats`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('fetchArtParticipantsStats error:', error);
+    throw error;
+  }
+}
+
+export async function exportArtParticipantsCsv(query = {}) {
+  try {
+    const params = new URLSearchParams();
+    if (query.search) params.append('search', query.search);
+    if (query.collegeName) params.append('collegeName', query.collegeName);
+    if (query.preferredArtMedium) params.append('preferredArtMedium', query.preferredArtMedium);
+    if (query.status) params.append('status', query.status);
+    if (query.attended !== undefined && query.attended !== '') params.append('attended', String(query.attended));
+
+    const response = await fetch(`${API_BASE}/art-competition/export?${params.toString()}`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) throw new Error('Failed to export CSV');
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `art_competition_participants_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+    return true;
+  } catch (error) {
+    console.error('exportArtParticipantsCsv error:', error);
+    throw error;
+  }
+}
+
+export async function getArtParticipantById(id) {
+  try {
+    const response = await fetch(`${API_BASE}/art-competition/${id}`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('getArtParticipantById error:', error);
+    throw error;
+  }
+}
+
+export async function updateArtParticipant(id, data) {
+  try {
+    const response = await fetch(`${API_BASE}/art-competition/${id}`, {
+      method: 'PATCH',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('updateArtParticipant error:', error);
+    throw error;
+  }
+}
+
+export async function deleteArtParticipant(id) {
+  try {
+    const response = await fetch(`${API_BASE}/art-competition/${id}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('deleteArtParticipant error:', error);
+    throw error;
+  }
+}
+
