@@ -254,7 +254,7 @@ export default function BusinessFoundersCommunityV1() {
     }
   };
 
-  const phoneDisplay = '9363737332';
+  const phoneDisplay = '';
   const fullAddress = '193/1A, Ground Floor, Ayyapan Kovil Opp. Police Station Road, Sivakasi – 626 123';
 
   return (

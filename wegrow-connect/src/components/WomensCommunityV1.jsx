@@ -179,13 +179,13 @@ export default function WomensCommunityV1() {
 
           <div className="flex items-center gap-3 sm:gap-4 lg:gap-6">
             <a
-              href="tel:+919344337331"
+              href="tel:+919344037331"
               className="flex items-center gap-2 text-sm font-semibold text-[#16225E] hover:text-[#F0791E] transition-colors"
             >
               <div className="w-8 h-8 rounded-full bg-[#16225E]/10 flex items-center justify-center">
                 <Phone className="w-4 h-4 text-[#F0791E]" />
               </div>
-              <span className="hidden sm:inline font-mono font-bold">+91 9344337331</span>
+              <span className="hidden sm:inline font-mono font-bold">+91 93440 37331</span>
             </a>
             <a
               href="#register"

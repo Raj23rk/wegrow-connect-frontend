@@ -1279,9 +1279,9 @@ export default function VinayagarCompetition() {
             <img src="/wegrow-logo.webp" alt="WeGrow Skill Campus & B School" onError={(e) => { e.target.src = '/logo.webp'; }} />
           </Link>
           <div className="nav-cta">
-            <a className="nav-call" href="tel:+919363737332">
+            <a className="nav-call" href="tel:+919344037331">
               <Phone size={17} />
-              <span className="txt">93637 37332</span>
+              <span className="txt">93440 37331</span>
             </a>
             <a className="btn btn-primary" href="#register" onClick={scrollToRegister}>
               Register now
@@ -1917,7 +1917,7 @@ export default function VinayagarCompetition() {
                 WeGrow B School Campus<br />
                 193/1A, Ground Floor, Ayyappan Kovil Opp. Police Station Road, Sivakasi &ndash; 626 123
               </p>
-              <a href="tel:+919363737332">Phone: +91 93440 37331</a>
+              <a href="tel:+919344037331">Phone: +91 93440 37331</a>
               <a href="mailto:wegrowskillcampus@gmail.com">Email: wegrowskillcampus@gmail.com</a>
             </div>
 

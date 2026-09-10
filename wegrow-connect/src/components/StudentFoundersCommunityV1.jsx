@@ -72,7 +72,7 @@ export default function StudentFoundersCommunityV1() {
     },
     {
       q: 'Will I get a confirmation after registering?',
-      a: 'Yes! You will receive a confirmation via WhatsApp or a call on the number you register with. For queries, call +91 9344337331.'
+      a: 'Yes! You will receive a confirmation via WhatsApp or a call on the number you register with. For queries, call +91 9344037331.'
     },
     {
       q: 'What should I bring to the orientation?',
@@ -200,7 +200,7 @@ export default function StudentFoundersCommunityV1() {
   ];
 
   const venueAddress = 'Ayyapan Kovil Opposite, Naturals below, WeGrow B School, Sivakasi';
-  const helperPhone = '+91 9344337331';
+  const helperPhone = '+91 9344037331';
 
   return (
     <div className="min-h-screen bg-[#FBF6EE] text-[#1B2140] font-sans antialiased selection:bg-[#F0791E] selection:text-white overflow-x-hidden">
