@@ -481,10 +481,10 @@ export default function WomensCommunity() {
               <Headphones className="w-7 h-7 text-[#F0791E] mx-auto mb-2" />
               <div className="text-xs font-bold text-[#666C87] uppercase tracking-wider mb-1">Queries & Support</div>
               <a
-                href="tel:+919344337331"
+                href="tel:+919344037331"
                 className="inline-block text-base font-extrabold text-[#F0791E] hover:underline font-mono"
               >
-                +91 9344337331
+                +91 9344037331
               </a>
             </div>
           </div>
@@ -900,7 +900,7 @@ export default function WomensCommunity() {
         eventDate="Fri, 11 Sep 2026"
         eventTime="11:00 AM – 1:00 PM"
         venueAddress={fullAddress}
-        queriesPhone="+91 9344337331"
+        queriesPhone="+91 93440 37331"
         registerSectionId="register"
       />
     </div>

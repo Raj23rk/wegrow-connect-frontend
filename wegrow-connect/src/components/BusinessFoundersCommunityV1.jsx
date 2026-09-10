@@ -254,7 +254,7 @@ export default function BusinessFoundersCommunityV1() {
     }
   };
 
-  const phoneDisplay = '9344037331';
+  const phoneDisplay = '+91 9344037331';
   const fullAddress = '193/1A, Ground Floor, Ayyapan Kovil Opp. Police Station Road, Sivakasi – 626 123';
 
   return (
@@ -276,7 +276,7 @@ export default function BusinessFoundersCommunityV1() {
 
           <div className="flex items-center gap-3 sm:gap-5">
             <a
-              href={`tel:+91${phoneDisplay}`}
+              href={`tel:${phoneDisplay}`}
               className="hidden sm:flex items-center gap-2 text-sm font-bold text-[#16225E] hover:text-[#F0791E] transition"
             >
               <div className="w-8 h-8 rounded-full bg-[#16225E]/10 flex items-center justify-center text-[#16225E]">
@@ -570,7 +570,7 @@ export default function BusinessFoundersCommunityV1() {
             <div className="border border-[#E7E1D4] rounded-2xl p-6 bg-[#FBF6EE] text-center">
               <Phone className="w-8 h-8 text-[#F0791E] mx-auto mb-3" />
               <h4 className="text-xs uppercase tracking-wider text-[#666C87] font-bold mb-1">Entry &amp; Help</h4>
-              <p className="text-base font-bold text-[#16225E]">+91 {phoneDisplay}</p>
+              <p className="text-base font-bold text-[#16225E]">{phoneDisplay}</p>
             </div>
           </div>
 
@@ -1064,7 +1064,7 @@ export default function BusinessFoundersCommunityV1() {
         eventDate="Wed, 30 Sep 2026"
         eventTime="11:00 AM – 1:00 PM"
         venueAddress={fullAddress}
-        queriesPhone={`+91 ${phoneDisplay}`}
+        queriesPhone={`${phoneDisplay}`}
         registerSectionId="register"
       />
     </div>
