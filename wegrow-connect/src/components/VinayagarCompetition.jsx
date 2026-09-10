@@ -26,6 +26,310 @@ import {
 } from 'lucide-react';
 import { registerArtParticipant } from '../services/api';
 
+// Realtime Blinking Festive Toran (Bunting Flags & Glowing Scalloped String Lights)
+// Realtime Blinking Festive Toran (Bunting Flags & Glowing Scalloped String Lights)
+function FestiveToranAndLights() {
+  const flagColors = ['#E8720C', '#0E7A5B', '#C43D6B', '#C9972B', '#7A1B2B'];
+  const bulbConfigs = [
+    { fill: '#FFB800', glow: '#FFB800', anim: 1 },
+    { fill: '#FF5722', glow: '#FF5722', anim: 2 },
+    { fill: '#FFCA28', glow: '#FFCA28', anim: 3 },
+    { fill: '#E91E63', glow: '#E91E63', anim: 4 },
+    { fill: '#FF9800', glow: '#FF9800', anim: 5 },
+  ];
+
+  const totalWidth = 2000;
+  const scallopWidth = 100;
+  const numScallops = 20;
+  const flagWidth = 24;
+  const numFlags = 84;
+
+  return (
+    <div
+      className="festive-toran-container"
+      style={{
+        width: '100%',
+        background: '#FFF8EE',
+        lineHeight: 0,
+        overflow: 'hidden',
+        position: 'relative',
+        zIndex: 20,
+      }}
+    >
+      <svg
+        viewBox="0 0 2000 68"
+        preserveAspectRatio="none"
+        style={{ width: '100%', height: '64px', display: 'block' }}
+      >
+        <defs>
+          <linearGradient id="festiveTopLine" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#E8720C" />
+            <stop offset="25%" stopColor="#0E7A5B" />
+            <stop offset="50%" stopColor="#C43D6B" />
+            <stop offset="75%" stopColor="#C9972B" />
+            <stop offset="100%" stopColor="#7A1B2B" />
+          </linearGradient>
+
+          {bulbConfigs.map((cfg, idx) => (
+            <radialGradient key={idx} id={`bulbGlow${idx}`}>
+              <stop offset="0%" stopColor={cfg.glow} stopOpacity="0.9" />
+              <stop offset="35%" stopColor={cfg.glow} stopOpacity="0.5" />
+              <stop offset="100%" stopColor={cfg.glow} stopOpacity="0" />
+            </radialGradient>
+          ))}
+        </defs>
+
+        {/* Top colored stripe */}
+        <line x1="0" y1="2" x2="2000" y2="2" stroke="url(#festiveTopLine)" strokeWidth="3" />
+
+        {/* Bunting / Toran Flags (Triangles) */}
+        {Array.from({ length: numFlags }).map((_, i) => {
+          const x = i * flagWidth;
+          const color = flagColors[i % flagColors.length];
+          return (
+            <polygon
+              key={`flag-${i}`}
+              points={`${x},3 ${x + flagWidth / 2},19 ${x + flagWidth},3`}
+              fill={color}
+            />
+          );
+        })}
+
+        {/* Scalloped String Light Curves, Sockets, and Blinking Bulbs */}
+        {Array.from({ length: numScallops }).map((_, i) => {
+          const xStart = i * scallopWidth;
+          const xMid = xStart + scallopWidth / 2;
+          const xEnd = xStart + scallopWidth;
+          const bulbCfg = bulbConfigs[i % bulbConfigs.length];
+
+          return (
+            <g key={`scallop-${i}`}>
+              {/* Curved Hanging Wire */}
+              <path
+                d={`M ${xStart},19 Q ${xMid},37 ${xEnd},19`}
+                fill="none"
+                stroke="#4A3728"
+                strokeWidth="1.2"
+                opacity="0.8"
+              />
+
+              {/* Socket cap */}
+              <rect
+                x={xMid - 2.5}
+                y="37"
+                width="5"
+                height="4"
+                rx="1"
+                fill="#2E2015"
+              />
+
+              {/* Glowing Halo (Realtime Pulse) */}
+              <circle
+                cx={xMid}
+                cy="46"
+                r="15"
+                fill={`url(#bulbGlow${i % bulbConfigs.length})`}
+                className={`fairy-halo-${bulbCfg.anim}`}
+              />
+
+              {/* Fairy Light Bulb (Realtime Blink) */}
+              <ellipse
+                cx={xMid}
+                cy="46"
+                rx="5"
+                ry="7"
+                fill={bulbCfg.fill}
+                className={`fairy-light-${bulbCfg.anim}`}
+              />
+
+              {/* 3D Glass Specular Highlight */}
+              <ellipse
+                cx={xMid - 1.4}
+                cy="44"
+                rx="1.3"
+                ry="2.1"
+                fill="#FFFFFF"
+                opacity="0.75"
+              />
+            </g>
+          );
+        })}
+      </svg>
+    </div>
+  );
+}
+
+// Realtime Falling Flower Petals Shower Animation (Top to Bottom Festive Pushpa Vrushti)
+function FallingFlowerPetals() {
+  const petals = [
+    { id: 1, left: 2, delay: -1.2, duration: 8.5, type: 'marigold', size: 34, rot: 380, sway: 45 },
+    { id: 2, left: 7, delay: -4.5, duration: 10.0, type: 'rose', size: 24, rot: -320, sway: -40 },
+    { id: 3, left: 13, delay: -2.8, duration: 9.2, type: 'jasmine', size: 26, rot: 420, sway: 55 },
+    { id: 4, left: 19, delay: -7.0, duration: 11.2, type: 'marigold-petal', size: 22, rot: 280, sway: -35 },
+    { id: 5, left: 25, delay: -0.5, duration: 8.8, type: 'lotus-petal', size: 27, rot: -440, sway: 50 },
+    { id: 6, left: 31, delay: -5.3, duration: 9.6, type: 'marigold', size: 36, rot: 360, sway: -55 },
+    { id: 7, left: 37, delay: -3.2, duration: 10.4, type: 'rose', size: 25, rot: -300, sway: 40 },
+    { id: 8, left: 43, delay: -8.1, duration: 8.4, type: 'jasmine', size: 28, rot: 400, sway: -45 },
+    { id: 9, left: 49, delay: -2.1, duration: 11.5, type: 'marigold-petal', size: 23, rot: -360, sway: 35 },
+    { id: 10, left: 55, delay: -6.4, duration: 9.0, type: 'marigold', size: 32, rot: 460, sway: -60 },
+    { id: 11, left: 61, delay: -1.8, duration: 8.6, type: 'lotus-petal', size: 26, rot: -340, sway: 50 },
+    { id: 12, left: 67, delay: -5.9, duration: 10.1, type: 'rose', size: 23, rot: 390, sway: -40 },
+    { id: 13, left: 73, delay: -3.7, duration: 9.4, type: 'jasmine', size: 25, rot: -410, sway: 45 },
+    { id: 14, left: 79, delay: -7.6, duration: 10.8, type: 'marigold', size: 35, rot: 330, sway: -35 },
+    { id: 15, left: 85, delay: -0.8, duration: 8.5, type: 'marigold-petal', size: 21, rot: -380, sway: 55 },
+    { id: 16, left: 91, delay: -4.9, duration: 11.0, type: 'rose', size: 26, rot: 420, sway: -50 },
+    { id: 17, left: 96, delay: -2.4, duration: 9.8, type: 'jasmine', size: 27, rot: -350, sway: 45 },
+    { id: 18, left: 5, delay: -6.1, duration: 10.5, type: 'lotus-petal', size: 25, rot: 370, sway: -40 },
+    { id: 19, left: 16, delay: -8.5, duration: 9.5, type: 'marigold', size: 30, rot: -290, sway: 35 },
+    { id: 20, left: 28, delay: -1.5, duration: 10.6, type: 'rose', size: 24, rot: 440, sway: -55 },
+    { id: 21, left: 46, delay: -4.0, duration: 9.1, type: 'marigold-petal', size: 22, rot: -370, sway: 50 },
+    { id: 22, left: 64, delay: -7.3, duration: 11.3, type: 'jasmine', size: 26, rot: 350, sway: -45 },
+    { id: 23, left: 82, delay: -2.9, duration: 9.7, type: 'marigold', size: 33, rot: -390, sway: 40 },
+    { id: 24, left: 94, delay: -6.7, duration: 10.3, type: 'lotus-petal', size: 28, rot: 380, sway: -50 },
+  ];
+
+  const renderFlower = (type, id) => {
+    switch (type) {
+      case 'marigold':
+        // Full Marigold Blossom (Genda Phool) with layered ruffled petals
+        return (
+          <svg viewBox="0 0 40 40" width="100%" height="100%" fill="none">
+            <defs>
+              <radialGradient id={`mgGrad-${id}`} cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stopColor="#FFF176" />
+                <stop offset="35%" stopColor="#FFA726" />
+                <stop offset="75%" stopColor="#FB8C00" />
+                <stop offset="100%" stopColor="#E65100" />
+              </radialGradient>
+            </defs>
+            <g fill={`url(#mgGrad-${id})`} filter="drop-shadow(0 3px 6px rgba(230,81,0,0.38))">
+              {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((deg) => (
+                <ellipse key={deg} cx="20" cy="8.5" rx="5" ry="7.5" transform={`rotate(${deg} 20 20)`} />
+              ))}
+              {[15, 45, 75, 105, 135, 165, 195, 225, 255, 285, 315, 345].map((deg) => (
+                <ellipse key={deg} cx="20" cy="11.5" rx="4.2" ry="6" fill="#FFA000" transform={`rotate(${deg} 20 20)`} />
+              ))}
+              <circle cx="20" cy="20" r="5.5" fill="#E65100" />
+              <circle cx="20" cy="20" r="3.2" fill="#FFE082" />
+            </g>
+          </svg>
+        );
+      case 'jasmine':
+        // Auspicious White Jasmine (Malligai) 5-petal star blossom
+        return (
+          <svg viewBox="0 0 32 32" width="100%" height="100%" fill="none">
+            <defs>
+              <linearGradient id={`jasGrad-${id}`} x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#FFFFFF" />
+                <stop offset="70%" stopColor="#FEF9C3" />
+                <stop offset="100%" stopColor="#FDE047" />
+              </linearGradient>
+            </defs>
+            <g filter="drop-shadow(0 2px 5px rgba(202,138,4,0.3))">
+              {[0, 72, 144, 216, 288].map((deg) => (
+                <path
+                  key={deg}
+                  d="M16 16 C13 10, 12 4, 16 2 C20 4, 19 10, 16 16 Z"
+                  fill={`url(#jasGrad-${id})`}
+                  transform={`rotate(${deg} 16 16)`}
+                />
+              ))}
+              <circle cx="16" cy="16" r="3.2" fill="#FACC15" />
+              <circle cx="16" cy="16" r="1.6" fill="#65A30D" />
+            </g>
+          </svg>
+        );
+      case 'rose':
+        // Velvet Red Rose Petal
+        return (
+          <svg viewBox="0 0 28 30" width="100%" height="100%" fill="none">
+            <defs>
+              <linearGradient id={`roseGrad-${id}`} x1="15%" y1="10%" x2="85%" y2="90%">
+                <stop offset="0%" stopColor="#FB7185" />
+                <stop offset="50%" stopColor="#E11D48" />
+                <stop offset="100%" stopColor="#881337" />
+              </linearGradient>
+            </defs>
+            <path
+              d="M14 2 C21 2, 26 8, 25 18 C24 25, 17 28, 14 28 C11 28, 4 25, 3 18 C2 8, 7 2, 14 2 Z"
+              fill={`url(#roseGrad-${id})`}
+              filter="drop-shadow(0 3px 6px rgba(136,19,55,0.38))"
+            />
+          </svg>
+        );
+      case 'lotus-petal':
+        // Auspicious Pink Lotus Petal
+        return (
+          <svg viewBox="0 0 26 32" width="100%" height="100%" fill="none">
+            <defs>
+              <linearGradient id={`lotusGrad-${id}`} x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#FBCFE8" />
+                <stop offset="55%" stopColor="#F43F5E" />
+                <stop offset="100%" stopColor="#9F1239" />
+              </linearGradient>
+            </defs>
+            <path
+              d="M13 2 C18 6, 23 15, 21 24 C19 29, 15 31, 13 31 C11 31, 7 29, 5 24 C3 15, 8 6, 13 2 Z"
+              fill={`url(#lotusGrad-${id})`}
+              filter="drop-shadow(0 3px 6px rgba(225,29,72,0.35))"
+            />
+          </svg>
+        );
+      case 'marigold-petal':
+      default:
+        // Single Marigold Petal
+        return (
+          <svg viewBox="0 0 24 28" width="100%" height="100%" fill="none">
+            <defs>
+              <linearGradient id={`mgpGrad-${id}`} x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#FFF59D" />
+                <stop offset="40%" stopColor="#FFB300" />
+                <stop offset="100%" stopColor="#E65100" />
+              </linearGradient>
+            </defs>
+            <path
+              d="M12 2 C17 2, 21 8, 20 18 C19 24, 15 27, 12 27 C9 27, 5 24, 4 18 C3 8, 7 2, 12 2 Z"
+              fill={`url(#mgpGrad-${id})`}
+              filter="drop-shadow(0 2px 5px rgba(230,81,0,0.32))"
+            />
+          </svg>
+        );
+    }
+  };
+
+  return (
+    <div
+      className="falling-flowers-container"
+      aria-hidden="true"
+      style={{
+        position: 'absolute',
+        inset: 0,
+        pointerEvents: 'none',
+        overflow: 'hidden',
+        zIndex: 6,
+      }}
+    >
+      {petals.map((p) => (
+        <span
+          key={p.id}
+          className="flower-petal"
+          style={{
+            left: `${p.left}%`,
+            width: `${p.size}px`,
+            height: `${p.size}px`,
+            animationDelay: `${p.delay}s`,
+            animationDuration: `${p.duration}s`,
+            '--sway': `${p.sway}px`,
+            '--rot': `${p.rot}deg`,
+          }}
+        >
+          {renderFlower(p.type, p.id)}
+        </span>
+      ))}
+    </div>
+  );
+}
+
 export default function VinayagarCompetition() {
   // 1. Live Countdown to Event: 14 September 2026, 11:00 AM IST
   const eventDate = new Date('2026-09-14T11:00:00+05:30').getTime();
@@ -282,16 +586,60 @@ export default function VinayagarCompetition() {
           .vinayagar-page .floating-badge { right: 14px; bottom: 14px; padding: 10px 14px; font-size: 12.5px; }
         }
 
-        /* ---------- String lights ---------- */
-        .vinayagar-page .string-lights { width: 100%; line-height: 0; background: var(--cream); }
-        .vinayagar-page .string-lights svg { width: 100%; height: 44px; display: block; }
-
-        /* ---------- Bunting / toran ---------- */
-        .vinayagar-page .bunting { display: flex; justify-content: center; gap: 4px; overflow: hidden; padding: 10px 0 0; background: var(--cream); }
-        .vinayagar-page .bunting .flag {
-          width: 0; height: 0; border-left: 13px solid transparent; border-right: 13px solid transparent;
-          border-top: 20px solid var(--c); margin-top: -2px;
+        /* ---------- Realtime Blinking Fairy Lights & Halos ---------- */
+        @keyframes fairyBlink1 {
+          0%, 100% { opacity: 1; filter: drop-shadow(0 0 10px rgba(255, 184, 0, 0.95)) brightness(1.3); }
+          50% { opacity: 0.28; filter: drop-shadow(0 0 2px rgba(255, 184, 0, 0.2)) brightness(0.7); }
         }
+        @keyframes fairyBlink2 {
+          0%, 100% { opacity: 0.25; filter: drop-shadow(0 0 2px rgba(255, 87, 34, 0.2)) brightness(0.65); }
+          50% { opacity: 1; filter: drop-shadow(0 0 11px rgba(255, 87, 34, 0.95)) brightness(1.3); }
+        }
+        @keyframes fairyBlink3 {
+          0%, 65%, 100% { opacity: 0.95; filter: drop-shadow(0 0 10px rgba(255, 202, 40, 0.95)) brightness(1.28); }
+          30% { opacity: 0.22; filter: drop-shadow(0 0 1px rgba(255, 202, 40, 0.15)) brightness(0.65); }
+        }
+        @keyframes fairyBlink4 {
+          0%, 100% { opacity: 0.3; filter: drop-shadow(0 0 2px rgba(233, 30, 99, 0.2)) brightness(0.7); }
+          45% { opacity: 1; filter: drop-shadow(0 0 11px rgba(233, 30, 99, 0.95)) brightness(1.35); }
+        }
+        @keyframes fairyBlink5 {
+          0%, 100% { opacity: 1; filter: drop-shadow(0 0 10px rgba(255, 152, 0, 0.95)) brightness(1.28); }
+          75% { opacity: 0.25; filter: drop-shadow(0 0 2px rgba(255, 152, 0, 0.2)) brightness(0.65); }
+        }
+
+        .vinayagar-page .fairy-light-1 { animation: fairyBlink1 1.7s ease-in-out infinite; }
+        .vinayagar-page .fairy-light-2 { animation: fairyBlink2 1.4s ease-in-out infinite; }
+        .vinayagar-page .fairy-light-3 { animation: fairyBlink3 2.0s ease-in-out infinite; }
+        .vinayagar-page .fairy-light-4 { animation: fairyBlink4 1.5s ease-in-out infinite; }
+        .vinayagar-page .fairy-light-5 { animation: fairyBlink5 2.2s ease-in-out infinite; }
+
+        @keyframes haloGlow1 {
+          0%, 100% { opacity: 0.9; transform: scale(1.05); }
+          50% { opacity: 0.12; transform: scale(0.5); }
+        }
+        @keyframes haloGlow2 {
+          0%, 100% { opacity: 0.12; transform: scale(0.5); }
+          50% { opacity: 0.95; transform: scale(1.08); }
+        }
+        @keyframes haloGlow3 {
+          0%, 65%, 100% { opacity: 0.88; transform: scale(1.02); }
+          30% { opacity: 0.1; transform: scale(0.48); }
+        }
+        @keyframes haloGlow4 {
+          0%, 100% { opacity: 0.15; transform: scale(0.5); }
+          45% { opacity: 0.95; transform: scale(1.08); }
+        }
+        @keyframes haloGlow5 {
+          0%, 100% { opacity: 0.9; transform: scale(1.05); }
+          75% { opacity: 0.15; transform: scale(0.5); }
+        }
+
+        .vinayagar-page .fairy-halo-1 { animation: haloGlow1 1.7s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
+        .vinayagar-page .fairy-halo-2 { animation: haloGlow2 1.4s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
+        .vinayagar-page .fairy-halo-3 { animation: haloGlow3 2.0s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
+        .vinayagar-page .fairy-halo-4 { animation: haloGlow4 1.5s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
+        .vinayagar-page .fairy-halo-5 { animation: haloGlow5 2.2s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
 
         /* ---------- Rangoli dot pattern ---------- */
         .vinayagar-page .rangoli-dots {
@@ -423,13 +771,284 @@ export default function VinayagarCompetition() {
         .vinayagar-page .hero-meta svg { width: 17px; height: 17px; flex: none; color: var(--saffron); }
         .vinayagar-page .hero-visual { position: relative; text-align: center; display: flex; align-items: center; justify-content: center; width: 100%; }
         .vinayagar-page .hero-duo-wrap { position: relative; display: flex; align-items: center; justify-content: center; width: 100%; max-width: 480px; }
-        .vinayagar-page .hero-visual .duo-img {
-          width: 100%; max-width: 470px; height: auto; object-fit: contain;
-          filter: drop-shadow(0 12px 24px rgba(122, 27, 43, 0.10));
-          transition: transform .25s ease;
+        /* ---------- Mascot & Vinayagar Duo Divine Animation ---------- */
+        @keyframes floatDuoMascot {
+          0%, 100% {
+            transform: translateY(0px) rotate(0deg);
+          }
+          50% {
+            transform: translateY(-13px) rotate(1deg);
+          }
         }
-        .vinayagar-page .hero-visual .duo-img:hover {
-          transform: translateY(-4px);
+
+        @keyframes divineAuraGlow {
+          0%, 100% {
+            filter: drop-shadow(0 14px 28px rgba(122, 27, 43, 0.16))
+                    drop-shadow(0 0 20px rgba(245, 158, 11, 0.35));
+          }
+          50% {
+            filter: drop-shadow(0 20px 36px rgba(122, 27, 43, 0.26))
+                    drop-shadow(0 0 45px rgba(245, 158, 11, 0.65))
+                    drop-shadow(0 0 70px rgba(234, 88, 12, 0.3));
+          }
+        }
+        /* ---------- Mascot Drawing Lord Vinayagar Animation ---------- */
+        @keyframes floatMascotDrawing {
+          0%, 100% {
+            transform: translateY(0px) rotate(0deg);
+          }
+          50% {
+            transform: translateY(-9px) rotate(0.6deg);
+          }
+        }
+
+        @keyframes divineCanvasGlow {
+          0%, 100% {
+            box-shadow: 0 16px 36px -8px rgba(122, 27, 43, 0.22),
+                        0 0 25px rgba(245, 158, 11, 0.25),
+                        inset 0 0 18px rgba(254, 240, 138, 0.12);
+          }
+          50% {
+            box-shadow: 0 22px 48px -6px rgba(122, 27, 43, 0.32),
+                        0 0 45px rgba(245, 158, 11, 0.55),
+                        0 0 75px rgba(234, 88, 12, 0.28),
+                        inset 0 0 30px rgba(254, 240, 138, 0.3);
+          }
+        }
+
+        .vinayagar-page .mascot-drawing-card {
+          position: relative;
+          z-index: 2;
+          width: 100%;
+          max-width: 485px;
+          border-radius: 24px;
+          overflow: hidden;
+          border: 3px solid #F59E0B;
+          background: #FFFBF5;
+          animation: floatMascotDrawing 4.8s ease-in-out infinite, divineCanvasGlow 3.6s ease-in-out infinite;
+          transition: transform .3s ease, box-shadow .3s ease;
+          will-change: transform, box-shadow;
+        }
+        .vinayagar-page .mascot-drawing-card:hover {
+          transform: translateY(-6px) scale(1.02);
+        }
+
+        .vinayagar-page .mascot-drawing-img {
+          width: 100%;
+          height: auto;
+          display: block;
+          border-radius: 21px;
+        }
+
+        /* Realtime Drawing Brush & Canvas Stroke Animation */
+        .vinayagar-page .drawing-stroke-overlay {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          z-index: 3;
+        }
+
+        @keyframes brushDrawingMotion {
+          0% {
+            transform: translate3d(0, 0, 0) rotate(-12deg);
+            opacity: 0.95;
+          }
+          25% {
+            transform: translate3d(14px, -18px, 0) rotate(14deg) scale(1.08);
+            opacity: 1;
+          }
+          50% {
+            transform: translate3d(-8px, 12px, 0) rotate(-8deg) scale(0.95);
+            opacity: 0.9;
+          }
+          75% {
+            transform: translate3d(18px, 6px, 0) rotate(16deg) scale(1.05);
+            opacity: 1;
+          }
+          100% {
+            transform: translate3d(0, 0, 0) rotate(-12deg);
+            opacity: 0.95;
+          }
+        }
+
+        .vinayagar-page .active-brush-tip {
+          position: absolute;
+          top: 48%;
+          left: 36%;
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          background: radial-gradient(circle, #FFE082 0%, #FF9800 60%, transparent 80%);
+          filter: drop-shadow(0 0 10px #FF9800) drop-shadow(0 0 18px #F59E0B);
+          animation: brushDrawingMotion 2.8s ease-in-out infinite;
+          pointer-events: none;
+        }
+        .vinayagar-page .active-brush-tip::after {
+          content: '✨';
+          font-size: 16px;
+          position: absolute;
+          top: -10px;
+          right: -8px;
+          animation: sparkleFloat 1.8s ease-in-out infinite;
+        }
+
+        @keyframes canvasShimmer {
+          0% {
+            transform: translateX(-120%) rotate(30deg);
+            opacity: 0;
+          }
+          30% {
+            opacity: 0.6;
+          }
+          60% {
+            transform: translateX(220%) rotate(30deg);
+            opacity: 0;
+          }
+          100% {
+            transform: translateX(220%) rotate(30deg);
+            opacity: 0;
+          }
+        }
+
+        .vinayagar-page .canvas-shimmer {
+          position: absolute;
+          top: 15%;
+          left: 10%;
+          width: 36%;
+          height: 62%;
+          background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.45) 50%, transparent 100%);
+          pointer-events: none;
+          animation: canvasShimmer 4.2s ease-in-out infinite;
+        }
+
+        /* Mascot Drawing Live Badge */
+        .vinayagar-page .mascot-drawing-badge {
+          position: absolute;
+          bottom: 12px;
+          left: 50%;
+          transform: translateX(-50%);
+          display: inline-flex;
+          align-items: center;
+          gap: 7px;
+          background: rgba(43, 27, 18, 0.88);
+          backdrop-filter: blur(8px);
+          color: #FFF7ED;
+          padding: 6px 14px;
+          border-radius: 100px;
+          font-size: 12.5px;
+          font-weight: 700;
+          border: 1px solid rgba(245, 158, 11, 0.5);
+          box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+          white-space: nowrap;
+          z-index: 4;
+        }
+        .vinayagar-page .mascot-drawing-badge .live-dot {
+          width: 7px;
+          height: 7px;
+          border-radius: 50%;
+          background: #22C55E;
+          box-shadow: 0 0 8px #22C55E;
+          animation: pulseBadge 1.6s infinite;
+        }
+
+        /* Divine Halo Backdrop Behind Mascot & Lord Vinayagar */
+        .vinayagar-page .duo-divine-aura {
+          position: absolute;
+          width: 460px;
+          height: 460px;
+          border-radius: 50%;
+          background: radial-gradient(circle, rgba(254, 240, 138, 0.45) 0%, rgba(251, 146, 60, 0.25) 45%, rgba(244, 63, 94, 0.08) 70%, transparent 80%);
+          z-index: 1;
+          pointer-events: none;
+          animation: auraSpinPulse 9s ease-in-out infinite alternate;
+        }
+
+        @keyframes auraSpinPulse {
+          0% {
+            transform: scale(0.92) rotate(0deg);
+            opacity: 0.6;
+          }
+          100% {
+            transform: scale(1.1) rotate(180deg);
+            opacity: 1;
+          }
+        }
+
+        /* ---------- Flower Petals Animation (Top to Bottom Flow) ---------- */
+        @keyframes petalFall {
+          0% {
+            transform: translate3d(0, -45px, 0) rotate(0deg) rotateY(0deg) scale(0.8);
+            opacity: 0;
+          }
+          6% {
+            opacity: 0.98;
+            transform: translate3d(calc(var(--sway) * 0.2), 70px, 0) rotate(40deg) rotateY(45deg) scale(1);
+          }
+          50% {
+            transform: translate3d(var(--sway), 50vh, 0) rotate(190deg) rotateY(180deg) scale(1.04);
+            opacity: 0.95;
+          }
+          85% {
+            opacity: 0.92;
+          }
+          100% {
+            transform: translate3d(calc(var(--sway) * 0.4), calc(100vh + 60px), 0) rotate(var(--rot)) rotateY(360deg) scale(0.85);
+            opacity: 0;
+          }
+        }
+
+        .vinayagar-page .flower-petal {
+          position: absolute;
+          top: -45px;
+          display: block;
+          pointer-events: none;
+          animation-name: petalFall;
+          animation-timing-function: cubic-bezier(0.36, 0.45, 0.64, 0.95);
+          animation-iteration-count: infinite;
+          will-change: transform, opacity;
+          z-index: 6;
+          user-select: none;
+        }
+        .vinayagar-page .flower-petal svg {
+          display: block;
+          width: 100%;
+          height: 100%;
+          overflow: visible;
+        }
+
+        /* 1. Marigold Orange Petal */
+        .vinayagar-page .petal-marigold-orange {
+          background: radial-gradient(circle at 35% 30%, #FFA726 0%, #F57C00 65%, #E65100 100%);
+          border-radius: 60% 40% 70% 30% / 60% 30% 70% 40%;
+          box-shadow: 0 4px 10px rgba(230, 81, 0, 0.35);
+        }
+
+        /* 2. Marigold Yellow Petal */
+        .vinayagar-page .petal-marigold-yellow {
+          background: radial-gradient(circle at 35% 30%, #FFF176 0%, #FDD835 60%, #F57F17 100%);
+          border-radius: 70% 30% 60% 40% / 50% 60% 40% 50%;
+          box-shadow: 0 4px 10px rgba(245, 127, 23, 0.3);
+        }
+
+        /* 3. Red Rose Petal */
+        .vinayagar-page .petal-rose-red {
+          background: radial-gradient(circle at 35% 30%, #FB7185 0%, #E11D48 60%, #9F1239 100%);
+          border-radius: 50% 50% 60% 60% / 60% 60% 70% 70%;
+          box-shadow: 0 4px 12px rgba(159, 18, 57, 0.35);
+        }
+
+        /* 4. White/Cream Jasmine Petal */
+        .vinayagar-page .petal-jasmine-white {
+          background: radial-gradient(circle at 35% 30%, #FFFFFF 0%, #FFFBEB 70%, #FEF08A 100%);
+          border-radius: 50% 50% 70% 70% / 70% 70% 50% 50%;
+          box-shadow: 0 3px 8px rgba(202, 138, 4, 0.25);
+        }
+
+        /* 5. Whole Marigold Blossom */
+        .vinayagar-page .petal-marigold-blossom {
+          background: radial-gradient(circle at 50% 50%, #FFE082 0%, #FFB300 45%, #FF6F00 85%, #E65100 100%);
+          border-radius: 50%;
+          box-shadow: 0 6px 14px rgba(230, 81, 0, 0.4), inset 0 0 4px rgba(255, 255, 255, 0.6);
         }
 
         @media(max-width: 920px) {
@@ -671,8 +1290,14 @@ export default function VinayagarCompetition() {
         </div>
       </nav>
 
-      {/* Hero Section */}
+      {/* Realtime Blinking Festive Toran & Fairy String Lights */}
+      <FestiveToranAndLights />
+
+      {/* Hero Section with Falling Flower Petals Shower */}
       <header className="hero" id="top">
+        {/* Realtime Falling Flower Petals Animation */}
+        <FallingFlowerPetals />
+
         <div className="hero-blob" aria-hidden="true" />
         <div className="hero-blob2" aria-hidden="true" />
         <div className="hero-blob3" aria-hidden="true" />
@@ -708,12 +1333,31 @@ export default function VinayagarCompetition() {
 
           <div className="hero-visual">
             <div className="hero-duo-wrap">
-              <img
-                className="duo-img"
-                src="/events/vinayagar-duo-full.png"
-                alt="WeGrow Mascot and Lord Vinayagar say hi"
-                onError={(e) => { e.target.src = '/events/vinayagar.jpg'; }}
-              />
+              {/* Divine Aura Backdrop */}
+              <div className="duo-divine-aura" aria-hidden="true" />
+
+              {/* Animated Mascot Drawing Card */}
+              <div className="mascot-drawing-card">
+                <img
+                  className="mascot-drawing-img"
+                  src="/events/mascot-drawing-vinayagar.jpg"
+                  alt="WeGrow Squirrel Mascot actively drawing and painting Lord Vinayagar"
+                  onError={(e) => { e.target.src = '/events/vinayagar-duo-full.png'; }}
+                />
+
+                {/* Live Realtime Drawing Brush & Canvas Shimmer Effect */}
+                <div className="drawing-stroke-overlay" aria-hidden="true">
+                  <div className="canvas-shimmer" />
+                  <div className="active-brush-tip" title="Mascot Drawing Strokes" />
+                </div>
+
+                {/* Festive Drawing Badge */}
+                <div className="mascot-drawing-badge">
+                  <span className="live-dot" />
+                  <span>Mascot Drawing Lord Vinayagar</span>
+                  <span>🎨✨</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>

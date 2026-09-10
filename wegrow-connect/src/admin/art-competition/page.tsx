@@ -80,12 +80,15 @@ export default function AdminArtCompetition() {
     try {
       setStatsLoading(true);
       const res = await fetchArtParticipantsStats();
-      if (res?.stats) {
-        setStats(res.stats);
-      } else if (res?.data?.stats) {
-        setStats(res.data.stats);
-      } else if (res?.data) {
-        setStats(res.data);
+      const statsData =
+        res?.data?.stats ||
+        res?.data?.data ||
+        (res?.data && typeof res.data === 'object' && !Array.isArray(res.data) ? res.data : null) ||
+        res?.stats ||
+        res?.summary ||
+        res;
+      if (statsData) {
+        setStats(statsData);
       }
     } catch (err) {
       console.error('Failed to load art competition stats:', err);
@@ -109,16 +112,40 @@ export default function AdminArtCompetition() {
       });
 
       if (res) {
-        const items = res?.data || [];
-        setData(Array.isArray(items) ? items : []);
-
-        if (res.pagination) {
-          setTotalCount(res.pagination.total || 0);
-          setTotalPages(res.pagination.totalPages || 1);
+        let items: any[] = [];
+        if (Array.isArray(res?.data?.data)) {
+          items = res.data.data;
+        } else if (Array.isArray(res?.data)) {
+          items = res.data;
+        } else if (Array.isArray(res?.data?.participants)) {
+          items = res.data.participants;
+        } else if (Array.isArray(res?.data?.registrations)) {
+          items = res.data.registrations;
+        } else if (Array.isArray(res?.participants)) {
+          items = res.participants;
+        } else if (Array.isArray(res)) {
+          items = res;
+        } else if (res?.data && typeof res.data === 'object' && Array.isArray(res.data.items)) {
+          items = res.data.items;
         }
 
-        if (res.summary && !stats) {
-          setStats((prev: any) => ({ ...prev, ...res.summary }));
+        setData(items);
+
+        const pagination = res?.data?.pagination || res?.pagination;
+        if (pagination) {
+          setTotalCount(pagination.total ?? pagination.totalCount ?? items.length);
+          setTotalPages(pagination.totalPages ?? pagination.pages ?? 1);
+        } else if (res?.data?.total !== undefined) {
+          setTotalCount(res.data.total);
+          setTotalPages(res.data.totalPages || 1);
+        } else {
+          setTotalCount(items.length);
+          setTotalPages(1);
+        }
+
+        const summary = res?.data?.summary || res?.data?.stats || res?.summary || res?.stats;
+        if (summary) {
+          setStats((prev: any) => ({ ...prev, ...summary }));
         }
       }
     } catch (err: any) {
@@ -127,7 +154,7 @@ export default function AdminArtCompetition() {
     } finally {
       setLoading(false);
     }
-  }, [page, limit, search, collegeName, preferredArtMedium, status, attended, stats]);
+  }, [page, limit, search, collegeName, preferredArtMedium, status, attended]);
 
   useEffect(() => {
     loadStats();
@@ -158,10 +185,10 @@ export default function AdminArtCompetition() {
       const newAttended = !item.attended;
       const res = await updateArtParticipant(item._id, {
         attended: newAttended,
-        status: newAttended ? 'attended' : 'confirmed',
+        status: newAttended ? 'ATTENDED' : 'CONFIRMED',
       });
 
-      if (res?.success || res?.data) {
+      if (res?.success || res?.data || res?.message) {
         toast.success(
           newAttended
             ? `Marked ${item.fullName} as Present! 🎉`
@@ -170,7 +197,7 @@ export default function AdminArtCompetition() {
         setData((prev) =>
           prev.map((p) =>
             p._id === item._id
-              ? { ...p, attended: newAttended, status: newAttended ? 'attended' : 'confirmed' }
+              ? { ...p, attended: newAttended, status: newAttended ? 'ATTENDED' : 'CONFIRMED' }
               : p
           )
         );
@@ -210,7 +237,7 @@ export default function AdminArtCompetition() {
       collegeName: item.collegeName || '',
       degreeAndYear: item.degreeAndYear || '',
       preferredArtMedium: item.preferredArtMedium || 'Color Pencils & Oil Pastels',
-      status: item.status || 'confirmed',
+      status: (item.status || 'CONFIRMED').toUpperCase(),
       attended: Boolean(item.attended),
       notes: item.notes || '',
     });
@@ -224,7 +251,7 @@ export default function AdminArtCompetition() {
     try {
       setIsUpdating(true);
       const res = await updateArtParticipant(editingItem._id, editForm);
-      if (res?.success || res?.data) {
+      if (res?.success || res?.data || res?.message) {
         toast.success('Participant details updated successfully!');
         setEditingItem(null);
         loadList();
@@ -246,7 +273,7 @@ export default function AdminArtCompetition() {
     try {
       setIsDeleting(true);
       const res = await deleteArtParticipant(deletingId);
-      if (res?.success) {
+      if (res?.success || res?.data || res?.message) {
         toast.success('Participant removed successfully');
         setDeletingId(null);
         loadList();
@@ -277,7 +304,7 @@ export default function AdminArtCompetition() {
                 <h1 className="text-xl font-black text-gray-900 tracking-tight flex items-center gap-2">
                   Vinayagar Chaturthi Art Competition
                   <span className="px-2.5 py-0.5 text-xs font-extrabold bg-orange-100 text-orange-800 rounded-full">
-                    {totalCount} registered
+                    {totalCount || stats?.total || stats?.totalParticipants || data.length || 0} registered
                   </span>
                 </h1>
                 <p className="text-xs text-gray-500 font-medium">
@@ -409,9 +436,9 @@ export default function AdminArtCompetition() {
                   className="w-full px-3 py-2.5 bg-gray-50/80 border border-gray-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-gray-700"
                 >
                   <option value="">All Statuses</option>
-                  <option value="confirmed">Confirmed</option>
-                  <option value="attended">Attended</option>
-                  <option value="cancelled">Cancelled</option>
+                  <option value="CONFIRMED">Confirmed</option>
+                  <option value="ATTENDED">Attended</option>
+                  <option value="CANCELLED">Cancelled</option>
                 </select>
               </div>
 
@@ -444,24 +471,24 @@ export default function AdminArtCompetition() {
           </div>
 
           {/* Data Table */}
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
+            <div className="w-full overflow-hidden">
+              <table className="w-full text-left text-xs table-fixed border-collapse">
                 <thead className="bg-gray-50 text-gray-500 font-bold uppercase tracking-wider border-b border-gray-200 text-[11px]">
                   <tr>
-                    <th className="px-5 py-3.5">Reg ID</th>
-                    <th className="px-5 py-3.5">Participant</th>
-                    <th className="px-5 py-3.5">College &amp; Degree</th>
-                    <th className="px-5 py-3.5">Art Medium</th>
-                    <th className="px-5 py-3.5">Attendance</th>
-                    <th className="px-5 py-3.5">Status</th>
-                    <th className="px-5 py-3.5 text-right">Actions</th>
+                    <th className="w-[12%] px-3 py-3.5">Reg ID</th>
+                    <th className="w-[22%] px-3 py-3.5">Participant</th>
+                    <th className="w-[18%] px-3 py-3.5">College &amp; Degree</th>
+                    <th className="w-[17%] px-3 py-3.5">Art Medium</th>
+                    <th className="w-[12%] px-3 py-3.5 text-center">Attendance</th>
+                    <th className="w-[9%] px-2 py-3.5 text-center">Status</th>
+                    <th className="w-[10%] px-3 py-3.5 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 font-medium text-gray-700">
                   {loading ? (
                     <tr>
-                      <td colSpan={7} className="px-5 py-12 text-center text-gray-400">
+                      <td colSpan={7} className="px-4 py-12 text-center text-gray-400">
                         <div className="inline-flex items-center gap-2">
                           <RefreshCw size={16} className="animate-spin text-orange-500" />
                           Loading art competition participants...
@@ -470,7 +497,7 @@ export default function AdminArtCompetition() {
                     </tr>
                   ) : data.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="px-5 py-12 text-center text-gray-400">
+                      <td colSpan={7} className="px-4 py-12 text-center text-gray-400">
                         <div className="max-w-xs mx-auto space-y-2">
                           <Palette size={32} className="mx-auto text-gray-300" />
                           <p className="font-semibold text-gray-600">No participants found</p>
@@ -484,26 +511,26 @@ export default function AdminArtCompetition() {
                     data.map((item) => (
                       <tr key={item._id} className="hover:bg-gray-50/70 transition-colors">
                         {/* Reg ID */}
-                        <td className="px-5 py-4 whitespace-nowrap">
-                          <span className="font-mono font-extrabold text-orange-700 bg-orange-50 px-2.5 py-1 rounded-md border border-orange-200 text-[11px]">
+                        <td className="px-3 py-3.5 whitespace-nowrap">
+                          <span className="font-mono font-extrabold text-orange-700 bg-orange-50 px-2 py-1 rounded-md border border-orange-200 text-[10px] sm:text-[11px] inline-block tracking-tight">
                             {item.registrationNumber || 'N/A'}
                           </span>
                         </td>
 
                         {/* Participant info */}
-                        <td className="px-5 py-4">
-                          <div className="font-bold text-gray-900 text-sm leading-tight">
+                        <td className="px-3 py-3.5">
+                          <div className="font-bold text-gray-900 text-xs truncate" title={item.fullName}>
                             {item.fullName}
                           </div>
-                          <div className="flex items-center gap-2 text-[11px] text-gray-500 mt-1">
+                          <div className="flex items-center gap-1.5 text-[11px] text-gray-500 mt-0.5 truncate">
                             <a
                               href={`tel:${item.phone}`}
-                              className="hover:text-orange-600 hover:underline flex items-center gap-1 font-mono"
+                              className="hover:text-orange-600 hover:underline font-mono shrink-0"
                             >
-                              <Phone size={11} /> {item.phone}
+                              {item.phone}
                             </a>
                             {item.email && (
-                              <span className="truncate max-w-[150px] text-gray-400" title={item.email}>
+                              <span className="truncate text-gray-400" title={item.email}>
                                 &bull; {item.email}
                               </span>
                             )}
@@ -511,27 +538,27 @@ export default function AdminArtCompetition() {
                         </td>
 
                         {/* College & Degree */}
-                        <td className="px-5 py-4 max-w-xs">
-                          <div className="font-semibold text-gray-900 truncate" title={item.collegeName}>
+                        <td className="px-3 py-3.5">
+                          <div className="font-semibold text-gray-900 text-xs truncate" title={item.collegeName}>
                             {item.collegeName || '—'}
                           </div>
-                          <div className="text-[11px] text-gray-500 truncate" title={item.degreeAndYear}>
+                          <div className="text-[11px] text-gray-500 truncate mt-0.5" title={item.degreeAndYear}>
                             {item.degreeAndYear || '—'}
                           </div>
                         </td>
 
                         {/* Art Medium */}
-                        <td className="px-5 py-4 whitespace-nowrap">
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-50 text-amber-800 rounded-full font-semibold text-[11px] border border-amber-200/60">
-                            🎨 {item.preferredArtMedium || 'Any Medium'}
+                        <td className="px-3 py-3.5">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-50 text-amber-800 rounded-full font-semibold text-[10px] sm:text-[11px] border border-amber-200/60 max-w-full truncate" title={item.preferredArtMedium}>
+                            🎨 <span className="truncate">{item.preferredArtMedium || 'Any Medium'}</span>
                           </span>
                         </td>
 
                         {/* Attendance Toggle */}
-                        <td className="px-5 py-4 whitespace-nowrap">
+                        <td className="px-3 py-3.5 text-center whitespace-nowrap">
                           <button
                             onClick={() => handleToggleAttendance(item)}
-                            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                            className={`inline-flex items-center justify-center gap-1 px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-bold transition-all cursor-pointer ${
                               item.attended
                                 ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200'
                                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -540,54 +567,61 @@ export default function AdminArtCompetition() {
                           >
                             {item.attended ? (
                               <>
-                                <Check size={13} className="stroke-[3]" /> Present
+                                <Check size={12} className="stroke-[3]" /> Present
                               </>
                             ) : (
                               <>
-                                <Clock size={13} /> Mark Present
+                                <Clock size={12} /> Mark Present
                               </>
                             )}
                           </button>
                         </td>
 
                         {/* Status */}
-                        <td className="px-5 py-4 whitespace-nowrap">
-                          <span
-                            className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wide ${
-                              item.status === 'attended'
-                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                                : item.status === 'cancelled'
-                                ? 'bg-rose-50 text-rose-700 border border-rose-200'
-                                : 'bg-blue-50 text-blue-700 border border-blue-200'
-                            }`}
-                          >
-                            {item.status || 'confirmed'}
-                          </span>
+                        <td className="px-2 py-3.5 text-center whitespace-nowrap">
+                          {(() => {
+                            const st = (item.status || 'CONFIRMED').toUpperCase();
+                            return (
+                              <span
+                                className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide inline-block ${
+                                  st === 'ATTENDED'
+                                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                    : st === 'CANCELLED'
+                                    ? 'bg-rose-50 text-rose-700 border border-rose-200'
+                                    : 'bg-blue-50 text-blue-700 border border-blue-200'
+                                }`}
+                              >
+                                {st}
+                              </span>
+                            );
+                          })()}
                         </td>
 
                         {/* Actions */}
-                        <td className="px-5 py-4 whitespace-nowrap text-right space-x-1">
-                          <button
-                            onClick={() => setViewingItem(item)}
-                            className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
-                            title="View details"
-                          >
-                            <Eye size={15} />
-                          </button>
-                          <button
-                            onClick={() => openEditModal(item)}
-                            className="p-1.5 text-gray-500 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors cursor-pointer"
-                            title="Edit participant"
-                          >
-                            <Edit2 size={15} />
-                          </button>
-                          <button
-                            onClick={() => setDeletingId(item._id)}
-                            className="p-1.5 text-gray-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
-                            title="Delete record"
-                          >
-                            <Trash2 size={15} />
-                          </button>
+                        <td className="px-3 py-3.5 whitespace-nowrap text-right">
+                          <div className="inline-flex items-center justify-end gap-1">
+                            <button
+                              onClick={() => setViewingItem(item)}
+                              className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                              title="View details"
+                            >
+                              <Eye size={15} />
+                            </button>
+                            <button
+                              onClick={() => openEditModal(item)}
+                              className="p-1.5 text-gray-500 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors cursor-pointer"
+                              title="Edit participant"
+                            >
+                              <Edit2 size={15} />
+                            </button>
+                            <button
+                              onClick={() => setDeletingId(item._id)}
+                              className="p-1.5 text-gray-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                              title="Delete record"
+                            >
+                              <Trash2 size={15} />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))
@@ -820,13 +854,13 @@ export default function AdminArtCompetition() {
                 <div>
                   <label className="block font-bold text-gray-700 mb-1">Status</label>
                   <select
-                    value={editForm.status}
+                    value={(editForm.status || 'CONFIRMED').toUpperCase()}
                     onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none bg-white"
                   >
-                    <option value="confirmed">Confirmed</option>
-                    <option value="attended">Attended</option>
-                    <option value="cancelled">Cancelled</option>
+                    <option value="CONFIRMED">Confirmed</option>
+                    <option value="ATTENDED">Attended</option>
+                    <option value="CANCELLED">Cancelled</option>
                   </select>
                 </div>
                 <div>
