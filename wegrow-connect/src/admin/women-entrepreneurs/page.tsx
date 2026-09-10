@@ -48,6 +48,8 @@ export default function AdminWomenEntrepreneurs() {
   const [businessStage, setBusinessStage] = useState('');
   const [category, setCategory] = useState('');
   const [status, setStatus] = useState('');
+  const [eventId, setEventId] = useState('');
+  const [distinctEvents, setDistinctEvents] = useState<string[]>([]);
 
   // Modals
   const [viewingItem, setViewingItem] = useState<any>(null);
@@ -72,7 +74,7 @@ export default function AdminWomenEntrepreneurs() {
   const loadStats = useCallback(async () => {
     try {
       setStatsLoading(true);
-      const res = await fetchWomenEntrepreneursStats();
+      const res = await fetchWomenEntrepreneursStats(eventId);
       if (res) {
         const statsData =
           res?.data?.stats ||
@@ -86,13 +88,17 @@ export default function AdminWomenEntrepreneurs() {
         if (statsData) {
           setStats((prev: any) => ({ ...prev, ...statsData }));
         }
+        const evList = res?.data?.distinctEvents || res?.distinctEvents || res?.data?.stats?.distinctEvents;
+        if (Array.isArray(evList) && evList.length > 0) {
+          setDistinctEvents((prev) => Array.from(new Set([...prev, ...evList])));
+        }
       }
     } catch (err) {
       console.error('Failed to load stats:', err);
     } finally {
       setStatsLoading(false);
     }
-  }, []);
+  }, [eventId]);
 
   // ─── Fetch List ──────────────────────────────────────────────────────────────
   const loadList = useCallback(async () => {
@@ -104,7 +110,8 @@ export default function AdminWomenEntrepreneurs() {
         search: search.trim(),
         businessStage,
         category,
-        status
+        status,
+        eventId
       });
 
       if (res) {
@@ -142,6 +149,11 @@ export default function AdminWomenEntrepreneurs() {
         const total = pagination?.total ?? summary?.totalFounders ?? summary?.total ?? items.length;
         const pages = pagination?.totalPages ?? pagination?.pages ?? Math.ceil(total / limit) ?? 1;
 
+        const evList = res?.data?.distinctEvents || res?.distinctEvents;
+        if (Array.isArray(evList) && evList.length > 0) {
+          setDistinctEvents((prev) => Array.from(new Set([...prev, ...evList])));
+        }
+
         setData(items);
         setTotalPages(pages || 1);
         setTotalCount(total);
@@ -155,7 +167,7 @@ export default function AdminWomenEntrepreneurs() {
     } finally {
       setLoading(false);
     }
-  }, [page, limit, search, businessStage, category, status]);
+  }, [page, limit, search, businessStage, category, status, eventId]);
 
   useEffect(() => {
     loadStats();
@@ -177,6 +189,7 @@ export default function AdminWomenEntrepreneurs() {
     setBusinessStage('');
     setCategory('');
     setStatus('');
+    setEventId('');
     setPage(1);
   };
 
@@ -185,7 +198,7 @@ export default function AdminWomenEntrepreneurs() {
     try {
       setIsExporting(true);
       toast.loading('Generating CSV...', { id: 'csv-export' });
-      await exportWomenEntrepreneursCsv();
+      await exportWomenEntrepreneursCsv({ eventId, search, businessStage, category, status });
       toast.success('CSV downloaded successfully!', { id: 'csv-export' });
     } catch (err) {
       toast.error('Failed to export CSV.', { id: 'csv-export' });
@@ -387,6 +400,22 @@ export default function AdminWomenEntrepreneurs() {
                 />
               </div>
 
+              {/* Event Filter */}
+              <select
+                value={eventId}
+                onChange={(e) => { setEventId(e.target.value); setPage(1); }}
+                className="px-3 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50 focus:outline-none font-semibold text-slate-700"
+              >
+                <option value="">All Events</option>
+                {Array.from(new Set(['WOMEN-SEP-11-2026', 'WOMEN-SEP-25-2026', ...distinctEvents]))
+                  .filter(Boolean)
+                  .map((ev) => (
+                    <option key={ev} value={ev}>
+                      {ev}
+                    </option>
+                  ))}
+              </select>
+
               {/* Business Stage Filter */}
               <select
                 value={businessStage}
@@ -433,7 +462,7 @@ export default function AdminWomenEntrepreneurs() {
                 Search
               </button>
 
-              {(search || businessStage || category || status) && (
+              {(search || businessStage || category || status || eventId) && (
                 <button
                   type="button"
                   onClick={handleResetFilters}
@@ -451,25 +480,26 @@ export default function AdminWomenEntrepreneurs() {
               <table className="w-full table-fixed text-left border-collapse">
                 <thead>
                   <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-black uppercase tracking-wider text-slate-500">
-                    <th className="w-[26%] py-3.5 px-4">Participant &amp; Contact</th>
-                    <th className="w-[22%] py-3.5 px-4">Category</th>
-                    <th className="w-[16%] py-3.5 px-4">Stage</th>
-                    <th className="w-[14%] py-3.5 px-4">Status</th>
-                    <th className="w-[12%] py-3.5 px-4">Registered Date</th>
-                    <th className="w-[10%] py-3.5 px-4 text-right">Actions</th>
+                    <th className="w-[22%] py-3.5 px-4">Participant &amp; Contact</th>
+                    <th className="w-[14%] py-3.5 px-4">Event ID</th>
+                    <th className="w-[17%] py-3.5 px-4">Category</th>
+                    <th className="w-[13%] py-3.5 px-4">Stage</th>
+                    <th className="w-[11%] py-3.5 px-4">Status</th>
+                    <th className="w-[11%] py-3.5 px-4">Registered Date</th>
+                    <th className="w-[12%] py-3.5 px-4 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-xs text-slate-700">
                   {loading ? (
                     <tr>
-                      <td colSpan={6} className="py-12 text-center text-slate-400">
+                      <td colSpan={7} className="py-12 text-center text-slate-400">
                         <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-pink-500" />
                         Loading registrations...
                       </td>
                     </tr>
                   ) : data.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="py-12 text-center text-slate-400">
+                      <td colSpan={7} className="py-12 text-center text-slate-400">
                         <AlertCircle className="w-8 h-8 mx-auto mb-2 text-slate-300" />
                         No registrations found matching your criteria.
                       </td>
@@ -515,6 +545,17 @@ export default function AdminWomenEntrepreneurs() {
                             </div>
                           </td>
 
+                          {/* Event ID */}
+                          <td className="py-3.5 px-4">
+                            {item.eventId ? (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10.5px] font-mono font-bold bg-pink-50 text-pink-700 border border-pink-200">
+                                {item.eventId}
+                              </span>
+                            ) : (
+                              <span className="text-slate-400 font-mono text-[11px]">—</span>
+                            )}
+                          </td>
+
                           {/* Category */}
                           <td className="py-3.5 px-4">
                             <span className="font-medium text-slate-800 truncate block" title={categoryName}>
@@ -543,7 +584,7 @@ export default function AdminWomenEntrepreneurs() {
 
                           {/* Actions */}
                           <td className="py-3.5 px-4 text-right">
-                            <div className="inline-flex items-center justify-end gap-1">
+                            <div className="inline-flex items-center justify-end gap-1 flex-nowrap">
                               <button
                                 onClick={() => handleView(item)}
                                 className="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition cursor-pointer"
@@ -632,6 +673,14 @@ export default function AdminWomenEntrepreneurs() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
+                  {viewingItem.eventId && (
+                    <div className="col-span-2">
+                      <span className="text-slate-400 font-bold uppercase tracking-wider block">Event ID</span>
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-pink-50 text-pink-700 border border-pink-200 mt-1">
+                        {viewingItem.eventId}
+                      </span>
+                    </div>
+                  )}
                   <div>
                     <span className="text-slate-400 font-bold uppercase tracking-wider block">Business Stage</span>
                     <span className="font-semibold text-slate-800">

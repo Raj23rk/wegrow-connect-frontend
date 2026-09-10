@@ -900,6 +900,19 @@ export async function markNotificationRead(notificationId) {
 }
 
 // =====================================================
+// EVENT ID HELPER
+// =====================================================
+
+export function formatEventId(topic, eventDate) {
+  const d = new Date(eventDate);
+  const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+  const month = months[d.getMonth()];
+  const day = String(d.getDate()).padStart(2, '0');
+  const year = d.getFullYear();
+  return `${topic.toUpperCase()}-${month}-${day}-${year}`;
+}
+
+// =====================================================
 // WOMEN ENTREPRENEURS COMMUNITY API
 // =====================================================
 
@@ -917,7 +930,7 @@ export async function registerWomenEntrepreneur(formData) {
   }
 }
 
-export async function fetchWomenEntrepreneurs({ page = 1, limit = 10, search = '', businessStage = '', category = '', status = '' } = {}) {
+export async function fetchWomenEntrepreneurs({ page = 1, limit = 10, search = '', businessStage = '', category = '', status = '', eventId = '' } = {}) {
   try {
     const params = new URLSearchParams();
     if (page) params.append('page', String(page));
@@ -926,6 +939,7 @@ export async function fetchWomenEntrepreneurs({ page = 1, limit = 10, search = '
     if (businessStage) params.append('businessStage', businessStage);
     if (category) params.append('category', category);
     if (status) params.append('status', status);
+    if (eventId) params.append('eventId', eventId);
 
     const response = await fetch(`${API_BASE}/women-entrepreneurs?${params.toString()}`, {
       method: 'GET',
@@ -938,9 +952,14 @@ export async function fetchWomenEntrepreneurs({ page = 1, limit = 10, search = '
   }
 }
 
-export async function fetchWomenEntrepreneursStats() {
+export async function fetchWomenEntrepreneursStats(eventIdOrQuery = '') {
   try {
-    const response = await fetch(`${API_BASE}/women-entrepreneurs/stats`, {
+    const params = new URLSearchParams();
+    const eventId = typeof eventIdOrQuery === 'string' ? eventIdOrQuery : eventIdOrQuery?.eventId;
+    if (eventId) params.append('eventId', eventId);
+    const qs = params.toString() ? `?${params.toString()}` : '';
+
+    const response = await fetch(`${API_BASE}/women-entrepreneurs/stats${qs}`, {
       method: 'GET',
       headers: getAuthHeaders(),
     });
@@ -951,9 +970,20 @@ export async function fetchWomenEntrepreneursStats() {
   }
 }
 
-export async function exportWomenEntrepreneursCsv() {
+export async function exportWomenEntrepreneursCsv(query = {}) {
   try {
-    const response = await fetch(`${API_BASE}/women-entrepreneurs/export`, {
+    const params = new URLSearchParams();
+    const eventId = typeof query === 'string' ? query : query?.eventId;
+    if (eventId) params.append('eventId', eventId);
+    if (typeof query === 'object') {
+      if (query.search) params.append('search', query.search);
+      if (query.businessStage) params.append('businessStage', query.businessStage);
+      if (query.category) params.append('category', query.category);
+      if (query.status) params.append('status', query.status);
+    }
+    const qs = params.toString() ? `?${params.toString()}` : '';
+
+    const response = await fetch(`${API_BASE}/women-entrepreneurs/export${qs}`, {
       method: 'GET',
       headers: getAuthHeaders(),
     });
@@ -1039,7 +1069,8 @@ export async function fetchBusinessFounders({
   industry = '',
   yearsInBusiness = '',
   biggestPriority = '',
-  status = ''
+  status = '',
+  eventId = ''
 } = {}) {
   try {
     const params = new URLSearchParams();
@@ -1050,6 +1081,7 @@ export async function fetchBusinessFounders({
     if (yearsInBusiness) params.append('yearsInBusiness', yearsInBusiness);
     if (biggestPriority) params.append('biggestPriority', biggestPriority);
     if (status) params.append('status', status);
+    if (eventId) params.append('eventId', eventId);
 
     const response = await fetch(`${API_BASE}/business-founders?${params.toString()}`, {
       method: 'GET',
@@ -1062,9 +1094,14 @@ export async function fetchBusinessFounders({
   }
 }
 
-export async function fetchBusinessFoundersStats() {
+export async function fetchBusinessFoundersStats(eventIdOrQuery = '') {
   try {
-    const response = await fetch(`${API_BASE}/business-founders/stats`, {
+    const params = new URLSearchParams();
+    const eventId = typeof eventIdOrQuery === 'string' ? eventIdOrQuery : eventIdOrQuery?.eventId;
+    if (eventId) params.append('eventId', eventId);
+    const qs = params.toString() ? `?${params.toString()}` : '';
+
+    const response = await fetch(`${API_BASE}/business-founders/stats${qs}`, {
       method: 'GET',
       headers: getAuthHeaders(),
     });
@@ -1075,9 +1112,21 @@ export async function fetchBusinessFoundersStats() {
   }
 }
 
-export async function exportBusinessFoundersCsv() {
+export async function exportBusinessFoundersCsv(query = {}) {
   try {
-    const response = await fetch(`${API_BASE}/business-founders/export`, {
+    const params = new URLSearchParams();
+    const eventId = typeof query === 'string' ? query : query?.eventId;
+    if (eventId) params.append('eventId', eventId);
+    if (typeof query === 'object') {
+      if (query.search) params.append('search', query.search);
+      if (query.industry) params.append('industry', query.industry);
+      if (query.yearsInBusiness) params.append('yearsInBusiness', query.yearsInBusiness);
+      if (query.biggestPriority) params.append('biggestPriority', query.biggestPriority);
+      if (query.status) params.append('status', query.status);
+    }
+    const qs = params.toString() ? `?${params.toString()}` : '';
+
+    const response = await fetch(`${API_BASE}/business-founders/export${qs}`, {
       method: 'GET',
       headers: getAuthHeaders(),
     });
@@ -1156,7 +1205,7 @@ export async function registerStudentFounder(formData) {
   }
 }
 
-export async function fetchStudentFounders({ page = 1, limit = 10, search = '', yearOfStudy = '', collegeName = '', status = '' } = {}) {
+export async function fetchStudentFounders({ page = 1, limit = 10, search = '', yearOfStudy = '', collegeName = '', status = '', eventId = '' } = {}) {
   try {
     const params = new URLSearchParams();
     if (page) params.append('page', String(page));
@@ -1165,6 +1214,7 @@ export async function fetchStudentFounders({ page = 1, limit = 10, search = '', 
     if (yearOfStudy) params.append('yearOfStudy', yearOfStudy);
     if (collegeName) params.append('collegeName', collegeName);
     if (status) params.append('status', status);
+    if (eventId) params.append('eventId', eventId);
 
     const response = await fetch(`${API_BASE}/student-founders?${params.toString()}`, {
       method: 'GET',
@@ -1177,9 +1227,14 @@ export async function fetchStudentFounders({ page = 1, limit = 10, search = '', 
   }
 }
 
-export async function fetchStudentFoundersStats() {
+export async function fetchStudentFoundersStats(eventIdOrQuery = '') {
   try {
-    const response = await fetch(`${API_BASE}/student-founders/stats`, {
+    const params = new URLSearchParams();
+    const eventId = typeof eventIdOrQuery === 'string' ? eventIdOrQuery : eventIdOrQuery?.eventId;
+    if (eventId) params.append('eventId', eventId);
+    const qs = params.toString() ? `?${params.toString()}` : '';
+
+    const response = await fetch(`${API_BASE}/student-founders/stats${qs}`, {
       method: 'GET',
       headers: getAuthHeaders(),
     });
@@ -1190,9 +1245,20 @@ export async function fetchStudentFoundersStats() {
   }
 }
 
-export async function exportStudentFoundersCsv() {
+export async function exportStudentFoundersCsv(query = {}) {
   try {
-    const response = await fetch(`${API_BASE}/student-founders/export`, {
+    const params = new URLSearchParams();
+    const eventId = typeof query === 'string' ? query : query?.eventId;
+    if (eventId) params.append('eventId', eventId);
+    if (typeof query === 'object') {
+      if (query.search) params.append('search', query.search);
+      if (query.yearOfStudy) params.append('yearOfStudy', query.yearOfStudy);
+      if (query.collegeName) params.append('collegeName', query.collegeName);
+      if (query.status) params.append('status', query.status);
+    }
+    const qs = params.toString() ? `?${params.toString()}` : '';
+
+    const response = await fetch(`${API_BASE}/student-founders/export${qs}`, {
       method: 'GET',
       headers: getAuthHeaders(),
     });
@@ -1668,6 +1734,7 @@ export async function fetchArtParticipants({
   endDate = '',
   sortBy = 'createdAt',
   sortOrder = 'desc',
+  eventId = '',
 } = {}) {
   try {
     const params = new URLSearchParams();
@@ -1684,6 +1751,7 @@ export async function fetchArtParticipants({
     if (endDate) params.append('endDate', endDate);
     if (sortBy) params.append('sortBy', sortBy);
     if (sortOrder) params.append('sortOrder', sortOrder);
+    if (eventId) params.append('eventId', eventId);
 
     const response = await fetch(`${API_BASE}/art-competition?${params.toString()}`, {
       method: 'GET',
@@ -1696,9 +1764,14 @@ export async function fetchArtParticipants({
   }
 }
 
-export async function fetchArtParticipantsStats() {
+export async function fetchArtParticipantsStats(eventIdOrQuery = '') {
   try {
-    const response = await fetch(`${API_BASE}/art-competition/stats`, {
+    const params = new URLSearchParams();
+    const eventId = typeof eventIdOrQuery === 'string' ? eventIdOrQuery : eventIdOrQuery?.eventId;
+    if (eventId) params.append('eventId', eventId);
+    const qs = params.toString() ? `?${params.toString()}` : '';
+
+    const response = await fetch(`${API_BASE}/art-competition/stats${qs}`, {
       method: 'GET',
       headers: getAuthHeaders(),
     });
@@ -1712,13 +1785,18 @@ export async function fetchArtParticipantsStats() {
 export async function exportArtParticipantsCsv(query = {}) {
   try {
     const params = new URLSearchParams();
-    if (query.search) params.append('search', query.search);
-    if (query.collegeName) params.append('collegeName', query.collegeName);
-    if (query.preferredArtMedium) params.append('preferredArtMedium', query.preferredArtMedium);
-    if (query.status) params.append('status', query.status);
-    if (query.attended !== undefined && query.attended !== '') params.append('attended', String(query.attended));
+    const eventId = typeof query === 'string' ? query : query?.eventId;
+    if (eventId) params.append('eventId', eventId);
+    if (typeof query === 'object') {
+      if (query.search) params.append('search', query.search);
+      if (query.collegeName) params.append('collegeName', query.collegeName);
+      if (query.preferredArtMedium) params.append('preferredArtMedium', query.preferredArtMedium);
+      if (query.status) params.append('status', query.status);
+      if (query.attended !== undefined && query.attended !== '') params.append('attended', String(query.attended));
+    }
+    const qs = params.toString() ? `?${params.toString()}` : '';
 
-    const response = await fetch(`${API_BASE}/art-competition/export?${params.toString()}`, {
+    const response = await fetch(`${API_BASE}/art-competition/export${qs}`, {
       method: 'GET',
       headers: getAuthHeaders(),
     });

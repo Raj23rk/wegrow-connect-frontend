@@ -22,9 +22,9 @@ import {
 import toast from 'react-hot-toast';
 import { registerWomenEntrepreneur, formatEventId } from '../services/api';
 
-export default function WomensCommunity() {
-  // 1. Live Countdown Timer to Event Date: Fri, Sep 11, 2026 11:00 AM IST
-  const eventDate = new Date('2026-09-11T11:00:00+05:30').getTime();
+export default function WomensCommunityV1() {
+  // 1. Live Countdown Timer to Event Date: Fri, Sep 25, 2026 11:00 AM IST
+  const eventDate = new Date('2026-09-25T11:00:00+05:30').getTime();
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,
@@ -249,7 +249,7 @@ export default function WomensCommunity() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-6 border-t border-[#E7E1D4] text-left">
               <div className="flex items-center gap-2.5 text-sm font-bold text-[#16225E]">
                 <Calendar className="w-5 h-5 text-[#F0791E] flex-shrink-0" />
-                <span>Fri, 11 Sep 2026</span>
+                <span>Fri, 25 Sep 2026</span>
               </div>
               <div className="flex items-center gap-2.5 text-sm font-bold text-[#16225E]">
                 <Clock className="w-5 h-5 text-[#F0791E] flex-shrink-0" />
@@ -283,7 +283,7 @@ export default function WomensCommunity() {
                 <span className="flex items-center gap-1.5 text-[#F0791E]">
                   <Sparkles className="w-4 h-4" /> Women Entrepreneurship  Orientation
                 </span>
-                <span>Fri, 11 Sep 2026</span>
+                <span>Fri, 25 Sep 2026</span>
               </div>
             </div>
 
@@ -293,7 +293,7 @@ export default function WomensCommunity() {
                 <Users className="w-5 h-5" />
               </div> */}
             {/* <div className="text-left">
-                <div className="font-extrabold text-sm text-[#16225E]">Fri, 11 Sep 2026</div>
+                <div className="font-extrabold text-sm text-[#16225E]">Fri, 25 Sep 2026</div>
               </div> */}
             {/* </div> */}
           </div>
@@ -460,7 +460,7 @@ export default function WomensCommunity() {
             <div className="bg-[#FBF6EE] border border-[#E7E1D4] rounded-2xl p-6 text-center">
               <Calendar className="w-7 h-7 text-[#F0791E] mx-auto mb-2" />
               <div className="text-xs font-bold text-[#666C87] uppercase tracking-wider mb-1">Date</div>
-              <div className="text-base font-extrabold text-[#16225E]">Fri, 11 Sep 2026</div>
+              <div className="text-base font-extrabold text-[#16225E]">Fri, 25 Sep 2026</div>
             </div>
 
             <div className="bg-[#FBF6EE] border border-[#E7E1D4] rounded-2xl p-6 text-center">
@@ -776,7 +776,7 @@ export default function WomensCommunity() {
                 </div>
                 <h4 className="text-2xl font-black text-emerald-900">Seat Reserved Successfully!</h4>
                 <p className="text-sm text-emerald-800 max-w-md mx-auto">
-                  Thank you, <strong>{formData.fullName}</strong>! We have saved your seat for <strong>Fri, 11 Sep 2026 (11:00 AM – 1:00 PM)</strong> at {fullAddress}. Our team will reach out on WhatsApp (+91 {formData.phone}) with directions.
+                  Thank you, <strong>{formData.fullName}</strong>! We have saved your seat for <strong>Fri, 25 Sep 2026 (11:00 AM – 1:00 PM)</strong> at {fullAddress}. Our team will reach out on WhatsApp (+91 {formData.phone}) with directions.
                 </p>
                 <button
                   onClick={() => setIsRegistered(false)}
@@ -897,7 +897,7 @@ export default function WomensCommunity() {
       {/* Shared WeGrow B School Footer */}
       <CommunityPageFooter
         eventLabel="Women's Orientation 2026"
-        eventDate="Fri, 11 Sep 2026"
+        eventDate="Fri, 25 Sep 2026"
         eventTime="11:00 AM – 1:00 PM"
         venueAddress={fullAddress}
         queriesPhone="+91 9344337331"

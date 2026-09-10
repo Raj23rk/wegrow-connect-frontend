@@ -53,6 +53,8 @@ export default function AdminArtCompetition() {
   const [preferredArtMedium, setPreferredArtMedium] = useState('');
   const [status, setStatus] = useState('');
   const [attended, setAttended] = useState('');
+  const [eventId, setEventId] = useState('');
+  const [distinctEvents, setDistinctEvents] = useState<string[]>([]);
 
   // Modals
   const [viewingItem, setViewingItem] = useState<any>(null);
@@ -79,7 +81,7 @@ export default function AdminArtCompetition() {
   const loadStats = useCallback(async () => {
     try {
       setStatsLoading(true);
-      const res = await fetchArtParticipantsStats();
+      const res = await fetchArtParticipantsStats(eventId);
       const statsData =
         res?.data?.stats ||
         res?.data?.data ||
@@ -90,12 +92,16 @@ export default function AdminArtCompetition() {
       if (statsData) {
         setStats(statsData);
       }
+      const evList = res?.data?.distinctEvents || res?.distinctEvents || res?.data?.stats?.distinctEvents;
+      if (Array.isArray(evList) && evList.length > 0) {
+        setDistinctEvents((prev) => Array.from(new Set([...prev, ...evList])));
+      }
     } catch (err) {
       console.error('Failed to load art competition stats:', err);
     } finally {
       setStatsLoading(false);
     }
-  }, []);
+  }, [eventId]);
 
   // ─── Fetch List ──────────────────────────────────────────────────────────────
   const loadList = useCallback(async () => {
@@ -109,6 +115,7 @@ export default function AdminArtCompetition() {
         preferredArtMedium,
         status,
         attended: attended !== '' ? attended : undefined,
+        eventId,
       });
 
       if (res) {
@@ -147,14 +154,18 @@ export default function AdminArtCompetition() {
         if (summary) {
           setStats((prev: any) => ({ ...prev, ...summary }));
         }
+        const evList = res?.data?.distinctEvents || res?.distinctEvents;
+        if (Array.isArray(evList) && evList.length > 0) {
+          setDistinctEvents((prev) => Array.from(new Set([...prev, ...evList])));
+        }
       }
-    } catch (err: any) {
-      console.error('Failed to load art competition participants:', err);
-      toast.error('Failed to load participants list');
+    } catch (err) {
+      console.error('Failed to load art participants list:', err);
+      toast.error('Failed to load participant records');
     } finally {
       setLoading(false);
     }
-  }, [page, limit, search, collegeName, preferredArtMedium, status, attended]);
+  }, [page, limit, search, collegeName, preferredArtMedium, status, attended, eventId]);
 
   useEffect(() => {
     loadStats();
@@ -176,6 +187,7 @@ export default function AdminArtCompetition() {
     setPreferredArtMedium('');
     setStatus('');
     setAttended('');
+    setEventId('');
     setPage(1);
   };
 
@@ -218,6 +230,7 @@ export default function AdminArtCompetition() {
         preferredArtMedium,
         status,
         attended: attended !== '' ? attended : undefined,
+        eventId,
       });
       toast.success('Participants CSV downloaded successfully!');
     } catch (err: any) {
@@ -395,15 +408,36 @@ export default function AdminArtCompetition() {
           <div className="bg-white rounded-2xl p-4 border border-gray-200/80 shadow-sm space-y-3">
             <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
               {/* Search Bar */}
-              <div className="md:col-span-4 relative">
+              <div className="md:col-span-3 relative">
                 <Search size={17} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Search by name, phone, reg ID, college..."
+                  placeholder="Search name, phone, reg ID, college..."
                   value={search}
                   onChange={(e) => handleSearchChange(e.target.value)}
                   className="w-full pl-10 pr-3.5 py-2.5 bg-gray-50/80 border border-gray-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
                 />
+              </div>
+
+              {/* Event Selector */}
+              <div className="md:col-span-2">
+                <select
+                  value={eventId}
+                  onChange={(e) => {
+                    setEventId(e.target.value);
+                    setPage(1);
+                  }}
+                  className="w-full px-3 py-2.5 bg-gray-50/80 border border-gray-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-gray-700 font-semibold"
+                >
+                  <option value="">All Events</option>
+                  {Array.from(new Set(['ART-2026', ...distinctEvents]))
+                    .filter(Boolean)
+                    .map((ev) => (
+                      <option key={ev} value={ev}>
+                        {ev}
+                      </option>
+                    ))}
+                </select>
               </div>
 
               {/* Art Medium Filter */}

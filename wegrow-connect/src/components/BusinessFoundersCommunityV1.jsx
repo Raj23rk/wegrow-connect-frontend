@@ -28,10 +28,10 @@ import toast from 'react-hot-toast';
 import { registerBusinessFounder, formatEventId } from '../services/api';
 import CommunityPageFooter from './CommunityPageFooter';
 
-export default function BusinessFoundersCommunity() {
+export default function BusinessFoundersCommunityV1() {
   // ─── Countdown Timer ─────────────────────────────────────────────────────────
-  // Orientation Event Date: Wednesday, 16 September 2026 11:00 AM IST
-  const eventDate = new Date('2026-09-16T11:00:00+05:30').getTime();
+  // Orientation Event Date: Wednesday, 30 September 2026 11:00 AM IST
+  const eventDate = new Date('2026-09-30T11:00:00+05:30').getTime();
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
   useEffect(() => {
@@ -355,7 +355,7 @@ export default function BusinessFoundersCommunity() {
               <ul className="flex flex-wrap gap-4 sm:gap-6 pt-4 text-sm font-bold text-[#16225E] border-t border-[#E7E1D4]">
                 <li className="flex items-center gap-2">
                   <Calendar className="w-5 h-5 text-[#F0791E] flex-shrink-0" />
-                  <span>16 September 2026</span>
+                  <span>30 September 2026</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <MapPin className="w-5 h-5 text-[#F0791E] flex-shrink-0" />
@@ -388,7 +388,7 @@ export default function BusinessFoundersCommunity() {
                   <span className="flex items-center gap-1.5 text-[#F0791E]">
                     <Sparkles className="w-4 h-4" /> Business Founders Orientation
                   </span>
-                  <span>16 September 2026</span>
+                  <span>30 September 2026</span>
                 </div>
               </div>
             </div>
@@ -444,7 +444,7 @@ export default function BusinessFoundersCommunity() {
 
           <div className="space-y-2 max-w-2xl mx-auto">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white">
-              Wednesday, 16 September 2026 · 11:00 AM
+              Wednesday, 30 September 2026 · 11:00 AM
             </h2>
             <p className="text-[#C9CEEB] text-sm sm:text-base">
               Limited seats available to ensure personalized mentor attention and deep peer discussions
@@ -552,7 +552,7 @@ export default function BusinessFoundersCommunity() {
             <div className="border border-[#E7E1D4] rounded-2xl p-6 bg-[#FBF6EE] text-center">
               <Calendar className="w-8 h-8 text-[#F0791E] mx-auto mb-3" />
               <h4 className="text-xs uppercase tracking-wider text-[#666C87] font-bold mb-1">Date</h4>
-              <p className="text-base font-bold text-[#16225E]">16 September 2026</p>
+              <p className="text-base font-bold text-[#16225E]">30 September 2026</p>
             </div>
 
             <div className="border border-[#E7E1D4] rounded-2xl p-6 bg-[#FBF6EE] text-center">
@@ -580,7 +580,7 @@ export default function BusinessFoundersCommunity() {
               <span className="font-bold text-sm uppercase tracking-wider flex items-center gap-2">
                 <Clock className="w-4 h-4 text-[#F0791E]" /> Orientation Schedule
               </span>
-              <span className="text-xs text-[#C9CEEB]">Wednesday, 16 Sep 2026</span>
+              <span className="text-xs text-[#C9CEEB]">Wednesday, 30 Sep 2026</span>
             </div>
 
             <div className="divide-y divide-[#E7E1D4]">
@@ -785,18 +785,18 @@ export default function BusinessFoundersCommunity() {
                   <p className="text-sm text-[#666C87] max-w-md mx-auto leading-relaxed">
                     Thank you, <strong>{form.fullName}</strong>. Your seat for the{' '}
                     <strong>WeGrow Business Founders Orientation</strong> on{' '}
-                    <strong>16 September 2026 (11:00 AM)</strong> is confirmed.
+                    <strong>30 September 2026 (11:00 AM)</strong> is confirmed.
                   </p>
                 </div>
 
                 <div className="bg-[#FBF6EE] border border-[#E7E1D4] rounded-2xl p-4 text-left text-xs sm:text-sm space-y-2 font-medium text-[#16225E]">
                   <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-[#F0791E]" />
-                    <span><strong>Date:</strong> Wednesday, 16 Sep 2026</span>
+                    <span><strong>Date:</strong> Wednesday, 30 Sep 2026</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Clock className="w-4 h-4 text-[#F0791E]" />
-                    <span><strong>Timing:</strong> 11:00 AM to 1:00 AM</span>
+                    <span><strong>Timing:</strong> 11:00 AM to 1:00 PM</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <MapPin className="w-4 h-4 text-[#F0791E] mt-0.5" />
@@ -806,7 +806,7 @@ export default function BusinessFoundersCommunity() {
 
                 <div className="pt-2">
                   <a
-                    href={`https://wa.me/91${phoneDisplay}?text=Hi%20WeGrow%2C%20I%20have%20registered%20for%20the%20Business%20Founders%20Community%20Orientation%20on%2016%20Sep.`}
+                    href={`https://wa.me/91${phoneDisplay}?text=Hi%20WeGrow%2C%20I%20have%20registered%20for%20the%20Business%20Founders%20Community%20Orientation%20on%2030%20Sep.`}
                     target="_blank"
                     rel="noreferrer"
                     className="inline-flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1EBE5D] text-white font-bold text-sm px-6 py-3 rounded-full transition shadow-md w-full"
@@ -1061,7 +1061,7 @@ export default function BusinessFoundersCommunity() {
       {/* ── Standard WeGrow Community Page Footer ───────────────────────────── */}
       <CommunityPageFooter
         eventLabel="Business Founders Community Orientation"
-        eventDate="Wed, 16 Sep 2026"
+        eventDate="Wed, 30 Sep 2026"
         eventTime="11:00 AM – 1:00 PM"
         venueAddress={fullAddress}
         queriesPhone={`+91 ${phoneDisplay}`}

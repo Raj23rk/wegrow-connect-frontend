@@ -53,6 +53,8 @@ export default function AdminBusinessFounders() {
   const [yearsInBusiness, setYearsInBusiness] = useState('');
   const [biggestPriority, setBiggestPriority] = useState('');
   const [status, setStatus] = useState('');
+  const [eventId, setEventId] = useState('');
+  const [distinctEvents, setDistinctEvents] = useState<string[]>([]);
 
   // Modals
   const [viewingItem, setViewingItem] = useState<any>(null);
@@ -83,7 +85,7 @@ export default function AdminBusinessFounders() {
   const loadStats = useCallback(async () => {
     try {
       setStatsLoading(true);
-      const res = await fetchBusinessFoundersStats();
+      const res = await fetchBusinessFoundersStats(eventId);
       if (res) {
         const statsData =
           res?.data?.stats ||
@@ -97,13 +99,17 @@ export default function AdminBusinessFounders() {
         if (statsData) {
           setStats((prev: any) => ({ ...prev, ...statsData }));
         }
+        const evList = res?.data?.distinctEvents || res?.distinctEvents || res?.data?.stats?.distinctEvents;
+        if (Array.isArray(evList) && evList.length > 0) {
+          setDistinctEvents((prev) => Array.from(new Set([...prev, ...evList])));
+        }
       }
     } catch (err) {
       console.error('Failed to load business founders stats:', err);
     } finally {
       setStatsLoading(false);
     }
-  }, []);
+  }, [eventId]);
 
   // ─── Fetch List ──────────────────────────────────────────────────────────────
   const loadList = useCallback(async () => {
@@ -116,7 +122,8 @@ export default function AdminBusinessFounders() {
         industry,
         yearsInBusiness,
         biggestPriority,
-        status
+        status,
+        eventId
       });
 
       if (res) {
@@ -156,6 +163,11 @@ export default function AdminBusinessFounders() {
         const total = pagination?.total ?? summary?.totalFounders ?? summary?.total ?? items.length;
         const pages = pagination?.totalPages ?? pagination?.pages ?? Math.ceil(total / limit) ?? 1;
 
+        const evList = res?.data?.distinctEvents || res?.distinctEvents;
+        if (Array.isArray(evList) && evList.length > 0) {
+          setDistinctEvents((prev) => Array.from(new Set([...prev, ...evList])));
+        }
+
         setData(items);
         setTotalPages(pages || 1);
         setTotalCount(total);
@@ -169,7 +181,7 @@ export default function AdminBusinessFounders() {
     } finally {
       setLoading(false);
     }
-  }, [page, limit, search, industry, yearsInBusiness, biggestPriority, status]);
+  }, [page, limit, search, industry, yearsInBusiness, biggestPriority, status, eventId]);
 
   useEffect(() => {
     loadStats();
@@ -192,6 +204,7 @@ export default function AdminBusinessFounders() {
     setYearsInBusiness('');
     setBiggestPriority('');
     setStatus('');
+    setEventId('');
     setPage(1);
   };
 
@@ -200,7 +213,7 @@ export default function AdminBusinessFounders() {
     try {
       setIsExporting(true);
       toast.loading('Generating CSV...', { id: 'csv-biz-export' });
-      await exportBusinessFoundersCsv();
+      await exportBusinessFoundersCsv({ eventId, search, industry, yearsInBusiness, biggestPriority, status });
       toast.success('CSV downloaded successfully!', { id: 'csv-biz-export' });
     } catch (err) {
       toast.error('Failed to export CSV.', { id: 'csv-biz-export' });
@@ -306,6 +319,14 @@ export default function AdminBusinessFounders() {
     return map[y] || y || '1+ Year';
   };
 
+  const statusBadges: Record<string, { label: string; color: string }> = {
+    registered: { label: 'Registered', color: 'bg-slate-100 text-slate-800 border-slate-300' },
+    contacted: { label: 'Contacted', color: 'bg-sky-100 text-sky-800 border-sky-300' },
+    confirmed: { label: 'Confirmed', color: 'bg-emerald-100 text-emerald-800 border-emerald-300' },
+    attended: { label: 'Attended', color: 'bg-indigo-100 text-indigo-800 border-indigo-300' },
+    cancelled: { label: 'Cancelled', color: 'bg-rose-100 text-rose-800 border-rose-300' }
+  };
+
   const getStatusBadge = (st: string) => {
     switch (st?.toLowerCase()) {
       case 'confirmed':
@@ -340,22 +361,22 @@ export default function AdminBusinessFounders() {
   };
 
   return (
-    <div className="flex h-screen bg-[#F8FAFC] overflow-hidden font-sans">
+    <div className="flex h-screen bg-slate-50 font-sans overflow-hidden">
       <Sidebar />
 
-      <main className="flex-1 flex flex-col h-full overflow-y-auto">
+      <main className="flex-1 flex flex-col min-w-0 overflow-y-auto">
         {/* ─── Top Header Bar ───────────────────────────────────────────────── */}
-        <header className="bg-white border-b border-slate-200 px-6 sm:px-8 py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 sticky top-0 z-20 shadow-sm">
+        <header className="bg-white border-b border-slate-200 px-6 py-3.5 sticky top-0 z-20 flex flex-wrap items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#16225E]/10 flex items-center justify-center text-[#16225E]">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl bg-[#16225E]/10 flex items-center justify-center text-[#16225E] font-black">
                 <Briefcase className="w-5 h-5 text-[#16225E]" />
               </div>
               <div>
-                <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                <h1 className="text-xl font-black text-slate-900 leading-tight">
                   Business Founders Community
                 </h1>
-                <p className="text-xs text-slate-500 font-medium">
+                <p className="text-xs text-slate-500">
                   Orientation Registrations, Founder Diagnostics &amp; Assessment CRM
                 </p>
               </div>
@@ -364,207 +385,224 @@ export default function AdminBusinessFounders() {
 
           <div className="flex items-center gap-3">
             <button
+              onClick={handleExport}
+              disabled={isExporting || totalCount === 0}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-sm transition disabled:opacity-50 cursor-pointer"
+            >
+              <Download className="w-4 h-4" />
+              Export CSV
+            </button>
+            <button
               onClick={() => {
                 loadStats();
                 loadList();
               }}
               disabled={loading}
-              className="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition cursor-pointer disabled:opacity-50"
-              title="Refresh data"
+              className="p-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 transition cursor-pointer"
+              title="Refresh Data"
             >
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-              <span className="hidden sm:inline">Refresh</span>
-            </button>
-
-            <button
-              onClick={handleExport}
-              disabled={isExporting || totalCount === 0}
-              className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-[#147A87] hover:bg-[#10626D] rounded-xl shadow-sm hover:shadow transition cursor-pointer disabled:opacity-50"
-            >
-              <Download className="w-4 h-4" />
-              <span>Export CSV</span>
             </button>
           </div>
         </header>
 
-        <div className="p-6 sm:p-8 space-y-6 max-w-7xl w-full mx-auto">
+        <div className="p-5 space-y-4">
           {/* ─── Stats KPI Overview ────────────────────────────────────────── */}
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0">
-                <Users className="w-6 h-6" />
-              </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+            <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
               <div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Founders</p>
-                <p className="text-2xl font-black text-slate-900 mt-0.5 font-mono">
-                  {statsLoading ? '...' : stats?.totalFounders ?? stats?.total ?? stats?.totalCount ?? totalCount}
-                </p>
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Total Founders</p>
+                <h3 className="text-2xl font-black text-slate-900 mt-0.5 font-mono">
+                  {statsLoading ? '…' : stats?.totalFounders ?? stats?.total ?? stats?.totalCount ?? totalCount}
+                </h3>
+              </div>
+              <div className="w-11 h-11 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                <Users className="w-5 h-5" />
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
-                <CheckCircle2 className="w-6 h-6" />
-              </div>
+            <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
               <div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Confirmed</p>
-                <p className="text-2xl font-black text-emerald-600 mt-0.5 font-mono">
-                  {statsLoading ? '...' : stats?.confirmed ?? stats?.counts?.confirmed ?? stats?.byStatus?.confirmed ?? 0}
-                </p>
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Confirmed</p>
+                <h3 className="text-2xl font-black text-emerald-600 mt-0.5 font-mono">
+                  {statsLoading ? '…' : stats?.confirmed ?? stats?.counts?.confirmed ?? stats?.byStatus?.confirmed ?? 0}
+                </h3>
+              </div>
+              <div className="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <CheckCircle2 className="w-5 h-5" />
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
-                <Sparkles className="w-6 h-6" />
-              </div>
+            <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
               <div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Attended</p>
-                <p className="text-2xl font-black text-blue-600 mt-0.5 font-mono">
-                  {statsLoading ? '...' : stats?.attended ?? stats?.attend ?? stats?.byStatus?.attended ?? 0}
-                </p>
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Attended</p>
+                <h3 className="text-2xl font-black text-blue-600 mt-0.5 font-mono">
+                  {statsLoading ? '…' : stats?.attended ?? stats?.attend ?? stats?.byStatus?.attended ?? 0}
+                </h3>
+              </div>
+              <div className="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                <Sparkles className="w-5 h-5" />
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center flex-shrink-0">
-                <Clock className="w-6 h-6" />
-              </div>
+            <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
               <div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">New Registrations</p>
-                <p className="text-2xl font-black text-amber-600 mt-0.5 font-mono">
-                  {statsLoading ? '...' : stats?.newRegs ?? stats?.registered ?? stats?.pending ?? 0}
-                </p>
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-500">New Registrations</p>
+                <h3 className="text-2xl font-black text-amber-600 mt-0.5 font-mono">
+                  {statsLoading ? '…' : stats?.newRegs ?? stats?.registered ?? stats?.pending ?? 0}
+                </h3>
+              </div>
+              <div className="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                <Clock className="w-5 h-5" />
               </div>
             </div>
           </div>
 
           {/* ─── Search & Filter Controls ──────────────────────────────────── */}
-          <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
-            <form onSubmit={handleSearchSubmit} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3">
+          <div className="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm space-y-2">
+            <form onSubmit={handleSearchSubmit} className="flex flex-wrap gap-2.5 items-center">
               {/* Search input */}
-              <div className="lg:col-span-4 relative">
-                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <div className="flex-1 min-w-[180px] relative">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
                   placeholder="Search name, phone, email, company..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#147A87] transition"
+                  className="w-full pl-9 pr-3 py-1.5 text-xs rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#147A87]"
                 />
               </div>
 
+              {/* Event Filter */}
+              <select
+                value={eventId}
+                onChange={(e) => {
+                  setEventId(e.target.value);
+                  setPage(1);
+                }}
+                className="px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 bg-slate-50 focus:outline-none font-semibold text-slate-700"
+              >
+                <option value="">All Events</option>
+                {Array.from(new Set(['BUSINESS-SEP-16-2026', 'BUSINESS-SEP-30-2026', ...distinctEvents]))
+                  .filter(Boolean)
+                  .map((ev) => (
+                    <option key={ev} value={ev}>
+                      {ev}
+                    </option>
+                  ))}
+              </select>
+
               {/* Industry Dropdown */}
-              <div className="lg:col-span-2">
-                <select
-                  value={industry}
-                  onChange={(e) => {
-                    setIndustry(e.target.value);
-                    setPage(1);
-                  }}
-                  className="w-full px-3 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#147A87] transition text-slate-700"
-                >
-                  <option value="">All Sectors</option>
-                  <option value="manufacturing">Manufacturing</option>
-                  <option value="printing_packaging">Printing &amp; Packaging</option>
-                  <option value="fireworks_matches">Fireworks &amp; Matches</option>
-                  <option value="retail_wholesale">Retail &amp; Wholesale</option>
-                  <option value="textiles_garments">Textiles &amp; Garments</option>
-                  <option value="services_agency">Services &amp; Agencies</option>
-                  <option value="food_hospitality">Food &amp; Hospitality</option>
-                  <option value="tech_digital">Tech &amp; Digital</option>
-                  <option value="other">Other Business</option>
-                </select>
-              </div>
+              <select
+                value={industry}
+                onChange={(e) => {
+                  setIndustry(e.target.value);
+                  setPage(1);
+                }}
+                className="px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 bg-slate-50 focus:outline-none font-semibold text-slate-700"
+              >
+                <option value="">All Sectors</option>
+                <option value="manufacturing">Manufacturing</option>
+                <option value="printing_packaging">Printing &amp; Packaging</option>
+                <option value="fireworks_matches">Fireworks &amp; Matches</option>
+                <option value="retail_wholesale">Retail &amp; Wholesale</option>
+                <option value="textiles_garments">Textiles &amp; Garments</option>
+                <option value="services_agency">Services &amp; Agencies</option>
+                <option value="food_hospitality">Food &amp; Hospitality</option>
+                <option value="tech_digital">Tech &amp; Digital</option>
+                <option value="other">Other Business</option>
+              </select>
 
               {/* Years in Business */}
-              <div className="lg:col-span-2">
-                <select
-                  value={yearsInBusiness}
-                  onChange={(e) => {
-                    setYearsInBusiness(e.target.value);
-                    setPage(1);
-                  }}
-                  className="w-full px-3 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#147A87] transition text-slate-700"
-                >
-                  <option value="">All Experience</option>
-                  <option value="less_than_1_year">&lt; 1 Year</option>
-                  <option value="1_to_3_years">1 – 3 Years</option>
-                  <option value="3_to_5_years">3 – 5 Years</option>
-                  <option value="5_plus_years">5+ Years</option>
-                </select>
-              </div>
+              <select
+                value={yearsInBusiness}
+                onChange={(e) => {
+                  setYearsInBusiness(e.target.value);
+                  setPage(1);
+                }}
+                className="px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 bg-slate-50 focus:outline-none font-semibold text-slate-700"
+              >
+                <option value="">All Experience</option>
+                <option value="less_than_1_year">&lt; 1 Year</option>
+                <option value="1_to_3_years">1 – 3 Years</option>
+                <option value="3_to_5_years">3 – 5 Years</option>
+                <option value="5_plus_years">5+ Years</option>
+              </select>
 
               {/* Biggest Priority */}
-              <div className="lg:col-span-2">
-                <select
-                  value={biggestPriority}
-                  onChange={(e) => {
-                    setBiggestPriority(e.target.value);
-                    setPage(1);
-                  }}
-                  className="w-full px-3 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#147A87] transition text-slate-700"
-                >
-                  <option value="">All Priorities</option>
-                  <option value="More Sales">More Sales</option>
-                  <option value="More Customers">More Customers</option>
-                  <option value="More Profit">More Profit</option>
-                  <option value="Better Team">Better Team</option>
-                  <option value="Business Growth">Business Growth</option>
-                  <option value="Better Systems">Better Systems</option>
-                </select>
-              </div>
+              <select
+                value={biggestPriority}
+                onChange={(e) => {
+                  setBiggestPriority(e.target.value);
+                  setPage(1);
+                }}
+                className="px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 bg-slate-50 focus:outline-none font-semibold text-slate-700"
+              >
+                <option value="">All Priorities</option>
+                <option value="More Sales">More Sales</option>
+                <option value="More Customers">More Customers</option>
+                <option value="More Profit">More Profit</option>
+                <option value="Better Team">Better Team</option>
+                <option value="Business Growth">Business Growth</option>
+                <option value="Better Systems">Better Systems</option>
+              </select>
 
               {/* Status Filter */}
-              <div className="lg:col-span-2 flex items-center gap-2">
-                <select
-                  value={status}
-                  onChange={(e) => {
-                    setStatus(e.target.value);
-                    setPage(1);
-                  }}
-                  className="w-full px-3 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#147A87] transition text-slate-700"
-                >
-                  <option value="">All Statuses</option>
-                  <option value="registered">Registered</option>
-                  <option value="confirmed">Confirmed</option>
-                  <option value="attended">Attended</option>
-                  <option value="cancelled">Cancelled</option>
-                </select>
+              <select
+                value={status}
+                onChange={(e) => {
+                  setStatus(e.target.value);
+                  setPage(1);
+                }}
+                className="px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 bg-slate-50 focus:outline-none font-semibold text-slate-700"
+              >
+                <option value="">All Statuses</option>
+                <option value="registered">Registered</option>
+                <option value="confirmed">Confirmed</option>
+                <option value="attended">Attended</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
 
-                {(search || industry || yearsInBusiness || biggestPriority || status) && (
-                  <button
-                    type="button"
-                    onClick={handleResetFilters}
-                    className="p-2.5 text-slate-500 hover:text-rose-600 bg-slate-100 hover:bg-rose-50 rounded-xl transition cursor-pointer"
-                    title="Clear filters"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
+              <button
+                type="submit"
+                className="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-bold transition cursor-pointer"
+              >
+                Search
+              </button>
+
+              {(search || industry || yearsInBusiness || biggestPriority || status || eventId) && (
+                <button
+                  type="button"
+                  onClick={handleResetFilters}
+                  className="px-2.5 py-1.5 text-xs font-bold text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
+                  title="Clear filters"
+                >
+                  Reset
+                </button>
+              )}
             </form>
           </div>
 
           {/* ─── Data Table Card ───────────────────────────────────────────── */}
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
             <div className="w-full overflow-hidden">
-              <table className="w-full table-fixed text-left text-xs sm:text-sm border-collapse">
+              <table className="w-full table-fixed text-left border-collapse">
                 <thead>
                   <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-500 uppercase tracking-wider font-bold text-[11px]">
-                    <th className="w-[26%] px-4 py-3.5">Founder</th>
-                    <th className="w-[20%] px-4 py-3.5">Enterprise &amp; Sector</th>
-                    <th className="w-[11%] px-4 py-3.5">Experience</th>
-                    <th className="w-[15%] px-4 py-3.5">Key Priority</th>
-                    <th className="w-[14%] px-4 py-3.5">Status</th>
-                    <th className="w-[8%] px-3 py-3.5">Date</th>
-                    <th className="w-[6%] px-3 py-3.5 text-right">Actions</th>
+                    <th className="w-[19%] py-3.5 px-4">Founder</th>
+                    <th className="w-[13%] py-3.5 px-4">Event ID</th>
+                    <th className="w-[16%] py-3.5 px-4">Enterprise &amp; Sector</th>
+                    <th className="w-[9%] py-3.5 px-4">Experience</th>
+                    <th className="w-[12%] py-3.5 px-4">Key Priority</th>
+                    <th className="w-[10%] py-3.5 px-4">Status</th>
+                    <th className="w-[10%] py-3.5 px-4">Date</th>
+                    <th className="w-[11%] py-3.5 px-4 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
+                <tbody className="divide-y divide-slate-100 text-xs text-slate-700">
                   {loading ? (
                     <tr>
-                      <td colSpan={7} className="text-center py-16 text-slate-400">
+                      <td colSpan={8} className="text-center py-16 text-slate-400">
                         <div className="flex flex-col items-center justify-center gap-3">
                           <div className="w-8 h-8 border-3 border-[#147A87] border-t-transparent rounded-full animate-spin" />
                           <p className="font-semibold text-xs text-slate-500">Loading Business Founders...</p>
@@ -573,7 +611,7 @@ export default function AdminBusinessFounders() {
                     </tr>
                   ) : data.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="text-center py-16 text-slate-400">
+                      <td colSpan={8} className="text-center py-16 text-slate-400">
                         <div className="flex flex-col items-center justify-center gap-2">
                           <Briefcase className="w-10 h-10 text-slate-300" />
                           <p className="font-bold text-slate-700 text-base">No registrations found</p>
@@ -586,13 +624,18 @@ export default function AdminBusinessFounders() {
                   ) : (
                     data.map((item, idx) => {
                       const id = item._id || item.id || idx;
+                      const statusInfo = statusBadges[item.status?.toLowerCase()] || {
+                        label: item.status || 'Registered',
+                        color: 'bg-slate-100 text-slate-700 border-slate-300'
+                      };
+
                       return (
                         <tr
                           key={id}
                           className="hover:bg-slate-50/70 transition-colors group"
                         >
                           {/* Founder Info */}
-                          <td className="px-4 py-3.5">
+                          <td className="py-3.5 px-4">
                             <div className="flex items-center gap-3 min-w-0">
                               <div className="w-9 h-9 rounded-full bg-[#16225E] text-white flex items-center justify-center font-bold text-xs font-mono flex-shrink-0 shadow-sm">
                                 {item.fullName
@@ -626,8 +669,19 @@ export default function AdminBusinessFounders() {
                             </div>
                           </td>
 
+                          {/* Event ID */}
+                          <td className="py-3.5 px-4">
+                            {item.eventId ? (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10.5px] font-mono font-bold bg-[#147A87]/10 text-[#147A87] border border-[#147A87]/20">
+                                {item.eventId}
+                              </span>
+                            ) : (
+                              <span className="text-slate-400 font-mono text-[11px]">—</span>
+                            )}
+                          </td>
+
                           {/* Enterprise & Sector */}
-                          <td className="px-4 py-3.5">
+                          <td className="py-3.5 px-4">
                             <div className="min-w-0">
                               <strong className="text-slate-800 block text-xs truncate" title={item.businessName || 'Business Enterprise'}>
                                 {item.businessName || 'Business Enterprise'}
@@ -639,65 +693,55 @@ export default function AdminBusinessFounders() {
                           </td>
 
                           {/* Experience */}
-                          <td className="px-4 py-3.5 text-xs font-semibold text-slate-600 truncate">
+                          <td className="py-3.5 px-4 text-xs font-semibold text-slate-600 truncate">
                             {formatYears(item.yearsInBusiness)}
                           </td>
 
                           {/* Priority */}
-                          <td className="px-4 py-3.5">
+                          <td className="py-3.5 px-4">
                             <span className="inline-block text-[11px] font-bold text-[#F0791E] bg-[#F0791E]/10 px-2 py-1 rounded-md truncate max-w-full" title={item.biggestPriority || 'Business Growth'}>
                               {item.biggestPriority || 'Business Growth'}
                             </span>
                           </td>
 
                           {/* Status */}
-                          <td className="px-4 py-3.5">
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              {getStatusBadge(item.status)}
-                              <select
-                                value={item.status || 'registered'}
-                                onChange={(e) => handleQuickStatus(item, e.target.value)}
-                                className="opacity-0 group-hover:opacity-100 text-[10px] bg-slate-100 border border-slate-200 rounded px-1 py-0.5 focus:opacity-100 transition cursor-pointer"
-                                title="Quick change status"
-                              >
-                                <option value="registered">Registered</option>
-                                <option value="confirmed">Confirmed</option>
-                                <option value="attended">Attended</option>
-                                <option value="cancelled">Cancelled</option>
-                              </select>
-                            </div>
+                          <td className="py-3.5 px-4">
+                            <span className={`inline-block px-2.5 py-1 rounded-full text-[10px] font-bold border uppercase ${statusInfo.color}`}>
+                              {statusInfo.label}
+                            </span>
                           </td>
 
                           {/* Registered At */}
-                          <td className="px-3 py-3.5 text-[11px] text-slate-500 font-mono">
+                          <td className="py-3.5 px-4 text-[11px] text-slate-500 font-mono whitespace-nowrap">
                             {item.createdAt
                               ? new Date(item.createdAt).toLocaleDateString('en-IN', {
                                   day: '2-digit',
-                                  month: 'short'
+                                  month: 'short',
+                                  year: 'numeric'
                                 })
-                              : 'Recent'}
+                              : '—'}
                           </td>
 
                           {/* Actions */}
-                          <td className="px-3 py-3.5 text-right">
-                            <div className="flex items-center justify-end gap-1">
+                          <td className="py-3.5 px-4 text-right">
+                            <div className="inline-flex items-center justify-end gap-1 flex-nowrap">
                               <button
                                 onClick={() => setViewingItem(item)}
-                                className="p-1.5 text-slate-500 hover:text-[#147A87] hover:bg-slate-100 rounded-lg transition cursor-pointer"
+                                className="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition cursor-pointer"
                                 title="View details"
                               >
                                 <Eye className="w-3.5 h-3.5" />
                               </button>
                               <button
                                 onClick={() => handleOpenEdit(item)}
-                                className="p-1.5 text-slate-500 hover:text-amber-600 hover:bg-slate-100 rounded-lg transition cursor-pointer"
+                                className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition cursor-pointer"
                                 title="Edit details"
                               >
                                 <Edit2 className="w-3.5 h-3.5" />
                               </button>
                               <button
                                 onClick={() => setDeletingId(item._id || item.id)}
-                                className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
+                                className="p-1.5 text-rose-600 hover:text-rose-800 hover:bg-rose-50 rounded-lg transition cursor-pointer"
                                 title="Delete"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
@@ -713,37 +757,27 @@ export default function AdminBusinessFounders() {
             </div>
 
             {/* ─── Pagination Footer ────────────────────────────────────────── */}
-            <div className="px-6 py-4 bg-white border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+            <div className="p-4 border-t border-slate-200 flex flex-wrap items-center justify-between gap-4 text-xs font-semibold text-slate-600">
               <div>
-                Showing{' '}
-                <strong className="text-slate-800 font-bold">
-                  {totalCount === 0 ? 0 : (page - 1) * limit + 1}
-                </strong>{' '}
-                to{' '}
-                <strong className="text-slate-800 font-bold">
-                  {Math.min(page * limit, totalCount)}
-                </strong>{' '}
-                of <strong className="text-slate-800 font-bold">{totalCount}</strong> founders
+                Showing {data.length} of {totalCount} total founders
               </div>
 
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => setPage((p) => Math.max(p - 1, 1))}
                   disabled={page <= 1 || loading}
-                  className="inline-flex items-center gap-1 px-3 py-1.5 border border-slate-200 rounded-lg hover:bg-slate-50 font-bold disabled:opacity-40 transition cursor-pointer"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  className="p-1.5 border border-slate-200 rounded-lg hover:bg-slate-50 transition disabled:opacity-40 cursor-pointer"
                 >
                   <ChevronLeft className="w-4 h-4" />
-                  Prev
                 </button>
-                <span className="font-mono px-2 font-bold text-slate-700">
-                  {page} / {totalPages || 1}
+                <span className="px-2 font-mono">
+                  Page {page} of {totalPages || 1}
                 </span>
                 <button
-                  onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
                   disabled={page >= totalPages || loading}
-                  className="inline-flex items-center gap-1 px-3 py-1.5 border border-slate-200 rounded-lg hover:bg-slate-50 font-bold disabled:opacity-40 transition cursor-pointer"
+                  onClick={() => setPage((p) => p + 1)}
+                  className="p-1.5 border border-slate-200 rounded-lg hover:bg-slate-50 transition disabled:opacity-40 cursor-pointer"
                 >
-                  Next
                   <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
@@ -812,6 +846,14 @@ export default function AdminBusinessFounders() {
                       {viewingItem.email || 'Not provided'}
                     </span>
                   </div>
+                  {viewingItem.eventId && (
+                    <div className="col-span-2">
+                      <span className="text-xs text-slate-400 block">Event ID</span>
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-[#147A87]/10 text-[#147A87] border border-[#147A87]/20 mt-1">
+                        {viewingItem.eventId}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
 

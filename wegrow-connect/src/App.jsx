@@ -32,6 +32,9 @@ import EventDetails from "./components/EventDetails";
 import WomensCommunity from './components/WomensCommunity';
 import StudentFoundersCommunity from './components/StudentFoundersCommunity';
 import BusinessFoundersCommunity from './components/BusinessFoundersCommunity';
+import WomensCommunityV1 from './components/WomensCommunityV1';
+import StudentFoundersCommunityV1 from './components/StudentFoundersCommunityV1';
+import BusinessFoundersCommunityV1 from './components/BusinessFoundersCommunityV1';
 import VinayagarCompetition from './components/VinayagarCompetition';
 
 // Auth Context, Theme Context and Guard
@@ -671,6 +674,33 @@ export default function App() {
             <Route path="/business-community" element={<BusinessFoundersCommunity />} />
             <Route path="/events/business-founders" element={<BusinessFoundersCommunity />} />
             <Route path="/founders-orientation" element={<BusinessFoundersCommunity />} />
+
+            {/* Women's Community V1 */}
+            <Route path="/womens-community/v1" element={<WomensCommunityV1 />} />
+            <Route path="/womens-community-v1" element={<WomensCommunityV1 />} />
+            <Route path="/events/womens-community-v1" element={<WomensCommunityV1 />} />
+            <Route path="/women-founder-25" element={<WomensCommunityV1 />} />
+            <Route path="/women-founders-25" element={<WomensCommunityV1 />} />
+
+            {/* Student Founders Community V1 */}
+            <Route path="/student-founders/v1" element={<StudentFoundersCommunityV1 />} />
+            <Route path="/student-founders-v1" element={<StudentFoundersCommunityV1 />} />
+            <Route path="/student-community-v1" element={<StudentFoundersCommunityV1 />} />
+            <Route path="/student-founder/v1" element={<StudentFoundersCommunityV1 />} />
+            <Route path="/student-founder-v1" element={<StudentFoundersCommunityV1 />} />
+            <Route path="/student-founder-oct-3" element={<StudentFoundersCommunityV1 />} />
+            <Route path="/events/student-founders-v1" element={<StudentFoundersCommunityV1 />} />
+
+            {/* Business Founders Community V1 */}
+            <Route path="/business-founders/v1" element={<BusinessFoundersCommunityV1 />} />
+            <Route path="/business-founders-v1" element={<BusinessFoundersCommunityV1 />} />
+            <Route path="/business-community-v1" element={<BusinessFoundersCommunityV1 />} />
+            <Route path="/business-founder/v1" element={<BusinessFoundersCommunityV1 />} />
+            <Route path="/business-founder-v1" element={<BusinessFoundersCommunityV1 />} />
+            <Route path="/bussiness-founder-v1" element={<BusinessFoundersCommunityV1 />} />
+            <Route path="/bussiness-founders-v1" element={<BusinessFoundersCommunityV1 />} />
+            <Route path="/business-founder-sep-30" element={<BusinessFoundersCommunityV1 />} />
+            <Route path="/events/business-founders-v1" element={<BusinessFoundersCommunityV1 />} />
 
             {/* Vinayagar Chaturthi Drawing Competition */}
             <Route path="/vinayagar-chaturthi" element={<VinayagarCompetition />} />

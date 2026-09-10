@@ -23,9 +23,9 @@ import toast from 'react-hot-toast';
 import { registerStudentFounder, formatEventId } from '../services/api';
 import CommunityPageFooter from './CommunityPageFooter';
 
-export default function StudentFoundersCommunity() {
+export default function StudentFoundersCommunityV1() {
   // ─── Countdown Timer ─────────────────────────────────────────────────────────
-  const eventDate = new Date('2026-09-12T11:00:00+05:30').getTime();
+  const eventDate = new Date('2026-10-03T11:00:00+05:30').getTime();
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
   useEffect(() => {
@@ -136,7 +136,7 @@ export default function StudentFoundersCommunity() {
       const res = await registerStudentFounder(payload);
       if (res && (res.success || res.status === 'success' || res._id || res.data)) {
         setRegistered(true);
-        toast.success('Registration confirmed! See you on 12 Sep 🎓');
+        toast.success('Registration confirmed! See you on 3 Oct 🎓');
       } else {
         const errMsg = res?.message || 'Registration failed. Please try again.';
         toast.error(errMsg);
@@ -282,7 +282,7 @@ export default function StudentFoundersCommunity() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-6 border-t border-[#E7E1D4] text-left">
               <div className="flex items-center gap-2.5 text-sm font-bold text-[#16225E]">
                 <Calendar className="w-5 h-5 text-[#F0791E] flex-shrink-0" />
-                <span>Sat, 12 Sep 2026</span>
+                <span>Sat, 3 Oct 2026</span>
               </div>
               <div className="flex items-center gap-2.5 text-sm font-bold text-[#16225E]">
                 <Clock className="w-5 h-5 text-[#F0791E] flex-shrink-0" />
@@ -311,7 +311,7 @@ export default function StudentFoundersCommunity() {
                 <span className="flex items-center gap-1.5 text-[#F0791E]">
                   <Sparkles className="w-4 h-4" /> Student Start-up Orientation
                 </span>
-                <span>Sat, 12 Sep 2026</span>
+                <span>Sat, 3 Oct 2026</span>
               </div>
             </div>
 
@@ -321,7 +321,7 @@ export default function StudentFoundersCommunity() {
                 <Users className="w-5 h-5" />
               </div> */}
             {/* <div className="text-left">
-                <div className="font-extrabold text-sm text-[#16225E]">12 Sep · Limited Seats</div>
+                <div className="font-extrabold text-sm text-[#16225E]">3 Oct · Limited Seats</div>
                 <div className="text-[11px] text-[#666C87]">Register now · Confirmation on WhatsApp</div>
               </div> */}
             {/* </div> */}
@@ -335,7 +335,7 @@ export default function StudentFoundersCommunity() {
           <span className="inline-block bg-[#F0791E] text-white text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full">
             Orientation Starts In
           </span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold">Sat, 12 September 2026 — 11:00 AM to 1:00 PM</h2>
+          <h2 className="text-2xl sm:text-3xl font-extrabold">Sat, 3 October 2026 — 11:00 AM to 1:00 PM</h2>
           <p className="text-[#C9CEEB] text-sm max-w-lg mx-auto">
             Limited seats at WeGrow B School, Sivakasi. Register now to secure your spot.
           </p>
@@ -417,7 +417,7 @@ export default function StudentFoundersCommunity() {
             <div className="bg-[#FBF6EE] border border-[#E7E1D4] rounded-2xl p-6 text-center">
               <Calendar className="w-7 h-7 text-[#F0791E] mx-auto mb-2" />
               <div className="text-xs font-bold text-[#666C87] uppercase tracking-wider mb-1">Date</div>
-              <div className="text-base font-extrabold text-[#16225E]">Sat, 12 Sep 2026</div>
+              <div className="text-base font-extrabold text-[#16225E]">Sat, 3 Oct 2026</div>
             </div>
             <div className="bg-[#FBF6EE] border border-[#E7E1D4] rounded-2xl p-6 text-center">
               <Clock className="w-7 h-7 text-[#F0791E] mx-auto mb-2" />
@@ -680,7 +680,7 @@ export default function StudentFoundersCommunity() {
                 Orientation Registration
               </span>
               <h3 className="text-2xl sm:text-3xl font-extrabold text-[#16225E]">
-                Secure Your Seat — 12 September 2026
+                Secure Your Seat — 3 October 2026
               </h3>
               <p className="text-sm text-[#666C87]">
                 Timing: 11:00 AM – 1:00 PM · Confirmation via WhatsApp / call on the number you provide.
@@ -694,7 +694,7 @@ export default function StudentFoundersCommunity() {
                 </div>
                 <h4 className="text-2xl font-black text-emerald-900">Registration Confirmed!</h4>
                 <p className="text-sm text-emerald-800 max-w-md mx-auto">
-                  Thank you, <strong>{form.fullName}</strong>! Your seat is reserved for <strong>Sat, 12 Sep 2026 (11:00 AM – 1:00 PM)</strong> at {venueAddress}. Our team will reach out on WhatsApp (+91 {form.phone}) with details.
+                  Thank you, <strong>{form.fullName}</strong>! Your seat is reserved for <strong>Sat, 3 Oct 2026 (11:00 AM – 1:00 PM)</strong> at {venueAddress}. Our team will reach out on WhatsApp (+91 {form.phone}) with details.
                 </p>
                 <button onClick={() => setRegistered(false)} className="text-xs font-bold text-emerald-700 underline hover:text-emerald-900 cursor-pointer">
                   Register another person
@@ -990,7 +990,7 @@ export default function StudentFoundersCommunity() {
       {/* ── Shared Footer ──────────────────────────────────────────────────── */}
       <CommunityPageFooter
         eventLabel="Student Founders Orientation 2026"
-        eventDate="Sat, 12 Sep 2026"
+        eventDate="Sat, 3 Oct 2026"
         eventTime="11:00 AM – 1:00 PM"
         venueAddress={venueAddress}
         queriesPhone={helperPhone}
