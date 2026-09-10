@@ -1254,7 +1254,7 @@ export default function VinayagarCompetition() {
       `}</style>
 
       {/* Floating Badge */}
-      {showFloatingBadge && (
+      {/* {showFloatingBadge && (
         <div className="floating-badge" onClick={scrollToRegister} title="Jump to registration">
           <span className="emoji">🎨</span>
           <span>Free Drawing Competition &bull; Register Now</span>
@@ -1270,7 +1270,7 @@ export default function VinayagarCompetition() {
             &times;
           </button>
         </div>
-      )}
+      )} */}
 
       {/* Sticky Navigation */}
       <nav className="nav">
@@ -1307,11 +1307,11 @@ export default function VinayagarCompetition() {
               <span className="dot" /> WeGrow Skill Campus &amp; B School presents
             </span>
             <h1>
-              Vinayagar Chaturthi<br />
+              Vinayagar Chathurthi<br />
               <span className="accent">Drawing</span> Competition
             </h1>
             <p className="hero-tag">
-              Celebrate Vinayagar Chaturthi with colour and creativity. An open drawing competition for students of every college and every degree — pick up your pencils and bring Lord Vinayagar to life on paper.
+              Celebrate Vinayagar Chathurthi with colour and creativity. An open drawing competition for final year students of every college — pick up your pencils and bring Lord Vinayagar to life on paper.
             </p>
             <div className="hero-actions">
               <a className="btn btn-primary" href="#register" onClick={scrollToRegister}>
@@ -1352,11 +1352,6 @@ export default function VinayagarCompetition() {
                 </div>
 
                 {/* Festive Drawing Badge */}
-                <div className="mascot-drawing-badge">
-                  <span className="live-dot" />
-                  <span>Mascot Drawing Lord Vinayagar</span>
-                  <span>🎨✨</span>
-                </div>
               </div>
             </div>
           </div>
@@ -1497,7 +1492,7 @@ export default function VinayagarCompetition() {
                 )}
 
                 <p style={{ color: '#8A7863', fontSize: '14px', margin: '8px 0 16px', lineHeight: 1.5 }}>
-                  Thank you, <strong>{confirmedReg?.fullName || formData.fullName}</strong>. Your entry for the <strong>Vinayagar Chaturthi Drawing Competition</strong> has been verified &amp; confirmed.
+                  Thank you, <strong>{confirmedReg?.fullName || formData.fullName}</strong>. Your entry for the <strong>Vinayagar Chathurthi Drawing Competition</strong> has been verified &amp; confirmed.
                 </p>
 
                 <div style={{ background: '#fff', border: '1px solid #EFE1C8', borderRadius: '12px', padding: '16px', textAlign: 'left', fontSize: '13.5px', marginBottom: '18px', lineHeight: 1.7 }}>
@@ -1893,9 +1888,9 @@ export default function VinayagarCompetition() {
       <section className="cta-strip">
         <div className="wrap">
           <h2>Ready to Bring Lord Vinayagar to Life on Paper?</h2>
-          <p>Seats are limited per hall capacity. Register your spot today for free!</p>
+          <p>Seats are limited per hall capacity!</p>
           <a className="btn btn-light" href="#register" onClick={scrollToRegister}>
-            Register Free Now &rarr;
+            Register Now &rarr;
           </a>
         </div>
       </section>
@@ -1938,7 +1933,7 @@ export default function VinayagarCompetition() {
 
           <div className="foot-bottom">
             <span>&copy; {new Date().getFullYear()} WeGrow Skill Campus &amp; B School. All rights reserved.</span>
-            <span>Vinayagar Chaturthi Drawing Competition &bull; Sivakasi</span>
+            <span>Vinayagar Chathurthi Drawing Competition &bull; Sivakasi</span>
           </div>
         </div>
       </footer>
