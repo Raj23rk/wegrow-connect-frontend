@@ -36,6 +36,7 @@ import WomensCommunityV1 from './components/WomensCommunityV1';
 import StudentFoundersCommunityV1 from './components/StudentFoundersCommunityV1';
 import BusinessFoundersCommunityV1 from './components/BusinessFoundersCommunityV1';
 import VinayagarCompetition from './components/VinayagarCompetition';
+import SingAlongBooking from './components/SingAlongBooking';
 
 // Auth Context, Theme Context and Guard
 import { AuthProvider, ProtectedRoute } from './context/AuthContext';
@@ -706,6 +707,13 @@ export default function App() {
             <Route path="/vinayagar-chaturthi" element={<VinayagarCompetition />} />
             <Route path="/drawing-competition" element={<VinayagarCompetition />} />
             <Route path="/events/vinayagar-chaturthi" element={<VinayagarCompetition />} />
+
+            {/* Sing Along Musical Night Event — Ticket Booking */}
+            <Route path="/sing-along" element={<SingAlongBooking />} />
+            <Route path="/singalong" element={<SingAlongBooking />} />
+            <Route path="/events/sing-along" element={<SingAlongBooking />} />
+            <Route path="/events/singalong" element={<SingAlongBooking />} />
+            <Route path="/book-tickets" element={<SingAlongBooking />} />
 
             {/* Student Dashboard Routes (Protected) */}
             <Route path="/student/dashboard" element={<ProtectedRoute allowedRoles={['student']}><StudentDashboard /></ProtectedRoute>} />
