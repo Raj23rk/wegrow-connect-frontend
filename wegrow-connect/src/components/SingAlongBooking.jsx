@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import QRCode from 'qrcode';
 import html2canvas from 'html2canvas';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import {
   Calendar,
   Clock,
@@ -19,52 +18,67 @@ import {
   Check,
   ChevronRight,
   ChevronLeft,
-  ChevronUp,
-  ChevronDown,
   Info,
   Phone,
   Mail,
   UploadCloud,
   Home,
-  Search,
   X,
   Volume2,
   VolumeX,
-  Music
+  Music,
+  ShieldCheck,
+  Sparkles,
+  Heart,
+  FileCheck,
+  RefreshCw,
+  Zap
 } from 'lucide-react';
-import { bookSingAlongTicket, verifySingAlongTicket } from '../services/singAlongApi';
+import { bookSingAlongTicket, submitSingPaymentUtr } from '../services/singAlongApi';
+import { openRazorpaySingAlongCheckout } from '../services/razorpay';
 
-// Brand Assets
-const LOGO_IMG = "/wegrow&Bschool.webp";
-const MASCOT_IMG = "/mascot.webp";
+// Brand & Event Assets
+const VIDEO_BANNER_SRC = "/Animate_concert_banner_mascot_1080p_20260912195333.mp4";
+const POSTER_STAGE_BG = "/ChatGPT Image Sep 12, 2026, 07_35_53 PM.webp";
+const MASCOT_PROMO_IMG = "/ChatGPT Image Sep 12, 2026, 07_20_20 PM.webp";
+const TITLE_ARTWORK_IMG = "/ChatGPT Image Sep 12, 2026, 10_34_58 PM.webp";
+const POSTER_CARD_IMG = "/sing_along_official_poster.jpg";
+const WEGROW_LOGO_IMG = "/Screenshot 2026-09-09 134254.webp";
+const WEGROW_BACKUP_LOGO = "/wegrow&Bschool.webp";
 const MASCOT_SONG_AUDIO = "/OM First Strike - Bgm _ Instrumental.mp3";
 
 const CONFIG = {
-  eventName: "Sing Along",
-  titleLine1: "SING",
-  titleLine2: "ALONG",
-  tagline: "A Musical Night. Unlimited Memories.",
+  eventName: "SING ALONG",
   category: "LIVE MUSIC EVENT",
-  date: "4 October 2026",
-  dateShort: "Sun, Oct 4, 2026",
-  dateTicketTop: "04 OCT 2026",
-  dayNum: "04",
-  monthAbbr: "OCT",
+  tagline: "Good Music, Brighter People, More Good Vibes!",
+  date: "27 September 2026",
+  dateShort: "Sun, Sep 27, 2026",
+  dayNum: "27",
+  monthAbbr: "SEP",
   dayName: "SUNDAY",
-  reportingTime: "5:30 PM – 6:00 PM",
+  reportingTime: "6:00 PM Onwards",
   eventTime: "6:00 PM – 9:00 PM",
   venue: "Arasan Turf",
   location: "Sivakasi",
   fullVenue: "Arasan Turf, Sivakasi",
   presentedBy: "WeGrow Skill Campus & B School",
-  organizer: "WeGrow Skill Campus",
-  upiId: "arasanturf@upi",
-  merchantName: "WeGrow Connect",
-  ticketPrice: 199,
-  maxTickets: 20,
-  requireScreenshot: false,
+  upiId: "ashokbcasvk45@oksbi",
+  upiNumber: "",
+  merchantName: "Ashok kumar",
+  payeeName: "Ashok kumar",
+  ticketPrice: 249,
+  conventionFee: 0,
+  maxTickets: 15,
   bookingPrefix: "SA26",
-  contactNumbers: ["+91 93440 37331"],
+  contactPhone: "+91 93440 37331",
+  partners: [
+    { name: "Fresh Bites", type: "FOOD PARTNER", icon: "🍔" },
+    { name: "Thirst Quench", type: "BEVERAGE PARTNER", icon: "🥤" },
+    { name: "Sweet Corner", type: "DESSERT PARTNER", icon: "🍰" },
+    { name: "Street Feast", type: "FOOD PARTNER", icon: "🌮" },
+    { name: "Spice Garden", type: "FOOD PARTNER", icon: "🍛" },
+    { name: "Curry House", type: "FOOD PARTNER", icon: "🥘" }
+  ],
   importantNotes: [
     "No outside food / No alcohol",
     "No smoking / vaping inside the venue",
@@ -73,20 +87,10 @@ const CONFIG = {
     "Weather postponement: same ticket stays valid"
   ],
   termsList: [
-    "Entry is allowed only with a valid ticket / booking confirmation.",
-    "Organizers reserve the right to refuse entry or eject anyone violating event rules, without refund.",
-    "All bookings are subject to ticket availability and organizer discretion.",
-    "By proceeding with the booking, all attendees agree to these terms and conditions."
-  ],
-  sponsors: [
-    { name: "Food Partner", color: "#f97316" },
-    { name: "Travel Partner", color: "#2547c7" },
-    { name: "Ticket Partner", color: "#122064" },
-    { name: "Digital Partner", color: "#fb923c" },
-    { name: "Food Partner", color: "#f97316" },
-    { name: "Travel Partner", color: "#2547c7" },
-    { name: "Ticket Partner", color: "#122064" },
-    { name: "Digital Partner", color: "#fb923c" }
+    "Entry allowed only with valid ticket confirmation.",
+    "Organizers reserve right to refuse entry for rule violations.",
+    "All bookings are subject to ticket availability.",
+    "By proceeding, attendees agree to terms and conditions."
   ]
 };
 
@@ -96,38 +100,22 @@ const genBookingId = () => {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   let code = "";
   for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
-  return CONFIG.bookingPrefix + "-" + code;
+  return `${CONFIG.bookingPrefix}-${code}`;
 };
 
-const BANNER_CROWD = [
-  { x: '2%', hc: '#d4926a', bc: '#0a162b', dur: '1.9s', dd: '0s', td: '0s', type: 0 },
-  { x: '6%', hc: '#c8845a', bc: '#112240', dur: '2.2s', dd: '.3s', td: '.5s', type: 1 },
-  { x: '11%', hc: '#bf7a50', bc: '#0d1a33', dur: '1.7s', dd: '.15s', td: '1.1s', type: 2 },
-  { x: '16%', hc: '#e09970', bc: '#16284a', dur: '2.4s', dd: '.5s', td: '.2s', type: 0 },
-  { x: '21%', hc: '#c88a60', bc: '#0f1f3d', dur: '1.6s', dd: '.1s', td: '.8s', type: 1 },
-  { x: '26%', hc: '#bf7a50', bc: '#132444', dur: '2.0s', dd: '.4s', td: '.35s', type: 2 },
-  { x: '31%', hc: '#d4926a', bc: '#0c1830', dur: '1.8s', dd: '.25s', td: '1.2s', type: 0 },
-  { x: '36%', hc: '#c8845a', bc: '#142749', dur: '2.3s', dd: '.6s', td: '.4s', type: 1, dim: true },
-  { x: '64%', hc: '#e09970', bc: '#101e38', dur: '1.5s', dd: '.35s', td: '.9s', type: 2, dim: true },
-  { x: '69%', hc: '#c88a60', bc: '#152a4d', dur: '2.5s', dd: '.2s', td: '.15s', type: 0 },
-  { x: '74%', hc: '#bf7a50', bc: '#0e1b36', dur: '1.9s', dd: '.45s', td: '.7s', type: 1 },
-  { x: '79%', hc: '#d4926a', bc: '#122342', dur: '2.1s', dd: '.15s', td: '1.0s', type: 2 },
-  { x: '84%', hc: '#c8845a', bc: '#16294d', dur: '1.7s', dd: '.55s', td: '.25s', type: 0 },
-  { x: '89%', hc: '#e09970', bc: '#0d1933', dur: '2.2s', dd: '.3s', td: '.6s', type: 1 },
-  { x: '94%', hc: '#c88a60', bc: '#132444', dur: '1.8s', dd: '.1s', td: '1.15s', type: 2 },
-  { x: '97%', hc: '#bf7a50', bc: '#0f1e3a', dur: '2.4s', dd: '.4s', td: '.45s', type: 0 }
-];
-
 export default function SingAlongBooking() {
-  const [screen, setScreen] = useState('form');
-  const [showIntroModal, setShowIntroModal] = useState(true);
-  const [step, setStep] = useState(1);
+  // Screen views: 'intro' (First Screen: Before You Book) | 'booking' (Second Screen: Hero + Booking)
+  const [pageView, setPageView] = useState('intro');
 
-  // Form states
+  // Booking Flow Steps
+  const [screen, setScreen] = useState('form'); // 'form' | 'status' | 'success'
+  const [step, setStep] = useState(1); // 1: Booker, 2: Tickets, 3: Payment, 4: Review
+
+  // Form Fields
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [shakeTerms, setShakeTerms] = useState(false);
   const [booker, setBooker] = useState({
     name: '',
-    countryCode: '+91',
     mobile: '',
     email: ''
   });
@@ -140,74 +128,122 @@ export default function SingAlongBooking() {
   });
   const [errors, setErrors] = useState({});
   const [copiedUpi, setCopiedUpi] = useState(false);
+  const [copiedUpiNumber, setCopiedUpiNumber] = useState(false);
+  const [showOriginalQr, setShowOriginalQr] = useState(true);
+  const [paymentMode, setPaymentMode] = useState('MANUAL_UPI'); // 'MANUAL_UPI' | 'ONLINE'
+  const [isOnlinePaying, setIsOnlinePaying] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Ticket states
+  // Success / Ticket Data
   const [ticketData, setTicketData] = useState(null);
-  const [ticketDetailsOpen, setTicketDetailsOpen] = useState(true);
   const [isDownloading, setIsDownloading] = useState(false);
-
   const [paymentQr, setPaymentQr] = useState('');
   const [ticketQr, setTicketQr] = useState('');
 
-  // Mascot Singing Music Audio State
-  const [isPlayingMusic, setIsPlayingMusic] = useState(false);
-  const audioRef = useRef(null);
+  // Mascot Concert Video & Sound Controls
+  const videoRef = useRef(null);
+  const [isVideoMuted, setIsVideoMuted] = useState(false);
+  const ticketCaptureRef = useRef(null);
 
-  const toggleMusic = () => {
-    if (!audioRef.current) return;
-    if (isPlayingMusic) {
-      audioRef.current.pause();
-      setIsPlayingMusic(false);
-    } else {
-      audioRef.current.play()
-        .then(() => {
-          setIsPlayingMusic(true);
-          toast.success("Playing Mascot Song 🎶", { id: 'music-toast', duration: 2500 });
-        })
-        .catch((err) => {
-          console.error("Audio play error:", err);
-          toast("Click again to enable audio playback!", { icon: '🎵', id: 'music-hint' });
-        });
+  const subtotal = qty * CONFIG.ticketPrice;
+  const conventionFee = 0;
+  const totalAmount = subtotal;
+
+  // Toggle Video Audio (mascot singing voice)
+  const toggleVideoSound = () => {
+    if (!videoRef.current) return;
+    const nextMuted = !videoRef.current.muted;
+    videoRef.current.muted = nextMuted;
+    setIsVideoMuted(nextMuted);
+    if (!nextMuted) {
+      videoRef.current.play().catch(console.warn);
     }
   };
 
-  const ticketCaptureRef = useRef(null);
-  const totalAmount = qty * CONFIG.ticketPrice;
-
-  // Scan & Pay UPI URL
-  const upiUrl = `upi://pay?pa=${encodeURIComponent(CONFIG.upiId)}&pn=${encodeURIComponent(CONFIG.organizer)}&am=${totalAmount}&cu=INR&tn=${encodeURIComponent(CONFIG.eventName + ' Ticket')}`;
-
+  // Generate UPI Payment QR Code & Mobile Deep Link
+  const [upiDeepLink, setUpiDeepLink] = useState('');
   useEffect(() => {
+    const upiUrl = `upi://pay?pa=${encodeURIComponent(CONFIG.upiId)}&pn=${encodeURIComponent(CONFIG.merchantName)}&am=${totalAmount}&cu=INR&tn=${encodeURIComponent(CONFIG.eventName + ' Ticket')}`;
+    setUpiDeepLink(upiUrl);
     QRCode.toDataURL(upiUrl, {
-      width: 200,
+      width: 220,
       margin: 1,
-      color: { dark: '#12205c', light: '#ffffff' }
+      color: { dark: '#111827', light: '#ffffff' }
     })
       .then(url => setPaymentQr(url))
       .catch(err => console.error('UPI QR Error:', err));
-  }, [totalAmount, upiUrl]);
+  }, [totalAmount]);
 
+  // Generate Verification QR Code for confirmed ticket
   useEffect(() => {
-    if (ticketData?.bookingId || ticketData?.ticketId) {
+    if (ticketData?.bookingId) {
       const code = ticketData.verificationToken || `SINGALONG-VERIFY:${ticketData.bookingId}`;
       QRCode.toDataURL(code, {
-        width: 220,
+        width: 200,
         margin: 1,
-        color: { dark: '#12205c', light: '#ffffff' }
+        color: { dark: '#0f172a', light: '#ffffff' }
       })
         .then(url => setTicketQr(url))
         .catch(err => console.error('Ticket QR Error:', err));
     }
   }, [ticketData]);
 
+  // Copy UPI ID
   const handleCopyUpi = () => {
-    navigator.clipboard?.writeText(CONFIG.upiId);
-    setCopiedUpi(true);
-    toast.success('UPI ID copied to clipboard!');
-    setTimeout(() => setCopiedUpi(false), 2000);
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(CONFIG.upiId);
+      setCopiedUpi(true);
+      toast.success('UPI ID copied to clipboard!');
+      setTimeout(() => setCopiedUpi(false), 2000);
+    }
   };
 
+  // Copy UPI Number
+  const handleCopyUpiNumber = () => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(CONFIG.upiNumber);
+      setCopiedUpiNumber(true);
+      toast.success('UPI Number copied to clipboard!');
+      setTimeout(() => setCopiedUpiNumber(false), 2000);
+    }
+  };
+
+  // First Screen: "Let's Book & Hear Mascot Sing" Click Handler
+  const handleIntroProceed = () => {
+    if (!termsAccepted) {
+      setShakeTerms(true);
+      toast.error("Please agree to the Terms & Conditions to proceed.");
+      setTimeout(() => setShakeTerms(false), 600);
+      return;
+    }
+
+    // Switch cleanly to Second Screen (Hero Banner at the top)
+    setPageView('booking');
+    window.scrollTo({ top: 0, behavior: 'instant' });
+
+    // Play video with mascot voice synchronized to mouth movement
+    setTimeout(() => {
+      if (videoRef.current) {
+        videoRef.current.muted = false;
+        videoRef.current.play()
+          .then(() => setIsVideoMuted(false))
+          .catch(() => {
+            if (videoRef.current) {
+              videoRef.current.muted = true;
+              videoRef.current.play().catch(console.warn);
+              setIsVideoMuted(true);
+            }
+          });
+      }
+    }, 150);
+  };
+
+  // Quantity Handlers
+  const handleQtyChange = (delta) => {
+    setQty(prev => Math.max(1, Math.min(CONFIG.maxTickets, prev + delta)));
+  };
+
+  // Form Validation
   const validateStep1 = () => {
     const err = {};
     if (!booker.name.trim()) err.name = "Full name is required.";
@@ -223,52 +259,39 @@ export default function SingAlongBooking() {
     return Object.keys(err).length === 0;
   };
 
-  const validateStep2 = () => {
-    const err = {};
-    if (!qty || qty < 1) err.qty = "Please select at least 1 ticket.";
-    else if (qty > CONFIG.maxTickets) err.qty = `Maximum ${CONFIG.maxTickets} tickets per booking.`;
-    setErrors(err);
-    return Object.keys(err).length === 0;
-  };
-
   const validateStep3 = () => {
+    if (paymentMode === 'ONLINE') return true;
     const err = {};
     if (!payment.utr.trim()) {
       err.utr = "UPI Transaction ID / UTR is required.";
     } else if (payment.utr.trim().length < 6) {
-      err.utr = "Enter a valid UTR / Transaction ID (min 6 chars).";
-    }
-    if (!payment.datetime) {
-      err.datetime = "Payment date & time is required.";
-    }
-    if (CONFIG.requireScreenshot && !payment.fileData) {
-      err.file = "Please upload your payment screenshot.";
+      err.utr = "Enter a valid UTR / Transaction ID (min 6 characters).";
     }
     setErrors(err);
     return Object.keys(err).length === 0;
   };
 
-  const handleNextStep = () => {
-    let isValid = false;
-    if (step === 1) isValid = validateStep1();
-    else if (step === 2) isValid = validateStep2();
-    else if (step === 3) isValid = validateStep3();
-
-    if (isValid) {
-      setStep(prev => prev + 1);
-      setErrors({});
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+  const handleNext = () => {
+    if (step === 1) {
+      if (!validateStep1()) return;
+      setStep(2);
+    } else if (step === 2) {
+      setStep(3);
+    } else if (step === 3) {
+      if (!validateStep3()) return;
+      setStep(4);
     }
+    setErrors({});
   };
 
-  const handlePrevStep = () => {
+  const handleBack = () => {
     if (step > 1) {
       setStep(prev => prev - 1);
       setErrors({});
-      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
+  // File Screenshot Upload
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -292,28 +315,123 @@ export default function SingAlongBooking() {
     reader.readAsDataURL(file);
   };
 
+  // Instant Real-Time Online Payment (Razorpay UPI, Cards, NetBanking)
+  const handleInstantOnlinePay = async () => {
+    setIsOnlinePaying(true);
+    try {
+      await openRazorpaySingAlongCheckout({
+        amount: totalAmount,
+        bookingDetails: {
+          fullName: booker.name.trim(),
+          phone: booker.mobile.trim(),
+          email: booker.email.trim(),
+          ticketQty: qty,
+          conventionFee: 0,
+        },
+        onSuccess: async (payResult) => {
+          setIsOnlinePaying(false);
+          setIsSubmitting(true);
+          setScreen('status');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+
+          const payload = {
+            fullName: booker.name.trim(),
+            phone: booker.mobile.trim(),
+            email: booker.email.trim() || undefined,
+            ticketQty: qty,
+            utr: payResult.paymentId,
+            paymentMethod: 'RAZORPAY',
+            status: 'CONFIRMED',
+            notes: `Real-time payment verified via Razorpay (${payResult.paymentId}). Amount: ₹${totalAmount} (${qty} pass${qty > 1 ? 'es' : ''})`,
+            eventId: "SINGALONG-SEP-27-2026",
+          };
+
+          try {
+            let bookedRecord = null;
+            try {
+              const res = await bookSingAlongTicket(payload);
+              bookedRecord = res?.data || res?.booking || res;
+            } catch (apiErr) {
+              console.warn("Backend booking warning:", apiErr);
+            }
+
+            const confirmedBookingId = bookedRecord?.bookingId || genBookingId();
+            const confirmedTicketData = {
+              bookingId: confirmedBookingId,
+              ticketId: bookedRecord?.ticketId || `TKT-${confirmedBookingId}`,
+              fullName: booker.name.trim(),
+              phone: `+91 ${booker.mobile.trim()}`,
+              email: booker.email.trim() || 'Not provided',
+              ticketQty: qty,
+              amount: totalAmount,
+              utr: payResult.paymentId,
+              paymentMethod: 'RAZORPAY',
+              paidAt: new Date().toISOString(),
+              verificationToken: bookedRecord?.verificationToken || `SINGALONG-VERIFY:${confirmedBookingId}`,
+            };
+
+            setTimeout(() => {
+              setTicketData(confirmedTicketData);
+              setScreen('success');
+              setIsSubmitting(false);
+              toast.success("Payment verified! Ticket booked successfully! 🎉");
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 800);
+          } catch (err) {
+            setIsSubmitting(false);
+            setScreen('form');
+            toast.error(err.message || "Failed to finalize booking.");
+          }
+        },
+        onError: (err) => {
+          setIsOnlinePaying(false);
+          toast.error(err?.description || err?.message || "Payment was cancelled or unsuccessful.");
+        },
+        onDismiss: () => {
+          setIsOnlinePaying(false);
+        },
+      });
+    } catch (e) {
+      setIsOnlinePaying(false);
+      console.error(e);
+      toast.error("Could not initiate online payment. You can also scan the Google Pay QR.");
+    }
+  };
+
+  // Final Booking Confirmation
   const handleConfirmBooking = async () => {
     setIsSubmitting(true);
     setScreen('status');
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
     const payload = {
+      utr: payment.utr.trim(),
       fullName: booker.name.trim(),
-      phone: `${booker.countryCode} ${booker.mobile.trim()}`,
+      phone: booker.mobile.trim(),
       email: booker.email.trim() || undefined,
       ticketQty: qty,
-      utr: payment.utr.trim(),
       paymentScreenshot: payment.fileData || undefined,
-      eventId: "SINGALONG-OCT-04-2026"
+      paymentMethod: CONFIG.upiId || 'ashokbcasvk45@oksbi',
     };
 
     try {
       let bookedRecord = null;
       try {
-        const res = await bookSingAlongTicket(payload);
-        bookedRecord = res.data || res.booking || res;
-      } catch (apiErr) {
-        console.warn("Backend API notice, using fallback:", apiErr);
+        const res = await submitSingPaymentUtr(payload);
+        bookedRecord = res?.data?.booking || res?.booking || res?.data || res;
+      } catch (utrErr) {
+        console.warn("submitSingPaymentUtr note (trying bookSingAlongTicket fallback):", utrErr);
+        try {
+          const res = await bookSingAlongTicket({
+            ...payload,
+            status: 'CONFIRMED',
+            eventId: "SINGALONG-SEP-27-2026",
+            notes: `Manual UPI payment. Amount: ₹${totalAmount} (${qty} pass${qty > 1 ? 'es' : ''})`
+          });
+          bookedRecord = res?.data?.booking || res?.data || res?.booking || res;
+        } catch (apiErr) {
+          console.warn("Backend API note (fallback enabled):", apiErr);
+        }
       }
 
       const confirmedBookingId = bookedRecord?.bookingId || genBookingId();
@@ -321,8 +439,8 @@ export default function SingAlongBooking() {
         bookingId: confirmedBookingId,
         ticketId: bookedRecord?.ticketId || `TKT-${confirmedBookingId}`,
         fullName: booker.name.trim(),
-        phone: `${booker.countryCode} ${booker.mobile.trim()}`,
-        email: booker.email.trim(),
+        phone: `+91 ${booker.mobile.trim()}`,
+        email: booker.email.trim() || 'Not provided',
         ticketQty: qty,
         amount: totalAmount,
         utr: payment.utr.trim(),
@@ -334,9 +452,9 @@ export default function SingAlongBooking() {
         setTicketData(confirmedTicketData);
         setScreen('success');
         setIsSubmitting(false);
-        toast.success("Ticket booked successfully! 🎉");
+        toast.success("Ticket booked successfully! 🎟️🎉");
         window.scrollTo({ top: 0, behavior: 'smooth' });
-      }, 1800);
+      }, 1600);
     } catch (err) {
       setIsSubmitting(false);
       setScreen('form');
@@ -344,49 +462,50 @@ export default function SingAlongBooking() {
     }
   };
 
+  // Download Ticket as PNG
   const handleDownloadTicket = async () => {
     if (!ticketCaptureRef.current) return;
     setIsDownloading(true);
-    const toastId = toast.loading("Generating ticket image...");
+    const toastId = toast.loading("Generating high-resolution ticket...");
     try {
       const canvas = await html2canvas(ticketCaptureRef.current, {
         scale: 2.5,
-        backgroundColor: '#0a0e1f',
+        backgroundColor: '#0f172a',
         useCORS: true,
         logging: false
       });
       const link = document.createElement("a");
-      link.download = `SingAlong_Ticket_${ticketData?.bookingId || "Pass"}.png`;
+      link.download = `SingAlong_Pass_${ticketData?.bookingId || "2026"}.png`;
       link.href = canvas.toDataURL("image/png");
       link.click();
-      toast.success("Ticket downloaded successfully!", { id: toastId });
+      toast.success("Ticket downloaded successfully! 📥", { id: toastId });
     } catch (err) {
       console.error("Ticket download error:", err);
-      toast.error("Could not download ticket image.", { id: toastId });
+      toast.error("Could not download ticket. Please take a screenshot.", { id: toastId });
     } finally {
       setIsDownloading(false);
     }
   };
 
-  const handleShareTicket = async () => {
-    const text = `🎟️ *${CONFIG.eventName} Live Music Event*\n📅 ${CONFIG.dateShort} | ${CONFIG.eventTime}\n📍 ${CONFIG.fullVenue}\n🎫 Booking ID: *${ticketData?.bookingId}*\n👤 Booked for: ${ticketData?.fullName} (${ticketData?.ticketQty} Ticket${ticketData?.ticketQty > 1 ? 's' : ''})\n\nBook your tickets here: ${window.location.origin}/sing-along`;
+  // Share on WhatsApp
+  const handleShareTicket = () => {
+    const text = `🎟️ *${CONFIG.eventName} - Live Music Event Entry Pass*\n📅 ${CONFIG.dateShort} | ${CONFIG.eventTime}\n📍 ${CONFIG.fullVenue}\n🎫 Booking ID: *${ticketData?.bookingId}*\n👤 Attendee: ${ticketData?.fullName} (${ticketData?.ticketQty} Pass${ticketData?.ticketQty > 1 ? 'es' : ''})\n💰 Total: ${rupee(ticketData?.amount)}\n\nBook your passes here: ${window.location.origin}/sing-along`;
     if (navigator.share) {
-      try {
-        await navigator.share({
-          title: CONFIG.eventName,
-          text: text,
-          url: `${window.location.origin}/sing-along`
-        });
-      } catch (e) { }
+      navigator.share({
+        title: CONFIG.eventName,
+        text: text,
+        url: `${window.location.origin}/sing-along`
+      }).catch(() => {});
     } else {
       window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
     }
   };
 
+  // Reset Booking Flow
   const handleReset = () => {
     setScreen('form');
     setStep(1);
-    setBooker({ name: '', countryCode: '+91', mobile: '', email: '' });
+    setBooker({ name: '', mobile: '', email: '' });
     setQty(1);
     setPayment({ utr: '', datetime: new Date().toISOString().slice(0, 16), fileName: '', fileData: '' });
     setTicketData(null);
@@ -394,1672 +513,1600 @@ export default function SingAlongBooking() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-
-  const renderCrowdSVG = () => (
-    <svg viewBox="0 0 700 140" preserveAspectRatio="none" style={{ width: '100%', height: '100%' }}>
-      {Array.from({ length: 11 }).map((_, i) => {
-        const x = 30 + i * 62;
-        const s = 0.58 + Math.sin(i * 1.3) * 0.07;
-        return (
-          <g key={`b-${i}`} transform={`translate(${x},78) scale(${s.toFixed(2)})`}>
-            <circle cx="0" cy="-30" r="7.5" fill="rgba(28,47,140,.55)" />
-            <path d="M-10,-20 Q0,-27 10,-20 L12,10 Q0,17 -12,10 Z" fill="rgba(28,47,140,.55)" />
-            <path d="M-8,-18 L-17,-38" stroke="rgba(28,47,140,.55)" strokeWidth="4.5" strokeLinecap="round" />
-            <path d="M8,-18 L17,-38" stroke="rgba(28,47,140,.55)" strokeWidth="4.5" strokeLinecap="round" />
-          </g>
-        );
-      })}
-      {Array.from({ length: 9 }).map((_, i) => {
-        const x = 18 + i * 78;
-        const s = 0.9 + Math.sin(i * 1.9) * 0.09;
-        const fill = (i === 2 || i === 6) ? "#f97316" : "#050a1c";
-        return (
-          <g key={`f-${i}`} transform={`translate(${x},116) scale(${s.toFixed(2)})`}>
-            <circle cx="0" cy="-30" r="7.5" fill={fill} />
-            <path d="M-10,-20 Q0,-27 10,-20 L12,10 Q0,17 -12,10 Z" fill={fill} />
-            <path d="M-8,-18 L-17,-38" stroke={fill} strokeWidth="4.5" strokeLinecap="round" />
-            <path d="M8,-18 L17,-38" stroke={fill} strokeWidth="4.5" strokeLinecap="round" />
-          </g>
-        );
-      })}
-    </svg>
-  );
-
   return (
-    <div
-      className="min-vh-100 position-relative pb-5"
-      style={{
-        fontFamily: "'Inter', sans-serif",
-        background: 'radial-gradient(120% 60% at 50% -5%, #e8f5e9 0%, #f1fbf5 35%, #f8fafc 100%)',
-        backgroundColor: '#f8fafc',
-        color: '#0f172a'
-      }}
-    >
-      {/* Self-contained style overrides for stage beams, ticket perforations & keyframes */}
+    <div className="min-h-screen bg-[#fdfbf7] text-[#0f172a] selection:bg-[#ff6a00] selection:text-white relative font-sans overflow-x-hidden">
+
+      {/* Embedded CSS for custom Google Fonts, Fast Blinking Multi-Color DJ Lights & Responsive Stage Layout */}
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
-        .font-display { font-family: 'Poppins', sans-serif !important; }
-        .sa-card {
-          background: #ffffff;
-          border-radius: 22px;
-          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.04), 0 16px 36px -10px rgba(22, 101, 52, 0.1);
-          border: 1.5px solid #dcfce7;
-          color: #0f172a;
-        }
-        .sa-step-card {
-          background: #ffffff;
-          border-radius: 22px;
-          border: 1.5px solid #bbf7d0;
-          box-shadow: 0 6px 14px -2px rgba(0, 0, 0, 0.04), 0 20px 40px -15px rgba(22, 101, 52, 0.12);
-          color: #0f172a;
-        }
-        .sa-btn-primary {
-          background: linear-gradient(180deg, #16a34a, #15803d);
-          color: #fff;
-          font-weight: 700;
-          border-radius: 14px;
-          border: none;
-          box-shadow: 0 8px 20px -6px rgba(22,163,74,.5);
-          transition: all .12s ease;
-        }
-        .sa-btn-primary:hover:not(:disabled) {
-          transform: translateY(-1px);
-          box-shadow: 0 12px 24px -8px rgba(34,197,94,.65);
-          color: #fff;
-        }
-        .sa-btn-primary:disabled { opacity: .4; cursor: not-allowed; }
-        .sa-btn-ghost {
-          background: #ffffff;
-          color: #15803d;
-          font-weight: 700;
-          border-radius: 14px;
-          border: 1.5px solid #bbf7d0;
-          box-shadow: 0 2px 5px rgba(0,0,0,0.03);
-          transition: all .12s ease;
-        }
-        .sa-btn-ghost:hover:not(:disabled) {
-          background: #f0fdf4;
-          border-color: #16a34a;
-          color: #15803d;
-        }
-        .sa-field {
-          width: 100%;
-          border-radius: 13px;
-          border: 1.5px solid #cbd5e1;
-          background: #ffffff;
-          padding: 12px 14px;
-          font-size: 15px;
-          color: #0f172a;
-          outline: none;
-          transition: border-color .12s ease, box-shadow .12s ease;
-        }
-        .sa-field:focus {
-          border-color: #16a34a;
-          box-shadow: 0 0 0 4px rgba(34,197,94,.18);
-          background: #ffffff;
-          color: #0f172a;
-        }
-        .sa-field option {
-          background: #ffffff;
-          color: #0f172a;
-        }
-        .sa-field-error { border-color: #ef4444 !important; }
-        .step-dot { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; flex-shrink: 0; }
-        .step-line { flex: 1; height: 2.5px; background: #e2e8f0; margin: 0 6px; min-width: 16px; border-radius: 999px; }
-        .step-line.done { background: #16a34a; box-shadow: 0 0 6px rgba(22,163,74,0.4); }
-        .sa-spinner { width: 48px; height: 48px; border-radius: 50%; border: 4px solid #dcfce7; border-top-color: #16a34a; animation: saSpin 0.9s linear infinite; }
-        @keyframes saSpin { to { transform: rotate(360deg); } }
-        .poster-stage { position: relative; overflow: hidden; color: #fff; background: radial-gradient(120% 90% at 18% 0%, rgba(22,163,74,.42), transparent 55%), radial-gradient(95% 75% at 88% 8%, rgba(249,115,22,.32), transparent 52%), linear-gradient(180deg, #092617 0%, #031009 75%); }
-        .poster-stars { position: absolute; inset: 0; background-image: radial-gradient(1.5px 1.5px at 20% 22%, rgba(255,255,255,.55) 50%, transparent 51%), radial-gradient(1.5px 1.5px at 72% 14%, rgba(255,255,255,.4) 50%, transparent 51%), radial-gradient(1.5px 1.5px at 42% 32%, rgba(255,255,255,.4) 50%, transparent 51%), radial-gradient(1.5px 1.5px at 88% 30%, rgba(255,255,255,.3) 50%, transparent 51%); }
-        .stage-beam { position: absolute; top: -16%; width: 34%; height: 120%; background: linear-gradient(180deg, rgba(255,255,255,.14), transparent 68%); transform: skewX(-13deg); filter: blur(1.5px); pointer-events: none; }
-        .poster-gradtext { background: linear-gradient(90deg, #86efac, #22c55e, #fbbf24); -webkit-background-clip: text; background-clip: text; color: transparent; }
-        .mascot-note { position: absolute; font-family: 'Poppins', sans-serif; font-weight: 700; pointer-events: none; animation: saNoteFloat 5s ease-in-out infinite; text-shadow: 0 2px 8px rgba(0,0,0,.35); }
-        @keyframes saNoteFloat { 0%,100% { transform: translateY(0) rotate(-6deg); } 50% { transform: translateY(-8px) rotate(6deg); } }
-        .mic-badge { width: 32px; height: 32px; border-radius: 50%; background: #f97316; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 14px -4px rgba(249,115,22,.7); position: relative; z-index: 2; }
-        .mic-ring { position: absolute; inset: -7px; border-radius: 50%; border: 2px solid rgba(249,115,22,.55); animation: saMicPing 2.4s ease-out infinite; }
-        @keyframes saMicPing { 0% { transform: scale(.7); opacity: .9; } 100% { transform: scale(1.85); opacity: 0; } }
-        .crowd-fade { background: linear-gradient(180deg, transparent, #031009 88%); }
-        .ticket-card { background: #ffffff; border: 1.5px solid #dcfce7; border-radius: 22px; box-shadow: 0 20px 50px -15px rgba(22, 101, 52, 0.15); position: relative; overflow: hidden; color: #0f172a; }
-        .perf-row { position: relative; padding: 0 22px; margin-top: 8px; }
-        .perf-row::before, .perf-row::after { content: ""; position: absolute; top: 50%; transform: translateY(-50%); width: 26px; height: 26px; border-radius: 50%; background: #f8fafc; }
-        .perf-row::before { left: -13px; }
-        .perf-row::after { right: -13px; }
-        .perf-pill { width: 100%; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 999px; padding: 12px 0; text-align: center; color: #166534; font-size: 13.5px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; }
-        .perf-pill:hover { background: #dcfce7; color: #14532d; }
-        .perf-divider { position: relative; height: 1px; background: #e2e8f0; margin: 0 34px; }
-        .perf-divider::before, .perf-divider::after { content: ""; position: absolute; top: 50%; transform: translateY(-50%); width: 26px; height: 26px; border-radius: 50%; background: #f8fafc; }
-        .perf-divider::before { left: -35px; }
-        .perf-divider::after { right: -35px; }
-        .vtag { writing-mode: vertical-rl; transform: rotate(180deg); letter-spacing: .14em; font-size: 10.5px; color: #16a34a; flex-shrink: 0; font-weight: 700; }
-        .qty-btn {
-          width: 44px;
-          height: 44px;
-          border-radius: 12px;
-          border: 1.5px solid #bbf7d0;
-          background: #f0fdf4;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-weight: 700;
-          font-size: 19px;
-          color: #15803d;
-          transition: all .12s ease;
-          flex-shrink: 0;
-          cursor: pointer;
-        }
-        .qty-btn:hover:not(:disabled) {
-          background: #16a34a;
-          border-color: #16a34a;
-          color: #ffffff;
-        }
-        .qty-btn:disabled { opacity: .3; cursor: not-allowed; }
-        .checkbox-box { width: 20px; height: 20px; border-radius: 6px; border: 2px solid #94a3b8; background: #ffffff; flex-shrink: 0; display: flex; align-items: center; justify-content: center; margin-top: 1px; transition: all .12s ease; }
-        .checkbox-box.checked { background: #16a34a; border-color: #16a34a; }
-        .ribbon { background: linear-gradient(180deg, #fb923c, #ea580c); box-shadow: 0 6px 16px -6px rgba(234,88,12,.6); }
-        .price-chip { border-radius: 14px; padding: 10px 12px; }
-        .scroll-x { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .sa-marquee-wrap { overflow: hidden; width: 100%; }
-        .sa-marquee-track { display: flex; gap: 0; width: max-content; animation: saMarquee 28s linear infinite; }
-        .sa-marquee-track:hover { animation-play-state: paused; }
-        .sa-marquee-group { display: flex; align-items: center; gap: 20px; padding-right: 20px; }
-        .sa-partner-chip {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          background: #ffffff;
-          border: 1.5px solid #dcfce7;
-          border-radius: 40px;
-          padding: 6px 14px 6px 8px;
-          box-shadow: 0 4px 12px rgba(22, 101, 52, 0.08);
-          white-space: nowrap;
-          flex-shrink: 0;
-        }
-        .sa-partner-icon { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 14px; }
-        .sa-partner-sep { width: 4px; height: 4px; border-radius: 50%; background: #86efac; flex-shrink: 0; }
-        @keyframes saMarquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-        @keyframes saMarquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-        /* Concert scene animations */
-        @keyframes saBob { 0%,100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-10px); } }
-        @keyframes saDance  { 0%,100% { transform: translateY(0) rotate(-5deg); } 50% { transform: translateY(-7px) rotate(5deg); } }
-        @keyframes saDance2 { 0%,100% { transform: translateY(0) rotate(4deg);  } 50% { transform: translateY(-9px) rotate(-4deg); } }
-        @keyframes saCrowdSway { 0%,100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-6px) rotate(3deg); } }
-        @keyframes saArmL   { 0%,100% { transform: rotate(-50deg); } 50% { transform: rotate(-10deg); } }
-        @keyframes saArmR   { 0%,100% { transform: rotate(50deg);  } 50% { transform: rotate(10deg);  } }
-        @keyframes saLegL   { 0%,100% { transform: rotate(-12deg); } 50% { transform: rotate(6deg); } }
-        @keyframes saLegR   { 0%,100% { transform: rotate(12deg);  } 50% { transform: rotate(-6deg); } }
-        @keyframes saTorch  { 0%,100% { opacity:1;  box-shadow:0 0 14px 7px rgba(255,255,255,1), 0 0 28px 12px rgba(134,239,172,0.85), 0 -24px 34px 8px rgba(255,255,255,0.45); } 50% { opacity:.25; box-shadow:0 0 3px 1px rgba(255,255,255,.3); } }
-        @keyframes saTorch2 { 0%,35% { opacity:.25; box-shadow:none; } 65%,100% { opacity:1;  box-shadow:0 0 16px 8px rgba(255,255,255,1), 0 0 32px 14px rgba(254,240,138,0.85), 0 -26px 36px 8px rgba(255,255,255,0.45); } }
-        @keyframes saTorch3 { 0%,20%,80%,100% { opacity:1; box-shadow:0 0 14px 7px rgba(255,255,255,1), 0 0 26px 10px rgba(186,230,253,0.8), 0 -24px 32px 6px rgba(255,255,255,.4); } 40%,60% { opacity:.2; box-shadow:0 0 2px 1px rgba(255,255,255,.2); } }
-        @keyframes saNoteRise { 0% { transform:translateY(0) rotate(-8deg) scale(.8); opacity:0; } 15% { opacity:1; } 85% { opacity:.7; } 100% { transform:translateY(-220px) rotate(14deg) scale(1.1); opacity:0; } }
-        @keyframes saBeamSway { 0%,100% { transform:skewX(-12deg) translateX(0); } 50% { transform:skewX(-12deg) translateX(18px); } }
-        @keyframes saTurfWave { 0%,100% { background-position:0 0; } 50% { background-position:8px 0; } }
-        @keyframes saPulseGlow { 0%,100% { box-shadow:0 -6px 32px 0 rgba(34,197,94,.45); } 50% { box-shadow:0 -10px 48px 0 rgba(34,197,94,.75); } }
-        @keyframes saPhoneLight { 0%,100% { opacity:1; filter:brightness(1.2); } 50% { opacity:.15; filter:brightness(.5); } }
-        .sa-concert-wrap { position:relative; width:100%; height:100%; overflow:hidden; }
-        .sa-turf { position:absolute; bottom:0; left:0; right:0; height:24%; background:repeating-linear-gradient(90deg,#0f4722 0px,#0f4722 14px,#155e2d 14px,#155e2d 28px); border-top:3px solid #22c55e; animation:saTurfWave 3s ease-in-out infinite, saPulseGlow 2.5s ease-in-out infinite; }
-        .sa-stage-line { position:absolute; bottom:24%; left:3%; right:3%; height:3px; background:linear-gradient(90deg,transparent,#22c55e 15%,#86efac 50%,#22c55e 85%,transparent); box-shadow:0 0 18px 5px rgba(34,197,94,.85); border-radius:999px; }
-        .sa-beam { position:absolute; top:0; width:7%; height:75%; background:linear-gradient(180deg,rgba(255,255,255,.18),transparent); transform-origin:top center; filter:blur(2px); pointer-events:none; animation:saBeamSway 4s ease-in-out infinite; }
-        .sa-note { position:absolute; pointer-events:none; animation:saNoteRise 3.5s ease-in-out infinite; }
-        .sa-mascot-stage { position:absolute; bottom:24%; left:50%; transform:translateX(-50%); z-index:1; animation:saBob 1.8s ease-in-out infinite; }
-        /* Mascot Singing Animation Keyframes */
-        @keyframes saMascotSing {
-          0%, 100% { transform: translateY(0) rotate(-2.5deg) scale(1); }
-          25% { transform: translateY(-9px) rotate(2deg) scale(1.03); }
-          50% { transform: translateY(-3px) rotate(-1deg) scale(1.01); }
-          75% { transform: translateY(-11px) rotate(3deg) scale(1.04); }
-        }
-        @keyframes saSingingNote {
-          0% { transform: translateY(0) translateX(0) scale(0.6) rotate(-8deg); opacity: 0; }
-          20% { opacity: 1; }
-          80% { opacity: 0.9; }
-          100% { transform: translateY(-75px) translateX(18px) scale(1.2) rotate(18deg); opacity: 0; }
-        }
-        .sa-singing-note {
-          position: absolute;
-          font-weight: 800;
-          pointer-events: none;
-          filter: drop-shadow(0 0 6px rgba(255,255,255,0.7));
-          animation: saSingingNote 3.2s ease-in-out infinite;
-        }
-        @keyframes saSpotlightPulse {
-          0%, 100% { opacity: 0.6; transform: translateX(-50%) scaleX(1); }
-          50% { opacity: 0.95; transform: translateX(-50%) scaleX(1.15); }
-        }
-        @keyframes saStageDiscPulse {
-          0%, 100% { transform: translateX(-50%) scale(1); box-shadow: 0 0 24px 8px rgba(34, 197, 94, 0.7); }
-          50% { transform: translateX(-50%) scale(1.12); box-shadow: 0 0 38px 14px rgba(34, 197, 94, 0.95); }
-        }
-        .sa-mascot-singer {
-          height: 96px;
-          width: auto;
-        }
-        @media (max-width: 768px) {
-          .sa-mascot-singer {
-            height: 84px;
-          }
-        }
-        @media (max-width: 480px) {
-          .sa-mascot-singer {
-            height: 72px;
-          }
-        }
-        /* Music Equalizer and Control Styles */
-        .eq-bar {
-          display: inline-block;
-          width: 3px;
-          background: #ffffff;
-          border-radius: 2px;
-          animation: eqBounce 0.8s ease-in-out infinite;
-        }
-        .eq-bar-1 { height: 10px; animation-delay: 0s; }
-        .eq-bar-2 { height: 14px; animation-delay: 0.2s; }
-        .eq-bar-3 { height: 7px;  animation-delay: 0.4s; }
-        .eq-bar-4 { height: 12px; animation-delay: 0.15s; }
-        @keyframes eqBounce {
-          0%, 100% { transform: scaleY(0.35); }
-          50% { transform: scaleY(1); }
-        }
-        /* Rotating Colored Stage Light Beams */
-        @keyframes saRotateColorBeamLeft {
+        @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Outfit:wght@500;600;700;800;900&family=Permanent+Marker&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Shrikhand&display=swap');
+
+        .font-display { font-family: 'Outfit', sans-serif; }
+        .font-body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .font-handwritten { font-family: 'Caveat', cursive; }
+        .font-poster { font-family: 'Shrikhand', cursive; }
+        .font-brush { font-family: 'Permanent Marker', cursive; }
+
+        /* =========================================================================
+           HIGH-SPEED MULTI-COLOUR BLINKING CONCERT DJ LIGHTS & LASER BEAMS
+           Increased Rotation Speed + Rapid Strobe Blinks through Cyan, Magenta, Lime, Gold, Purple
+           ========================================================================= */
+
+        /* =========================================================================
+           STAGE LIGHTS & SPOTLIGHT CONES (MATCHING IMAGE 1 CONCERT ATMOSPHERE)
+           Smooth sweeping colored light cones: Warm Amber-Yellow on Left,
+           Electric Cyan/Magenta on Right, and Dual Center Lasers
+           ========================================================================= */
+
+        /* Fixture 1: Sweeping Left Stage Spotlight (Warm Amber-Gold into Vivid Coral/Pink like Image 1) */
+        @keyframes djColorCycleFlash1 {
           0% {
-            transform: rotate(-34deg) scaleX(0.9);
-            opacity: 0.72;
+            background: linear-gradient(135deg, rgba(255, 204, 0, 0.88) 0%, rgba(255, 107, 0, 0.65) 45%, transparent 100%);
+            opacity: 0.9;
+            transform: rotate(-36deg) scaleX(1);
+          }
+          30% {
+            background: linear-gradient(135deg, rgba(255, 77, 0, 0.92) 0%, rgba(236, 72, 153, 0.7) 45%, transparent 100%);
+            opacity: 0.82;
+            transform: rotate(-18deg) scaleX(1.15);
           }
           50% {
-            transform: rotate(10deg) scaleX(1.12);
-            opacity: 0.98;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.95) 0%, rgba(255, 120, 0, 0.75) 45%, transparent 100%);
+            opacity: 0.95;
+            transform: rotate(4deg) scaleX(1.2);
+          }
+          75% {
+            background: linear-gradient(135deg, rgba(236, 72, 153, 0.9) 0%, rgba(168, 85, 247, 0.65) 45%, transparent 100%);
+            opacity: 0.85;
+            transform: rotate(-16deg) scaleX(1.1);
           }
           100% {
-            transform: rotate(-34deg) scaleX(0.9);
-            opacity: 0.72;
+            background: linear-gradient(135deg, rgba(255, 204, 0, 0.88) 0%, rgba(255, 107, 0, 0.65) 45%, transparent 100%);
+            opacity: 0.9;
+            transform: rotate(-36deg) scaleX(1);
           }
         }
-        @keyframes saRotateColorBeamRight {
+
+        /* Fixture 2: Sweeping Right Stage Spotlight (Electric Cyan into Neon Violet/Pink like Image 1) */
+        @keyframes djColorCycleFlash2 {
           0% {
-            transform: rotate(34deg) scaleX(0.9);
-            opacity: 0.72;
+            background: linear-gradient(225deg, rgba(6, 182, 212, 0.9) 0%, rgba(59, 130, 246, 0.65) 45%, transparent 100%);
+            opacity: 0.9;
+            transform: rotate(36deg) scaleX(1);
+          }
+          30% {
+            background: linear-gradient(225deg, rgba(168, 85, 247, 0.92) 0%, rgba(236, 72, 153, 0.7) 45%, transparent 100%);
+            opacity: 0.82;
+            transform: rotate(18deg) scaleX(1.15);
           }
           50% {
-            transform: rotate(-10deg) scaleX(1.12);
-            opacity: 0.98;
+            background: linear-gradient(225deg, rgba(0, 245, 255, 0.95) 0%, rgba(168, 85, 247, 0.75) 45%, transparent 100%);
+            opacity: 0.95;
+            transform: rotate(-4deg) scaleX(1.2);
+          }
+          75% {
+            background: linear-gradient(225deg, rgba(34, 197, 94, 0.9) 0%, rgba(6, 182, 212, 0.65) 45%, transparent 100%);
+            opacity: 0.85;
+            transform: rotate(16deg) scaleX(1.1);
           }
           100% {
-            transform: rotate(34deg) scaleX(0.9);
-            opacity: 0.72;
+            background: linear-gradient(225deg, rgba(6, 182, 212, 0.9) 0%, rgba(59, 130, 246, 0.65) 45%, transparent 100%);
+            opacity: 0.9;
+            transform: rotate(36deg) scaleX(1);
           }
         }
-        .sa-color-beam-left {
+
+        /* Center Lasers */
+        @keyframes djLaserStrobe1 {
+          0%, 100% { transform: rotate(-24deg) scaleY(0.95); opacity: 0.85; filter: hue-rotate(0deg); }
+          50% { transform: rotate(20deg) scaleY(1.15); opacity: 0.95; filter: hue-rotate(120deg); }
+        }
+
+        @keyframes djLaserStrobe2 {
+          0%, 100% { transform: rotate(24deg) scaleY(0.95); opacity: 0.85; filter: hue-rotate(180deg); }
+          50% { transform: rotate(-20deg) scaleY(1.15); opacity: 0.95; filter: hue-rotate(300deg); }
+        }
+
+        /* Floor Sweepers */
+        @keyframes djFloorSweeperLeft {
+          0%, 100% { transform: rotate(-30deg) scaleY(0.9); opacity: 0.8; }
+          50% { transform: rotate(26deg) scaleY(1.15); opacity: 0.92; }
+        }
+
+        @keyframes djFloorSweeperRight {
+          0%, 100% { transform: rotate(30deg) scaleY(0.9); opacity: 0.8; }
+          50% { transform: rotate(-26deg) scaleY(1.15); opacity: 0.92; }
+        }
+
+        /* Ambient Stage Light Pulse */
+        @keyframes djConcertBlinker {
+          0%, 100% { opacity: 0.35; filter: hue-rotate(0deg); }
+          50% { opacity: 0.7; filter: hue-rotate(80deg); }
+        }
+
+        .dj-laser-left-blinker {
           position: absolute;
-          top: 6px;
-          left: 6px;
-          width: 300px;
-          height: 420px;
-          background: linear-gradient(135deg, rgba(6, 182, 212, 0.55) 0%, rgba(168, 85, 247, 0.35) 45%, rgba(34, 197, 94, 0.15) 75%, transparent 100%);
-          clip-path: polygon(0% 0%, 28% 0%, 100% 100%, 14% 100%);
+          top: -20px;
+          left: -10px;
+          width: 520px;
+          height: 750px;
+          clip-path: polygon(0% 0%, 30% 0%, 100% 100%, 8% 100%);
           transform-origin: top left;
-          filter: blur(2px);
+          filter: blur(4px);
           pointer-events: none;
-          animation: saRotateColorBeamLeft 5.2s ease-in-out infinite;
+          z-index: 4;
+          animation: djColorCycleFlash1 2.8s ease-in-out infinite;
         }
-        .sa-color-beam-right {
+
+        .dj-laser-right-blinker {
           position: absolute;
-          top: 6px;
-          right: 6px;
-          width: 300px;
-          height: 420px;
-          background: linear-gradient(225deg, rgba(249, 115, 22, 0.55) 0%, rgba(236, 72, 153, 0.35) 45%, rgba(234, 179, 8, 0.15) 75%, transparent 100%);
-          clip-path: polygon(72% 0%, 100% 0%, 86% 100%, 0% 100%);
+          top: -20px;
+          right: -10px;
+          width: 520px;
+          height: 750px;
+          clip-path: polygon(70% 0%, 100% 0%, 92% 100%, 0% 100%);
           transform-origin: top right;
-          filter: blur(2px);
+          filter: blur(4px);
           pointer-events: none;
-          animation: saRotateColorBeamRight 5.2s ease-in-out infinite -2.6s;
+          z-index: 4;
+          animation: djColorCycleFlash2 2.8s ease-in-out infinite -1.4s;
         }
-        .sa-modal-scroll {
-          overflow-y: auto !important;
-          -webkit-overflow-scrolling: touch;
-          scrollbar-width: thin;
-          scrollbar-color: rgba(22,163,74,0.4) transparent;
+
+        .dj-laser-center-left {
+          position: absolute;
+          top: -10px;
+          left: 36%;
+          width: 280px;
+          height: 600px;
+          background: linear-gradient(170deg, rgba(168, 85, 247, 0.85) 0%, rgba(236, 72, 153, 0.6) 50%, transparent 100%);
+          clip-path: polygon(44% 0%, 56% 0%, 85% 100%, 15% 100%);
+          transform-origin: top center;
+          filter: blur(3.5px);
+          pointer-events: none;
+          z-index: 4;
+          animation: djLaserStrobe1 2.2s ease-in-out infinite;
         }
-        .sa-modal-scroll::-webkit-scrollbar { width: 6px; }
-        .sa-modal-scroll::-webkit-scrollbar-track { background: transparent; }
-        .sa-modal-scroll::-webkit-scrollbar-thumb { background: rgba(34,197,94,0.35); border-radius: 999px; }
-        .sa-modal-scroll::-webkit-scrollbar-thumb:hover { background: rgba(34,197,94,0.6); }
+
+        .dj-laser-center-right {
+          position: absolute;
+          top: -10px;
+          right: 36%;
+          width: 280px;
+          height: 600px;
+          background: linear-gradient(190deg, rgba(6, 182, 212, 0.85) 0%, rgba(52, 211, 153, 0.6) 50%, transparent 100%);
+          clip-path: polygon(44% 0%, 56% 0%, 85% 100%, 15% 100%);
+          transform-origin: top center;
+          filter: blur(3.5px);
+          pointer-events: none;
+          z-index: 4;
+          animation: djLaserStrobe2 2.2s ease-in-out infinite -1.1s;
+        }
+
+        .dj-floor-sweeper-left {
+          position: absolute;
+          bottom: 40px;
+          left: 8%;
+          width: 240px;
+          height: 500px;
+          background: linear-gradient(0deg, rgba(6, 182, 212, 0.85) 0%, rgba(168, 85, 247, 0.5) 60%, transparent 100%);
+          clip-path: polygon(42% 100%, 58% 100%, 100% 0%, 0% 0%);
+          transform-origin: bottom center;
+          filter: blur(4px);
+          pointer-events: none;
+          z-index: 4;
+          animation: djFloorSweeperLeft 2.5s ease-in-out infinite;
+        }
+
+        .dj-floor-sweeper-right {
+          position: absolute;
+          bottom: 40px;
+          right: 8%;
+          width: 240px;
+          height: 500px;
+          background: linear-gradient(0deg, rgba(255, 107, 0, 0.85) 0%, rgba(236, 72, 153, 0.5) 60%, transparent 100%);
+          clip-path: polygon(42% 100%, 58% 100%, 100% 0%, 0% 0%);
+          transform-origin: bottom center;
+          filter: blur(4px);
+          pointer-events: none;
+          z-index: 4;
+          animation: djFloorSweeperRight 2.5s ease-in-out infinite -1.25s;
+        }
+
+        .dj-stage-strobe-blinker {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 380px;
+          background: radial-gradient(ellipse at 50% 0%, rgba(255, 153, 0, 0.5) 0%, rgba(236, 72, 153, 0.3) 40%, rgba(6, 182, 212, 0.25) 70%, transparent 100%);
+          pointer-events: none;
+          z-index: 3;
+          animation: djConcertBlinker 1.8s ease-in-out infinite;
+        }
+
+        /* Floating Scattered Notes */
+        @keyframes floatNote {
+          0%, 100% { transform: translateY(0) rotate(-6deg); }
+          50% { transform: translateY(-12px) rotate(6deg); }
+        }
+        .animate-float-note {
+          animation: floatNote 3.5s ease-in-out infinite;
+        }
+
+        /* Partner Marquee Continuous Track */
+        @keyframes saMarqueeScroll {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .sa-marquee-track {
+          display: flex;
+          align-items: center;
+          gap: 1.25rem;
+          width: max-content;
+          animation: saMarqueeScroll 26s linear infinite;
+        }
+        .sa-marquee-track:hover {
+          animation-play-state: paused;
+        }
+
+        /* Heart Pulse Animation */
+        @keyframes heartPulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.24); }
+        }
+        .animate-heart-pulse {
+          animation: heartPulse 1.6s ease-in-out infinite;
+        }
+
+        /* Alert Shake */
+        @keyframes chkShake {
+          0%, 100% { transform: translateX(0); }
+          25% { transform: translateX(-6px); }
+          75% { transform: translateX(6px); }
+        }
+        .animate-shake {
+          animation: chkShake 0.45s ease both;
+        }
+
+        /* Glassmorphic Panel Styles */
+        .glass-panel {
+          background: rgba(22, 10, 3, 0.86);
+          backdrop-filter: blur(22px) saturate(170%);
+          -webkit-backdrop-filter: blur(22px) saturate(170%);
+          border: 1.5px solid rgba(255, 170, 0, 0.45);
+          box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255, 230, 160, 0.35);
+        }
+
+        /* Perforated Ticket Notches */
+        .ticket-notch-left, .ticket-notch-right {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 26px;
+          height: 26px;
+          border-radius: 9999px;
+          background: #0f172a;
+          z-index: 10;
+        }
+        .ticket-notch-left { left: -13px; }
+        .ticket-notch-right { right: -13px; }
       `}</style>
 
       {/* =========================================================================
-          1. FIRST: "BEFORE YOU BOOK" POPUP MODAL (Screenshot 1)
+          SCREEN 1: "BEFORE YOU BOOK" FULLSTAGE SCREEN (Exact design from index.html)
           ========================================================================= */}
-      {showIntroModal && (
-        <div
-          className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center p-2 p-sm-3"
-          style={{ zIndex: 1050 }}
-        >
-          {/* ── Animated Concert Backdrop ── */}
-          <div className="sa-concert-wrap" style={{ position: 'absolute', inset: 0, background: 'radial-gradient(120% 90% at 50% 0%, #0d3822 0%, #082416 60%, #03100a 100%)' }}>
-
-            {/* Stage beams */}
-            <div className="sa-beam" style={{ left: '12%', animationDelay: '0s', animationDuration: '5s' }} />
-            <div className="sa-beam" style={{ left: '30%', animationDelay: '-.8s', animationDuration: '4.2s', opacity: .7 }} />
-            <div className="sa-beam" style={{ left: '58%', animationDelay: '-.4s', animationDuration: '4.8s' }} />
-            <div className="sa-beam" style={{ right: '12%', left: 'unset', animationDelay: '-1.2s', animationDuration: '5.4s', opacity: .6 }} />
-
-            {/* Blinking torch lights & concert sparkles */}
-            {['18%', '35%', '55%', '72%', '82%', '8%', '90%'].map((l, i) => (
-              <div
-                key={i}
-                style={{
-                  position: 'absolute',
-                  left: l,
-                  bottom: '24%',
-                  width: '7px',
-                  height: '7px',
-                  borderRadius: '50%',
-                  background: '#fff',
-                  boxShadow: '0 0 14px 5px rgba(255,255,255,0.95), 0 0 24px 10px rgba(34,197,94,0.6)',
-                  animation: `saTorch ${1.8 + (i % 3) * 0.4}s ease-in-out infinite`,
-                  animationDelay: `${i * 0.35}s`,
-                  pointerEvents: 'none'
-                }}
-              />
-            ))}
-
-            {/* Green turf floor */}
-            <div className="sa-turf" />
-            {/* Stage line glow */}
-            <div className="sa-stage-line" />
-
-
-            {/* Audience row – realistic dancing figures */}
-            {[
-              { x: '3%', hc: '#c8845a', bc: '#1a2456', dur: '1.9s', dd: '0s', td: '0s', ev: 0 },
-              { x: '10%', hc: '#d4926a', bc: '#1e3060', dur: '2.1s', dd: '.3s', td: '.5s', ev: 1 },
-              { x: '18%', hc: '#bf7a50', bc: '#162048', dur: '1.7s', dd: '.15s', td: '1s', ev: 0 },
-              { x: '25%', hc: '#e09970', bc: '#0f1a3e', dur: '2.3s', dd: '.5s', td: '.2s', ev: 1 },
-              { x: '33%', hc: '#c88a60', bc: '#1c2d58', dur: '1.6s', dd: '.1s', td: '.8s', ev: 0 },
-              { x: '61%', hc: '#bf7a50', bc: '#1a2456', dur: '2s', dd: '.4s', td: '0.3s', ev: 1 },
-              { x: '68%', hc: '#d4926a', bc: '#1e3060', dur: '1.8s', dd: '.2s', td: '1.2s', ev: 0 },
-              { x: '75%', hc: '#c8845a', bc: '#162048', dur: '2.2s', dd: '.6s', td: '.6s', ev: 1 },
-              { x: '83%', hc: '#e09970', bc: '#0f1a3e', dur: '1.5s', dd: '.35s', td: '.1s', ev: 0 },
-              { x: '91%', hc: '#c88a60', bc: '#1c2d58', dur: '2.4s', dd: '.25s', td: '.9s', ev: 1 },
-            ].map((p, i) => {
-              const da = p.ev === 0 ? 'saDance' : 'saDance2';
-              return (
-                <div key={i} style={{ position: 'absolute', bottom: '22%', left: p.x, display: 'flex', flexDirection: 'column', alignItems: 'center', animation: `${da} ${p.dur} ease-in-out infinite`, animationDelay: p.dd }}>
-
-                  {/* Phone torch – WHITE blinking with upward beam */}
-                  <div style={{
-                    width: '5px', height: '9px', borderRadius: '2px',
-                    background: '#e0e0e0',
-                    marginBottom: '2px',
-                    position: 'relative'
-                  }}>
-                    <div style={{
-                      position: 'absolute', top: '-5px', left: '50%', transform: 'translateX(-50%)',
-                      width: '6px', height: '6px', borderRadius: '50%',
-                      background: '#fff',
-                      animation: `${p.ev === 0 ? 'saTorch' : 'saTorch2'} ${p.dur} ease-in-out infinite`,
-                      animationDelay: p.td
-                    }} />
-                    <div style={{
-                      position: 'absolute',
-                      bottom: '100%',
-                      left: '50%',
-                      transform: 'translateX(-50%)',
-                      width: '18px',
-                      height: '60px',
-                      background: 'linear-gradient(to top, rgba(255,255,255,0.4) 0%, rgba(134,239,172,0.12) 60%, transparent 100%)',
-                      clipPath: 'polygon(38% 100%, 62% 100%, 100% 0%, 0% 0%)',
-                      animation: `${p.ev === 0 ? 'saTorch' : 'saTorch2'} ${p.dur} ease-in-out infinite`,
-                      animationDelay: p.td,
-                      filter: 'blur(1px)',
-                      pointerEvents: 'none'
-                    }} />
-                  </div>
-
-                  {/* Raised arm holding phone */}
-                  <div style={{
-                    width: '4px', height: '22px', background: p.bc, borderRadius: '2px',
-                    transformOrigin: 'bottom center',
-                    animation: `saArmL ${p.dur} ease-in-out infinite`,
-                    animationDelay: p.dd
-                  }} />
-
-                  {/* Head */}
-                  <div style={{ width: '16px', height: '16px', borderRadius: '50%', background: p.hc, border: '1.5px solid rgba(255,255,255,.15)', marginBottom: '1px' }} />
-
-                  {/* Torso */}
-                  <div style={{ position: 'relative', width: '20px', height: '28px', background: p.bc, borderRadius: '5px 5px 0 0' }}>
-                    {/* Left arm */}
-                    <div style={{
-                      position: 'absolute', top: '6px', left: '-10px',
-                      width: '10px', height: '4px', background: p.bc, borderRadius: '2px',
-                      transformOrigin: 'right center',
-                      animation: `saArmL ${p.dur} ease-in-out infinite`,
-                      animationDelay: p.dd
-                    }} />
-                    {/* Right arm */}
-                    <div style={{
-                      position: 'absolute', top: '6px', right: '-10px',
-                      width: '10px', height: '4px', background: p.bc, borderRadius: '2px',
-                      transformOrigin: 'left center',
-                      animation: `saArmR ${p.dur} ease-in-out infinite`,
-                      animationDelay: p.dd
-                    }} />
-                  </div>
-
-                  {/* Legs */}
-                  <div style={{ display: 'flex', gap: '3px' }}>
-                    <div style={{
-                      width: '7px', height: '20px', background: p.bc, borderRadius: '0 0 4px 4px',
-                      transformOrigin: 'top center',
-                      animation: `saLegL ${p.dur} ease-in-out infinite`,
-                      animationDelay: p.dd
-                    }} />
-                    <div style={{
-                      width: '7px', height: '20px', background: p.bc, borderRadius: '0 0 4px 4px',
-                      transformOrigin: 'top center',
-                      animation: `saLegR ${p.dur} ease-in-out infinite`,
-                      animationDelay: p.dd
-                    }} />
-                  </div>
-                </div>
-              );
-            })}
+      {pageView === 'intro' && (
+        <div className="min-h-screen w-full relative flex items-center justify-center p-3 sm:p-6 py-8 sm:py-12 bg-black overflow-y-auto overflow-x-hidden selection:bg-[#ff6a00] selection:text-white">
+          {/* Full Stage Visual Background */}
+          <div className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden z-0">
+            <img
+              src={POSTER_STAGE_BG}
+              alt="Concert Stage Background"
+              className="w-full h-full object-cover object-center filter brightness-90 contrast-105"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-black/80" />
+            
+            {/* Stage DJ Lights on Intro Screen */}
+            <div className="dj-laser-left-blinker opacity-60" />
+            <div className="dj-laser-right-blinker opacity-60" />
+            <div className="dj-stage-strobe-blinker opacity-60" />
           </div>
 
-          {/* ── Booking Card ── */}
-          <div className="sa-card sa-modal-scroll w-100 shadow-lg position-relative my-auto" style={{ maxWidth: '580px', maxHeight: '94vh', zIndex: 2, borderRadius: '22px' }}>
-
-            {/* ── Concert banner inside card ── */}
-            <div style={{
-              position: 'relative', overflow: 'hidden',
-              background: 'radial-gradient(130% 140% at 50% -10%, #166534 0%, #0a3820 50%, #03140a 100%)',
-              padding: '14px 20px 0',
-              borderRadius: '22px 22px 0 0'
-            }}>
-              {/* Beams */}
-              {[{ l: '10%', d: '0s' }, { l: '30%', d: '-.6s' }, { l: '55%', d: '-.3s' }, { l: '75%', d: '-1s' }].map((b, i) => (
-                <div key={i} style={{ position: 'absolute', top: 0, left: b.l, width: '8%', height: '100%', background: 'linear-gradient(180deg,rgba(255,255,255,.13),transparent)', transform: 'skewX(-10deg)', filter: 'blur(2px)', animation: `saBeamSway 4s ease-in-out infinite`, animationDelay: b.d, pointerEvents: 'none' }} />
-              ))}
-              {/* Floating notes */}
-              {[['♪', '#86efac', '12%', '0s'], ['♫', '#fb923c', '78%', '-1s'], ['♩', '#4ade80', '88%', '-2s'], ['♬', '#a78bfa', '5%', '-1.5s']].map(([n, c, l, d], i) => (
-                <div key={i} style={{ position: 'absolute', bottom: '6px', left: l, color: c, fontSize: i % 2 === 0 ? '16px' : '13px', animation: 'saNoteRise 3.5s ease-in-out infinite', animationDelay: d, pointerEvents: 'none' }}>{n}</div>
-              ))}
-
-              <div className="d-flex align-items-center justify-content-between position-relative" style={{ zIndex: 2 }}>
-                {/* Left: Titles */}
-                <div>
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: 'rgba(34,197,94,.18)', border: '1px solid rgba(34,197,94,.4)', borderRadius: '20px', padding: '2px 10px', marginBottom: '4px' }}>
-                    <Ticket style={{ width: '11px', height: '11px', color: '#86efac' }} />
-                    <span style={{ fontSize: '9.5px', fontWeight: 700, letterSpacing: '1.2px', color: '#86efac', textTransform: 'uppercase' }}>Before You Book</span>
-                  </div>
-                  <div style={{ fontSize: '20px', fontWeight: 800, color: '#fff', fontFamily: 'Poppins,sans-serif', lineHeight: 1.1, marginBottom: '2px' }}>
-                    SING <span style={{ background: 'linear-gradient(90deg,#86efac,#4ade80,#fb923c)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>ALONG</span>
-                  </div>
-                  <div style={{ fontSize: '10px', color: '#86efac', letterSpacing: '1.5px', textTransform: 'uppercase' }}>Live Music Event</div>
-                </div>
-
-                {/* Right: Mascot */}
-                <div style={{ animation: 'saBob 1.8s ease-in-out infinite', marginRight: '6px' }}>
-                  <img src={MASCOT_IMG} alt="WeGrow Mascot" style={{ height: '75px', width: 'auto', filter: 'drop-shadow(0 4px 16px rgba(34,197,94,.5))' }} />
-                </div>
+          {/* Central Glassmorphic Card */}
+          <div className="relative z-10 w-full max-w-2xl glass-panel rounded-2xl sm:rounded-3xl p-4 sm:p-7 md:p-8 text-white shadow-2xl my-auto animate-fadeIn border border-amber-500/40">
+            {/* Top Pill Badge: Before You Book */}
+            <div className="flex justify-between items-center mb-3 sm:mb-4">
+              <div className="inline-flex items-center gap-2 px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 font-display text-[11px] sm:text-xs font-extrabold tracking-wider uppercase shadow-inner">
+                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                <span>BEFORE YOU BOOK</span>
               </div>
-
-              {/* Green turf edge */}
-              <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '4px', background: 'linear-gradient(90deg,transparent,#22c55e 30%,#86efac 50%,#22c55e 70%,transparent)', boxShadow: '0 0 12px 2px rgba(34,197,94,.7)' }} />
             </div>
 
-            <div className="p-3 p-sm-4">
-
-              {/* Title & Venue Header with Ticket Price badge */}
-              <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 pb-2" style={{ borderBottom: '1.5px solid #e2e8f0' }}>
-                <div>
-                  <div className="small" style={{ fontSize: '11px', color: '#64748b' }}>Musical evening at</div>
-                  <div className="font-display font-weight-bold" style={{ color: '#0f172a', fontSize: '17px', fontWeight: 800 }}>
-                    {CONFIG.fullVenue}
-                  </div>
-                </div>
-                <div className="d-inline-flex align-items-center gap-2 px-3 py-1.5 rounded-3" style={{ background: '#f0fdf4', border: '1.5px solid #bbf7d0' }}>
-                  <span className="small font-medium" style={{ fontSize: '11px', color: '#166534' }}>Ticket Price:</span>
-                  <span className="font-display font-weight-bold fs-5" style={{ color: '#15803d' }}>
-                    {rupee(CONFIG.ticketPrice)}
+            {/* Header: Title, Venue & Glowing Price Badge */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 pb-3 sm:pb-4 border-b border-amber-500/20">
+              <div>
+                <span className="text-xs font-semibold text-amber-200/90 block mb-0.5">
+                  WeGrow Skill Campus &amp; B School presents
+                </span>
+                <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
+                  <h2 className="text-2xl sm:text-3xl md:text-4xl font-black font-display tracking-tight text-white drop-shadow-md">
+                    <span className="text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.7)]">SING</span>{" "}
+                    <span className="bg-gradient-to-r from-[#ff4500] via-[#ff6a00] to-[#ffa500] bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(255,106,0,0.8)]">ALONG</span>
+                  </h2>
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#0D0D3A] border border-amber-400/40 text-[10px] sm:text-[11px] font-bold text-amber-300">
+                    <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
+                    LIVE CONCERT • SEP 27
                   </span>
                 </div>
-              </div>
-
-              {/* 2-Column Notes & Terms */}
-              <div className="row g-2 g-md-3 mb-3">
-                {/* Column 1: Important Notes */}
-                <div className="col-12 col-md-6">
-                  <div className="text-uppercase font-weight-bold mb-1.5" style={{ fontSize: '11px', letterSpacing: '0.8px', color: '#15803d' }}>
-                    IMPORTANT NOTES
-                  </div>
-                  <ul className="list-unstyled mb-0 d-flex flex-column gap-1">
-                    {CONFIG.importantNotes.map((note, idx) => (
-                      <li key={idx} className="d-flex align-items-start gap-1.5" style={{ fontSize: '12px', lineHeight: 1.35, color: '#334155' }}>
-                        <AlertTriangle className="text-warning flex-shrink-0 mt-0.5" style={{ width: '13px', height: '13px' }} />
-                        <span>{note}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {/* Column 2: Terms & Conditions */}
-                <div className="col-12 col-md-6">
-                  <div className="text-uppercase font-weight-bold mb-1.5" style={{ fontSize: '11px', letterSpacing: '0.8px', color: '#15803d' }}>
-                    TERMS &amp; CONDITIONS
-                  </div>
-                  <ul className="list-unstyled mb-0 d-flex flex-column gap-1">
-                    {CONFIG.termsList.map((term, idx) => (
-                      <li key={idx} className="d-flex align-items-start gap-1.5" style={{ fontSize: '12px', lineHeight: 1.35, color: '#334155' }}>
-                        <span className="rounded-circle mt-1.5 flex-shrink-0" style={{ width: '5px', height: '5px', background: '#16a34a' }}></span>
-                        <span>{term}</span>
-                      </li>
-                    ))}
-                  </ul>
+                <div className="flex items-center gap-2 mt-1.5 text-slate-300 text-xs sm:text-sm">
+                  <MapPin className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                  <span>Musical evening at <strong className="text-white font-semibold">{CONFIG.fullVenue}</strong></span>
                 </div>
               </div>
 
-              {/* Checkbox Agreement */}
-              <div
-                onClick={() => setTermsAccepted(!termsAccepted)}
-                className="d-flex align-items-center gap-2 p-2.5 px-3 rounded-3 mb-3 cursor-pointer user-select-none"
-                style={{ background: '#f8fafc', border: '1.5px solid #e2e8f0' }}
-              >
-                <div className={`checkbox-box ${termsAccepted ? 'checked' : ''}`} style={{ width: '18px', height: '18px' }}>
-                  {termsAccepted && <Check className="text-white" style={{ width: '12px', height: '12px', strokeWidth: 3 }} />}
-                </div>
-                <span className="small font-weight-semibold lh-sm" style={{ fontSize: '12px', color: '#1e293b' }}>
-                  I have read and agree to all Terms &amp; Conditions and event rules.
+              {/* Glowing Ticket Price Badge (Flat ₹249, No Fee) */}
+              <div className="flex-shrink-0 bg-gradient-to-br from-amber-500/30 to-[#2d1405] border border-amber-400 rounded-xl sm:rounded-2xl px-4 py-2.5 sm:py-3 shadow-[0_0_20px_rgba(255,170,0,0.3)] text-right self-stretch sm:self-auto flex sm:flex-col justify-between sm:justify-center items-center sm:items-end">
+                <span className="font-display text-[10px] font-extrabold uppercase tracking-wider text-amber-200">ENTRY PASS</span>
+                <span className="font-display text-2xl sm:text-3xl font-black text-white drop-shadow-[0_0_8px_rgba(255,170,0,0.8)] leading-tight">
+                  {rupee(CONFIG.ticketPrice)}
                 </span>
               </div>
+            </div>
 
-              {/* Submit Button */}
+            {/* Two-Column Grid: Important Notes & Terms */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 mt-4 sm:mt-5">
+              {/* Column 1: Important Notes */}
+              <div className="bg-black/45 border border-amber-500/20 rounded-xl sm:rounded-2xl p-3.5 sm:p-4">
+                <div className="flex items-center gap-2 mb-2.5 sm:mb-3 pb-2 border-b border-white/10 text-amber-400">
+                  <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                  <h3 className="font-display text-xs font-bold uppercase tracking-wider text-slate-200">IMPORTANT NOTES</h3>
+                </div>
+                <ul className="space-y-2 text-xs text-slate-300">
+                  {CONFIG.importantNotes.map((note, idx) => (
+                    <li key={idx} className="flex items-start gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shadow-[0_0_6px_#f59e0b] mt-1 flex-shrink-0" />
+                      <span className="leading-snug">{note}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Column 2: Terms & Conditions */}
+              <div className="bg-black/45 border border-amber-500/20 rounded-xl sm:rounded-2xl p-3.5 sm:p-4">
+                <div className="flex items-center gap-2 mb-2.5 sm:mb-3 pb-2 border-b border-white/10 text-emerald-400">
+                  <ShieldCheck className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                  <h3 className="font-display text-xs font-bold uppercase tracking-wider text-slate-200">TERMS & CONDITIONS</h3>
+                </div>
+                <ul className="space-y-2 text-xs text-slate-300">
+                  {CONFIG.termsList.map((term, idx) => (
+                    <li key={idx} className="flex items-start gap-2">
+                      <Check className="w-3.5 h-3.5 text-emerald-400 mt-0.5 flex-shrink-0" />
+                      <span className="leading-snug">{term}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            {/* Bottom Actions: Checkbox & CTA */}
+            <div className="mt-5 sm:mt-6 flex flex-col gap-3.5 sm:gap-4 pt-3.5 sm:pt-4 border-t border-white/10">
+              {/* Agreement Checkbox */}
+              <label className={`flex items-center gap-3 cursor-pointer select-none p-2 sm:p-2.5 rounded-xl border transition-all ${
+                shakeTerms ? 'animate-shake border-red-500 bg-red-500/10' : 'border-transparent hover:bg-white/5'
+              }`}>
+                <input
+                  type="checkbox"
+                  checked={termsAccepted}
+                  onChange={(e) => setTermsAccepted(e.target.checked)}
+                  className="w-4 h-4 rounded border-amber-400 text-[#ff6a00] focus:ring-[#ff6a00] focus:ring-offset-black bg-black/60 cursor-pointer flex-shrink-0"
+                />
+                <span className="text-xs text-slate-300">
+                  I have read and agree to all <strong className="text-white font-semibold">Terms & Conditions</strong> and venue rules.
+                </span>
+              </label>
+
+              {/* Gradient CTA Button */}
               <button
-                disabled={!termsAccepted}
-                onClick={() => {
-                  if (termsAccepted) {
-                    setShowIntroModal(false);
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                    // Auto-start mascot singing song on user interaction
-                    if (audioRef.current) {
-                      audioRef.current.play()
-                        .then(() => {
-                          setIsPlayingMusic(true);
-                          toast.success("Sing Along with the Mascot! 🎶", { id: 'music-start', duration: 2500 });
-                        })
-                        .catch((err) => console.log("Audio play deferred:", err));
-                    }
-                  }
-                }}
-                className="sa-btn-primary w-100 py-2.5 d-flex align-items-center justify-content-center gap-2"
-                style={{ fontSize: '15px' }}
+                type="button"
+                onClick={handleIntroProceed}
+                className="w-full py-3 sm:py-3.5 px-4 sm:px-6 rounded-xl sm:rounded-2xl font-display font-black text-sm sm:text-base text-black bg-gradient-to-r from-[#ffb703] via-[#fb8500] to-[#ea580c] hover:brightness-110 active:scale-[0.99] transition-all shadow-[0_8px_25px_rgba(251,133,0,0.5)] flex items-center justify-center gap-2.5 sm:gap-3 cursor-pointer"
               >
-                <span>Let's Book &amp; Hear Mascot Sing 🎵</span>
-                <ChevronRight style={{ width: '16px', height: '16px' }} />
+                <Music className="w-4 h-4 sm:w-5 sm:h-5 text-black animate-bounce flex-shrink-0" />
+                <span>Let's Book &amp; Hear Mascot Sing</span>
+                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-black flex-shrink-0" />
               </button>
-
             </div>
           </div>
         </div>
       )}
 
-      {/* Real Mascot Song Audio Element */}
-      <audio
-        ref={audioRef}
-        src={MASCOT_SONG_AUDIO}
-        loop
-        preload="auto"
-        onPlay={() => setIsPlayingMusic(true)}
-        onPause={() => setIsPlayingMusic(false)}
-      />
-
       {/* =========================================================================
-          2. SECOND: MAIN BOOKING PAGE (Screenshot 2)
+          SCREEN 2: HERO BANNER (WITH HIGHER TOP POSITIONING & HIGH-SPEED BLINKING DJ LIGHTS)
           ========================================================================= */}
-      <div className={`container py-4 ${showIntroModal ? 'opacity-50 user-select-none' : ''}`} style={{ maxWidth: '1140px', filter: showIntroModal ? 'blur(2px)' : 'none' }}>
-
-        {/* HEADER BANNER CARD - NATURAL GREEN TURF MODE */}
-        <div
-          className="rounded-4 p-4 p-sm-5 text-white position-relative overflow-hidden shadow-lg mb-3"
-          style={{
-            backgroundImage: `linear-gradient(180deg, rgba(4, 28, 16, 0.68) 0%, rgba(8, 44, 25, 0.52) 40%, rgba(2, 16, 9, 0.88) 100%), url('/arasan_turf_bg.png')`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center 42%',
-            backgroundRepeat: 'no-repeat',
-            border: '1.5px solid rgba(34, 197, 94, 0.45)',
-            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.7), inset 0 0 80px rgba(16, 185, 129, 0.25)',
-            minHeight: '475px'
-          }}
-        >
-          {/* Left Corner Rotating Colored Concert Light (Cyan/Purple) */}
-          <div style={{ position: 'absolute', top: '-15px', left: '-15px', width: '120px', height: '120px', pointerEvents: 'none', zIndex: 1 }}>
-            <div style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#00f0ff', boxShadow: '0 0 40px 18px rgba(6, 182, 212, 0.95), 0 0 70px 30px rgba(168, 85, 247, 0.7)' }} />
-            <div className="sa-color-beam-left" />
-          </div>
-
-          {/* Right Corner Rotating Colored Concert Light (Orange/Pink) */}
-          <div style={{ position: 'absolute', top: '-15px', right: '-15px', width: '120px', height: '120px', pointerEvents: 'none', zIndex: 1 }}>
-            <div style={{ position: 'absolute', right: 0, width: '18px', height: '18px', borderRadius: '50%', background: '#ff781f', boxShadow: '0 0 40px 18px rgba(249, 115, 22, 0.95), 0 0 70px 30px rgba(236, 72, 153, 0.7)' }} />
-            <div className="sa-color-beam-right" />
-          </div>
-
-          {/* Stage Spotlights / Light Beams with color tints */}
-          <div className="sa-beam" style={{ left: '10%', animationDelay: '0s', animationDuration: '4.8s', background: 'linear-gradient(180deg, rgba(6, 182, 212, 0.3), transparent)' }} />
-          <div className="sa-beam" style={{ left: '28%', animationDelay: '-1.2s', animationDuration: '4.2s', opacity: 0.7, background: 'linear-gradient(180deg, rgba(168, 85, 247, 0.3), transparent)' }} />
-          <div className="sa-beam" style={{ left: '72%', animationDelay: '-1.8s', animationDuration: '4.5s', opacity: 0.7, background: 'linear-gradient(180deg, rgba(249, 115, 22, 0.3), transparent)' }} />
-          <div className="sa-beam" style={{ left: '90%', animationDelay: '-.9s', animationDuration: '5.2s', background: 'linear-gradient(180deg, rgba(236, 72, 153, 0.3), transparent)' }} />
-
-          {/* Glowing Turf Stage Line */}
-          <div className="sa-stage-line" style={{ bottom: '16%' }} />
-
-          {/* Crowd of People on Turf with Blinking Torch Lights */}
-          {BANNER_CROWD.map((p, i) => {
-            const danceAnim = p.type === 0 ? 'saDance' : p.type === 1 ? 'saDance2' : 'saCrowdSway';
-            const torchAnim = p.type === 0 ? 'saTorch' : p.type === 1 ? 'saTorch2' : 'saTorch3';
-            return (
-              <div
-                key={i}
-                style={{
-                  position: 'absolute',
-                  bottom: '15%',
-                  left: p.x,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  animation: `${danceAnim} ${p.dur} ease-in-out infinite`,
-                  animationDelay: p.dd,
-                  opacity: p.dim ? 0.35 : 1,
-                  zIndex: 2,
-                  pointerEvents: 'none'
-                }}
+      {pageView === 'booking' && (
+        <div className="animate-fadeIn">
+          {/* =====================================================================
+              HERO / EVENT BANNER (100VH FULLSCREEN WITH VIDEO BACKGROUND & FAST BLINKING DJ LIGHTS)
+              ===================================================================== */}
+          <header className="relative w-full min-h-[90vh] sm:min-h-screen bg-gradient-to-b from-[#1a0800] via-[#0d0400] to-black overflow-hidden flex flex-col justify-between shadow-2xl z-20">
+            
+            {/* Full Video Background Layer (Real Video completely visible without black crowd silhouette) */}
+            <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none z-0">
+              <video
+                ref={videoRef}
+                className="w-full h-full object-cover object-[center_20%] sm:object-[center_12%] filter brightness-100 contrast-105"
+                autoPlay
+                loop
+                muted={isVideoMuted}
+                playsInline
               >
-                {/* Phone Torch - WHITE Blinking with upward beam */}
-                <div style={{ width: '5px', height: '9px', borderRadius: '2px', background: '#d1d5db', marginBottom: '2px', position: 'relative' }}>
-                  <div
-                    style={{
-                      position: 'absolute',
-                      top: '-5px',
-                      left: '50%',
-                      transform: 'translateX(-50%)',
-                      width: '6px',
-                      height: '6px',
-                      borderRadius: '50%',
-                      background: '#fff',
-                      animation: `${torchAnim} ${p.dur} ease-in-out infinite`,
-                      animationDelay: p.td
-                    }}
+                <source src={VIDEO_BANNER_SRC} type="video/mp4" />
+              </video>
+
+              {/* Gentle Stage Gradient Overlay - Keeps real video vibrant and bright */}
+              <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/30 pointer-events-none z-[1]" />
+            </div>
+
+            {/* Scattered Floating Music Notes */}
+            <span className="absolute top-[12%] left-[14%] text-2xl text-amber-300 select-none pointer-events-none z-10 animate-float-note hidden sm:block">🎵</span>
+            <span className="absolute top-[45%] left-[8%] text-xl text-white/80 select-none pointer-events-none z-10 animate-float-note" style={{ animationDelay: '1s' }}>🎶</span>
+            <span className="absolute top-[28%] left-[24%] text-2xl text-[#ff8c00] select-none pointer-events-none z-10 animate-float-note hidden sm:block" style={{ animationDelay: '2s' }}>✨</span>
+            <span className="absolute top-[14%] right-[14%] text-3xl text-amber-300 select-none pointer-events-none z-10 animate-float-note hidden sm:block" style={{ animationDelay: '0.5s' }}>🎶</span>
+            <span className="absolute top-[48%] right-[8%] text-xl text-white/80 select-none pointer-events-none z-10 animate-float-note" style={{ animationDelay: '1.5s' }}>🎵</span>
+            <span className="absolute top-[30%] right-[24%] text-2xl text-[#ff8c00] select-none pointer-events-none z-10 animate-float-note hidden sm:block" style={{ animationDelay: '2.5s' }}>💛</span>
+
+            {/* =================================================================
+                PROPER SYMMETRICAL TOP BAR ALIGNMENT:
+                Logo on Top Left & Date on Top Right at the exact same vertical offset
+                ================================================================= */}
+            
+            {/* Top-Left: WeGrow Logo Box */}
+            <div className="absolute top-3.5 left-3.5 sm:top-6 sm:left-8 z-30">
+              <div className="bg-white rounded-xl sm:rounded-2xl px-2.5 py-1.5 sm:px-4 sm:py-2 shadow-[0_8px_24px_rgba(0,0,0,0.5)] border border-slate-200/40 flex items-center justify-center">
+                <img
+                  src={WEGROW_LOGO_IMG}
+                  onError={(e) => { e.currentTarget.src = WEGROW_BACKUP_LOGO; }}
+                  alt="WeGrow Skill Campus & B School"
+                  className="h-6 sm:h-8 md:h-9 w-auto object-contain"
+                />
+              </div>
+            </div>
+
+            {/* Left Handwritten Script under Logo */}
+            <div className="absolute top-20 left-6 sm:top-24 sm:left-8 z-20 font-handwritten text-white text-xl sm:text-2xl font-bold leading-tight drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)] -rotate-6 hidden md:block">
+              <span className="block">Good Music</span>
+              <span className="block">Brighter</span>
+              <span className="block text-amber-300">People 🎶</span>
+            </div>
+
+            {/* Top-Right: Date Badge Box */}
+            <div className="absolute top-3.5 right-3.5 sm:top-6 sm:right-8 z-30">
+              <div className="w-[58px] sm:w-[68px] md:w-[74px] bg-white rounded-xl sm:rounded-2xl overflow-hidden text-center shadow-[0_8px_24px_rgba(0,0,0,0.5)] border border-slate-200/40">
+                <div className="font-display text-base sm:text-xl md:text-2xl font-black text-[#1A1A4E] pt-1 leading-none">{CONFIG.dayNum}</div>
+                <div className="bg-[#ff6a00] text-white font-body text-[9px] sm:text-xs font-black tracking-wider py-0.5">{CONFIG.monthAbbr}</div>
+                <div className="bg-white text-[#ff6a00] font-body text-[8px] sm:text-[10px] font-black tracking-wider py-0.5">{CONFIG.dayName}</div>
+              </div>
+            </div>
+
+            {/* Right Handwritten Script under Date */}
+            <div className="absolute top-24 right-6 sm:top-28 sm:right-8 z-20 font-handwritten text-white text-xl sm:text-2xl font-bold leading-tight drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)] rotate-6 text-right hidden md:block">
+              <span className="block">Same</span>
+              <span className="block">Tickets</span>
+              <span className="block">More</span>
+              <span className="block text-amber-300">Good Vibes!</span>
+            </div>
+
+            {/* =================================================================
+                CENTER: POSITIONED DIRECTLY ON THE STAGE TRUSS (Exact place from Image 2)
+                All elements arranged and centered in the middle
+                ================================================================= */}
+            <div className="relative z-20 flex flex-col items-center text-center max-w-3xl mx-auto pt-14 sm:pt-18 md:pt-10 px-3 sm:px-4">
+              
+              {/* Title Sponsor: K7 Chit Funds (Added ONLY on Hero stage banner) */}
+              <div className="flex items-center justify-center gap-2 mb-2 sm:mb-2.5">
+                <div className="inline-flex items-center gap-2 px-3 sm:px-3.5 py-1 rounded-full bg-white text-slate-900 border-2 border-emerald-600 shadow-md">
+                  <span className="bg-[#007A3D] text-white text-[8px] sm:text-[9px] font-black px-1.5 py-0.5 rounded tracking-wider uppercase">
+                    TITLE SPONSOR
+                  </span>
+                  <img
+                    src="/k7_sarathy_chitfunds_logo.png"
+                    alt="K7 Chit Funds"
+                    className="h-5 sm:h-6 max-h-6 w-auto object-contain"
                   />
-                  <div
+                  <span className="text-[11px] sm:text-xs font-black text-[#007A3D] tracking-tight">
+                    K7 CHIT FUNDS
+                  </span>
+                </div>
+              </div>
+
+              {/* Presents text + Badges (Centered in the middle) */}
+              <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-2 sm:mb-2.5">
+                <span className="font-body text-xs sm:text-sm md:text-base font-bold tracking-wide text-white/95 drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">
+                  WeGrow Skill Campus &amp; B School presents
+                </span>
+                <div className="flex items-center gap-1.5">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#0D0D3A]/90 border border-white/30 text-white font-display text-[9px] sm:text-[10px] font-extrabold shadow-md">
+                    🎵 LIVE MUSIC EVENT
+                  </span>
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-[#ff6a00] text-white font-display text-[9px] sm:text-[10px] font-extrabold shadow-[0_0_15px_rgba(255,106,0,0.7)]">
+                    ₹249 per ticket
+                  </span>
+                </div>
+              </div>
+
+              {/* Row 3: Sing Along Title Logo with Vibrant Color Change (Crisp White SING + Fiery Orange ALONG + Crown) */}
+              <div className="relative select-none text-center group cursor-default">
+                {/* Golden Crown doodle above ALONG */}
+                <div className="flex items-center justify-center -mb-1.5 sm:-mb-2">
+                  <span className="text-amber-400 font-handwritten text-2xl sm:text-3xl font-black drop-shadow-[0_0_14px_rgba(255,190,0,0.9)] rotate-6 inline-block animate-float-note">
+                    👑
+                  </span>
+                </div>
+                
+                <h1 className="font-poster text-4xl sm:text-6xl md:text-7xl font-black tracking-tight leading-none drop-shadow-[0_8px_30px_rgba(0,0,0,0.95)]">
+                  <span
+                    className="text-white inline-block transition-transform duration-300 group-hover:scale-105"
                     style={{
-                      position: 'absolute',
-                      bottom: '100%',
-                      left: '50%',
-                      transform: 'translateX(-50%)',
-                      width: '18px',
-                      height: '65px',
-                      background: 'linear-gradient(to top, rgba(255,255,255,0.4) 0%, rgba(134,239,172,0.12) 60%, transparent 100%)',
-                      clipPath: 'polygon(38% 100%, 62% 100%, 100% 0%, 0% 0%)',
-                      animation: `${torchAnim} ${p.dur} ease-in-out infinite`,
-                      animationDelay: p.td,
-                      filter: 'blur(1px)',
-                      pointerEvents: 'none'
+                      textShadow: '0 0 25px rgba(255,255,255,0.7), 0 4px 10px rgba(0,0,0,0.9)',
+                      WebkitTextStroke: '1.5px #0f172a'
                     }}
-                  />
-                </div>
-
-                {/* Raised arm holding phone */}
-                <div style={{ width: '4px', height: '22px', background: p.bc, borderRadius: '2px', transformOrigin: 'bottom center', animation: `saArmL ${p.dur} ease-in-out infinite`, animationDelay: p.dd }} />
-
-                {/* Head */}
-                <div style={{ width: '15px', height: '15px', borderRadius: '50%', background: p.hc, border: '1px solid rgba(255,255,255,.15)', marginBottom: '1px' }} />
-
-                {/* Torso */}
-                <div style={{ position: 'relative', width: '18px', height: '26px', background: p.bc, borderRadius: '4px 4px 0 0' }}>
-                  <div style={{ position: 'absolute', top: '5px', left: '-9px', width: '9px', height: '4px', background: p.bc, borderRadius: '2px', transformOrigin: 'right center', animation: `saArmL ${p.dur} ease-in-out infinite`, animationDelay: p.dd }} />
-                  <div style={{ position: 'absolute', top: '5px', right: '-9px', width: '9px', height: '4px', background: p.bc, borderRadius: '2px', transformOrigin: 'left center', animation: `saArmR ${p.dur} ease-in-out infinite`, animationDelay: p.dd }} />
-                </div>
-
-                {/* Legs */}
-                <div style={{ display: 'flex', gap: '2px' }}>
-                  <div style={{ width: '6px', height: '18px', background: p.bc, borderRadius: '0 0 3px 3px', transformOrigin: 'top center', animation: `saLegL ${p.dur} ease-in-out infinite`, animationDelay: p.dd }} />
-                  <div style={{ width: '6px', height: '18px', background: p.bc, borderRadius: '0 0 3px 3px', transformOrigin: 'top center', animation: `saLegR ${p.dur} ease-in-out infinite`, animationDelay: p.dd }} />
-                </div>
-              </div>
-            );
-          })}
-
-          {/* ========================================================
-              CENTER STAGE: WEGROW MASCOT SINGING ANIMATION
-              ======================================================== */}
-          <div
-            className="sa-mascot-center-stage"
-            onClick={toggleMusic}
-            style={{
-              position: 'absolute',
-              bottom: '15%',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              zIndex: 14,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              cursor: 'pointer',
-              pointerEvents: 'auto'
-            }}
-            title={isPlayingMusic ? "Click Mascot to Pause OM BGM" : "Click Mascot to Sing OM BGM!"}
-          >
-            {/* Center Stage Spotlight Beam illuminating mascot */}
-            <div
-              style={{
-                position: 'absolute',
-                top: '-260px',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                width: '260px',
-                height: '350px',
-                background: isPlayingMusic 
-                  ? 'linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, rgba(34, 197, 94, 0.28) 50%, rgba(250, 204, 21, 0.12) 85%, transparent 100%)'
-                  : 'linear-gradient(180deg, rgba(255, 255, 255, 0.35) 0%, rgba(34, 197, 94, 0.16) 50%, rgba(250, 204, 21, 0.05) 85%, transparent 100%)',
-                clipPath: 'polygon(36% 0%, 64% 0%, 100% 100%, 0% 100%)',
-                filter: 'blur(2px)',
-                pointerEvents: 'none',
-                zIndex: 1,
-                animation: isPlayingMusic ? 'saSpotlightPulse 2.4s ease-in-out infinite' : 'none'
-              }}
-            />
-
-            {/* Glowing Stadium Turf Disc under Mascot's feet */}
-            <div
-              style={{
-                position: 'absolute',
-                bottom: '-6px',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                width: '140px',
-                height: '24px',
-                borderRadius: '50%',
-                background: 'radial-gradient(ellipse at center, rgba(34, 197, 94, 0.9) 0%, rgba(250, 204, 21, 0.5) 45%, transparent 75%)',
-                boxShadow: isPlayingMusic ? '0 0 32px 12px rgba(34, 197, 94, 0.85)' : '0 0 20px 6px rgba(34, 197, 94, 0.55)',
-                zIndex: 2,
-                animation: isPlayingMusic ? 'saStageDiscPulse 2s ease-in-out infinite' : 'none'
-              }}
-            />
-
-            {/* Mascot Singing Character with Live Bob & Groove Motion */}
-            <div
-              style={{
-                position: 'relative',
-                animation: isPlayingMusic ? 'saMascotSing 2s ease-in-out infinite' : 'saBob 2.6s ease-in-out infinite',
-                transformOrigin: 'bottom center',
-                zIndex: 5
-              }}
-            >
-              {/* Floating Animated Musical Notes (Active when singing) */}
-              {isPlayingMusic && (
-                <>
-                  <span className="sa-singing-note" style={{ top: '-18px', right: '-12px', color: '#fb923c', animationDelay: '0s', fontSize: '22px' }}>♪</span>
-                  <span className="sa-singing-note" style={{ top: '-36px', right: '16px', color: '#86efac', animationDelay: '0.8s', fontSize: '26px' }}>♫</span>
-                  <span className="sa-singing-note" style={{ top: '-26px', left: '-18px', color: '#facc15', animationDelay: '1.6s', fontSize: '20px' }}>♬</span>
-                  <span className="sa-singing-note" style={{ top: '-48px', left: '8px', color: '#38bdf8', animationDelay: '2.4s', fontSize: '24px' }}>♩</span>
-                  <span className="sa-singing-note" style={{ top: '-12px', left: '-28px', color: '#f472b6', animationDelay: '1.2s', fontSize: '18px' }}>✨</span>
-                </>
-              )}
-
-              {/* Mascot Image */}
-              <img
-                src={MASCOT_IMG}
-                alt="WeGrow Mascot Singing"
-                className="sa-mascot-singer"
-                style={{
-                  position: 'relative',
-                  filter: isPlayingMusic 
-                    ? 'drop-shadow(0 14px 22px rgba(0, 0, 0, 0.75)) drop-shadow(0 0 18px rgba(34, 197, 94, 0.65))' 
-                    : 'drop-shadow(0 10px 18px rgba(0, 0, 0, 0.55)) drop-shadow(0 0 12px rgba(34, 197, 94, 0.35))'
-                }}
-              />
-
-              {/* Singing Stage Microphone with Pulsing Soundwave Rings */}
-              <div
-                style={{
-                  position: 'absolute',
-                  top: '24%',
-                  right: '-10px',
-                  width: '32px',
-                  height: '32px',
-                  borderRadius: '50%',
-                  background: isPlayingMusic ? 'linear-gradient(135deg, #f97316, #ea580c)' : 'linear-gradient(135deg, #64748b, #475569)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxShadow: isPlayingMusic ? '0 0 18px rgba(249,115,22,0.95), 0 0 25px rgba(34,197,94,0.5)' : '0 2px 8px rgba(0,0,0,0.4)',
-                  zIndex: 10
-                }}
-              >
-                <span style={{ fontSize: '16px', lineHeight: 1 }}>🎤</span>
-                {isPlayingMusic && (
-                  <>
-                    <div className="mic-ring" style={{ borderColor: 'rgba(249, 115, 22, 0.75)' }} />
-                    <div className="mic-ring" style={{ borderColor: 'rgba(34, 197, 94, 0.65)', animationDelay: '1.2s' }} />
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Foreground Event Content */}
-          <div className="position-relative" style={{ zIndex: 10 }}>
-            <div className="d-flex align-items-center justify-content-between mb-2">
-              {/* WeGrow Logo */}
-              <div className="d-flex flex-column align-items-center">
-                <div className="bg-white rounded-3 px-3 py-1 shadow-sm">
-                  <img src={LOGO_IMG} alt="WeGrow" style={{ height: '28px', width: 'auto' }} />
-                </div>
-              </div>
-
-              {/* Date Box */}
-              <div className="d-flex flex-column align-items-center">
-                <div className="rounded-3 border border-light border-opacity-25 d-flex flex-column align-items-center justify-content-center" style={{ width: '52px', height: '52px', background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(4px)' }}>
-                  <span className="fs-5 font-weight-bold lh-1 text-white">{CONFIG.dayNum}</span>
-                  <span className="small text-uppercase font-weight-bold" style={{ fontSize: '9px', color: '#86efac' }}>{CONFIG.monthAbbr}</span>
-                </div>
-                <span className="small font-weight-bold mt-1 text-uppercase" style={{ fontSize: '9px', color: '#86efac' }}>
-                  {CONFIG.dayName}
-                </span>
-              </div>
-            </div>
-
-            {/* Centered Identity */}
-            <div className="text-center mt-2">
-              <div className="small font-weight-medium" style={{ color: '#d1fae5', textShadow: '0 2px 8px rgba(0,0,0,0.7)' }}>
-                {CONFIG.presentedBy} presents
-              </div>
-
-              <div className="d-inline-flex flex-wrap align-items-center justify-content-center gap-2 mt-2">
-                <div className="d-inline-flex align-items-center gap-2 rounded-pill px-3 py-1" style={{ background: 'rgba(34,197,94,0.22)', border: '1px solid rgba(34,197,94,0.5)', fontSize: '11px', backdropFilter: 'blur(4px)' }}>
-                  <span className="rounded-circle bg-warning" style={{ width: '6px', height: '6px' }}></span>
-                  <span className="font-weight-bold tracking-wider text-white">{CONFIG.category}</span>
-                </div>
-                <div className="d-inline-flex align-items-center gap-1.5 px-3 py-1 rounded-pill" style={{ background: 'rgba(249, 115, 22, 0.28)', border: '1px solid rgba(249, 115, 22, 0.55)', backdropFilter: 'blur(4px)', fontSize: '11px' }}>
-                  <Ticket style={{ width: '13px', height: '13px', color: '#fb923c' }} />
-                  <span className="font-weight-bold text-white">{rupee(CONFIG.ticketPrice)} per ticket</span>
-                </div>
-              </div>
-
-              <h1 className="font-display display-4 font-weight-bold mt-3 mb-2" style={{ letterSpacing: '-0.5px', textShadow: '0 4px 24px rgba(0,0,0,0.85)' }}>
-                <span className="text-white">{CONFIG.titleLine1}</span>{' '}
-                <span style={{ background: 'linear-gradient(90deg, #86efac 0%, #34d399 40%, #fbbf24 80%, #fb923c 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>{CONFIG.titleLine2}</span>
-              </h1>
-
-              <div className="d-flex flex-wrap align-items-center justify-content-center gap-3 small font-weight-medium mt-2" style={{ color: '#e2e8f0', textShadow: '0 2px 8px rgba(0,0,0,0.85)' }}>
-                <span className="d-flex align-items-center gap-1">
-                  <Calendar style={{ width: '14px', height: '14px', color: '#86efac' }} /> {CONFIG.dateShort}
-                </span>
-                <span className="d-flex align-items-center gap-1">
-                  <Clock style={{ width: '14px', height: '14px', color: '#86efac' }} /> Rep: {CONFIG.reportingTime} · Event: {CONFIG.eventTime}
-                </span>
-                <span className="d-flex align-items-center gap-1">
-                  <MapPin style={{ width: '14px', height: '14px', color: '#86efac' }} /> {CONFIG.fullVenue}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* FOOD PARTNER SCROLLING STRIP */}
-        <div className="mb-3">
-          <div className="d-flex align-items-center gap-2 mb-2 px-1">
-            <span className="small font-weight-bold text-uppercase" style={{ fontSize: '11px', letterSpacing: '1.5px', color: '#15803d' }}>Our Partners</span>
-            <div style={{ flex: 1, height: '1.5px', background: 'linear-gradient(90deg, #86efac, transparent)' }} />
-          </div>
-          <div className="sa-marquee-wrap">
-            <div className="sa-marquee-track">
-              {/* Group 1 */}
-              <div className="sa-marquee-group">
-                <div className="sa-partner-chip">
-                  <div className="sa-partner-icon" style={{ background: 'rgba(249, 115, 22, 0.12)' }}>🍕</div>
-                  <div>
-                    <div style={{ fontSize: '11.5px', fontWeight: 700, color: '#0f172a', lineHeight: 1.2 }}>Spice Garden</div>
-                    <div style={{ fontSize: '9px', color: '#ea580c', fontWeight: 700, letterSpacing: '0.5px' }}>FOOD PARTNER</div>
-                  </div>
-                </div>
-                <div className="sa-partner-sep" />
-                <div className="sa-partner-chip">
-                  <div className="sa-partner-icon" style={{ background: 'rgba(234, 179, 8, 0.15)' }}>🥘</div>
-                  <div>
-                    <div style={{ fontSize: '11.5px', fontWeight: 700, color: '#0f172a', lineHeight: 1.2 }}>Curry House</div>
-                    <div style={{ fontSize: '9px', color: '#ca8a04', fontWeight: 700, letterSpacing: '0.5px' }}>FOOD PARTNER</div>
-                  </div>
-                </div>
-                <div className="sa-partner-sep" />
-                <div className="sa-partner-chip">
-                  <div className="sa-partner-icon" style={{ background: 'rgba(34, 197, 94, 0.12)' }}>🥗</div>
-                  <div>
-                    <div style={{ fontSize: '11.5px', fontWeight: 700, color: '#0f172a', lineHeight: 1.2 }}>Fresh Bites</div>
-                    <div style={{ fontSize: '9px', color: '#16a34a', fontWeight: 700, letterSpacing: '0.5px' }}>FOOD PARTNER</div>
-                  </div>
-                </div>
-                <div className="sa-partner-sep" />
-                <div className="sa-partner-chip">
-                  <div className="sa-partner-icon" style={{ background: 'rgba(59, 130, 246, 0.12)' }}>🍹</div>
-                  <div>
-                    <div style={{ fontSize: '11.5px', fontWeight: 700, color: '#0f172a', lineHeight: 1.2 }}>Thirst Quench</div>
-                    <div style={{ fontSize: '9px', color: '#2563eb', fontWeight: 700, letterSpacing: '0.5px' }}>BEVERAGE PARTNER</div>
-                  </div>
-                </div>
-                <div className="sa-partner-sep" />
-                <div className="sa-partner-chip">
-                  <div className="sa-partner-icon" style={{ background: 'rgba(236, 72, 153, 0.12)' }}>🍰</div>
-                  <div>
-                    <div style={{ fontSize: '11.5px', fontWeight: 700, color: '#0f172a', lineHeight: 1.2 }}>Sweet Corner</div>
-                    <div style={{ fontSize: '9px', color: '#db2777', fontWeight: 700, letterSpacing: '0.5px' }}>DESSERT PARTNER</div>
-                  </div>
-                </div>
-                <div className="sa-partner-sep" />
-                <div className="sa-partner-chip">
-                  <div className="sa-partner-icon" style={{ background: 'rgba(249, 115, 22, 0.12)' }}>🌮</div>
-                  <div>
-                    <div style={{ fontSize: '11.5px', fontWeight: 700, color: '#0f172a', lineHeight: 1.2 }}>Street Feast</div>
-                    <div style={{ fontSize: '9px', color: '#ea580c', fontWeight: 700, letterSpacing: '0.5px' }}>FOOD PARTNER</div>
-                  </div>
-                </div>
-              </div>
-              {/* Group 2 – duplicate for seamless loop */}
-              <div className="sa-marquee-group">
-                <div className="sa-partner-chip">
-                  <div className="sa-partner-icon" style={{ background: 'rgba(249, 115, 22, 0.12)' }}>🍕</div>
-                  <div>
-                    <div style={{ fontSize: '11.5px', fontWeight: 700, color: '#0f172a', lineHeight: 1.2 }}>Spice Garden</div>
-                    <div style={{ fontSize: '9px', color: '#ea580c', fontWeight: 700, letterSpacing: '0.5px' }}>FOOD PARTNER</div>
-                  </div>
-                </div>
-                <div className="sa-partner-sep" />
-                <div className="sa-partner-chip">
-                  <div className="sa-partner-icon" style={{ background: 'rgba(234, 179, 8, 0.15)' }}>🥘</div>
-                  <div>
-                    <div style={{ fontSize: '11.5px', fontWeight: 700, color: '#0f172a', lineHeight: 1.2 }}>Curry House</div>
-                    <div style={{ fontSize: '9px', color: '#ca8a04', fontWeight: 700, letterSpacing: '0.5px' }}>FOOD PARTNER</div>
-                  </div>
-                </div>
-                <div className="sa-partner-sep" />
-                <div className="sa-partner-chip">
-                  <div className="sa-partner-icon" style={{ background: 'rgba(34, 197, 94, 0.12)' }}>🥗</div>
-                  <div>
-                    <div style={{ fontSize: '11.5px', fontWeight: 700, color: '#0f172a', lineHeight: 1.2 }}>Fresh Bites</div>
-                    <div style={{ fontSize: '9px', color: '#16a34a', fontWeight: 700, letterSpacing: '0.5px' }}>FOOD PARTNER</div>
-                  </div>
-                </div>
-                <div className="sa-partner-sep" />
-                <div className="sa-partner-chip">
-                  <div className="sa-partner-icon" style={{ background: 'rgba(59, 130, 246, 0.12)' }}>🍹</div>
-                  <div>
-                    <div style={{ fontSize: '11.5px', fontWeight: 700, color: '#0f172a', lineHeight: 1.2 }}>Thirst Quench</div>
-                    <div style={{ fontSize: '9px', color: '#2563eb', fontWeight: 700, letterSpacing: '0.5px' }}>BEVERAGE PARTNER</div>
-                  </div>
-                </div>
-                <div className="sa-partner-sep" />
-                <div className="sa-partner-chip">
-                  <div className="sa-partner-icon" style={{ background: 'rgba(236, 72, 153, 0.12)' }}>🍰</div>
-                  <div>
-                    <div style={{ fontSize: '11.5px', fontWeight: 700, color: '#0f172a', lineHeight: 1.2 }}>Sweet Corner</div>
-                    <div style={{ fontSize: '9px', color: '#db2777', fontWeight: 700, letterSpacing: '0.5px' }}>DESSERT PARTNER</div>
-                  </div>
-                </div>
-                <div className="sa-partner-sep" />
-                <div className="sa-partner-chip">
-                  <div className="sa-partner-icon" style={{ background: 'rgba(249, 115, 22, 0.12)' }}>🌮</div>
-                  <div>
-                    <div style={{ fontSize: '11.5px', fontWeight: 700, color: '#0f172a', lineHeight: 1.2 }}>Street Feast</div>
-                    <div style={{ fontSize: '9px', color: '#ea580c', fontWeight: 700, letterSpacing: '0.5px' }}>FOOD PARTNER</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 4-STEP PROGRESS STEPPER */}
-        {screen === 'form' && (
-          <div className="sa-card px-3 px-sm-4 py-3 mb-4 d-flex align-items-center">
-            {["Booker Details", "Ticket Details", "Payment", "Review & Confirm"].map((label, i) => {
-              const n = i + 1;
-              const done = step > n;
-              const current = step === n;
-              return (
-                <div key={i} className={`d-flex align-items-center ${i < 3 ? 'flex-grow-1' : ''}`}>
-                  <div className="d-flex flex-column align-items-center cursor-pointer" onClick={() => { if (done) setStep(n); }}>
-                    <div
-                      className={`step-dot ${done || current ? 'text-white' : ''}`}
-                      style={done || current ? {
-                        background: 'linear-gradient(135deg, #16a34a, #15803d)',
-                        boxShadow: '0 0 12px rgba(22,163,74,0.45)',
-                        border: 'none'
-                      } : {
-                        background: '#f8fafc',
-                        border: '1.5px solid #cbd5e1',
-                        color: '#64748b'
-                      }}
-                    >
-                      {done ? <Check style={{ width: '16px', height: '16px', strokeWidth: 3 }} /> : n}
-                    </div>
-                    <div
-                      className="d-none d-sm-block small font-weight-bold mt-1 text-center"
-                      style={{ fontSize: '11.5px', maxWidth: '95px', color: done || current ? '#15803d' : '#64748b' }}
-                    >
-                      {label}
-                    </div>
-                  </div>
-                  {i < 3 && <div className={`step-line ${done ? 'done' : ''}`} />}
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        {/* TWO-COLUMN LAYOUT: STAGE POSTER ON LEFT, FORM ON RIGHT */}
-        {screen === 'form' && (
-          <div className="row g-4 align-items-start">
-            {/* LEFT COLUMN: LIVE EVENT STAGE POSTER */}
-            <div className="col-12 col-lg-5">
-              <div className="sa-card overflow-hidden">
-                <div className="poster-stage p-4 pb-0">
-                  <div className="poster-stars"></div>
-                  <div className="stage-beam" style={{ left: '8%' }}></div>
-                  <div className="stage-beam" style={{ right: '10%', top: '-20%', transform: 'skewX(13deg)' }}></div>
-
-                  {/* Corner tags */}
-                  <div className="d-flex align-items-start justify-content-between text-warning position-relative" style={{ fontSize: '10.5px', fontWeight: 600 }}>
-                    <div style={{ transform: 'rotate(-3deg)' }}>
-                      Get ready to<br />sing along! 🎤
-                    </div>
-                    <div className="text-end text-white-50">
-                      MUSIC · PEOPLE<br />MEMORIES · TOGETHER
-                    </div>
-                  </div>
-
-                  {/* Center Poster Titles */}
-                  <div className="text-center position-relative mt-2">
-                    <span className="ribbon text-white px-3 py-1 rounded-2 small font-weight-bold d-inline-block">
-                      WEGROW
-                    </span>
-                    <div className="text-white-50 small mt-1" style={{ fontSize: '9px', letterSpacing: '3px' }}>
-                      — PRESENTS —
-                    </div>
-                    <div className="font-display text-white mt-1 fs-3 font-weight-bold">
-                      SING <span className="poster-gradtext">ALONG</span>
-                    </div>
-                    <div className="text-white-50 small font-weight-medium mt-1">
-                      {CONFIG.category}
-                    </div>
-                    <div className="mt-2">
-                      <span className="ribbon text-white px-3 py-1 rounded-pill small font-weight-bold d-inline-block shadow" style={{ transform: 'rotate(-2deg)' }}>
-                        BOOKINGS OPEN NOW!
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Stage Mascot Performing */}
-                  <div className="position-relative d-flex justify-content-center mt-2 pb-1">
-                    <div
-                      className="position-relative cursor-pointer"
-                      onClick={toggleMusic}
-                      title={isPlayingMusic ? "Click Mascot to Pause OM Song" : "Click Mascot to Play OM Song"}
-                      style={{ width: '210px', animation: isPlayingMusic ? 'saMascotSing 2s ease-in-out infinite' : 'saBob 2.8s ease-in-out infinite', transformOrigin: 'bottom center' }}
-                    >
-                      {isPlayingMusic && (
-                        <>
-                          <span className="sa-singing-note" style={{ top: '-10px', left: '-12px', fontSize: '20px', color: '#fb923c', animationDelay: '0s' }}>♪</span>
-                          <span className="sa-singing-note" style={{ top: '20%', right: '-16px', fontSize: '22px', color: '#7fb2ff', animationDelay: '1.1s' }}>♫</span>
-                          <span className="sa-singing-note" style={{ top: '-14px', right: '12px', fontSize: '18px', color: '#facc15', animationDelay: '2s' }}>♬</span>
-                        </>
-                      )}
-                      <img
-                        src={MASCOT_IMG}
-                        alt="Mascot"
-                        className="w-100 h-auto position-relative"
-                        style={{ zIndex: 10, filter: isPlayingMusic ? 'drop-shadow(0 16px 20px rgba(0,0,0,0.5)) drop-shadow(0 0 16px rgba(34,197,94,0.6))' : 'drop-shadow(0 16px 20px rgba(0,0,0,0.5))' }}
-                      />
-                      <div className="position-absolute" style={{ right: '0%', top: '28%', zIndex: 20 }}>
-                        {isPlayingMusic && <div className="mic-ring"></div>}
-                        <div className="mic-badge text-white small" style={{ background: isPlayingMusic ? '#f97316' : '#64748b' }}>🎤</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Crowd on Turf */}
-                  <div className="position-relative" style={{ height: '60px', marginTop: '-8px', zIndex: 20 }}>
-                    {renderCrowdSVG()}
-                  </div>
-                  <div className="position-absolute start-0 end-0 bottom-0 crowd-fade" style={{ height: '90px', zIndex: 10 }}></div>
-                </div>
-
-
-              </div>
-            </div>
-
-            {/* RIGHT COLUMN: STEP FORM */}
-            <div className="col-12 col-lg-7">
-              {/* STEP 1: BOOKER DETAILS */}
-              {step === 1 && (
-                <div className="sa-step-card p-4 p-sm-5">
-                  <div className="d-flex align-items-center gap-2 mb-1">
-                    <User style={{ width: '22px', height: '22px', color: '#16a34a' }} />
-                    <h4 className="font-display font-weight-bold mb-0" style={{ color: '#0f172a' }}>Booker Details</h4>
-                  </div>
-                  <p className="small mb-4" style={{ color: '#475569' }}>
-                    Please fill in your contact information. We'll use this to send your booking confirmation.
-                  </p>
-
-                  <div className="d-flex flex-column gap-3">
-                    <div>
-                      <label className="form-label font-weight-semibold small mb-1" style={{ color: '#0f172a' }}>
-                        Full Name *
-                      </label>
-                      <input
-                        type="text"
-                        className={`sa-field ${errors.name ? 'sa-field-error' : ''}`}
-                        placeholder="e.g., Rajapavalam"
-                        value={booker.name}
-                        onChange={(e) => setBooker({ ...booker, name: e.target.value })}
-                      />
-                      {errors.name && <div className="text-danger small mt-1">{errors.name}</div>}
-                    </div>
-
-                    <div>
-                      <label className="form-label font-weight-semibold small mb-1" style={{ color: '#0f172a' }}>
-                        Mobile / WhatsApp Number *
-                      </label>
-                      <div className="d-flex gap-2">
-                        <select
-                          className="sa-field font-weight-bold text-center"
-                          style={{ width: '80px', flexShrink: 0 }}
-                          value={booker.countryCode}
-                          onChange={(e) => setBooker({ ...booker, countryCode: e.target.value })}
-                        >
-                          <option value="+91">IN -</option>
-                          <option value="+1">US -</option>
-                          <option value="+44">UK -</option>
-                          <option value="+971">AE -</option>
-                        </select>
-                        <input
-                          type="tel"
-                          inputMode="numeric"
-                          maxLength={10}
-                          className={`sa-field ${errors.mobile ? 'sa-field-error' : ''}`}
-                          placeholder="10-digit mobile number"
-                          value={booker.mobile}
-                          onChange={(e) => setBooker({ ...booker, mobile: e.target.value.replace(/\D/g, '').slice(0, 10) })}
-                        />
-                      </div>
-                      {errors.mobile ? (
-                        <div className="text-danger small mt-1">{errors.mobile}</div>
-                      ) : (
-                        <div className="small mt-1" style={{ color: '#64748b' }}>We'll send booking updates on WhatsApp.</div>
-                      )}
-                    </div>
-
-                    <div>
-                      <label className="form-label font-weight-semibold small mb-1" style={{ color: '#0f172a' }}>
-                        Email ID <span style={{ color: '#16a34a', fontWeight: 600 }}>(Recommended)</span>
-                      </label>
-                      <input
-                        type="email"
-                        className={`sa-field ${errors.email ? 'sa-field-error' : ''}`}
-                        placeholder="e.g., yourname@email.com"
-                        value={booker.email}
-                        onChange={(e) => setBooker({ ...booker, email: e.target.value })}
-                      />
-                      {errors.email ? (
-                        <div className="text-danger small mt-1">{errors.email}</div>
-                      ) : (
-                        <div className="small mt-1" style={{ color: '#64748b' }}>We'll email your booking confirmation and digital ticket here.</div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="d-flex align-items-start gap-2 p-3 rounded-3 mt-4" style={{ background: '#f0fdf4', border: '1.5px solid #bbf7d0' }}>
-                    <Info className="flex-shrink-0 mt-1" style={{ width: '16px', height: '16px', color: '#16a34a' }} />
-                    <p className="mb-0 small font-weight-medium" style={{ color: '#166534', fontSize: '13px' }}>
-                      Your information is safe with us. We'll never share your contact details with third parties.
-                    </p>
-                  </div>
-
-                  <div className="d-flex align-items-center justify-content-between mt-4 pt-2">
-                    <button disabled className="sa-btn-ghost px-4 py-2 small d-flex align-items-center gap-1 opacity-50">
-                      <ChevronLeft style={{ width: '16px', height: '16px' }} /> Back
-                    </button>
-                    <button onClick={handleNextStep} className="sa-btn-primary px-4 py-2 small d-flex align-items-center gap-1">
-                      <span>Next</span>
-                      <ChevronRight style={{ width: '16px', height: '16px' }} />
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* STEP 2: TICKET DETAILS */}
-              {step === 2 && (
-                <div className="sa-step-card p-4 p-sm-5">
-                  <div className="d-flex align-items-center gap-2 mb-1">
-                    <Ticket style={{ width: '22px', height: '22px', color: '#16a34a' }} />
-                    <h4 className="font-display font-weight-bold mb-0" style={{ color: '#0f172a' }}>Ticket Details</h4>
-                  </div>
-                  <p className="small mb-4" style={{ color: '#475569' }}>
-                    {CONFIG.eventName} — Live Music Event · Ticket Price: {rupee(CONFIG.ticketPrice)} / ticket
-                  </p>
-
-                  <div className="mb-4">
-                    <label className="form-label font-weight-semibold small mb-2" style={{ color: '#0f172a' }}>
-                      Number of Tickets *
-                    </label>
-                    <div className="d-flex align-items-center gap-3">
-                      <button
-                        onClick={() => qty > 1 && setQty(qty - 1)}
-                        disabled={qty <= 1}
-                        className="qty-btn"
-                      >
-                        −
-                      </button>
-                      <span className="font-display fs-3 font-weight-bold px-2" style={{ color: '#0f172a' }}>
-                        {qty}
-                      </span>
-                      <button
-                        onClick={() => qty < CONFIG.maxTickets && setQty(qty + 1)}
-                        disabled={qty >= CONFIG.maxTickets}
-                        className="qty-btn"
-                      >
-                        +
-                      </button>
-                      <span className="small ms-2" style={{ color: '#64748b' }}>Max {CONFIG.maxTickets} tickets per booking</span>
-                    </div>
-                    {errors.qty && <div className="text-danger small mt-2">{errors.qty}</div>}
-                  </div>
-
-                  <div className="rounded-3 overflow-hidden mb-4 shadow-sm" style={{ border: '1.5px solid #dcfce7' }}>
-                    <div className="d-flex justify-content-between px-3 py-2 text-uppercase font-weight-bold" style={{ fontSize: '11px', background: '#f0fdf4', color: '#15803d' }}>
-                      <span>Item</span>
-                      <span>Amount</span>
-                    </div>
-                    <div className="d-flex justify-content-between px-3 py-2 small" style={{ borderTop: '1px solid #e2e8f0', background: '#ffffff' }}>
-                      <span style={{ color: '#64748b' }}>Ticket Price</span>
-                      <span className="font-weight-bold" style={{ color: '#0f172a' }}>{rupee(CONFIG.ticketPrice)}</span>
-                    </div>
-                    <div className="d-flex justify-content-between px-3 py-2 small" style={{ borderTop: '1px solid #e2e8f0', background: '#ffffff' }}>
-                      <span style={{ color: '#64748b' }}>Quantity</span>
-                      <span className="font-weight-bold" style={{ color: '#0f172a' }}>{qty}</span>
-                    </div>
-                    <div className="d-flex justify-content-between px-3 py-3" style={{ borderTop: '1.5px solid #bbf7d0', background: '#ecfdf5' }}>
-                      <span className="font-weight-bold" style={{ color: '#166534' }}>Total</span>
-                      <span className="font-display fs-5 font-weight-bold" style={{ color: '#15803d' }}>
-                        {rupee(totalAmount)}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div
-                    className="rounded-3 p-4 text-white d-flex align-items-center justify-content-between mb-4 shadow"
-                    style={{ background: 'linear-gradient(135deg, #16a34a 0%, #15803d 100%)', boxShadow: '0 10px 25px -8px rgba(22, 163, 74, 0.45)' }}
                   >
-                    <div>
-                      <div className="small font-weight-bold text-uppercase" style={{ color: '#dcfce7' }}>TOTAL AMOUNT</div>
-                      <div className="display-6 font-weight-bold mt-1 text-white">{rupee(totalAmount)}</div>
+                    SING{" "}
+                  </span>
+                  <span
+                    className="bg-gradient-to-r from-[#ff3800] via-[#ff6a00] to-[#ffa500] bg-clip-text text-transparent inline-block transition-transform duration-300 group-hover:scale-105"
+                    style={{
+                      filter: 'drop-shadow(0 0 25px rgba(255,106,0,0.85)) drop-shadow(0 4px 8px #2b0c00)'
+                    }}
+                  >
+                    ALONG
+                  </span>
+                </h1>
+                <p className="font-brush text-amber-300 text-xs sm:text-sm md:text-base tracking-[0.25em] sm:tracking-[0.3em] uppercase mt-1 drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
+                  LIVE MUSIC EVENT
+                </p>
+              </div>
+            </div>
+
+            {/* Middle Stage Space: Mascot's Head, Face, Glasses, Ears, Mic & Smiling Expression are 100% VISIBLE! */}
+            <div className="relative z-10 flex-grow pointer-events-none" />
+
+            {/* Video Stage Bottom Floating Badge: MUSIC CONNECTS US */}
+            <div className="relative z-20 flex justify-center mb-2 px-3">
+              <div className="inline-flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-1.5 sm:py-2 rounded-full bg-gradient-to-r from-[#ff7800]/40 via-[#cc5500]/30 to-[#1a0c00]/80 border border-amber-400/60 backdrop-blur-md shadow-[0_0_24px_rgba(255,153,0,0.5)] text-amber-200">
+                <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-300 fill-amber-300 animate-heart-pulse flex-shrink-0" />
+                <span className="font-display text-[11px] sm:text-xs md:text-sm font-black tracking-[0.15em] sm:tracking-[0.2em] uppercase bg-gradient-to-r from-white via-[#ffe6a7] to-[#ffb703] bg-clip-text text-transparent text-center">
+                  MUSIC CONNECTS US
+                </span>
+                <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-300 fill-amber-300 animate-heart-pulse flex-shrink-0" />
+              </div>
+            </div>
+
+            {/* Bottom Info Bar */}
+            <div className="relative z-30 w-full bg-black/90 backdrop-blur-md border-t border-[#ff6a00]/40 py-2 sm:py-2.5 px-3 sm:px-6 flex flex-wrap items-center justify-center gap-2 sm:gap-6 md:gap-8 text-[11px] sm:text-xs font-bold text-white">
+              <div className="inline-flex items-center gap-1.5 bg-white/5 sm:bg-transparent rounded-full px-2.5 py-1 sm:p-0 border border-white/10 sm:border-0">
+                <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 flex-shrink-0" />
+                <span>{CONFIG.dateShort}</span>
+              </div>
+              <span className="hidden md:inline text-slate-600">|</span>
+              <div className="inline-flex items-center gap-1.5 bg-white/5 sm:bg-transparent rounded-full px-2.5 py-1 sm:p-0 border border-white/10 sm:border-0">
+                <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 flex-shrink-0" />
+                <span>Rep: {CONFIG.reportingTime}</span>
+              </div>
+              <span className="hidden md:inline text-slate-600">|</span>
+              <div className="inline-flex items-center gap-1.5 bg-white/5 sm:bg-transparent rounded-full px-2.5 py-1 sm:p-0 border border-white/10 sm:border-0">
+                <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 flex-shrink-0" />
+                <span>Event: {CONFIG.eventTime}</span>
+              </div>
+              <span className="hidden md:inline text-slate-600">|</span>
+              <div className="inline-flex items-center gap-1.5 bg-white/5 sm:bg-transparent rounded-full px-2.5 py-1 sm:p-0 border border-white/10 sm:border-0">
+                <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 flex-shrink-0" />
+                <span>{CONFIG.fullVenue}</span>
+              </div>
+              <span className="hidden md:inline text-slate-600">|</span>
+              <button
+                type="button"
+                onClick={() => setPageView('intro')}
+                className="text-amber-400 hover:text-amber-300 underline underline-offset-2 inline-flex items-center gap-1 cursor-pointer bg-amber-500/10 sm:bg-transparent rounded-full px-2.5 py-1 sm:p-0 border border-amber-500/20 sm:border-0"
+              >
+                <Info className="w-3.5 h-3.5 flex-shrink-0" />
+                <span>Rules &amp; Notes</span>
+              </button>
+            </div>
+          </header>
+
+          {/* =====================================================================
+              SECTION 2: SPONSOR / PARTNER MARQUEE
+              ===================================================================== */}
+          <section className="w-full bg-white py-4 sm:py-6 border-b border-slate-200 overflow-hidden relative z-10">
+            <div className="flex items-center justify-center gap-3 max-w-5xl mx-auto mb-3 sm:mb-4 px-4">
+              <span className="text-amber-400 text-sm">✨</span>
+              <h3 className="font-poster text-xs sm:text-base tracking-wider uppercase text-[#ff6a00]">OUR PARTNERS</h3>
+              <span className="text-amber-400 text-sm">✨</span>
+              <div className="flex-grow h-[2px] bg-gradient-to-r from-[#ff6a00]/30 to-transparent rounded-full ml-2" />
+            </div>
+
+            {/* Infinite Scrolling Track */}
+            <div className="w-full overflow-hidden relative [mask-image:linear-gradient(90deg,transparent_0%,#000_6%,#000_94%,transparent_100%)]">
+              <div className="sa-marquee-track">
+                {/* Set 1 */}
+                {CONFIG.partners.map((partner, idx) => (
+                  <React.Fragment key={`p1-${idx}`}>
+                    <div className="inline-flex items-center gap-2 sm:gap-3 bg-[#fdfbf7] hover:bg-[#fff8f0] border border-slate-200 hover:border-[#ff6a00] rounded-full px-3.5 sm:px-5 py-1.5 sm:py-2 shadow-sm transition-all duration-200 cursor-default">
+                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center text-sm sm:text-base flex-shrink-0">
+                        {partner.icon}
+                      </div>
+                      <div className="flex flex-col text-left">
+                        <span className="font-display text-xs sm:text-sm font-bold text-[#0f172a] leading-tight">{partner.name}</span>
+                        <span className="text-[9px] sm:text-[10px] font-extrabold tracking-wider text-[#ff6a00] uppercase">{partner.type}</span>
+                      </div>
                     </div>
-                    <div className="text-end small" style={{ color: '#dcfce7' }}>
-                      <div>{rupee(CONFIG.ticketPrice)} × {qty} ticket{qty > 1 ? 's' : ''}</div>
-                      <div>Auto-calculated</div>
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#ff6a00] opacity-60" />
+                  </React.Fragment>
+                ))}
+
+                {/* Set 2 (Duplicated for seamless loop) */}
+                {CONFIG.partners.map((partner, idx) => (
+                  <React.Fragment key={`p2-${idx}`}>
+                    <div className="inline-flex items-center gap-2 sm:gap-3 bg-[#fdfbf7] hover:bg-[#fff8f0] border border-slate-200 hover:border-[#ff6a00] rounded-full px-3.5 sm:px-5 py-1.5 sm:py-2 shadow-sm transition-all duration-200 cursor-default">
+                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center text-sm sm:text-base flex-shrink-0">
+                        {partner.icon}
+                      </div>
+                      <div className="flex flex-col text-left">
+                        <span className="font-display text-xs sm:text-sm font-bold text-[#0f172a] leading-tight">{partner.name}</span>
+                        <span className="text-[9px] sm:text-[10px] font-extrabold tracking-wider text-[#ff6a00] uppercase">{partner.type}</span>
+                      </div>
+                    </div>
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#ff6a00] opacity-60" />
+                  </React.Fragment>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* =====================================================================
+              MAIN BOOKING PORTAL WRAPPER
+              ===================================================================== */}
+          <main className="w-full max-w-6xl mx-auto px-4 sm:px-6 py-10 relative z-10">
+
+            {/* ===================================================================
+                SCREEN: STATUS / PROCESSING
+                =================================================================== */}
+            {screen === 'status' && (
+              <div className="max-w-md mx-auto bg-white rounded-3xl p-8 border border-slate-200 shadow-2xl text-center my-12 animate-fadeIn">
+                <div className="w-16 h-16 border-4 border-amber-200 border-t-[#ff6a00] rounded-full animate-spin mx-auto mb-4" />
+                <h3 className="text-xl font-black font-display text-slate-800 mb-2">Securing Your Tickets...</h3>
+                <p className="text-sm text-slate-500 mb-4">
+                  Please wait while we record your booking and generate your verified QR entry pass.
+                </p>
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-50 text-amber-700 text-xs font-semibold">
+                  <Sparkles className="w-4 h-4 text-amber-500" />
+                  <span>Sing Along Live 2026</span>
+                </div>
+              </div>
+            )}
+
+            {/* ===================================================================
+                SCREEN: SUCCESS (PERFORATED ENTRY TICKET PASS)
+                =================================================================== */}
+            {screen === 'success' && ticketData && (
+              <div className="max-w-xl mx-auto my-4 sm:my-6 animate-fadeIn px-1">
+                {/* Top Success Banner */}
+                <div className="text-center mb-5 sm:mb-6">
+                  <div className="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-emerald-100 text-emerald-600 mb-2.5 sm:mb-3 shadow-md">
+                    <CheckCircle2 className="w-7 h-7 sm:w-8 sm:h-8" />
+                  </div>
+                  <h2 className="text-2xl sm:text-3xl font-black font-display text-slate-900">
+                    Booking Confirmed! 🎉
+                  </h2>
+                  <p className="text-xs sm:text-sm text-slate-600 mt-1">
+                    Your entry pass is ready. Please save or download this ticket for venue entry.
+                  </p>
+                </div>
+
+                {/* Perforated Printable Ticket Card */}
+                <div
+                  ref={ticketCaptureRef}
+                  className="bg-white border-2 border-slate-200 rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl relative text-slate-800"
+                >
+                  {/* Ticket Top Header Banner */}
+                  <div className="bg-gradient-to-r from-[#0f172a] via-[#1e293b] to-[#0f172a] text-white p-3.5 sm:p-5 flex items-center justify-between border-b-2 border-amber-500/40">
+                    <div className="flex items-center gap-2 sm:gap-2.5">
+                      <div className="bg-white rounded-lg sm:rounded-xl p-1 sm:p-1.5 shadow flex-shrink-0">
+                        <img src={WEGROW_LOGO_IMG} onError={(e) => { e.currentTarget.src = WEGROW_BACKUP_LOGO; }} alt="WeGrow" className="h-6 sm:h-7 w-auto" />
+                      </div>
+                      <div>
+                        <span className="font-display text-[9px] sm:text-[10px] font-extrabold uppercase tracking-widest text-amber-400">OFFICIAL ENTRY PASS</span>
+                        <h3 className="font-display text-base sm:text-lg font-black leading-tight text-white">SING ALONG 2026</h3>
+                      </div>
+                    </div>
+                    <div className="text-right flex-shrink-0 pl-2">
+                      <span className="text-[9px] sm:text-[10px] uppercase font-bold text-slate-400 block">PASS ID</span>
+                      <span className="font-display font-black text-amber-400 text-xs sm:text-sm tracking-wider">{ticketData.bookingId}</span>
                     </div>
                   </div>
 
-                  <div className="d-flex align-items-center justify-content-between pt-2">
-                    <button onClick={handlePrevStep} className="sa-btn-ghost px-4 py-2 small d-flex align-items-center gap-1">
-                      <ChevronLeft style={{ width: '16px', height: '16px' }} /> Back
-                    </button>
-                    <button onClick={handleNextStep} className="sa-btn-primary px-4 py-2 small d-flex align-items-center gap-1">
-                      <span>Next</span>
-                      <ChevronRight style={{ width: '16px', height: '16px' }} />
-                    </button>
+                  {/* Middle Section: Event & Attendee Details */}
+                  <div className="p-4 sm:p-6">
+                    <div className="grid grid-cols-1 xs:grid-cols-2 gap-3 sm:gap-4 pb-3.5 sm:pb-4 border-b border-dashed border-slate-200">
+                      <div>
+                        <span className="text-[9px] sm:text-[10px] uppercase font-extrabold text-slate-400 block tracking-wider">ATTENDEE NAME</span>
+                        <span className="font-display text-sm sm:text-base font-black text-slate-900">{ticketData.fullName}</span>
+                        <span className="text-xs text-slate-500 block">{ticketData.phone}</span>
+                      </div>
+                      <div className="xs:text-right">
+                        <span className="text-[9px] sm:text-[10px] uppercase font-extrabold text-slate-400 block tracking-wider">TICKETS &amp; AMOUNT</span>
+                        <span className="font-display text-sm sm:text-base font-black text-[#ff6a00]">
+                          {ticketData.ticketQty} Pass{ticketData.ticketQty > 1 ? 'es' : ''} ({rupee(ticketData.amount)})
+                        </span>
+                        <span className="text-[11px] text-emerald-600 font-bold block">● Payment Verified</span>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 xs:grid-cols-2 gap-3 sm:gap-4 py-3.5 sm:py-4 border-b border-dashed border-slate-200 text-xs">
+                      <div>
+                        <span className="text-[9px] sm:text-[10px] uppercase font-extrabold text-slate-400 block tracking-wider">DATE &amp; TIME</span>
+                        <span className="font-bold text-slate-800">{CONFIG.date}</span>
+                        <span className="text-slate-500 block">{CONFIG.eventTime}</span>
+                      </div>
+                      <div className="xs:text-right">
+                        <span className="text-[9px] sm:text-[10px] uppercase font-extrabold text-slate-400 block tracking-wider">VENUE</span>
+                        <span className="font-bold text-slate-800">{CONFIG.venue}</span>
+                        <span className="text-slate-500 block">{CONFIG.location}</span>
+                      </div>
+                    </div>
+
+                    {/* Perforation Cutout Row */}
+                    <div className="relative py-3 sm:py-4 my-1 sm:my-2 flex items-center justify-between">
+                      <div className="ticket-notch-left" />
+                      <div className="w-full border-b-2 border-dashed border-slate-300" />
+                      <div className="ticket-notch-right" />
+                    </div>
+
+                    {/* Bottom Section: QR Code & Instructions */}
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-1 sm:pt-2">
+                      <div className="flex-grow text-center sm:text-left">
+                        <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[11px] font-extrabold mb-1.5">
+                          <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" />
+                          <span>VALID ENTRY CODE</span>
+                        </div>
+                        <p className="text-xs text-slate-500 leading-relaxed max-w-xs mx-auto sm:mx-0">
+                          Scan this QR code at Arasan Turf gate for instant badge check-in.
+                        </p>
+                        <span className="text-[10px] text-slate-400 block mt-1 font-mono">
+                          Ref: {ticketData.utr || 'UPI-DIRECT'}
+                        </span>
+                      </div>
+
+                      {/* QR Code */}
+                      <div className="flex-shrink-0 bg-slate-50 border-2 border-slate-200 rounded-2xl p-2 shadow-inner">
+                        {ticketQr ? (
+                          <img src={ticketQr} alt="Verification QR Code" className="w-24 h-24 sm:w-28 sm:h-28 object-contain" />
+                        ) : (
+                          <div className="w-24 h-24 sm:w-28 sm:h-28 flex items-center justify-center bg-slate-100 text-slate-400 text-xs">
+                            QR Code
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Ticket Footer Ribbon */}
+                  <div className="bg-[#fff8f0] border-t border-amber-200 px-4 sm:px-6 py-2.5 text-center text-[10px] sm:text-[11px] font-bold text-[#ff6a00]">
+                    WeGrow Skill Campus &amp; B School • Present this pass at venue entry
                   </div>
                 </div>
-              )}
 
-              {/* STEP 3: PAYMENT */}
-              {step === 3 && (
-                <div className="sa-step-card p-4 p-sm-5">
-                  <div className="d-flex align-items-center gap-2 mb-1">
-                    <CreditCard style={{ width: '22px', height: '22px', color: '#16a34a' }} />
-                    <h4 className="font-display font-weight-bold mb-0" style={{ color: '#0f172a' }}>Payment</h4>
+                {/* Action Buttons: Download, Share, Reset */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2.5 sm:gap-3 mt-5 sm:mt-6">
+                  <button
+                    type="button"
+                    onClick={handleDownloadTicket}
+                    disabled={isDownloading}
+                    className="w-full sm:w-auto px-5 sm:px-6 py-3 rounded-xl font-display font-black text-sm text-white bg-gradient-to-r from-emerald-600 to-teal-700 hover:brightness-110 shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2 cursor-pointer transition-all"
+                  >
+                    <Download className="w-4 h-4" />
+                    <span>{isDownloading ? 'Saving Pass...' : 'Download Pass (PNG)'}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleShareTicket}
+                    className="w-full sm:w-auto px-5 sm:px-6 py-3 rounded-xl font-display font-black text-sm text-white bg-gradient-to-r from-[#ff6a00] to-[#ee5007] hover:brightness-110 shadow-lg shadow-orange-600/30 flex items-center justify-center gap-2 cursor-pointer transition-all"
+                  >
+                    <Share2 className="w-4 h-4" />
+                    <span>Share via WhatsApp</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleReset}
+                    className="w-full sm:w-auto px-5 py-3 rounded-xl font-display font-bold text-sm text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-300 flex items-center justify-center gap-2 cursor-pointer transition-all"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                    <span>Book Another</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* ===================================================================
+                SCREEN: FORM (STEP PROGRESS & 2-COLUMN BOOKING WORKFLOW WITH EXACT IMAGE 2)
+                =================================================================== */}
+            {screen === 'form' && (
+              <div>
+                {/* SECTION 3: BOOKING PROGRESS (4 Rounded Steps) */}
+                <div className="w-full mb-6 sm:mb-8">
+                  {/* Mobile Active Step Indicator */}
+                  <div className="sm:hidden flex items-center justify-between mb-2.5 px-1">
+                    <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                      Step {step} of 4
+                    </span>
+                    <span className="text-xs font-black text-[#ff6a00] font-display">
+                      {step === 1 ? 'Booker Details' : step === 2 ? 'Ticket Summary' : step === 3 ? 'Payment via UPI' : 'Review & Confirm'}
+                    </span>
                   </div>
-                  <p className="small mb-4" style={{ color: '#475569' }}>
-                    Make the UPI payment and share the transaction details below.
-                  </p>
 
-                  <div className="row g-3 mb-4">
-                    {/* Order summary with UPI ID */}
-                    <div className="col-12 col-sm-6">
-                      <div
-                        className="rounded-3 p-3 text-white h-100 d-flex flex-column justify-content-between shadow-sm"
-                        style={{ background: 'linear-gradient(160deg, #15803d, #14532d)', borderRadius: '16px' }}
-                      >
-                        <div>
-                          <div className="d-flex justify-content-between align-items-center mb-2">
-                            <span className="small font-weight-bold text-uppercase" style={{ color: '#bbf7d0' }}>ORDER SUMMARY</span>
-                            <span className="badge" style={{ background: 'rgba(255, 255, 255, 0.2)', color: '#ffffff', border: '1px solid rgba(255, 255, 255, 0.3)' }}>{qty} Ticket{qty > 1 ? 's' : ''}</span>
+                  <div className="flex items-center justify-between bg-white px-3 sm:px-8 py-3.5 sm:py-4 rounded-2xl border border-slate-200 shadow-sm">
+                    {/* Step 1 */}
+                    <div className="flex items-center gap-1.5 sm:gap-3">
+                      <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center font-display font-black text-xs sm:text-sm transition-all ${
+                        step >= 1 ? 'bg-gradient-to-br from-[#ff6a00] to-[#ee5007] text-white shadow-[0_0_14px_rgba(255,106,0,0.5)]' : 'bg-slate-100 text-slate-400'
+                      }`}>
+                        {step > 1 ? <Check className="w-4 h-4" /> : '1'}
+                      </div>
+                      <span className={`font-display text-xs sm:text-sm hidden sm:inline ${step === 1 ? 'font-black text-slate-900' : 'font-bold text-slate-500'}`}>
+                        Booker
+                      </span>
+                    </div>
+
+                    <div className={`flex-grow h-[3px] mx-1.5 sm:mx-4 rounded-full transition-all ${step >= 2 ? 'bg-[#ff6a00]' : 'bg-slate-200'}`} />
+
+                    {/* Step 2 */}
+                    <div className="flex items-center gap-1.5 sm:gap-3">
+                      <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center font-display font-black text-xs sm:text-sm transition-all ${
+                        step >= 2 ? 'bg-gradient-to-br from-[#ff6a00] to-[#ee5007] text-white shadow-[0_0_14px_rgba(255,106,0,0.5)]' : 'bg-slate-100 text-slate-400'
+                      }`}>
+                        {step > 2 ? <Check className="w-4 h-4" /> : '2'}
+                      </div>
+                      <span className={`font-display text-xs sm:text-sm hidden sm:inline ${step === 2 ? 'font-black text-slate-900' : 'font-bold text-slate-500'}`}>
+                        Tickets
+                      </span>
+                    </div>
+
+                    <div className={`flex-grow h-[3px] mx-1.5 sm:mx-4 rounded-full transition-all ${step >= 3 ? 'bg-[#ff6a00]' : 'bg-slate-200'}`} />
+
+                    {/* Step 3 */}
+                    <div className="flex items-center gap-1.5 sm:gap-3">
+                      <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center font-display font-black text-xs sm:text-sm transition-all ${
+                        step >= 3 ? 'bg-gradient-to-br from-[#ff6a00] to-[#ee5007] text-white shadow-[0_0_14px_rgba(255,106,0,0.5)]' : 'bg-slate-100 text-slate-400'
+                      }`}>
+                        {step > 3 ? <Check className="w-4 h-4" /> : '3'}
+                      </div>
+                      <span className={`font-display text-xs sm:text-sm hidden sm:inline ${step === 3 ? 'font-black text-slate-900' : 'font-bold text-slate-500'}`}>
+                        Payment
+                      </span>
+                    </div>
+
+                    <div className={`flex-grow h-[3px] mx-1.5 sm:mx-4 rounded-full transition-all ${step >= 4 ? 'bg-[#ff6a00]' : 'bg-slate-200'}`} />
+
+                    {/* Step 4 */}
+                    <div className="flex items-center gap-1.5 sm:gap-3">
+                      <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center font-display font-black text-xs sm:text-sm transition-all ${
+                        step >= 4 ? 'bg-gradient-to-br from-[#ff6a00] to-[#ee5007] text-white shadow-[0_0_14px_rgba(255,106,0,0.5)]' : 'bg-slate-100 text-slate-400'
+                      }`}>
+                        4
+                      </div>
+                      <span className={`font-display text-xs sm:text-sm hidden sm:inline ${step === 4 ? 'font-black text-slate-900' : 'font-bold text-slate-500'}`}>
+                        Confirm
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* SECTION 4: TWO-COLUMN BOOKING AREA (EQUAL HEIGHT ON BOTH COLUMNS) */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch">
+                  
+                  {/* LEFT SIDE — EVENT PROMOTIONAL POSTER CARD (Matches right card height exactly) */}
+                  <div className="lg:col-span-5 relative rounded-2xl sm:rounded-[32px] overflow-hidden shadow-2xl border-2 border-amber-500/40 bg-[#160b02] min-h-[340px] sm:min-h-[420px] lg:min-h-[580px] lg:h-full flex flex-col justify-between group">
+                    {/* Background Stage Poster with Mascot - Updated Second Poster (Image 2) */}
+                    <img
+                      src={POSTER_CARD_IMG}
+                      onError={(e) => { e.currentTarget.src = POSTER_STAGE_BG; }}
+                      alt="Sing Along Concert Promotional Poster with Mascot"
+                      className="absolute inset-0 w-full h-full object-cover object-center z-0 transition-transform duration-700 group-hover:scale-105"
+                    />
+
+                    {/* Gradient Overlay - Keeps mascot and stage completely clear and vibrant */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-black/30 z-10 pointer-events-none" />
+
+                    {/* Top Row: Official Event & Date Pill */}
+                    <div className="relative z-20 p-3.5 sm:p-5 flex items-center justify-between gap-2">
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/95 text-[#0f172a] font-display text-[10px] sm:text-[11px] font-black tracking-wide shadow-md">
+                        <Sparkles className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-[#ff6a00]" />
+                        <span>OFFICIAL CONCERT POSTER</span>
+                      </div>
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#ff6a00] text-white font-display text-[10px] sm:text-[11px] font-black shadow-md">
+                        <Calendar className="w-3.5 h-3.5 text-white" />
+                        <span>27 SEP • 6:00 PM</span>
+                      </div>
+                    </div>
+
+                    {/* Middle Graphic Stage Area */}
+                    <div className="relative z-20 flex-grow" />
+
+                    {/* Bottom: Card Footer with Venue & ₹249 Flat Pass */}
+                    <div className="relative z-20 p-4 sm:p-5 flex items-center justify-between border-t border-white/20 text-white backdrop-blur-md bg-black/60">
+                      <div className="flex items-center gap-1.5 text-xs sm:text-sm font-bold text-slate-100">
+                        <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#ff6a00] flex-shrink-0" />
+                        <span className="truncate max-w-[140px] sm:max-w-none">Arasan Turf, Sivakasi</span>
+                      </div>
+                      <div className="px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl bg-gradient-to-r from-[#ff6a00] to-[#ff5000] text-white font-display text-xs sm:text-sm font-black shadow-[0_4px_16px_rgba(255,106,0,0.6)]">
+                        ₹249 <span className="text-[10px] sm:text-xs font-medium opacity-90">/ Pass</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* RIGHT COLUMN: BOOKING FORM CARD (Matches left card height exactly) */}
+                  <div className="lg:col-span-7 relative bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-xl p-4 sm:p-6 md:p-8 h-full flex flex-col justify-between">
+                    
+                    {/* Doodles from HTML reference */}
+                    <span className="absolute top-4 right-6 font-handwritten text-[#ff6a00] text-2xl opacity-30 select-none pointer-events-none rotate-12 hidden sm:block">
+                      🎵 🎶
+                    </span>
+                    <span className="absolute bottom-16 right-6 font-handwritten text-[#ff6a00] text-xl opacity-25 select-none pointer-events-none -rotate-12 hidden sm:block">
+                      Good Vibes!
+                    </span>
+
+                    {/* =========================================================
+                        STEP 1: BOOKER DETAILS
+                        ========================================================= */}
+                    {step === 1 && (
+                      <div className="animate-fadeIn">
+                        <div className="mb-5 sm:mb-6">
+                          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#fff3eb] text-[#ff6a00] font-display text-xs font-extrabold tracking-wider uppercase mb-2">
+                            <User className="w-3.5 h-3.5" />
+                            <span>STEP 1 OF 4</span>
                           </div>
-                          <div className="d-flex justify-content-between py-1 small border-bottom border-light border-opacity-25 text-white-50">
-                            <span className="text-white opacity-75">Amount</span><span className="text-white font-weight-bold">{rupee(totalAmount)}</span>
-                          </div>
+                          <h2 className="font-display text-xl sm:text-3xl font-black text-slate-900">
+                            Booker Details
+                          </h2>
+                          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+                            Please fill in your contact information. We'll use this to send your booking confirmation and entry passes.
+                          </p>
                         </div>
 
-                        <div className="pt-3 border-top border-light border-opacity-25 mt-3">
-                          <div onClick={handleCopyUpi} className="d-flex align-items-center gap-2 cursor-pointer">
-                            <div className="rounded p-1 bg-white text-success">
-                              <CreditCard style={{ width: '16px', height: '16px' }} />
+                        <div className="space-y-3.5 sm:space-y-4">
+                          {/* Full Name */}
+                          <div>
+                            <label className="block font-display text-xs font-bold text-slate-800 mb-1.5">
+                              Full Name <span className="text-[#ff6a00]">*</span>
+                            </label>
+                            <div className="relative">
+                              <User className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#ff6a00]" />
+                              <input
+                                type="text"
+                                value={booker.name}
+                                onChange={(e) => setBooker({ ...booker, name: e.target.value })}
+                                placeholder="e.g. Rahul Sharma"
+                                className={`w-full h-12 pl-11 pr-4 rounded-xl border-2 bg-[#fdfbf7] text-slate-900 font-medium text-sm outline-none transition-all ${
+                                  errors.name ? 'border-red-500' : 'border-slate-200 focus:border-[#ff6a00] focus:bg-white focus:ring-2 focus:ring-[#ff6a00]/20'
+                                }`}
+                              />
                             </div>
-                            <div className="flex-grow-1 overflow-hidden">
-                              <div style={{ fontSize: '10px', color: '#bbf7d0' }}>UPI ID</div>
-                              <div className="small font-weight-bold text-truncate text-white">{CONFIG.upiId}</div>
+                            {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name}</p>}
+                          </div>
+
+                          {/* Mobile / WhatsApp Number */}
+                          <div>
+                            <label className="block font-display text-xs font-bold text-slate-800 mb-1.5">
+                              Mobile / WhatsApp Number <span className="text-[#ff6a00]">*</span>
+                            </label>
+                            <div className="relative">
+                              <Phone className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#ff6a00]" />
+                              <input
+                                type="tel"
+                                maxLength={10}
+                                value={booker.mobile}
+                                onChange={(e) => setBooker({ ...booker, mobile: e.target.value.replace(/\D/g, '') })}
+                                placeholder="10-digit mobile number"
+                                className={`w-full h-12 pl-11 pr-4 rounded-xl border-2 bg-[#fdfbf7] text-slate-900 font-medium text-sm outline-none transition-all ${
+                                  errors.mobile ? 'border-red-500' : 'border-slate-200 focus:border-[#ff6a00] focus:bg-white focus:ring-2 focus:ring-[#ff6a00]/20'
+                                }`}
+                              />
                             </div>
+                            {errors.mobile && <p className="text-xs text-red-500 mt-1">{errors.mobile}</p>}
+                          </div>
+
+                          {/* Email ID */}
+                          <div>
+                            <label className="block font-display text-xs font-bold text-slate-800 mb-1.5">
+                              Email ID <span className="text-slate-400 font-normal">(Recommended)</span>
+                            </label>
+                            <div className="relative">
+                              <Mail className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#ff6a00]" />
+                              <input
+                                type="email"
+                                value={booker.email}
+                                onChange={(e) => setBooker({ ...booker, email: e.target.value })}
+                                placeholder="e.g. rahul@example.com"
+                                className={`w-full h-12 pl-11 pr-4 rounded-xl border-2 bg-[#fdfbf7] text-slate-900 font-medium text-sm outline-none transition-all ${
+                                  errors.email ? 'border-red-500' : 'border-slate-200 focus:border-[#ff6a00] focus:bg-white focus:ring-2 focus:ring-[#ff6a00]/20'
+                                }`}
+                              />
+                            </div>
+                            {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email}</p>}
+                          </div>
+
+                          {/* Attendee Ticket Quantity Counter Card */}
+                          <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between gap-3 bg-[#fff8f0] border-2 border-amber-500/30 rounded-xl sm:rounded-2xl p-3.5 sm:p-4 mt-2">
+                            <div>
+                              <span className="font-display text-sm font-bold text-slate-900 block">Number of Attendees</span>
+                              <span className="text-xs text-[#ff6a00] font-bold block">
+                                {rupee(CONFIG.ticketPrice)} × {qty} {qty > 1 ? 'Passes' : 'Pass'} = {rupee(totalAmount)}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-3 bg-white border border-slate-200 rounded-xl px-2 py-1 shadow-sm self-end xs:self-auto">
+                              <button
+                                type="button"
+                                onClick={() => handleQtyChange(-1)}
+                                disabled={qty <= 1}
+                                className="w-8 h-8 rounded-lg bg-[#fff3eb] text-[#ff6a00] font-black text-lg flex items-center justify-center hover:bg-[#ffe5d4] disabled:opacity-30 cursor-pointer"
+                              >
+                                −
+                              </button>
+                              <span className="font-display font-black text-base w-6 text-center text-slate-900">
+                                {qty}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => handleQtyChange(1)}
+                                disabled={qty >= CONFIG.maxTickets}
+                                className="w-8 h-8 rounded-lg bg-[#fff3eb] text-[#ff6a00] font-black text-lg flex items-center justify-center hover:bg-[#ffe5d4] disabled:opacity-30 cursor-pointer"
+                              >
+                                +
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Privacy Shield Notice */}
+                          <div className="flex items-start gap-2.5 bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-500">
+                            <ShieldCheck className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
+                            <p>
+                              Your information is safe with us. We'll never share your contact details with third parties.
+                            </p>
+                          </div>
+
+                          {/* Bottom Checkout Action */}
+                          <div className="pt-4 border-t border-slate-200 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3.5 sm:gap-4 mt-6">
+                            <div className="flex items-center justify-between sm:block">
+                              <span className="text-[11px] uppercase font-bold text-slate-400 block tracking-wider">Payable Amount:</span>
+                              <span className="font-display text-2xl font-black text-[#ff6a00]">{rupee(totalAmount)}</span>
+                            </div>
+
                             <button
-                              onClick={(e) => { e.stopPropagation(); handleCopyUpi(); }}
-                              className="btn btn-light btn-sm px-2 py-1 small font-weight-bold"
-                              style={{ color: '#15803d' }}
+                              type="button"
+                              onClick={handleNext}
+                              className="w-full sm:w-auto px-6 sm:px-8 py-3.5 rounded-xl font-display font-black text-sm text-white bg-gradient-to-r from-[#ff6a00] to-[#ee5007] hover:brightness-110 active:scale-95 shadow-lg shadow-orange-600/30 flex items-center justify-center gap-2 cursor-pointer transition-all"
                             >
-                              {copiedUpi ? 'Copied!' : 'Copy'}
+                              <span>Proceed to Ticket Details</span>
+                              <ChevronRight className="w-4 h-4" />
                             </button>
                           </div>
                         </div>
                       </div>
-                    </div>
+                    )}
 
-                    {/* Scan & Pay QR */}
-                    <div className="col-12 col-sm-6">
-                      <div
-                        className="rounded-3 p-3 text-center shadow-sm d-flex flex-column align-items-center justify-content-center h-100"
-                        style={{ background: '#ffffff', border: '1.5px solid #dcfce7', borderRadius: '16px' }}
-                      >
-                        <div className="small font-weight-bold text-uppercase mb-2" style={{ color: '#15803d' }}>
-                          📱 SCAN &amp; PAY
+                    {/* =========================================================
+                        STEP 2: TICKET DETAILS & PASS BREAKDOWN
+                        ========================================================= */}
+                    {step === 2 && (
+                      <div className="animate-fadeIn">
+                        <div className="mb-5 sm:mb-6">
+                          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#fff3eb] text-[#ff6a00] font-display text-xs font-extrabold tracking-wider uppercase mb-2">
+                            <Ticket className="w-3.5 h-3.5" />
+                            <span>STEP 2 OF 4</span>
+                          </div>
+                          <h2 className="font-display text-xl sm:text-3xl font-black text-slate-900">
+                            Ticket Summary
+                          </h2>
+                          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+                            Review the pass count and event guidelines before proceeding to payment.
+                          </p>
                         </div>
-                        <a href={upiUrl} className="p-2 rounded shadow-sm d-block" style={{ background: '#ffffff', border: '1px solid #e2e8f0' }}>
-                          {paymentQr ? (
-                            <img src={paymentQr} alt="Scan QR" style={{ width: '135px', height: '135px', display: 'block' }} />
-                          ) : (
-                            <div style={{ width: '135px', height: '135px' }} className="d-flex align-items-center justify-content-center text-muted small">Loading QR...</div>
-                          )}
-                        </a>
-                        <div className="small mt-2" style={{ color: '#475569' }}>
-                          Amount: <span className="font-weight-bold" style={{ color: '#0f172a' }}>{rupee(totalAmount)}</span>
+
+                        <div className="space-y-4">
+                          {/* Ticket Breakdown Card */}
+                          <div className="bg-[#fdfbf7] border-2 border-slate-200 rounded-xl sm:rounded-2xl p-3.5 sm:p-4">
+                            <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+                              <div>
+                                <span className="font-display font-black text-sm sm:text-base text-slate-900 block">
+                                  General Admission Pass
+                                </span>
+                                <span className="text-xs text-slate-500">Live Stage &amp; Music Access</span>
+                              </div>
+                              <div className="text-right">
+                                <span className="font-display font-black text-base text-[#ff6a00] block">{rupee(totalAmount)}</span>
+                                <span className="text-xs text-slate-400">{qty} Pass{qty > 1 ? 'es' : ''} • Total</span>
+                              </div>
+                            </div>
+
+                            <div className="pt-3 space-y-2 text-xs text-slate-600">
+                              <div className="flex justify-between">
+                                <span>Ticket Price ({qty} × {rupee(CONFIG.ticketPrice)}):</span>
+                                <span className="font-bold text-slate-800">{rupee(totalAmount)}</span>
+                              </div>
+                              <div className="flex justify-between border-t border-slate-200 pt-1.5 font-bold text-slate-900">
+                                <span>Total Payable:</span>
+                                <span className="text-[#ff6a00]">{rupee(totalAmount)}</span>
+                              </div>
+                              <div className="flex justify-between pt-1">
+                                <span>Booker Name:</span>
+                                <strong className="text-slate-800">{booker.name}</strong>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Contact Phone:</span>
+                                <strong className="text-slate-800">+91 {booker.mobile}</strong>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Event Date &amp; Time:</span>
+                                <strong className="text-slate-800">{CONFIG.dateShort} ({CONFIG.eventTime})</strong>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Gate Reporting:</span>
+                                <strong className="text-amber-600 font-bold">{CONFIG.reportingTime}</strong>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Venue Entry Reminder */}
+                          <div className="bg-amber-50/80 border border-amber-200 rounded-xl sm:rounded-2xl p-3.5 sm:p-4 text-xs text-amber-900 space-y-1.5">
+                            <div className="font-bold flex items-center gap-1.5 text-amber-800">
+                              <Info className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                              <span>Venue &amp; Entry Guidelines</span>
+                            </div>
+                            <p>• Venue: <strong>{CONFIG.fullVenue}</strong></p>
+                            <p>• Please bring a digital copy of your confirmed ticket QR pass.</p>
+                            <p>• 1 × 500 ml sealed water bottle per person permitted.</p>
+                          </div>
+
+                          {/* Navigation Actions */}
+                          <div className="pt-4 border-t border-slate-200 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 mt-6">
+                            <button
+                              type="button"
+                              onClick={handleBack}
+                              className="w-full sm:w-auto px-5 py-3 rounded-xl font-display font-bold text-sm text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                            >
+                              <ChevronLeft className="w-4 h-4" />
+                              <span>Back</span>
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={handleNext}
+                              className="w-full sm:w-auto px-6 sm:px-8 py-3.5 rounded-xl font-display font-black text-sm text-white bg-gradient-to-r from-[#ff6a00] to-[#ee5007] hover:brightness-110 active:scale-95 shadow-lg shadow-orange-600/30 flex items-center justify-center gap-2 cursor-pointer transition-all"
+                            >
+                              <span>Proceed to Payment</span>
+                              <ChevronRight className="w-4 h-4" />
+                            </button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
+                    )}
 
-                  {/* Transaction Inputs */}
-                  <div className="d-flex flex-column gap-3 mb-4">
-                    <div>
-                      <label className="form-label font-weight-semibold small mb-1" style={{ color: '#0f172a' }}>
-                        UPI Transaction ID / UTR Number *
-                      </label>
-                      <input
-                        type="text"
-                        className={`sa-field ${errors.utr ? 'sa-field-error' : ''}`}
-                        placeholder="e.g., 2026091112345678"
-                        value={payment.utr}
-                        onChange={(e) => setPayment({ ...payment, utr: e.target.value })}
-                      />
-                      {errors.utr && <div className="text-danger small mt-1">{errors.utr}</div>}
-                    </div>
-
-                    <div>
-                      <label className="form-label font-weight-semibold small mb-1" style={{ color: '#0f172a' }}>
-                        Date &amp; Time of Payment *
-                      </label>
-                      <input
-                        type="datetime-local"
-                        className={`sa-field ${errors.datetime ? 'sa-field-error' : ''}`}
-                        value={payment.datetime}
-                        onChange={(e) => setPayment({ ...payment, datetime: e.target.value })}
-                      />
-                      {errors.datetime && <div className="text-danger small mt-1">{errors.datetime}</div>}
-                    </div>
-
-                    <div>
-                      <label className="form-label font-weight-semibold small mb-1" style={{ color: '#0f172a' }}>
-                        Payment Screenshot <span style={{ color: '#16a34a', fontWeight: 600 }}>(Recommended)</span>
-                      </label>
-                      <label
-                        htmlFor="sa-screenshot-file"
-                        className="d-block rounded-3 p-3 text-center cursor-pointer"
-                        style={{ background: '#f8fafc', border: '2px dashed #86efac' }}
-                      >
-                        {payment.fileData ? (
-                          <div>
-                            <img src={payment.fileData} alt="Preview" style={{ maxHeight: '120px' }} className="rounded mb-1" />
-                            <div className="small font-weight-semibold" style={{ color: '#15803d' }}>{payment.fileName} · Click to replace</div>
+                    {/* =========================================================
+                        STEP 3: PAYMENT VIA UPI
+                        ========================================================= */}
+                    {step === 3 && (
+                      <div className="animate-fadeIn">
+                        <div className="mb-5 sm:mb-6">
+                          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#fff3eb] text-[#ff6a00] font-display text-xs font-extrabold tracking-wider uppercase mb-2">
+                            <CreditCard className="w-3.5 h-3.5" />
+                            <span>STEP 3 OF 4</span>
                           </div>
-                        ) : (
-                          <div>
-                            <UploadCloud style={{ width: '28px', height: '28px', color: '#16a34a' }} />
-                            <div className="small font-weight-bold mt-1" style={{ color: '#0f172a' }}>Upload Payment Screenshot</div>
-                            <div style={{ fontSize: '11px', color: '#64748b' }}>PNG, JPG, WEBP (Max 5MB)</div>
+                          <h2 className="font-display text-xl sm:text-3xl font-black text-slate-900">
+                            Choose Payment Method
+                          </h2>
+                          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+                            Pay instantly with real-time automated confirmation or scan the Google Pay QR directly.
+                          </p>
+                        </div>
+
+                        {/* Payment Method Selector Tabs */}
+                        <div className="grid grid-cols-2 gap-2.5 p-1.5 bg-slate-100/80 border border-slate-200 rounded-2xl mb-6">
+                          <button
+                            type="button"
+                            onClick={() => setPaymentMode('MANUAL_UPI')}
+                            className={`py-3 px-2 sm:px-4 rounded-xl font-display text-xs sm:text-sm font-black flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                              paymentMode === 'MANUAL_UPI'
+                                ? 'bg-gradient-to-r from-[#ff6a00] to-[#ee5007] text-white shadow-md'
+                                : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                            }`}
+                          >
+                            <CreditCard className="w-4 h-4" />
+                            <span>📱 Scan GPay QR (Manual UTR)</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => setPaymentMode('ONLINE')}
+                            className={`py-3 px-2 sm:px-4 rounded-xl font-display text-xs sm:text-sm font-black flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                              paymentMode === 'ONLINE'
+                                ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md'
+                                : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                            }`}
+                          >
+                            <Zap className="w-4 h-4" />
+                            <span>⚡ Real-Time Online Pay</span>
+                          </button>
+                        </div>
+
+                        {/* TAB 1: DIRECT GOOGLE PAY QR & UTR ENTRY (DEFAULT & FIRST) */}
+                        {paymentMode === 'MANUAL_UPI' && (
+                          <div className="space-y-4 sm:space-y-5 animate-fadeIn">
+                            <div className="bg-[#fdfbf7] border-2 border-amber-500/30 rounded-xl sm:rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-center gap-4 sm:gap-5">
+                              <div className="flex-shrink-0 flex flex-col items-center">
+                                <div className="bg-white p-2.5 rounded-2xl border-2 border-slate-200 shadow-sm relative">
+                                  {showOriginalQr ? (
+                                    <img
+                                      src="/ashok_kumar_upi_qr.jpg"
+                                      alt="Google Pay QR Code Ashok kumar"
+                                      className="w-36 h-36 sm:w-44 sm:h-44 object-contain rounded-lg"
+                                    />
+                                  ) : paymentQr ? (
+                                    <img
+                                      src={paymentQr}
+                                      alt="UPI Payment QR Code"
+                                      className="w-36 h-36 sm:w-44 sm:h-44 object-contain"
+                                    />
+                                  ) : (
+                                    <div className="w-36 h-36 sm:w-44 sm:h-44 flex items-center justify-center bg-slate-100 text-slate-400 text-xs">
+                                      Loading QR...
+                                    </div>
+                                  )}
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => setShowOriginalQr(!showOriginalQr)}
+                                  className="mt-2 text-[11px] text-[#ff6a00] hover:text-[#ee5007] font-bold underline underline-offset-2 cursor-pointer"
+                                >
+                                  {showOriginalQr ? "Show Dynamic Amount QR" : "Show GPay Standee QR"}
+                                </button>
+                              </div>
+
+                              <div className="flex-grow space-y-2 text-center sm:text-left w-full sm:w-auto">
+                                <div className="flex items-center justify-center sm:justify-start gap-1.5">
+                                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                                  <span className="text-[11px] uppercase font-extrabold text-slate-500 tracking-wider">
+                                    PAY TO: <strong className="text-slate-900">{CONFIG.payeeName}</strong>
+                                  </span>
+                                </div>
+
+                                <div className="font-display text-2xl font-black text-slate-900">{rupee(totalAmount)}</div>
+
+                                <div className="flex flex-col gap-2">
+                                  <div className="inline-flex items-center justify-between gap-2 bg-white border border-slate-300 rounded-xl px-3 py-1.5 shadow-sm max-w-full">
+                                    <div className="flex items-center gap-1.5 text-xs text-slate-500 truncate">
+                                      <span className="font-bold text-slate-700">UPI ID:</span>
+                                      <span className="font-mono font-bold text-slate-900 truncate">{CONFIG.upiId}</span>
+                                    </div>
+                                    <button
+                                      type="button"
+                                      onClick={handleCopyUpi}
+                                      className="text-[#ff6a00] hover:text-[#ee5007] text-xs font-bold flex items-center gap-1 cursor-pointer flex-shrink-0"
+                                    >
+                                      {copiedUpi ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                                      <span>{copiedUpi ? 'Copied' : 'Copy'}</span>
+                                    </button>
+                                  </div>
+
+                                  {CONFIG.upiNumber && (
+                                    <div className="inline-flex items-center justify-between gap-2 bg-white border border-slate-300 rounded-xl px-3 py-1.5 shadow-sm max-w-full">
+                                      <div className="flex items-center gap-1.5 text-xs text-slate-500 truncate">
+                                        <span className="font-bold text-slate-700">UPI Number:</span>
+                                        <span className="font-mono font-bold text-slate-900">{CONFIG.upiNumber}</span>
+                                      </div>
+                                      <button
+                                        type="button"
+                                        onClick={handleCopyUpiNumber}
+                                        className="text-[#ff6a00] hover:text-[#ee5007] text-xs font-bold flex items-center gap-1 cursor-pointer flex-shrink-0"
+                                      >
+                                        {copiedUpiNumber ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                                        <span>{copiedUpiNumber ? 'Copied' : 'Copy'}</span>
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
+
+                                <p className="text-[11px] text-slate-500 pt-0.5">
+                                  Supports GPay, PhonePe, Paytm, BHIM, Cred, and all UPI banking apps.
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* Mobile Direct UPI App Link */}
+                            {upiDeepLink && (
+                              <a
+                                href={upiDeepLink}
+                                className="sm:hidden w-full py-3 px-4 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-display font-black text-xs flex items-center justify-center gap-2 shadow-md active:scale-98 transition-all"
+                              >
+                                <CreditCard className="w-4 h-4" />
+                                <span>Pay Directly with UPI App (GPay / PhonePe)</span>
+                              </a>
+                            )}
+
+                            {/* UTR Input */}
+                            <div>
+                              <label className="block font-display text-xs font-bold text-slate-800 mb-1.5">
+                                UPI Transaction ID / UTR (12 digits) <span className="text-[#ff6a00]">*</span>
+                              </label>
+                              <input
+                                type="text"
+                                value={payment.utr}
+                                onChange={(e) => setPayment({ ...payment, utr: e.target.value })}
+                                placeholder="e.g. 423819284712 or Bank Ref No."
+                                className={`w-full h-12 px-4 rounded-xl border-2 bg-[#fdfbf7] text-slate-900 font-mono font-semibold text-sm outline-none transition-all ${
+                                  errors.utr ? 'border-red-500' : 'border-slate-200 focus:border-[#ff6a00] focus:bg-white focus:ring-2 focus:ring-[#ff6a00]/20'
+                                }`}
+                              />
+                              {errors.utr && <p className="text-xs text-red-500 mt-1">{errors.utr}</p>}
+                            </div>
+
+                            {/* Screenshot Upload */}
+                            <div>
+                              <label className="block font-display text-xs font-bold text-slate-800 mb-1.5">
+                                Payment Screenshot <span className="text-slate-400 font-normal">(Optional for faster approval)</span>
+                              </label>
+                              <label className="border-2 border-dashed border-slate-300 hover:border-[#ff6a00] bg-[#fdfbf7] hover:bg-[#fff8f0] rounded-xl p-4 flex flex-col items-center justify-center gap-1.5 cursor-pointer transition-all">
+                                <UploadCloud className="w-6 h-6 text-[#ff6a00]" />
+                                <span className="text-xs font-bold text-slate-700 text-center">
+                                  {payment.fileName ? payment.fileName : 'Click to attach payment receipt'}
+                                </span>
+                                <span className="text-[10px] text-slate-400">PNG, JPG, or WEBP (Max 5MB)</span>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={handleFileUpload}
+                                  className="hidden"
+                                />
+                              </label>
+                            </div>
+
+                            {/* Navigation Actions */}
+                            <div className="pt-4 border-t border-slate-200 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 mt-6">
+                              <button
+                                type="button"
+                                onClick={handleBack}
+                                className="w-full sm:w-auto px-5 py-3 rounded-xl font-display font-bold text-sm text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                              >
+                                <ChevronLeft className="w-4 h-4" />
+                                <span>Back</span>
+                              </button>
+
+                              <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
+                                <button
+                                  type="button"
+                                  onClick={() => setPaymentMode('ONLINE')}
+                                  className="text-xs font-bold text-[#ff6a00] hover:underline cursor-pointer hidden sm:inline"
+                                >
+                                  Or pay via Online Gateway &rarr;
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={handleNext}
+                                  className="w-full sm:w-auto px-6 sm:px-8 py-3.5 rounded-xl font-display font-black text-sm text-white bg-gradient-to-r from-[#ff6a00] to-[#ee5007] hover:brightness-110 active:scale-95 shadow-lg shadow-orange-600/30 flex items-center justify-center gap-2 cursor-pointer transition-all"
+                                >
+                                  <span>Review &amp; Confirm</span>
+                                  <ChevronRight className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </div>
                           </div>
                         )}
-                      </label>
-                      <input
-                        id="sa-screenshot-file"
-                        type="file"
-                        accept="image/png,image/jpeg,image/webp"
-                        className="d-none"
-                        onChange={handleFileUpload}
-                      />
-                    </div>
-                  </div>
 
-                  <div className="d-flex align-items-center justify-content-between pt-2">
-                    <button onClick={handlePrevStep} className="sa-btn-ghost px-4 py-2 small d-flex align-items-center gap-1">
-                      <ChevronLeft style={{ width: '16px', height: '16px' }} /> Back
-                    </button>
-                    <button onClick={handleNextStep} className="sa-btn-primary px-4 py-2 small d-flex align-items-center gap-1">
-                      <span>Next</span>
-                      <ChevronRight style={{ width: '16px', height: '16px' }} />
-                    </button>
+                        {/* TAB 2: REAL-TIME ONLINE GATEWAY */}
+                        {paymentMode === 'ONLINE' && (
+                          <div className="space-y-5 animate-fadeIn">
+                            <div className="bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-transparent border-2 border-[#ff6a00]/30 rounded-2xl p-5 sm:p-6">
+                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                                <div>
+                                  <span className="text-[10px] uppercase font-extrabold text-[#ff6a00] tracking-wider block">REAL-TIME CHECKOUT</span>
+                                  <h3 className="font-display text-lg sm:text-xl font-black text-slate-900">Instant Automated Verification</h3>
+                                </div>
+                                <div className="sm:text-right">
+                                  <span className="text-[10px] uppercase font-extrabold text-slate-400 block">TOTAL PAYABLE</span>
+                                  <span className="font-display text-2xl font-black text-[#ff6a00]">{rupee(totalAmount)}</span>
+                                </div>
+                              </div>
+
+                              <p className="text-xs text-slate-600 leading-relaxed mb-4">
+                                Supports <strong>Google Pay, PhonePe, Paytm, BHIM UPI, Credit/Debit Cards</strong>, and <strong>NetBanking</strong>. Your digital ticket pass is confirmed immediately upon payment.
+                              </p>
+
+                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-5">
+                                <div className="p-2.5 rounded-xl bg-white border border-slate-200 text-center shadow-xs">
+                                  <span className="text-xs font-bold text-slate-700 block">Google Pay</span>
+                                  <span className="text-[10px] text-emerald-600 font-semibold">⚡ Instant UPI</span>
+                                </div>
+                                <div className="p-2.5 rounded-xl bg-white border border-slate-200 text-center shadow-xs">
+                                  <span className="text-xs font-bold text-slate-700 block">PhonePe</span>
+                                  <span className="text-[10px] text-emerald-600 font-semibold">⚡ Instant UPI</span>
+                                </div>
+                                <div className="p-2.5 rounded-xl bg-white border border-slate-200 text-center shadow-xs">
+                                  <span className="text-xs font-bold text-slate-700 block">Paytm UPI</span>
+                                  <span className="text-[10px] text-emerald-600 font-semibold">⚡ Instant UPI</span>
+                                </div>
+                                <div className="p-2.5 rounded-xl bg-white border border-slate-200 text-center shadow-xs">
+                                  <span className="text-xs font-bold text-slate-700 block">Cards / NetBank</span>
+                                  <span className="text-[10px] text-blue-600 font-semibold">🔒 256-bit Secure</span>
+                                </div>
+                              </div>
+
+                              <button
+                                type="button"
+                                onClick={handleInstantOnlinePay}
+                                disabled={isOnlinePaying}
+                                className="w-full py-4 px-6 rounded-xl font-display font-black text-sm sm:text-base text-white bg-gradient-to-r from-[#ff6a00] via-[#ee5007] to-[#d84000] hover:brightness-110 active:scale-98 shadow-xl shadow-orange-500/30 flex items-center justify-center gap-2.5 cursor-pointer transition-all disabled:opacity-60"
+                              >
+                                {isOnlinePaying ? (
+                                  <>
+                                    <RefreshCw className="w-5 h-5 animate-spin" />
+                                    <span>Opening Secure Gateway...</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Zap className="w-5 h-5 text-amber-200 fill-amber-200" />
+                                    <span>Pay {rupee(totalAmount)} Now (Real-Time Auto Confirm)</span>
+                                  </>
+                                )}
+                              </button>
+                            </div>
+
+                            <div className="flex items-center justify-center gap-2 text-xs text-slate-500">
+                              <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                              <span>256-bit SSL encrypted • Instant digital ticket pass with QR</span>
+                            </div>
+
+                            <div className="pt-4 border-t border-slate-200 flex items-center justify-between">
+                              <button
+                                type="button"
+                                onClick={handleBack}
+                                className="px-5 py-3 rounded-xl font-display font-bold text-sm text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors flex items-center gap-1.5 cursor-pointer"
+                              >
+                                <ChevronLeft className="w-4 h-4" />
+                                <span>Back</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setPaymentMode('MANUAL_UPI')}
+                                className="text-xs font-bold text-[#ff6a00] hover:underline cursor-pointer"
+                              >
+                                Or scan Google Pay QR code &rarr;
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {step === 4 && (
+                      <div className="animate-fadeIn">
+                        <div className="mb-5 sm:mb-6">
+                          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#fff3eb] text-[#ff6a00] font-display text-xs font-extrabold tracking-wider uppercase mb-2">
+                            <FileCheck className="w-3.5 h-3.5" />
+                            <span>STEP 4 OF 4</span>
+                          </div>
+                          <h2 className="font-display text-xl sm:text-3xl font-black text-slate-900">
+                            Review &amp; Confirm
+                          </h2>
+                          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+                            Please double check all booking details before final submission.
+                          </p>
+                        </div>
+
+                        <div className="space-y-4">
+                          {/* Summary Table Card */}
+                          <div className="bg-[#fdfbf7] border-2 border-slate-200 rounded-xl sm:rounded-2xl p-4 sm:p-5 space-y-3">
+                            <div className="flex justify-between items-center pb-2 border-b border-slate-200">
+                              <span className="text-xs text-slate-500">Attendee Name</span>
+                              <strong className="text-sm font-black text-slate-900">{booker.name}</strong>
+                            </div>
+                            <div className="flex justify-between items-center pb-2 border-b border-slate-200">
+                              <span className="text-xs text-slate-500">Mobile Number</span>
+                              <strong className="text-sm font-black text-slate-900">+91 {booker.mobile}</strong>
+                            </div>
+                            {booker.email && (
+                              <div className="flex justify-between items-center pb-2 border-b border-slate-200">
+                                <span className="text-xs text-slate-500">Email</span>
+                                <strong className="text-sm font-semibold text-slate-700">{booker.email}</strong>
+                              </div>
+                            )}
+                            <div className="flex justify-between items-center pb-2 border-b border-slate-200">
+                              <span className="text-xs text-slate-500">Number of Passes</span>
+                              <strong className="text-sm font-black text-[#ff6a00]">{qty} General Pass{qty > 1 ? 'es' : ''}</strong>
+                            </div>
+                            <div className="flex justify-between items-center pb-2 border-b border-slate-200">
+                              <span className="text-xs text-slate-500">Ticket Price</span>
+                              <strong className="text-xs font-bold text-slate-800">{qty} × {rupee(CONFIG.ticketPrice)} = {rupee(totalAmount)}</strong>
+                            </div>
+                            <div className="flex justify-between items-center pb-2 border-b border-slate-200">
+                              <span className="text-xs text-slate-500">Payment Reference (UTR)</span>
+                              <span className="font-mono text-xs font-bold text-slate-800 truncate max-w-[150px] sm:max-w-none">{payment.utr || 'Auto Online (Razorpay)'}</span>
+                            </div>
+                            <div className="flex justify-between items-center pt-1">
+                              <span className="font-display text-sm font-bold text-slate-800">Total Payable / Paid</span>
+                              <span className="font-display text-xl sm:text-2xl font-black text-[#ff6a00]">{rupee(totalAmount)}</span>
+                            </div>
+                          </div>
+
+                          {/* Non-refundable notice */}
+                          <div className="flex items-center gap-2 text-xs text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                            <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0" />
+                            <span>All ticket bookings are final and non-refundable as per event policy.</span>
+                          </div>
+
+                          {/* Navigation Actions */}
+                          <div className="pt-4 border-t border-slate-200 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 mt-6">
+                            <button
+                              type="button"
+                              onClick={handleBack}
+                              disabled={isSubmitting}
+                              className="w-full sm:w-auto px-5 py-3 rounded-xl font-display font-bold text-sm text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                            >
+                              <ChevronLeft className="w-4 h-4" />
+                              <span>Back</span>
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={handleConfirmBooking}
+                              disabled={isSubmitting}
+                              className="w-full sm:w-auto px-6 sm:px-8 py-3.5 rounded-xl font-display font-black text-sm text-white bg-gradient-to-r from-emerald-600 to-teal-700 hover:brightness-110 active:scale-95 shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2 cursor-pointer transition-all disabled:opacity-50"
+                            >
+                              {isSubmitting ? (
+                                <>
+                                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                  <span>Processing...</span>
+                                </>
+                              ) : (
+                                <>
+                                  <CheckCircle2 className="w-4 h-4" />
+                                  <span>Confirm Booking &amp; Generate Ticket</span>
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                   </div>
                 </div>
-              )}
 
-              {/* STEP 4: REVIEW & CONFIRM */}
-              {step === 4 && (
-                <div className="sa-step-card p-4 p-sm-5">
-                  <h4 className="font-display font-weight-bold mb-1" style={{ color: '#0f172a' }}>Review &amp; Confirm</h4>
-                  <p className="small mb-4" style={{ color: '#475569' }}>
-                    Please review your details before confirming the booking.
-                  </p>
-
-                  <div className="d-flex flex-column gap-3 mb-4">
-                    {/* Booker */}
-                    <div className="rounded-3 p-3 shadow-sm" style={{ background: '#ffffff', border: '1.5px solid #dcfce7' }}>
-                      <div className="small font-weight-bold text-uppercase mb-2" style={{ color: '#15803d' }}>BOOKER DETAILS</div>
-                      <div className="d-flex justify-content-between py-1 small" style={{ borderBottom: '1px solid #f1f5f9' }}><span style={{ color: '#64748b' }}>Name</span><span className="font-weight-bold" style={{ color: '#0f172a' }}>{booker.name}</span></div>
-                      <div className="d-flex justify-content-between py-1 small" style={{ borderBottom: '1px solid #f1f5f9' }}><span style={{ color: '#64748b' }}>Mobile</span><span className="font-weight-bold" style={{ color: '#0f172a' }}>{booker.countryCode} {booker.mobile}</span></div>
-                      <div className="d-flex justify-content-between py-1 small"><span style={{ color: '#64748b' }}>Email</span><span className="font-weight-bold" style={{ color: '#0f172a' }}>{booker.email || '—'}</span></div>
-                    </div>
-
-                    {/* Ticket */}
-                    <div className="rounded-3 p-3 shadow-sm" style={{ background: '#ffffff', border: '1.5px solid #dcfce7' }}>
-                      <div className="small font-weight-bold text-uppercase mb-2" style={{ color: '#15803d' }}>TICKET DETAILS</div>
-                      <div className="d-flex justify-content-between py-1 small" style={{ borderBottom: '1px solid #f1f5f9' }}><span style={{ color: '#64748b' }}>Event</span><span className="font-weight-bold" style={{ color: '#0f172a' }}>{CONFIG.eventName}</span></div>
-                      <div className="d-flex justify-content-between py-1 small" style={{ borderBottom: '1px solid #f1f5f9' }}><span style={{ color: '#64748b' }}>Tickets</span><span className="font-weight-bold" style={{ color: '#0f172a' }}>{qty}</span></div>
-                      <div className="d-flex justify-content-between py-1 small"><span style={{ color: '#64748b' }}>Total</span><span className="font-weight-bold fs-6" style={{ color: '#15803d' }}>{rupee(totalAmount)}</span></div>
-                    </div>
-
-                    {/* Payment */}
-                    <div className="rounded-3 p-3 shadow-sm" style={{ background: '#ffffff', border: '1.5px solid #dcfce7' }}>
-                      <div className="small font-weight-bold text-uppercase mb-2" style={{ color: '#15803d' }}>PAYMENT DETAILS</div>
-                      <div className="d-flex justify-content-between py-1 small" style={{ borderBottom: '1px solid #f1f5f9' }}><span style={{ color: '#64748b' }}>UTR / Transaction ID</span><span className="font-weight-bold" style={{ color: '#0f172a' }}>{payment.utr}</span></div>
-                      <div className="d-flex justify-content-between py-1 small"><span style={{ color: '#64748b' }}>Date &amp; Time</span><span className="font-weight-bold" style={{ color: '#0f172a' }}>{payment.datetime ? new Date(payment.datetime).toLocaleString('en-IN') : '—'}</span></div>
-                    </div>
-
-                    <div className="d-flex align-items-center gap-2 p-3 rounded-3" style={{ background: '#f0fdf4', border: '1.5px solid #bbf7d0' }}>
-                      <CheckCircle2 style={{ width: '18px', height: '18px', color: '#16a34a' }} />
-                      <span className="small font-weight-semibold" style={{ color: '#166534' }}>
-                        I have read and agreed to all Terms &amp; Conditions and event rules.
-                      </span>
-                    </div>
+                {/* EVENT QUICK INFO FOOTER */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-8 sm:mt-10 p-4 sm:p-5 bg-white rounded-2xl border border-slate-200 shadow-sm text-xs font-bold text-slate-700">
+                  <div className="flex items-center gap-2.5 p-2 rounded-xl bg-[#fdfbf7]">
+                    <MapPin className="w-4 h-4 text-[#ff6a00] flex-shrink-0" />
+                    <span className="truncate">{CONFIG.fullVenue}</span>
                   </div>
-
-                  <div className="d-flex align-items-center justify-content-between pt-2">
-                    <button onClick={handlePrevStep} className="sa-btn-ghost px-4 py-2 small d-flex align-items-center gap-1">
-                      <ChevronLeft style={{ width: '16px', height: '16px' }} /> Back
-                    </button>
-                    <button
-                      disabled={isSubmitting}
-                      onClick={handleConfirmBooking}
-                      className="sa-btn-primary px-4 py-2 small d-flex align-items-center gap-1"
-                    >
-                      <span>{isSubmitting ? 'Confirming...' : 'Confirm Booking'}</span>
-                      <ChevronRight style={{ width: '16px', height: '16px' }} />
-                    </button>
+                  <div className="flex items-center gap-2.5 p-2 rounded-xl bg-[#fdfbf7]">
+                    <Calendar className="w-4 h-4 text-[#ff6a00] flex-shrink-0" />
+                    <span className="truncate">{CONFIG.dateShort} • {CONFIG.eventTime}</span>
                   </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* 3. STATUS SCREEN */}
-        {screen === 'status' && (
-          <div className="sa-card p-5 text-center mx-auto my-5 shadow" style={{ maxWidth: '500px' }}>
-            <div className="sa-spinner mx-auto mb-3"></div>
-            <h4 className="font-display font-weight-bold" style={{ color: '#0f172a' }}>Verifying your payment...</h4>
-            <p className="small" style={{ color: '#64748b' }}>Please do not close or refresh this page.</p>
-            <div className="rounded-3 p-3 text-start small mt-3" style={{ background: '#f8fafc', border: '1.5px solid #dcfce7' }}>
-              <div className="d-flex justify-content-between py-1"><span style={{ color: '#64748b' }}>Event</span><span className="font-weight-bold" style={{ color: '#0f172a' }}>{CONFIG.eventName}</span></div>
-              <div className="d-flex justify-content-between py-1"><span style={{ color: '#64748b' }}>Amount</span><span className="font-weight-bold" style={{ color: '#0f172a' }}>{rupee(totalAmount)}</span></div>
-              <div className="d-flex justify-content-between py-1"><span style={{ color: '#64748b' }}>Transaction ID</span><span className="font-weight-bold" style={{ color: '#0f172a' }}>{payment.utr}</span></div>
-            </div>
-          </div>
-        )}
-
-        {/* 4. SUCCESS SCREEN */}
-        {screen === 'success' && ticketData && (
-          <div className="sa-card p-5 text-center mx-auto my-5 shadow-lg" style={{ maxWidth: '520px' }}>
-            <img src={MASCOT_IMG} alt="Celebrating Mascot" className="rounded-circle shadow mb-3" style={{ width: '100px', height: '100px', objectFit: 'cover' }} />
-            <h3 className="font-display font-weight-bold" style={{ color: '#0f172a' }}>🎶 Your Sing Along Ticket is Confirmed!</h3>
-            <p className="small" style={{ color: '#64748b' }}>Get ready for an unforgettable musical evening at {CONFIG.fullVenue}.</p>
-
-            <div className="rounded-3 p-3 text-start small mb-4" style={{ background: '#f0fdf4', border: '1.5px solid #bbf7d0' }}>
-              <div className="d-flex justify-content-between py-1"><span style={{ color: '#64748b' }}>Booking ID</span><span className="font-weight-bold" style={{ color: '#15803d' }}>{ticketData.bookingId}</span></div>
-              <div className="d-flex justify-content-between py-1"><span style={{ color: '#64748b' }}>Amount Paid</span><span className="font-weight-bold" style={{ color: '#0f172a' }}>{rupee(ticketData.amount || totalAmount)}</span></div>
-              <div className="d-flex justify-content-between py-1"><span style={{ color: '#64748b' }}>Status</span><span className="badge bg-success">CONFIRMED</span></div>
-            </div>
-
-            <div className="d-flex flex-column gap-2">
-              <button onClick={() => { setScreen('ticket'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="sa-btn-primary py-3 small font-weight-bold">
-                View My Ticket →
-              </button>
-              <button onClick={() => { setScreen('ticket'); setTimeout(handleDownloadTicket, 300); }} className="sa-btn-ghost py-3 small font-weight-bold">
-                Download Ticket
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* 5. TICKET SCREEN */}
-        {screen === 'ticket' && ticketData && (
-          <div className="mx-auto py-3" style={{ maxWidth: '440px' }}>
-            <div ref={ticketCaptureRef} className="rounded-4 p-3 shadow-lg" style={{ background: '#ffffff', border: '1.5px solid #dcfce7' }}>
-              <div className="ticket-card">
-                {ticketDetailsOpen ? (
-                  <div className="p-4 pb-3 d-flex gap-3">
-                    <div className="rounded-3 overflow-hidden shadow-sm flex-shrink-0" style={{ width: '84px', height: '110px' }}>
-                      <img src={MASCOT_IMG} alt="Mascot" className="w-100 h-100 object-fit-cover" style={{ objectPosition: '50% 10%' }} />
-                    </div>
-                    <div className="flex-grow-1 overflow-hidden">
-                      <h5 className="font-display font-weight-bold mb-1" style={{ color: '#0f172a' }}>{CONFIG.eventName}</h5>
-                      <div className="small mb-1 font-weight-semibold" style={{ color: '#15803d' }}>{CONFIG.category}</div>
-                      <div className="small mb-1" style={{ color: '#64748b' }}>{CONFIG.dateShort} | 6:00 PM</div>
-                      <div className="small lh-sm" style={{ color: '#64748b' }}>{CONFIG.fullVenue}</div>
-                    </div>
-                    <div className="vtag font-weight-bold">ENTRY TICKET</div>
+                  <div className="flex items-center gap-2.5 p-2 rounded-xl bg-[#fdfbf7]">
+                    <Sparkles className="w-4 h-4 text-[#ff6a00] flex-shrink-0" />
+                    <span className="truncate">Instant WhatsApp Pass</span>
                   </div>
-                ) : (
-                  <div className="p-3 d-flex align-items-center gap-3">
-                    <img src={MASCOT_IMG} alt="Mascot" className="rounded-2" style={{ width: '40px', height: '40px', objectFit: 'cover' }} />
-                    <div className="small font-weight-bold" style={{ color: '#0f172a' }}>{CONFIG.eventName} · {ticketData.bookingId}</div>
+                  <div className="flex items-center gap-2.5 p-2 rounded-xl bg-[#fdfbf7]">
+                    <Phone className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                    <span className="truncate">Support: {CONFIG.contactPhone}</span>
                   </div>
-                )}
-
-                <div className="perf-row">
-                  <button onClick={() => setTicketDetailsOpen(!ticketDetailsOpen)} className="perf-pill">
-                    <span>Tap to {ticketDetailsOpen ? 'hide' : 'show'} details</span>
-                    {ticketDetailsOpen ? <ChevronUp style={{ width: '14px', height: '14px' }} /> : <ChevronDown style={{ width: '14px', height: '14px' }} />}
-                  </button>
-                </div>
-
-                <div className="p-4 text-center">
-                  <div className="small font-weight-semibold" style={{ color: '#15803d' }}>{ticketData.ticketQty || qty} Ticket{(ticketData.ticketQty || qty) > 1 ? 's' : ''}</div>
-                  <h4 className="font-display font-weight-bold mt-1" style={{ color: '#0f172a' }}>SING ALONG TICKET</h4>
-                  <div className="small" style={{ color: '#64748b' }}>General Admission · {rupee(CONFIG.ticketPrice)} each</div>
-
-                  <div className="d-flex justify-content-center my-3">
-                    <div className="p-2 bg-white rounded-3 shadow-sm border" style={{ width: '180px', height: '180px' }}>
-                      {ticketQr ? (
-                        <img src={ticketQr} alt="QR" className="w-100 h-100" />
-                      ) : (
-                        <div className="d-flex align-items-center justify-content-center h-100 small text-muted">Loading QR...</div>
-                      )}
-                    </div>
-                  </div>
-                  <div className="small" style={{ color: '#64748b' }}>Scan at entry for verification</div>
-                  <div className="font-display font-weight-bold mt-3" style={{ color: '#15803d' }}>BOOKING ID: {ticketData.bookingId}</div>
-                </div>
-
-                <div className="perf-divider"></div>
-
-                <div className="p-3 d-flex justify-content-between align-items-center" style={{ background: '#f0fdf4' }}>
-                  <span className="font-weight-medium small" style={{ color: '#64748b' }}>Total Amount</span>
-                  <span className="font-display font-weight-bold fs-5" style={{ color: '#15803d' }}>{rupee(ticketData.amount || totalAmount)}</span>
                 </div>
               </div>
-            </div>
+            )}
 
-            <div className="d-flex flex-column gap-2 mt-3">
-              <button disabled={isDownloading} onClick={handleDownloadTicket} className="sa-btn-primary py-3 small font-weight-bold">
-                <Download style={{ width: '16px', height: '16px', display: 'inline', marginRight: '6px' }} />
-                {isDownloading ? 'Downloading Ticket...' : 'Download Ticket'}
-              </button>
-              <button onClick={handleShareTicket} className="sa-btn-ghost py-3 small font-weight-bold">
-                <Share2 style={{ width: '16px', height: '16px', display: 'inline', marginRight: '6px' }} />
-                Share Ticket
-              </button>
-              <button onClick={handleReset} className="sa-btn-ghost py-3 small font-weight-bold">
-                <Home style={{ width: '16px', height: '16px', display: 'inline', marginRight: '6px' }} />
-                Book More Tickets
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* FOOTER */}
-        <div className="mt-5 text-center">
-          <div className="sa-card p-4 text-center">
-            <div className="small font-weight-bold text-uppercase" style={{ fontSize: '11px', letterSpacing: '2px', color: '#15803d' }}>
-              PRESENTED &amp; ORGANISED BY
-            </div>
-            <div className="mt-3 d-flex justify-content-center align-items-center">
-              <div className="px-4 py-2 rounded-3 shadow-sm" style={{ background: '#ffffff', border: '1px solid #e2e8f0', display: 'inline-block' }}>
-                <img src={LOGO_IMG} alt="WeGrow" style={{ height: '32px', width: 'auto' }} />
-              </div>
-            </div>
-          </div>
-          <div className="small mt-3 font-weight-medium" style={{ color: '#64748b' }}>
-            © 2026 {CONFIG.eventName} · {CONFIG.venue}, {CONFIG.location}. All rights reserved.
-          </div>
+          </main>
         </div>
-      </div>
-
-
+      )}
     </div>
   );
 }

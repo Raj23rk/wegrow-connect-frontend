@@ -1,4 +1,4 @@
-﻿import { API_BASE } from './config';
+import { API_BASE } from './config';
 import { getAuthHeaders } from './api';
 
 async function parseResponse(response) {
@@ -37,6 +37,25 @@ export async function bookSingAlongTicket(data) {
     return await parseResponse(response);
   } catch (error) {
     console.error('bookSingAlongTicket error:', error);
+    throw error;
+  }
+}
+
+/**
+ * Alias endpoint to book tickets (POST /sing-along)
+ */
+export async function bookSingAlongTicketAlias(data) {
+  try {
+    const response = await fetch(`${API_BASE}/sing-along`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('bookSingAlongTicketAlias error:', error);
     throw error;
   }
 }
@@ -127,3 +146,175 @@ export async function exportSingAlongCsv() {
     throw error;
   }
 }
+
+// =====================================================
+// PAYMENTS & RAZORPAY APIs (/payments)
+// =====================================================
+
+/**
+ * Fetch public Razorpay keyId to initialize Checkout SDK on client
+ * GET /api/v1/payments/config
+ */
+export async function getPaymentConfig() {
+  try {
+    const response = await fetch(`${API_BASE}/payments/config`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('getPaymentConfig error:', error);
+    throw error;
+  }
+}
+
+/**
+ * Create a Razorpay Order ID for checkout
+ * POST /api/v1/payments/create-order
+ */
+export async function createPaymentOrder(payload) {
+  try {
+    const response = await fetch(`${API_BASE}/payments/create-order`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('createPaymentOrder error:', error);
+    throw error;
+  }
+}
+
+/**
+ * Verify payment HMAC-SHA256 signature and confirm booking
+ * POST /api/v1/payments/verify
+ */
+export async function verifyPayment(payload) {
+  try {
+    const response = await fetch(`${API_BASE}/payments/verify`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('verifyPayment error:', error);
+    throw error;
+  }
+}
+
+/**
+ * Get payment status and details by Order ID or Payment ID
+ * GET /api/v1/payments/:id
+ */
+export async function getPaymentDetails(id) {
+  try {
+    const response = await fetch(
+      `${API_BASE}/payments/${encodeURIComponent(id)}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
+    );
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('getPaymentDetails error:', error);
+    throw error;
+  }
+}
+
+// =====================================================
+// SING ALONG CASHFREE & UPI PAYMENT APIs (/sing-payment)
+// =====================================================
+
+/**
+ * Submit 12-digit UPI Transaction ID / UTR after QR scan
+ * POST /api/v1/sing-payment/submit-utr
+ */
+export async function submitSingPaymentUtr(payload) {
+  try {
+    const response = await fetch(`${API_BASE}/sing-payment/submit-utr`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('submitSingPaymentUtr error:', error);
+    throw error;
+  }
+}
+
+/**
+ * Create Cashfree order & payment_session_id for Sing Along
+ * POST /api/v1/sing-payment/create-order
+ */
+export async function createSingPaymentOrder(payload) {
+  try {
+    const response = await fetch(`${API_BASE}/sing-payment/create-order`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('createSingPaymentOrder error:', error);
+    throw error;
+  }
+}
+
+/**
+ * Verify payment by Order ID and return confirmed booking
+ * POST /api/v1/sing-payment/verify
+ */
+export async function verifySingPayment(payload) {
+  try {
+    const response = await fetch(`${API_BASE}/sing-payment/verify`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('verifySingPayment error:', error);
+    throw error;
+  }
+}
+
+/**
+ * Get payment status of an order by Order ID
+ * GET /api/v1/sing-payment/status/:orderId
+ */
+export async function getSingPaymentStatus(orderId) {
+  try {
+    const response = await fetch(
+      `${API_BASE}/sing-payment/status/${encodeURIComponent(orderId)}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
+    );
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('getSingPaymentStatus error:', error);
+    throw error;
+  }
+}
+

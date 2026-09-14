@@ -82,6 +82,7 @@ import AdminWomenEntrepreneurs from './admin/women-entrepreneurs/page';
 import AdminStudentFounders from './admin/student-founders/page';
 import AdminBusinessFounders from './admin/business-founders/page';
 import AdminArtCompetition from './admin/art-competition/page';
+import AdminSingAlong from './admin/sing-along/page';
 
 // Campaign Platform (Public)
 import CampaignLanding from './components/CampaignLanding';
@@ -744,6 +745,8 @@ export default function App() {
             <Route path="/admin/business-founders" element={<ProtectedRoute allowedRoles={['admin']}><AdminBusinessFounders /></ProtectedRoute>} />
             <Route path="/admin/art-competition" element={<ProtectedRoute allowedRoles={['admin']}><AdminArtCompetition /></ProtectedRoute>} />
             <Route path="/admin/drawing-competition" element={<ProtectedRoute allowedRoles={['admin']}><AdminArtCompetition /></ProtectedRoute>} />
+            <Route path="/admin/sing-along" element={<ProtectedRoute allowedRoles={['admin']}><AdminSingAlong /></ProtectedRoute>} />
+            <Route path="/admin/singalong" element={<ProtectedRoute allowedRoles={['admin']}><AdminSingAlong /></ProtectedRoute>} />
             <Route path="/admin/workshops" element={<ProtectedRoute allowedRoles={['admin']}><AdminWorkshops /></ProtectedRoute>} />
             <Route path="/admin/events" element={<ProtectedRoute allowedRoles={['admin']}><AdminEvents /></ProtectedRoute>} />
             <Route path="/admin/gallery" element={<ProtectedRoute allowedRoles={['admin']}><AdminGalleryPage /></ProtectedRoute>} />
