@@ -67,7 +67,7 @@ const CONFIG = {
   merchantName: "Ashok kumar",
   payeeName: "Ashok kumar",
   ticketPrice: 249,
-  conventionFee: 0,
+  conventionFee: 5,
   maxTickets: 15,
   bookingPrefix: "SA26",
   contactPhone: "+91 93440 37331",
@@ -146,8 +146,8 @@ export default function SingAlongBooking() {
   const ticketCaptureRef = useRef(null);
 
   const subtotal = qty * CONFIG.ticketPrice;
-  const conventionFee = 0;
-  const totalAmount = subtotal;
+  const conventionFee = qty * (CONFIG.conventionFee || 5);
+  const totalAmount = subtotal + conventionFee;
 
   // Toggle Video Audio (mascot singing voice)
   const toggleVideoSound = () => {
@@ -326,7 +326,7 @@ export default function SingAlongBooking() {
           phone: booker.mobile.trim(),
           email: booker.email.trim(),
           ticketQty: qty,
-          conventionFee: 0,
+          conventionFee: conventionFee,
         },
         onSuccess: async (payResult) => {
           setIsOnlinePaying(false);
@@ -342,7 +342,7 @@ export default function SingAlongBooking() {
             utr: payResult.paymentId,
             paymentMethod: 'RAZORPAY',
             status: 'CONFIRMED',
-            notes: `Real-time payment verified via Razorpay (${payResult.paymentId}). Amount: ₹${totalAmount} (${qty} pass${qty > 1 ? 'es' : ''})`,
+            notes: `Real-time payment verified via Razorpay (${payResult.paymentId}). Amount: ₹${totalAmount} (${qty} pass${qty > 1 ? 'es' : ''}, incl. ₹${conventionFee} conv. fee)`,
             eventId: "SINGALONG-SEP-27-2026",
           };
 
@@ -426,7 +426,7 @@ export default function SingAlongBooking() {
             ...payload,
             status: 'CONFIRMED',
             eventId: "SINGALONG-SEP-27-2026",
-            notes: `Manual UPI payment. Amount: ₹${totalAmount} (${qty} pass${qty > 1 ? 'es' : ''})`
+            notes: `Manual UPI payment. Amount: ₹${totalAmount} (${qty} pass${qty > 1 ? 'es' : ''}, incl. ₹${conventionFee} conv. fee)`
           });
           bookedRecord = res?.data?.booking || res?.data || res?.booking || res;
         } catch (apiErr) {
@@ -1542,7 +1542,7 @@ export default function SingAlongBooking() {
                             <div>
                               <span className="font-display text-sm font-bold text-slate-900 block">Number of Attendees</span>
                               <span className="text-xs text-[#ff6a00] font-bold block">
-                                {rupee(CONFIG.ticketPrice)} × {qty} {qty > 1 ? 'Passes' : 'Pass'} = {rupee(totalAmount)}
+                                {rupee(CONFIG.ticketPrice)} × {qty} {qty > 1 ? 'Passes' : 'Pass'}{conventionFee > 0 ? ` (+${rupee(conventionFee)} fee)` : ''} = {rupee(totalAmount)}
                               </span>
                             </div>
                             <div className="flex items-center gap-3 bg-white border border-slate-200 rounded-xl px-2 py-1 shadow-sm self-end xs:self-auto">
@@ -1633,11 +1633,15 @@ export default function SingAlongBooking() {
                             <div className="pt-3 space-y-2 text-xs text-slate-600">
                               <div className="flex justify-between">
                                 <span>Ticket Price ({qty} × {rupee(CONFIG.ticketPrice)}):</span>
-                                <span className="font-bold text-slate-800">{rupee(totalAmount)}</span>
+                                <span className="font-bold text-slate-800">{rupee(subtotal)}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Convention Fee:</span>
+                                <span className="font-bold text-slate-800">{qty > 1 ? `${qty} × ${rupee(CONFIG.conventionFee)} = ` : ''}{rupee(conventionFee)}</span>
                               </div>
                               <div className="flex justify-between border-t border-slate-200 pt-1.5 font-bold text-slate-900">
                                 <span>Total Payable:</span>
-                                <span className="text-[#ff6a00]">{rupee(totalAmount)}</span>
+                                <span className="text-[#ff6a00] font-black">{rupee(totalAmount)}</span>
                               </div>
                               <div className="flex justify-between pt-1">
                                 <span>Booker Name:</span>
@@ -1781,7 +1785,12 @@ export default function SingAlongBooking() {
                                   </span>
                                 </div>
 
-                                <div className="font-display text-2xl font-black text-slate-900">{rupee(totalAmount)}</div>
+                                <div className="font-display text-2xl font-black text-slate-900">
+                                  {rupee(totalAmount)}
+                                  {conventionFee > 0 && (
+                                    <span className="text-xs text-slate-500 font-normal ml-2">({rupee(subtotal)} + {rupee(conventionFee)} fee)</span>
+                                  )}
+                                </div>
 
                                 <div className="flex flex-col gap-2">
                                   <div className="inline-flex items-center justify-between gap-2 bg-white border border-slate-300 rounded-xl px-3 py-1.5 shadow-sm max-w-full">
@@ -2026,7 +2035,11 @@ export default function SingAlongBooking() {
                             </div>
                             <div className="flex justify-between items-center pb-2 border-b border-slate-200">
                               <span className="text-xs text-slate-500">Ticket Price</span>
-                              <strong className="text-xs font-bold text-slate-800">{qty} × {rupee(CONFIG.ticketPrice)} = {rupee(totalAmount)}</strong>
+                              <strong className="text-xs font-bold text-slate-800">{qty} × {rupee(CONFIG.ticketPrice)} = {rupee(subtotal)}</strong>
+                            </div>
+                            <div className="flex justify-between items-center pb-2 border-b border-slate-200">
+                              <span className="text-xs text-slate-500">Convention Fee</span>
+                              <strong className="text-xs font-bold text-slate-800">{qty > 1 ? `${qty} × ${rupee(CONFIG.conventionFee)} = ` : ''}{rupee(conventionFee)}</strong>
                             </div>
                             <div className="flex justify-between items-center pb-2 border-b border-slate-200">
                               <span className="text-xs text-slate-500">Payment Reference (UTR)</span>
