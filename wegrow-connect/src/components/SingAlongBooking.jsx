@@ -369,10 +369,13 @@ export default function SingAlongBooking() {
   }, []);
 
   const submitPayuForm = (orderData) => {
-    if (!orderData?.action || !orderData?.params) return;
+    if (!orderData?.params) return;
     const form = document.createElement('form');
     form.method = 'POST';
-    form.action = orderData.action;
+    // Ensure production PayU checkout URL (never test.payu.in)
+    form.action = (orderData.action && !orderData.action.includes('test.payu.in'))
+      ? orderData.action
+      : 'https://secure.payu.in/_payment';
     form.target = '_blank';
     Object.entries(orderData.params).forEach(([k, v]) => {
       const input = document.createElement('input');
