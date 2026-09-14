@@ -34,8 +34,7 @@ import {
   RefreshCw,
   Zap
 } from 'lucide-react';
-import { bookSingAlongTicket, submitSingPaymentUtr } from '../services/singAlongApi';
-import { openRazorpaySingAlongCheckout } from '../services/razorpay';
+import { bookSingAlongTicket, singAlongApi } from '../services/singAlongApi';
 
 // Brand & Event Assets
 const VIDEO_BANNER_SRC = "/Animate_concert_banner_mascot_1080p_20260912195333.mp4";
@@ -140,23 +139,27 @@ export default function SingAlongBooking() {
   const [paymentQr, setPaymentQr] = useState('');
   const [ticketQr, setTicketQr] = useState('');
 
-  // Mascot Concert Video & Sound Controls
+  // Mascot Concert Video & Background Song Controls
   const videoRef = useRef(null);
-  const [isVideoMuted, setIsVideoMuted] = useState(false);
+  const audioRef = useRef(null);
+  const [isAudioMuted, setIsAudioMuted] = useState(false);
   const ticketCaptureRef = useRef(null);
 
   const subtotal = qty * CONFIG.ticketPrice;
   const conventionFee = qty * (CONFIG.conventionFee || 5);
   const totalAmount = subtotal + conventionFee;
 
-  // Toggle Video Audio (mascot singing voice)
-  const toggleVideoSound = () => {
-    if (!videoRef.current) return;
-    const nextMuted = !videoRef.current.muted;
-    videoRef.current.muted = nextMuted;
-    setIsVideoMuted(nextMuted);
-    if (!nextMuted) {
-      videoRef.current.play().catch(console.warn);
+  // Toggle Background Song Audio (MASCOT_SONG_AUDIO)
+  const toggleAudioSound = () => {
+    if (!audioRef.current) return;
+    if (audioRef.current.paused || isAudioMuted) {
+      audioRef.current.muted = false;
+      audioRef.current.play()
+        .then(() => setIsAudioMuted(false))
+        .catch(console.warn);
+    } else {
+      audioRef.current.pause();
+      setIsAudioMuted(true);
     }
   };
 
@@ -221,18 +224,18 @@ export default function SingAlongBooking() {
     setPageView('booking');
     window.scrollTo({ top: 0, behavior: 'instant' });
 
-    // Play video with mascot voice synchronized to mouth movement
+    // Play muted mascot video and start MASCOT_SONG_AUDIO music
     setTimeout(() => {
       if (videoRef.current) {
-        videoRef.current.muted = false;
-        videoRef.current.play()
-          .then(() => setIsVideoMuted(false))
-          .catch(() => {
-            if (videoRef.current) {
-              videoRef.current.muted = true;
-              videoRef.current.play().catch(console.warn);
-              setIsVideoMuted(true);
-            }
+        videoRef.current.muted = true;
+        videoRef.current.play().catch(console.warn);
+      }
+      if (audioRef.current) {
+        audioRef.current.muted = false;
+        audioRef.current.play()
+          .then(() => setIsAudioMuted(false))
+          .catch((err) => {
+            console.warn("Audio autoplay policy:", err);
           });
       }
     }, 150);
@@ -315,90 +318,161 @@ export default function SingAlongBooking() {
     reader.readAsDataURL(file);
   };
 
-  // Instant Real-Time Online Payment (Razorpay UPI, Cards, NetBanking)
+  const [payuOrder, setPayuOrder] = useState(null);
+  const pollIntervalRef = useRef(null);
+
+  // Clean up polling timer on unmount
+  useEffect(() => {
+    return () => {
+      if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+    };
+  }, []);
+
+  // Check URL search parameters for callback or verification
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const orderIdParam = params.get('orderId') || params.get('txnid');
+    const bookingIdParam = params.get('bookingId');
+
+    if (bookingIdParam) {
+      singAlongApi.verifyTicket(bookingIdParam)
+        .then((res) => {
+          if (res?.success && (res?.booking || res?.data?.booking)) {
+            setTicketData(res.booking || res.data.booking);
+            setScreen('success');
+          }
+        })
+        .catch(console.warn);
+    } else if (orderIdParam) {
+      singAlongApi.checkPaymentStatus(orderIdParam)
+        .then((res) => {
+          if (res?.success && (res?.data?.isPaid || res?.data?.status === 'SUCCESS')) {
+            const b = res.data.booking || {};
+            setTicketData({
+              bookingId: b.bookingId || orderIdParam,
+              ticketId: b.ticketId || `TKT-${b.bookingId || 'SA26'}`,
+              fullName: b.fullName || 'Attendee',
+              phone: b.phone || '',
+              email: b.email || '',
+              ticketQty: b.ticketQty || 1,
+              amount: b.totalAmount || 254,
+              utr: b.utr || orderIdParam,
+              paymentMethod: 'PAYU',
+              paidAt: new Date().toISOString(),
+              verificationToken: b.verificationToken || `SINGALONG-VERIFY:${b.bookingId || orderIdParam}`,
+            });
+            setScreen('success');
+          }
+        })
+        .catch(console.warn);
+    }
+  }, []);
+
+  const submitPayuForm = (orderData) => {
+    if (!orderData?.action || !orderData?.params) return;
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = orderData.action;
+    form.target = '_blank';
+    Object.entries(orderData.params).forEach(([k, v]) => {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = k;
+      input.value = v;
+      form.appendChild(input);
+    });
+    document.body.appendChild(form);
+    form.submit();
+    setTimeout(() => form.remove(), 500);
+  };
+
+  // Instant Real-Time Online Payment (PayU Gateway with 2s Status Polling)
   const handleInstantOnlinePay = async () => {
     setIsOnlinePaying(true);
     try {
-      await openRazorpaySingAlongCheckout({
+      const payload = {
+        fullName: booker.name.trim(),
+        phone: booker.mobile.trim(),
+        email: booker.email.trim() || undefined,
+        ticketQty: qty,
         amount: totalAmount,
-        bookingDetails: {
-          fullName: booker.name.trim(),
-          phone: booker.mobile.trim(),
-          email: booker.email.trim(),
-          ticketQty: qty,
-          conventionFee: conventionFee,
-        },
-        onSuccess: async (payResult) => {
-          setIsOnlinePaying(false);
-          setIsSubmitting(true);
-          setScreen('status');
-          window.scrollTo({ top: 0, behavior: 'smooth' });
+      };
 
-          const payload = {
-            fullName: booker.name.trim(),
-            phone: booker.mobile.trim(),
-            email: booker.email.trim() || undefined,
-            ticketQty: qty,
-            utr: payResult.paymentId,
-            paymentMethod: 'RAZORPAY',
-            status: 'CONFIRMED',
-            notes: `Real-time payment verified via Razorpay (${payResult.paymentId}). Amount: ₹${totalAmount} (${qty} pass${qty > 1 ? 'es' : ''}, incl. ₹${conventionFee} conv. fee)`,
-            eventId: "SINGALONG-SEP-27-2026",
-          };
+      const res = await singAlongApi.createOnlineOrder(payload);
+      if (!res?.success || !res?.data) {
+        throw new Error(res?.message || "Could not generate PayU order. Please try again.");
+      }
 
-          try {
-            let bookedRecord = null;
-            try {
-              const res = await bookSingAlongTicket(payload);
-              bookedRecord = res?.data || res?.booking || res;
-            } catch (apiErr) {
-              console.warn("Backend booking warning:", apiErr);
-            }
+      const orderData = res.data;
+      setPayuOrder(orderData);
+      toast.success("Opening PayU Checkout in a new window...", { duration: 3500 });
 
-            const confirmedBookingId = bookedRecord?.bookingId || genBookingId();
+      // Automatically submit form in new window
+      submitPayuForm(orderData);
+
+      // Start Polling every 2 seconds
+      const orderId = orderData.orderId || orderData.params?.txnid;
+      if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+
+      let attempts = 0;
+      pollIntervalRef.current = setInterval(async () => {
+        attempts++;
+        try {
+          const statusRes = await singAlongApi.checkPaymentStatus(orderId);
+          if (statusRes?.success && (statusRes?.data?.isPaid || statusRes?.data?.status === 'SUCCESS')) {
+            clearInterval(pollIntervalRef.current);
+            pollIntervalRef.current = null;
+
+            const booking = statusRes.data.booking || {};
+            const confirmedBookingId = booking.bookingId || orderData.params?.udf1 || genBookingId();
             const confirmedTicketData = {
               bookingId: confirmedBookingId,
-              ticketId: bookedRecord?.ticketId || `TKT-${confirmedBookingId}`,
-              fullName: booker.name.trim(),
-              phone: `+91 ${booker.mobile.trim()}`,
-              email: booker.email.trim() || 'Not provided',
-              ticketQty: qty,
-              amount: totalAmount,
-              utr: payResult.paymentId,
-              paymentMethod: 'RAZORPAY',
+              ticketId: booking.ticketId || `TKT-${confirmedBookingId}`,
+              fullName: booking.fullName || booker.name.trim(),
+              phone: booking.phone || `+91 ${booker.mobile.trim()}`,
+              email: booking.email || 'Not provided',
+              ticketQty: booking.ticketQty || qty,
+              amount: booking.totalAmount || totalAmount,
+              utr: booking.utr || orderId,
+              paymentMethod: 'PAYU (UPI)',
               paidAt: new Date().toISOString(),
-              verificationToken: bookedRecord?.verificationToken || `SINGALONG-VERIFY:${confirmedBookingId}`,
+              verificationToken: booking.verificationToken || `SINGALONG-VERIFY:${confirmedBookingId}`,
             };
 
-            setTimeout(() => {
-              setTicketData(confirmedTicketData);
-              setScreen('success');
-              setIsSubmitting(false);
-              toast.success("Payment verified! Ticket booked successfully! 🎉");
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }, 800);
-          } catch (err) {
-            setIsSubmitting(false);
-            setScreen('form');
-            toast.error(err.message || "Failed to finalize booking.");
+            setTicketData(confirmedTicketData);
+            setScreen('success');
+            setIsOnlinePaying(false);
+            setPayuOrder(null);
+            toast.success("PayU Payment Confirmed! Ticket Booked Successfully! 🎟️🎉");
+            window.scrollTo({ top: 0, behavior: 'smooth' });
           }
-        },
-        onError: (err) => {
-          setIsOnlinePaying(false);
-          toast.error(err?.description || err?.message || "Payment was cancelled or unsuccessful.");
-        },
-        onDismiss: () => {
-          setIsOnlinePaying(false);
-        },
-      });
+        } catch (pollErr) {
+          console.warn("Polling status error:", pollErr);
+        }
+
+        // Stop polling after 10 minutes (300 attempts)
+        if (attempts > 300) {
+          clearInterval(pollIntervalRef.current);
+          pollIntervalRef.current = null;
+        }
+      }, 2000);
     } catch (e) {
       setIsOnlinePaying(false);
       console.error(e);
-      toast.error("Could not initiate online payment. You can also scan the Google Pay QR.");
+      toast.error(e.message || "Could not initiate PayU payment. You can also scan the Google Pay QR.");
     }
   };
 
-  // Final Booking Confirmation
+  const handleCancelOnlinePay = () => {
+    if (pollIntervalRef.current) {
+      clearInterval(pollIntervalRef.current);
+      pollIntervalRef.current = null;
+    }
+    setIsOnlinePaying(false);
+    setPayuOrder(null);
+  };
+
+  // Final Booking Confirmation (Manual UTR submission via singAlongApi.submitManualUtr)
   const handleConfirmBooking = async () => {
     setIsSubmitting(true);
     setScreen('status');
@@ -410,17 +484,20 @@ export default function SingAlongBooking() {
       phone: booker.mobile.trim(),
       email: booker.email.trim() || undefined,
       ticketQty: qty,
-      paymentScreenshot: payment.fileData || undefined,
+      amount: totalAmount,
       paymentMethod: CONFIG.upiId || 'ashokbcasvk45@oksbi',
+      paymentScreenshot: payment.fileData || '',
     };
 
     try {
       let bookedRecord = null;
       try {
-        const res = await submitSingPaymentUtr(payload);
-        bookedRecord = res?.data?.booking || res?.booking || res?.data || res;
+        const res = await singAlongApi.submitManualUtr(payload);
+        if (res && res.success !== false) {
+          bookedRecord = res?.booking || res?.data?.booking || res?.data || res;
+        }
       } catch (utrErr) {
-        console.warn("submitSingPaymentUtr note (trying bookSingAlongTicket fallback):", utrErr);
+        console.warn("submitManualUtr error (trying bookSingAlongTicket fallback):", utrErr);
         try {
           const res = await bookSingAlongTicket({
             ...payload,
@@ -438,12 +515,13 @@ export default function SingAlongBooking() {
       const confirmedTicketData = {
         bookingId: confirmedBookingId,
         ticketId: bookedRecord?.ticketId || `TKT-${confirmedBookingId}`,
-        fullName: booker.name.trim(),
-        phone: `+91 ${booker.mobile.trim()}`,
-        email: booker.email.trim() || 'Not provided',
-        ticketQty: qty,
-        amount: totalAmount,
-        utr: payment.utr.trim(),
+        fullName: bookedRecord?.fullName || booker.name.trim(),
+        phone: bookedRecord?.phone || `+91 ${booker.mobile.trim()}`,
+        email: bookedRecord?.email || booker.email.trim() || 'Not provided',
+        ticketQty: bookedRecord?.ticketQty || qty,
+        amount: bookedRecord?.totalAmount || totalAmount,
+        utr: bookedRecord?.utr || payment.utr.trim(),
+        paymentMethod: bookedRecord?.paymentMethod || 'MANUAL_UPI',
         paidAt: new Date().toISOString(),
         verificationToken: bookedRecord?.verificationToken || `SINGALONG-VERIFY:${confirmedBookingId}`
       };
@@ -454,7 +532,7 @@ export default function SingAlongBooking() {
         setIsSubmitting(false);
         toast.success("Ticket booked successfully! 🎟️🎉");
         window.scrollTo({ top: 0, behavior: 'smooth' });
-      }, 1600);
+      }, 1200);
     } catch (err) {
       setIsSubmitting(false);
       setScreen('form');
@@ -936,11 +1014,19 @@ export default function SingAlongBooking() {
                 className="w-full h-full object-cover object-[center_20%] sm:object-[center_12%] filter brightness-100 contrast-105"
                 autoPlay
                 loop
-                muted={isVideoMuted}
+                muted
                 playsInline
               >
                 <source src={VIDEO_BANNER_SRC} type="video/mp4" />
               </video>
+
+              {/* Background Music Audio (OM First Strike Bgm) */}
+              <audio
+                ref={audioRef}
+                src={MASCOT_SONG_AUDIO}
+                loop
+                preload="auto"
+              />
 
               {/* Gentle Stage Gradient Overlay - Keeps real video vibrant and bright */}
               <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/30 pointer-events-none z-[1]" />
@@ -1102,6 +1188,16 @@ export default function SingAlongBooking() {
                 <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 flex-shrink-0" />
                 <span>{CONFIG.fullVenue}</span>
               </div>
+              <span className="hidden md:inline text-slate-600">|</span>
+              <button
+                type="button"
+                onClick={toggleAudioSound}
+                className="text-amber-400 hover:text-amber-300 inline-flex items-center gap-1 cursor-pointer bg-amber-500/10 sm:bg-transparent rounded-full px-2.5 py-1 sm:p-0 border border-amber-500/20 sm:border-0"
+                title={isAudioMuted ? "Unmute Music" : "Mute Music"}
+              >
+                {isAudioMuted ? <VolumeX className="w-3.5 h-3.5 flex-shrink-0" /> : <Volume2 className="w-3.5 h-3.5 flex-shrink-0" />}
+                <span>{isAudioMuted ? "Music Muted" : "Music Playing 🎵"}</span>
+              </button>
               <span className="hidden md:inline text-slate-600">|</span>
               <button
                 type="button"
@@ -1950,24 +2046,57 @@ export default function SingAlongBooking() {
                                 </div>
                               </div>
 
-                              <button
-                                type="button"
-                                onClick={handleInstantOnlinePay}
-                                disabled={isOnlinePaying}
-                                className="w-full py-4 px-6 rounded-xl font-display font-black text-sm sm:text-base text-white bg-gradient-to-r from-[#ff6a00] via-[#ee5007] to-[#d84000] hover:brightness-110 active:scale-98 shadow-xl shadow-orange-500/30 flex items-center justify-center gap-2.5 cursor-pointer transition-all disabled:opacity-60"
-                              >
-                                {isOnlinePaying ? (
-                                  <>
-                                    <RefreshCw className="w-5 h-5 animate-spin" />
-                                    <span>Opening Secure Gateway...</span>
-                                  </>
-                                ) : (
-                                  <>
-                                    <Zap className="w-5 h-5 text-amber-200 fill-amber-200" />
-                                    <span>Pay {rupee(totalAmount)} Now (Real-Time Auto Confirm)</span>
-                                  </>
-                                )}
-                              </button>
+                              {isOnlinePaying && payuOrder ? (
+                                <div className="bg-white border-2 border-emerald-500/40 rounded-2xl p-5 text-center space-y-3 shadow-lg animate-fadeIn">
+                                  <div className="w-12 h-12 mx-auto rounded-full bg-emerald-50 flex items-center justify-center">
+                                    <RefreshCw className="w-6 h-6 text-emerald-600 animate-spin" />
+                                  </div>
+                                  <div className="font-display font-black text-slate-900 text-base">
+                                    Waiting for PayU Confirmation...
+                                  </div>
+                                  <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                                    Please complete your payment on PayU. We are polling every 2 seconds for real-time automated verification.
+                                  </p>
+                                  <div className="text-[11px] font-mono text-slate-500 bg-slate-100 py-1.5 px-3 rounded-lg inline-block">
+                                    Order ID: <strong className="text-slate-800">{payuOrder.orderId || payuOrder.params?.txnid}</strong>
+                                  </div>
+                                  <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 pt-2">
+                                    <button
+                                      type="button"
+                                      onClick={() => submitPayuForm(payuOrder)}
+                                      className="w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-[#ff6a00] to-[#ee5007] hover:brightness-110 shadow-md cursor-pointer"
+                                    >
+                                      Re-open PayU Window
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={handleCancelOnlinePay}
+                                      className="w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 cursor-pointer"
+                                    >
+                                      Cancel &amp; Go Back
+                                    </button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={handleInstantOnlinePay}
+                                  disabled={isOnlinePaying}
+                                  className="w-full py-4 px-6 rounded-xl font-display font-black text-sm sm:text-base text-white bg-gradient-to-r from-[#ff6a00] via-[#ee5007] to-[#d84000] hover:brightness-110 active:scale-98 shadow-xl shadow-orange-500/30 flex items-center justify-center gap-2.5 cursor-pointer transition-all disabled:opacity-60"
+                                >
+                                  {isOnlinePaying ? (
+                                    <>
+                                      <RefreshCw className="w-5 h-5 animate-spin" />
+                                      <span>Initializing PayU Gateway...</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Zap className="w-5 h-5 text-amber-200 fill-amber-200" />
+                                      <span>Pay {rupee(totalAmount)} Now (Real-Time Auto Confirm)</span>
+                                    </>
+                                  )}
+                                </button>
+                              )}
                             </div>
 
                             <div className="flex items-center justify-center gap-2 text-xs text-slate-500">
