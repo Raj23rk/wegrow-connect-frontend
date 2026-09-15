@@ -50,7 +50,7 @@ export const singAlongApi = {
     return res.json();
   },
 
-  // 3. Real-Time Status Check (polls every 2s)
+  // 3. Payment Status Check by Order ID
   async checkPaymentStatus(orderId) {
     const res = await fetch(`${API_BASE}/sing-payment/status/${encodeURIComponent(orderId)}`);
     return res.json();

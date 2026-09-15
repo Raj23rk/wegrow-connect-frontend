@@ -319,22 +319,18 @@ export default function SingAlongBooking() {
   };
 
   const [payuOrder, setPayuOrder] = useState(null);
-  const pollIntervalRef = useRef(null);
+  const [isCheckingPayment, setIsCheckingPayment] = useState(false);
+  const checkedUrlParamRef = useRef(false);
 
-  // Clean up polling timer on unmount
+  // Check URL search parameters for callback or verification (runs only once)
   useEffect(() => {
-    return () => {
-      if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
-    };
-  }, []);
-
-  // Check URL search parameters for callback or verification
-  useEffect(() => {
+    if (checkedUrlParamRef.current) return;
     const params = new URLSearchParams(window.location.search);
     const orderIdParam = params.get('orderId') || params.get('txnid');
     const bookingIdParam = params.get('bookingId');
 
     if (bookingIdParam) {
+      checkedUrlParamRef.current = true;
       singAlongApi.verifyTicket(bookingIdParam)
         .then((res) => {
           if (res?.success && (res?.booking || res?.data?.booking)) {
@@ -344,6 +340,7 @@ export default function SingAlongBooking() {
         })
         .catch(console.warn);
     } else if (orderIdParam) {
+      checkedUrlParamRef.current = true;
       singAlongApi.checkPaymentStatus(orderIdParam)
         .then((res) => {
           if (res?.success && (res?.data?.isPaid || res?.data?.status === 'SUCCESS')) {
@@ -389,7 +386,7 @@ export default function SingAlongBooking() {
     setTimeout(() => form.remove(), 500);
   };
 
-  // Instant Real-Time Online Payment (PayU Gateway with 2s Status Polling)
+  // Instant Online Payment (PayU Gateway)
   const handleInstantOnlinePay = async () => {
     setIsOnlinePaying(true);
     try {
@@ -412,53 +409,6 @@ export default function SingAlongBooking() {
 
       // Automatically submit form in new window
       submitPayuForm(orderData);
-
-      // Start Polling every 2 seconds
-      const orderId = orderData.orderId || orderData.params?.txnid;
-      if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
-
-      let attempts = 0;
-      pollIntervalRef.current = setInterval(async () => {
-        attempts++;
-        try {
-          const statusRes = await singAlongApi.checkPaymentStatus(orderId);
-          if (statusRes?.success && (statusRes?.data?.isPaid || statusRes?.data?.status === 'SUCCESS')) {
-            clearInterval(pollIntervalRef.current);
-            pollIntervalRef.current = null;
-
-            const booking = statusRes.data.booking || {};
-            const confirmedBookingId = booking.bookingId || orderData.params?.udf1 || genBookingId();
-            const confirmedTicketData = {
-              bookingId: confirmedBookingId,
-              ticketId: booking.ticketId || `TKT-${confirmedBookingId}`,
-              fullName: booking.fullName || booker.name.trim(),
-              phone: booking.phone || `+91 ${booker.mobile.trim()}`,
-              email: booking.email || 'Not provided',
-              ticketQty: booking.ticketQty || qty,
-              amount: booking.totalAmount || totalAmount,
-              utr: booking.utr || orderId,
-              paymentMethod: 'PAYU (UPI)',
-              paidAt: new Date().toISOString(),
-              verificationToken: booking.verificationToken || `SINGALONG-VERIFY:${confirmedBookingId}`,
-            };
-
-            setTicketData(confirmedTicketData);
-            setScreen('success');
-            setIsOnlinePaying(false);
-            setPayuOrder(null);
-            toast.success("PayU Payment Confirmed! Ticket Booked Successfully! 🎟️🎉");
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }
-        } catch (pollErr) {
-          console.warn("Polling status error:", pollErr);
-        }
-
-        // Stop polling after 10 minutes (300 attempts)
-        if (attempts > 300) {
-          clearInterval(pollIntervalRef.current);
-          pollIntervalRef.current = null;
-        }
-      }, 2000);
     } catch (e) {
       setIsOnlinePaying(false);
       console.error(e);
@@ -466,11 +416,52 @@ export default function SingAlongBooking() {
     }
   };
 
-  const handleCancelOnlinePay = () => {
-    if (pollIntervalRef.current) {
-      clearInterval(pollIntervalRef.current);
-      pollIntervalRef.current = null;
+  // Single on-demand status check when user confirms payment
+  const handleCheckPaymentStatus = async () => {
+    if (!payuOrder || isCheckingPayment) return;
+    const orderId = payuOrder.orderId || payuOrder.params?.txnid;
+    if (!orderId) return;
+
+    setIsCheckingPayment(true);
+    try {
+      const statusRes = await singAlongApi.checkPaymentStatus(orderId);
+      if (statusRes?.success && (statusRes?.data?.isPaid || statusRes?.data?.status === 'SUCCESS')) {
+        const booking = statusRes.data.booking || {};
+        const confirmedBookingId = booking.bookingId || payuOrder.params?.udf1 || genBookingId();
+        const confirmedTicketData = {
+          bookingId: confirmedBookingId,
+          ticketId: booking.ticketId || `TKT-${confirmedBookingId}`,
+          fullName: booking.fullName || booker.name.trim(),
+          phone: booking.phone || `+91 ${booker.mobile.trim()}`,
+          email: booking.email || 'Not provided',
+          ticketQty: booking.ticketQty || qty,
+          amount: booking.totalAmount || totalAmount,
+          utr: booking.utr || orderId,
+          paymentMethod: 'PAYU (UPI)',
+          paidAt: new Date().toISOString(),
+          verificationToken: booking.verificationToken || `SINGALONG-VERIFY:${confirmedBookingId}`,
+        };
+
+        setTicketData(confirmedTicketData);
+        setScreen('success');
+        setIsOnlinePaying(false);
+        setPayuOrder(null);
+        toast.success("PayU Payment Confirmed! Ticket Booked Successfully! 🎟️🎉");
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        toast((statusRes?.message || "Payment is not confirmed yet. If you have paid, please wait a few seconds and try again."), {
+          icon: '⏳',
+        });
+      }
+    } catch (err) {
+      console.warn("Status check error:", err);
+      toast.error(err.message || "Unable to check payment status. Please try again.");
+    } finally {
+      setIsCheckingPayment(false);
     }
+  };
+
+  const handleCancelOnlinePay = () => {
     setIsOnlinePaying(false);
     setPayuOrder(null);
   };
@@ -2052,13 +2043,13 @@ export default function SingAlongBooking() {
                               {isOnlinePaying && payuOrder ? (
                                 <div className="bg-white border-2 border-emerald-500/40 rounded-2xl p-5 text-center space-y-3 shadow-lg animate-fadeIn">
                                   <div className="w-12 h-12 mx-auto rounded-full bg-emerald-50 flex items-center justify-center">
-                                    <RefreshCw className="w-6 h-6 text-emerald-600 animate-spin" />
+                                    <ShieldCheck className="w-6 h-6 text-emerald-600" />
                                   </div>
                                   <div className="font-display font-black text-slate-900 text-base">
-                                    Waiting for PayU Confirmation...
+                                    PayU Checkout Opened
                                   </div>
                                   <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                                    Please complete your payment on PayU. We are polling every 2 seconds for real-time automated verification.
+                                    Please complete your payment on PayU. Once you have completed the payment, click the button below to verify and generate your ticket.
                                   </p>
                                   <div className="text-[11px] font-mono text-slate-500 bg-slate-100 py-1.5 px-3 rounded-lg inline-block">
                                     Order ID: <strong className="text-slate-800">{payuOrder.orderId || payuOrder.params?.txnid}</strong>
@@ -2066,8 +2057,26 @@ export default function SingAlongBooking() {
                                   <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 pt-2">
                                     <button
                                       type="button"
+                                      onClick={handleCheckPaymentStatus}
+                                      disabled={isCheckingPayment}
+                                      className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-md cursor-pointer flex items-center justify-center gap-2 disabled:opacity-60"
+                                    >
+                                      {isCheckingPayment ? (
+                                        <>
+                                          <RefreshCw className="w-4 h-4 animate-spin" />
+                                          <span>Verifying Payment...</span>
+                                        </>
+                                      ) : (
+                                        <>
+                                          <CheckCircle2 className="w-4 h-4" />
+                                          <span>I Have Paid (Verify Status)</span>
+                                        </>
+                                      )}
+                                    </button>
+                                    <button
+                                      type="button"
                                       onClick={() => submitPayuForm(payuOrder)}
-                                      className="w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-[#ff6a00] to-[#ee5007] hover:brightness-110 shadow-md cursor-pointer"
+                                      className="w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-bold text-slate-700 bg-amber-100 hover:bg-amber-200 cursor-pointer"
                                     >
                                       Re-open PayU Window
                                     </button>
@@ -2076,7 +2085,7 @@ export default function SingAlongBooking() {
                                       onClick={handleCancelOnlinePay}
                                       className="w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 cursor-pointer"
                                     >
-                                      Cancel &amp; Go Back
+                                      Cancel
                                     </button>
                                   </div>
                                 </div>
