@@ -145,7 +145,14 @@ export default function AdminSingAlong() {
       const res = await getSingAlongStats();
       const statsData = res?.data?.data || res?.data?.stats || res?.data || res?.stats || res;
       if (statsData) {
-        setStats(statsData);
+        setStats((prev: any) => ({
+          ...statsData,
+          ...prev, // Keep confirmedCount, totalTickets, totalRevenueFormatted from /sing-along endpoint
+          attendedCount: statsData.attendedCount ?? statsData.checkedInCount ?? prev?.attendedCount ?? 0,
+          confirmedCount: prev?.confirmedCount ?? statsData.confirmedCount ?? statsData.totalConfirmed,
+          totalTickets: prev?.totalTickets ?? statsData.totalTickets ?? statsData.totalTicketsSold,
+          totalRevenueFormatted: prev?.totalRevenueFormatted ?? statsData.totalRevenueFormatted,
+        }));
       }
     } catch (err) {
       console.error('Failed to load Sing Along stats:', err);
@@ -169,12 +176,41 @@ export default function AdminSingAlong() {
 
       const total = extractTotalCount(res, listData.length);
       setTotalCount(total);
-      setTotalPages(Math.max(1, Math.ceil(total / limit)));
+
+      const serverPages = res?.data?.totalPages ?? res?.totalPages;
+      if (typeof serverPages === 'number' && serverPages > 0) {
+        setTotalPages(serverPages);
+      } else {
+        setTotalPages(Math.max(1, Math.ceil(total / limit)));
+      }
+
+      // Extract stats from /sing-along API response
+      const resData = res?.data || {};
+      const summary = resData?.summary || res?.summary || {};
+
+      const confirmedCount = resData.confirmedCount ?? summary.confirmedCount ?? resData.totalConfirmed ?? summary.totalConfirmed;
+      const totalTickets = resData.totalTickets ?? summary.totalTickets;
+      const totalRevenueFormatted = resData.totalRevenueFormatted || summary.totalRevenueFormatted || (resData.totalRevenue != null ? rupee(resData.totalRevenue) : (summary.totalRevenue != null ? rupee(summary.totalRevenue) : undefined));
+      const totalRevenue = resData.totalRevenue ?? summary.totalRevenue;
+      const attendedCount = resData.attendedCount ?? summary.attendedCount ?? resData.checkedInCount ?? summary.checkedInCount;
+      const attendedFromList = listData.filter((b: any) => b.attended || b.status === 'ATTENDED').length;
+
+      setStats((prev: any) => ({
+        ...prev,
+        ...resData,
+        ...summary,
+        confirmedCount: confirmedCount !== undefined ? confirmedCount : prev?.confirmedCount,
+        totalTickets: totalTickets !== undefined ? totalTickets : prev?.totalTickets,
+        totalRevenueFormatted: totalRevenueFormatted || prev?.totalRevenueFormatted,
+        totalRevenue: totalRevenue !== undefined ? totalRevenue : prev?.totalRevenue,
+        attendedCount: attendedCount !== undefined ? attendedCount : (prev?.attendedCount ?? attendedFromList)
+      }));
     } catch (err: any) {
       console.error('Failed to load Sing Along bookings:', err);
       toast.error(err.message || 'Failed to load bookings list');
     } finally {
       setLoading(false);
+      setStatsLoading(false);
     }
   }, [page, limit, search, status, eventId]);
 
@@ -339,7 +375,7 @@ export default function AdminSingAlong() {
               <div>
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-1">Total Bookings</span>
                 <div className="text-2xl font-black text-slate-900">
-                  {statsLoading ? '...' : (stats?.totalBookings ?? totalCount ?? 0)}
+                  {statsLoading && !stats ? '...' : (stats?.confirmedCount ?? stats?.summary?.confirmedCount ?? stats?.totalConfirmed ?? 0)}
                 </div>
                 <span className="text-[11px] text-slate-500 font-medium">Unique booking orders</span>
               </div>
@@ -353,7 +389,7 @@ export default function AdminSingAlong() {
               <div>
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-1">Tickets Sold</span>
                 <div className="text-2xl font-black text-slate-900">
-                  {statsLoading ? '...' : (stats?.totalTicketsSold ?? stats?.totalTickets ?? totalCount)}
+                  {statsLoading && !stats ? '...' : (stats?.totalTickets ?? stats?.summary?.totalTickets ?? 0)}
                 </div>
                 <span className="text-[11px] text-emerald-600 font-semibold">Attendees Registered</span>
               </div>
@@ -367,7 +403,9 @@ export default function AdminSingAlong() {
               <div>
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-1">Total Revenue</span>
                 <div className="text-2xl font-black text-slate-900">
-                  {statsLoading ? '...' : rupee(stats?.totalRevenue ?? 0)}
+                  {statsLoading && !stats
+                    ? '...'
+                    : (stats?.totalRevenueFormatted || stats?.summary?.totalRevenueFormatted || (stats?.totalRevenue != null ? rupee(stats.totalRevenue) : '₹0.00'))}
                 </div>
                 <span className="text-[11px] text-slate-500 font-medium">Ticket sales &amp; fees</span>
               </div>
@@ -381,7 +419,7 @@ export default function AdminSingAlong() {
               <div>
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-1">Checked In</span>
                 <div className="text-2xl font-black text-slate-900">
-                  {statsLoading ? '...' : (stats?.attendedCount ?? stats?.checkedInCount ?? 0)}
+                  {statsLoading && !stats ? '...' : (stats?.attendedCount ?? stats?.checkedInCount ?? 0)}
                 </div>
                 <span className="text-[11px] text-purple-600 font-semibold">Verified at Gate</span>
               </div>

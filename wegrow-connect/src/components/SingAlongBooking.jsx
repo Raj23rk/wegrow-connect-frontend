@@ -68,6 +68,7 @@ const CONFIG = {
   payeeName: "Ashok kumar",
   ticketPrice: 249,
   conventionFee: 5.30,
+  convenienceFee: 5.30,
   maxTickets: 15,
   bookingPrefix: "SA26",
   contactPhone: "+91 93440 37331",
@@ -151,8 +152,9 @@ export default function SingAlongBooking() {
   const ticketCaptureRef = useRef(null);
 
   const subtotal = qty * CONFIG.ticketPrice;
-  const conventionFee = Number((qty * (CONFIG.conventionFee ?? 5.30)).toFixed(2));
-  const totalAmount = Number((subtotal + conventionFee).toFixed(2));
+  const convenienceFee = Number((qty * (CONFIG.convenienceFee ?? CONFIG.conventionFee ?? 5.30)).toFixed(2));
+  const conventionFee = convenienceFee;
+  const totalAmount = Number((subtotal + convenienceFee).toFixed(2));
 
   // Toggle Background Song Audio (MASCOT_SONG_AUDIO)
   const toggleAudioSound = () => {
@@ -1105,38 +1107,58 @@ export default function SingAlongBooking() {
             </div>
 
             {/* =================================================================
-                CENTER: POSITIONED DIRECTLY ON THE STAGE TRUSS (Mobile Responsive)
-                Row 1: [ WeGrow logo ]  [ K7 logo ]
-                Row 2: presents
-                Row 3: SING ALONG
+                CENTER: POSITIONED DIRECTLY ON THE STAGE TRUSS (Mobile & Desktop Responsive)
+                Line 1: [ WeGrow Skill Campus & B School ] (BIG)
+                Line 2: [ K7 Chitfunds (P) Ltd. ] (MEDIUM)
+                Line 3: presents
+                Line 4: SING ALONG
                 ================================================================= */}
             <div className="relative z-20 flex flex-col items-center text-center max-w-3xl mx-auto pt-1 sm:pt-2 md:-mt-10 px-3 sm:px-4">
 
-              {/* Row 1: WeGrow Logo & K7 Logo Center */}
-              <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-2 sm:mb-2.5 max-w-full">
-                {/* WeGrow Logo Box */}
-                <div className="bg-white rounded-xl sm:rounded-2xl px-2.5 py-1 sm:px-4 sm:py-1.5 shadow-lg border border-slate-200/40 flex items-center justify-center h-8 sm:h-10 md:h-11">
-                  <img
-                    src={WEGROW_LOGO_IMG}
-                    onError={(e) => { e.currentTarget.src = WEGROW_BACKUP_LOGO; }}
-                    alt="WeGrow"
-                    className="h-5 sm:h-7 md:h-8 w-auto object-contain"
-                  />
-                </div>
+              {/* Line 1: WeGrow Skill Campus & B School (BIG - Main Brand Host) */}
+              <div className="bg-white rounded-2xl sm:rounded-3xl px-5 sm:px-8 py-2.5 sm:py-3.5 shadow-2xl border border-white/60 flex items-center justify-center w-full max-w-[280px] xs:max-w-[330px] sm:max-w-[400px] md:max-w-[440px] mb-2 sm:mb-3">
+                <img
+                  src={WEGROW_BACKUP_LOGO}
+                  alt="WeGrow Skill Campus & B School"
+                  className="h-11 xs:h-13 sm:h-16 md:h-20 w-auto max-w-full object-contain filter drop-shadow-xs"
+                />
+              </div>
 
-                {/* K7 Logo Box */}
-                <div className="bg-white rounded-xl sm:rounded-2xl px-2.5 py-1 sm:px-4 sm:py-1.5 shadow-lg border border-slate-200/40 flex items-center justify-center h-8 sm:h-10 md:h-11">
-                  <img
-                    src="/k7_sarathy_chitfunds_logo.png"
-                    alt="K7"
-                    className="h-5 sm:h-7 md:h-8 w-auto object-contain"
-                  />
+              {/* Line 2: K7 Chitfunds (P) Ltd. Banner & Logo (Compact / Reduced Width) */}
+              <div className="bg-white rounded-xl sm:rounded-2xl px-2.5 sm:px-3.5 py-1 sm:py-1.5 shadow-xl border border-white/50 flex flex-col items-center justify-center w-auto max-w-[190px] xs:max-w-[210px] sm:max-w-[240px] mb-2 sm:mb-2.5 select-none">
+                {/* K7 Logo Mark */}
+                <img
+                  src="/k7_sarathy_chitfunds_logo.png"
+                  alt="K7 Chitfunds"
+                  className="h-5 sm:h-7 md:h-8 w-auto object-contain mb-0.5"
+                />
+                {/* HARIHARA WIN */}
+                <span className="text-[#13522a] font-serif font-black text-[7px] xs:text-[8px] sm:text-[9.5px] tracking-[0.18em] uppercase leading-tight">
+                  HARIHARA WIN
+                </span>
+                {/* K7 CHITFUNDS (P) Ltd., */}
+                <span className="text-[#13522a] font-serif font-black text-[8.5px] xs:text-[10px] sm:text-[11.5px] tracking-wide leading-tight mt-0.5">
+                  K7 CHITFUNDS (P) Ltd.,
+                </span>
+                {/* The Experts In Finance Divider */}
+                <div className="flex items-center justify-center gap-1 w-full my-0.5 px-0.5">
+                  <div className="h-[1px] bg-[#13522a] flex-1" />
+                  <span className="text-[#13522a] font-serif italic text-[6.5px] xs:text-[7.5px] sm:text-[8.5px] px-0.5 whitespace-nowrap">
+                    The Experts In Finance
+                  </span>
+                  <div className="h-[1px] bg-[#13522a] flex-1" />
+                </div>
+                {/* CALL $ARATHY 805 66666 16 */}
+                <div className="w-full bg-[#fef043] rounded py-0.5 px-1 text-center shadow-xs">
+                  <span className="text-[#13522a] font-serif font-black text-[6.5px] xs:text-[7.5px] sm:text-[8.5px] tracking-wider block">
+                    CALL $ARATHY 805 66666 16
+                  </span>
                 </div>
               </div>
 
-              {/* Row 2: presents */}
+              {/* Line 3: presents */}
               <div className="flex items-center justify-center mb-1.5 sm:mb-2">
-                <span className="font-body text-xs sm:text-sm md:text-base font-bold tracking-widest uppercase text-white/95 drop-shadow-[0_2px_8px_rgba(0,0,0,0.95)]">
+                <span className="font-body text-xs sm:text-sm md:text-base font-black tracking-widest uppercase text-white/95 drop-shadow-[0_2px_8px_rgba(0,0,0,0.95)]">
                   presents
                 </span>
               </div>
@@ -1511,44 +1533,18 @@ export default function SingAlongBooking() {
                 {/* SECTION 4: TWO-COLUMN BOOKING AREA (EQUAL HEIGHT ON BOTH COLUMNS) */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-8 items-stretch">
 
-                  {/* LEFT SIDE — EVENT PROMOTIONAL POSTER CARD (Compact on mobile, matches right card on desktop) */}
-                  <div className="lg:col-span-5 relative rounded-2xl sm:rounded-[32px] overflow-hidden shadow-xl border-2 border-amber-500/40 bg-[#160b02] min-h-[210px] sm:min-h-[360px] lg:min-h-[580px] lg:h-full flex flex-col justify-between group">
-                    {/* Background Stage Poster with Mascot */}
+                  {/* LEFT SIDE — EVENT PROMOTIONAL POSTER CARD (Covered 100% Edge-to-Edge, No Blank Spaces) */}
+                  <div className="lg:col-span-5 relative rounded-2xl sm:rounded-[32px] overflow-hidden shadow-2xl border-2 border-amber-500/40 bg-[#0c0602] group h-[460px] xs:h-[520px] sm:h-[600px] lg:h-full min-h-[460px] lg:min-h-[620px]">
+                    {/* Full poster image covering 100% width and height edge-to-edge with object-cover object-top */}
                     <img
                       src={POSTER_CARD_IMG}
                       onError={(e) => { e.currentTarget.src = POSTER_STAGE_BG; }}
-                      alt="Sing Along Concert Promotional Poster with Mascot"
-                      className="absolute inset-0 w-full h-full object-cover object-center z-0 transition-transform duration-700 group-hover:scale-105"
+                      alt="Sing Along Concert Official Poster"
+                      className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
                     />
 
-                    {/* Gradient Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-black/30 z-10 pointer-events-none" />
-
-                    {/* Top Row: Official Event & Date Pill */}
-                    <div className="relative z-20 p-2.5 sm:p-5 flex items-center justify-between gap-2">
-                      <div className="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full bg-white/95 text-[#0f172a] font-display text-[9px] sm:text-[11px] font-black tracking-wide shadow-md">
-                        <Sparkles className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-[#ff6a00]" />
-                        <span>OFFICIAL POSTER</span>
-                      </div>
-                      <div className="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full bg-[#ff6a00] text-white font-display text-[9px] sm:text-[11px] font-black shadow-md">
-                        <Calendar className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-white" />
-                        <span>27 SEP • 6 PM</span>
-                      </div>
-                    </div>
-
-                    {/* Middle Graphic Stage Area */}
-                    <div className="relative z-20 flex-grow" />
-
-                    {/* Bottom: Card Footer with Venue & ₹249 Flat Pass */}
-                    <div className="relative z-20 p-3 sm:p-5 flex items-center justify-between border-t border-white/20 text-white backdrop-blur-md bg-black/60">
-                      <div className="flex items-center gap-1.5 text-xs sm:text-sm font-bold text-slate-100 min-w-0">
-                        <MapPin className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-[#ff6a00] flex-shrink-0" />
-                        <span className="truncate max-w-[150px] sm:max-w-none">Arasan Turf, Sivakasi</span>
-                      </div>
-                      <div className="px-3 sm:px-4 py-1 sm:py-2 rounded-xl sm:rounded-2xl bg-gradient-to-r from-[#ff6a00] to-[#ff5000] text-white font-display text-xs sm:text-sm font-black shadow-[0_4px_16px_rgba(255,106,0,0.6)] flex-shrink-0">
-                        ₹249 <span className="text-[10px] sm:text-xs font-medium opacity-90">/ Pass</span>
-                      </div>
-                    </div>
+                    {/* Subtle gradient vignette at the bottom for smooth finish */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
                   </div>
 
                   {/* RIGHT COLUMN: BOOKING FORM CARD */}
@@ -1755,7 +1751,7 @@ export default function SingAlongBooking() {
                                 <span className="font-bold text-slate-800">{rupee(subtotal)}</span>
                               </div>
                               <div className="flex justify-between">
-                                <span>Convention Fee:</span>
+                                <span>Convenience Fee:</span>
                                 <span className="font-bold text-slate-800">{qty > 1 ? `${qty} × ${rupee(CONFIG.conventionFee)} = ` : ''}{rupee(conventionFee)}</span>
                               </div>
                               <div className="flex justify-between border-t border-slate-200 pt-1.5 font-bold text-slate-900">
@@ -1782,14 +1778,14 @@ export default function SingAlongBooking() {
                           </div>
 
                           {/* Venue Entry Reminder */}
-                          <div className="bg-amber-50/80 border border-amber-200 rounded-xl sm:rounded-2xl p-3.5 sm:p-4 text-xs text-amber-900 space-y-1.5">
+                          {/* <div className="bg-amber-50/80 border border-amber-200 rounded-xl sm:rounded-2xl p-3.5 sm:p-4 text-xs text-amber-900 space-y-1.5">
                             <div className="font-bold flex items-center gap-1.5 text-amber-800">
                               <Info className="w-4 h-4 text-amber-600 flex-shrink-0" />
                               <span>Entry Guidelines</span>
                             </div>
                             <p>• Please bring a digital copy of your confirmed ticket QR pass.</p>
                             <p>• 1 × 500 ml sealed water bottle per person permitted.</p>
-                          </div>
+                          </div> */}
 
                           {/* Booking Support Helpline */}
                           <div className="flex flex-wrap items-center justify-between gap-2 p-2.5 sm:p-3 rounded-xl bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200/80 text-[11px] sm:text-xs">
