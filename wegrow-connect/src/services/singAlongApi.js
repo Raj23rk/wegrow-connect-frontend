@@ -3,7 +3,7 @@ import { getAuthHeaders } from './api';
 // Base URLs: Local backend if running on localhost, otherwise Render production
 const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
 export const API_BASE = isLocal
-  ? 'http://localhost:4000/api/v1'
+  ? 'http://localhost:3000/api/v1'
   : 'https://wegrow-connect-backend-1.onrender.com/api/v1';
 
 async function parseResponse(response) {
@@ -30,7 +30,7 @@ async function parseResponse(response) {
 // CORE SING ALONG PAYMENT & TICKETING OBJECT
 // =====================================================
 export const singAlongApi = {
-  // 1. Submit Manual 12-digit UTR (Image 1 screen)
+  // 1. Submit Manual 12-digit UTR
   async submitManualUtr(data) {
     const res = await fetch(`${API_BASE}/sing-payment/submit-utr`, {
       method: 'POST',
@@ -40,7 +40,7 @@ export const singAlongApi = {
     return res.json();
   },
 
-  // 2. Initialize PayU Online Order (Image 2 screen)
+  // 2. Initialize Cashfree Online Order
   async createOnlineOrder(data) {
     const res = await fetch(`${API_BASE}/sing-payment/create-order`, {
       method: 'POST',

@@ -318,7 +318,7 @@ export default function SingAlongBooking() {
     reader.readAsDataURL(file);
   };
 
-  const [payuOrder, setPayuOrder] = useState(null);
+  const [cashfreeOrder, setCashfreeOrder] = useState(null);
   const [isCheckingPayment, setIsCheckingPayment] = useState(false);
   const checkedUrlParamRef = useRef(false);
 
@@ -326,8 +326,8 @@ export default function SingAlongBooking() {
   useEffect(() => {
     if (checkedUrlParamRef.current) return;
     const params = new URLSearchParams(window.location.search);
-    const orderIdParam = params.get('orderId') || params.get('txnid');
-    const bookingIdParam = params.get('bookingId');
+    const orderIdParam = params.get('order_id') || params.get('orderId') || params.get('txnid');
+    const bookingIdParam = params.get('booking_id') || params.get('bookingId');
 
     if (bookingIdParam) {
       checkedUrlParamRef.current = true;
@@ -336,6 +336,9 @@ export default function SingAlongBooking() {
           if (res?.success && (res?.booking || res?.data?.booking)) {
             setTicketData(res.booking || res.data.booking);
             setScreen('success');
+            try {
+              window.history.replaceState({}, document.title, window.location.pathname);
+            } catch (_) {}
           }
         })
         .catch(console.warn);
@@ -343,8 +346,15 @@ export default function SingAlongBooking() {
       checkedUrlParamRef.current = true;
       singAlongApi.checkPaymentStatus(orderIdParam)
         .then((res) => {
-          if (res?.success && (res?.data?.isPaid || res?.data?.status === 'SUCCESS')) {
-            const b = res.data.booking || {};
+          const isSuccess =
+            res?.isPaid === true ||
+            res?.status === 'SUCCESS' ||
+            res?.data?.isPaid === true ||
+            res?.data?.status === 'SUCCESS' ||
+            (res?.success && (res?.data?.isPaid || res?.data?.status === 'SUCCESS'));
+
+          if (isSuccess) {
+            const b = res?.booking || res?.data?.booking || res?.data || {};
             setTicketData({
               bookingId: b.bookingId || orderIdParam,
               ticketId: b.ticketId || `TKT-${b.bookingId || 'SA26'}`,
@@ -352,41 +362,23 @@ export default function SingAlongBooking() {
               phone: b.phone || '',
               email: b.email || '',
               ticketQty: b.ticketQty || 1,
-              amount: b.totalAmount || 254,
-              utr: b.utr || orderIdParam,
-              paymentMethod: 'PAYU',
-              paidAt: new Date().toISOString(),
+              amount: b.totalAmount || b.amount || 254,
+              utr: b.utr || b.cfPaymentId || orderIdParam,
+              paymentMethod: 'CASHFREE',
+              paidAt: b.paidAt || new Date().toISOString(),
               verificationToken: b.verificationToken || `SINGALONG-VERIFY:${b.bookingId || orderIdParam}`,
             });
             setScreen('success');
+            try {
+              window.history.replaceState({}, document.title, window.location.pathname);
+            } catch (_) {}
           }
         })
         .catch(console.warn);
     }
   }, []);
 
-  const submitPayuForm = (orderData) => {
-    if (!orderData?.params) return;
-    const form = document.createElement('form');
-    form.method = 'POST';
-    // Ensure production PayU checkout URL (never test.payu.in)
-    form.action = (orderData.action && !orderData.action.includes('test.payu.in'))
-      ? orderData.action
-      : 'https://secure.payu.in/_payment';
-    form.target = '_blank';
-    Object.entries(orderData.params).forEach(([k, v]) => {
-      const input = document.createElement('input');
-      input.type = 'hidden';
-      input.name = k;
-      input.value = v;
-      form.appendChild(input);
-    });
-    document.body.appendChild(form);
-    form.submit();
-    setTimeout(() => form.remove(), 500);
-  };
-
-  // Instant Online Payment (PayU Gateway)
+  // Instant Online Payment (Cashfree Gateway)
   const handleInstantOnlinePay = async () => {
     setIsOnlinePaying(true);
     try {
@@ -400,34 +392,75 @@ export default function SingAlongBooking() {
 
       const res = await singAlongApi.createOnlineOrder(payload);
       if (!res?.success || !res?.data) {
-        throw new Error(res?.message || "Could not generate PayU order. Please try again.");
+        throw new Error(res?.message || "Could not generate Cashfree payment order. Please try again.");
       }
 
       const orderData = res.data;
-      setPayuOrder(orderData);
-      toast.success("Opening PayU Checkout in a new window...", { duration: 3500 });
+      setCashfreeOrder(orderData);
 
-      // Automatically submit form in new window
-      submitPayuForm(orderData);
+      const mode = (orderData.environment?.toLowerCase() === 'sandbox' || orderData.environment?.toLowerCase() === 'test')
+        ? 'sandbox'
+        : 'production';
+
+      // Check if Cashfree JS SDK v3 is available
+      if (typeof window !== 'undefined' && window.Cashfree) {
+        toast.success("Opening Cashfree Checkout...", { duration: 3000 });
+        const cashfree = window.Cashfree({ mode });
+        cashfree.checkout({
+          paymentSessionId: orderData.paymentSessionId,
+          redirectTarget: "_modal",
+        }).then((result) => {
+          if (result?.error) {
+            console.warn("Cashfree checkout error:", result.error);
+            if (orderData.paymentLink) {
+              window.location.href = orderData.paymentLink;
+            }
+          } else {
+            const targetOrderId = orderData.orderId || orderData.bookingId;
+            if (targetOrderId) {
+              handleCheckPaymentStatus(targetOrderId);
+            }
+          }
+        }).catch((err) => {
+          console.warn("Cashfree modal error:", err);
+          if (orderData.paymentLink) {
+            window.location.href = orderData.paymentLink;
+          }
+        });
+      } else if (orderData.paymentLink) {
+        toast.success("Opening Cashfree Checkout...", { duration: 3000 });
+        window.location.href = orderData.paymentLink;
+      } else {
+        throw new Error("Cashfree payment session could not be initialized.");
+      }
     } catch (e) {
       setIsOnlinePaying(false);
       console.error(e);
-      toast.error(e.message || "Could not initiate PayU payment. You can also scan the Google Pay QR.");
+      toast.error(e.message || "Could not initiate Cashfree payment. You can also scan the QR.");
     }
   };
 
   // Single on-demand status check when user confirms payment
-  const handleCheckPaymentStatus = async () => {
-    if (!payuOrder || isCheckingPayment) return;
-    const orderId = payuOrder.orderId || payuOrder.params?.txnid;
-    if (!orderId) return;
+  const handleCheckPaymentStatus = async (overrideOrderId) => {
+    const orderId = (typeof overrideOrderId === 'string' && overrideOrderId)
+      ? overrideOrderId
+      : (cashfreeOrder?.orderId || cashfreeOrder?.bookingId);
+
+    if (!orderId || isCheckingPayment) return;
 
     setIsCheckingPayment(true);
     try {
       const statusRes = await singAlongApi.checkPaymentStatus(orderId);
-      if (statusRes?.success && (statusRes?.data?.isPaid || statusRes?.data?.status === 'SUCCESS')) {
-        const booking = statusRes.data.booking || {};
-        const confirmedBookingId = booking.bookingId || payuOrder.params?.udf1 || genBookingId();
+      const isSuccess =
+        statusRes?.isPaid === true ||
+        statusRes?.status === 'SUCCESS' ||
+        statusRes?.data?.isPaid === true ||
+        statusRes?.data?.status === 'SUCCESS' ||
+        (statusRes?.success && (statusRes?.data?.isPaid || statusRes?.data?.status === 'SUCCESS'));
+
+      if (isSuccess) {
+        const booking = statusRes?.booking || statusRes?.data?.booking || statusRes?.data || {};
+        const confirmedBookingId = booking.bookingId || cashfreeOrder?.bookingId || genBookingId();
         const confirmedTicketData = {
           bookingId: confirmedBookingId,
           ticketId: booking.ticketId || `TKT-${confirmedBookingId}`,
@@ -435,18 +468,18 @@ export default function SingAlongBooking() {
           phone: booking.phone || `+91 ${booker.mobile.trim()}`,
           email: booking.email || 'Not provided',
           ticketQty: booking.ticketQty || qty,
-          amount: booking.totalAmount || totalAmount,
-          utr: booking.utr || orderId,
-          paymentMethod: 'PAYU (UPI)',
-          paidAt: new Date().toISOString(),
+          amount: booking.totalAmount || booking.amount || totalAmount,
+          utr: booking.utr || booking.cfPaymentId || orderId,
+          paymentMethod: 'CASHFREE',
+          paidAt: booking.paidAt || new Date().toISOString(),
           verificationToken: booking.verificationToken || `SINGALONG-VERIFY:${confirmedBookingId}`,
         };
 
         setTicketData(confirmedTicketData);
         setScreen('success');
         setIsOnlinePaying(false);
-        setPayuOrder(null);
-        toast.success("PayU Payment Confirmed! Ticket Booked Successfully! 🎟️🎉");
+        setCashfreeOrder(null);
+        toast.success("Payment Confirmed! Ticket Booked Successfully! 🎟️🎉");
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
         toast((statusRes?.message || "Payment is not confirmed yet. If you have paid, please wait a few seconds and try again."), {
@@ -463,7 +496,7 @@ export default function SingAlongBooking() {
 
   const handleCancelOnlinePay = () => {
     setIsOnlinePaying(false);
-    setPayuOrder(null);
+    setCashfreeOrder(null);
   };
 
   // Final Booking Confirmation (Manual UTR submission via singAlongApi.submitManualUtr)
@@ -2040,24 +2073,29 @@ export default function SingAlongBooking() {
                                 </div>
                               </div>
 
-                              {isOnlinePaying && payuOrder ? (
+                              {isOnlinePaying && cashfreeOrder ? (
                                 <div className="bg-white border-2 border-emerald-500/40 rounded-2xl p-5 text-center space-y-3 shadow-lg animate-fadeIn">
                                   <div className="w-12 h-12 mx-auto rounded-full bg-emerald-50 flex items-center justify-center">
                                     <ShieldCheck className="w-6 h-6 text-emerald-600" />
                                   </div>
                                   <div className="font-display font-black text-slate-900 text-base">
-                                    PayU Checkout Opened
+                                    Cashfree Checkout Active
                                   </div>
                                   <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                                    Please complete your payment on PayU. Once you have completed the payment, click the button below to verify and generate your ticket.
+                                    Please complete your payment in the Cashfree checkout window or popup. Once completed, click the button below to verify and view your ticket.
                                   </p>
-                                  <div className="text-[11px] font-mono text-slate-500 bg-slate-100 py-1.5 px-3 rounded-lg inline-block">
-                                    Order ID: <strong className="text-slate-800">{payuOrder.orderId || payuOrder.params?.txnid}</strong>
+                                  <div className="flex flex-wrap items-center justify-center gap-2">
+                                    <div className="text-[11px] font-mono text-slate-600 bg-slate-100 py-1.5 px-3 rounded-lg inline-block">
+                                      Order ID: <strong className="text-slate-900">{cashfreeOrder.orderId || cashfreeOrder.bookingId}</strong>
+                                    </div>
+                                    <div className="text-[11px] font-mono text-slate-600 bg-slate-100 py-1.5 px-3 rounded-lg inline-block">
+                                      Amount: <strong className="text-emerald-700 font-bold">{rupee(cashfreeOrder.amount || totalAmount)}</strong>
+                                    </div>
                                   </div>
                                   <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 pt-2">
                                     <button
                                       type="button"
-                                      onClick={handleCheckPaymentStatus}
+                                      onClick={() => handleCheckPaymentStatus()}
                                       disabled={isCheckingPayment}
                                       className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-md cursor-pointer flex items-center justify-center gap-2 disabled:opacity-60"
                                     >
@@ -2073,13 +2111,16 @@ export default function SingAlongBooking() {
                                         </>
                                       )}
                                     </button>
-                                    <button
-                                      type="button"
-                                      onClick={() => submitPayuForm(payuOrder)}
-                                      className="w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-bold text-slate-700 bg-amber-100 hover:bg-amber-200 cursor-pointer"
-                                    >
-                                      Re-open PayU Window
-                                    </button>
+                                    {cashfreeOrder.paymentLink && (
+                                      <a
+                                        href={cashfreeOrder.paymentLink}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-bold text-slate-700 bg-amber-100 hover:bg-amber-200 cursor-pointer text-center"
+                                      >
+                                        Re-open Payment Page
+                                      </a>
+                                    )}
                                     <button
                                       type="button"
                                       onClick={handleCancelOnlinePay}
@@ -2099,12 +2140,12 @@ export default function SingAlongBooking() {
                                   {isOnlinePaying ? (
                                     <>
                                       <RefreshCw className="w-5 h-5 animate-spin" />
-                                      <span>Initializing PayU Gateway...</span>
+                                      <span>Connecting Cashfree Gateway...</span>
                                     </>
                                   ) : (
                                     <>
                                       <Zap className="w-5 h-5 text-amber-200 fill-amber-200" />
-                                      <span>Pay {rupee(totalAmount)} Now (Real-Time Auto Confirm)</span>
+                                      <span>Pay {rupee(totalAmount)} Now (Cashfree Instant UPI &amp; Cards)</span>
                                     </>
                                   )}
                                 </button>
