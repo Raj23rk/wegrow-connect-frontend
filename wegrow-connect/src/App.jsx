@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import MissionVisionSection from './components/MissionVisionSection';
 import CoursesSection from './components/CoursesSection';
@@ -36,64 +36,74 @@ import WomensCommunityV1 from './components/WomensCommunityV1';
 import StudentFoundersCommunityV1 from './components/StudentFoundersCommunityV1';
 import BusinessFoundersCommunityV1 from './components/BusinessFoundersCommunityV1';
 import VinayagarCompetition from './components/VinayagarCompetition';
-import SingAlongBooking from './components/SingAlongBooking';
+
+// Lazy load Sing Along Page for ultra-fast initial paint
+const SingAlongBooking = lazy(() => import('./components/SingAlongBooking'));
 
 // Auth Context, Theme Context and Guard
 import { AuthProvider, ProtectedRoute } from './context/AuthContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 
-// Student Portal Sub-pages
-import StudentDashboard from './student/dashboard/page';
-import StudentCourses from './student/courses/page';
-import StudentCertificates from './student/certificates/page';
-import StudentRewards from './student/rewards/page';
-import StudentAnalytics from './student/analytics/page';
-import StudentWorkshops from './student/workshops/page';
-import StudentSubscriptions from './student/subscriptions/page';
-import StudentSettings from './student/settings/page';
+// Student Portal Sub-pages (Lazy Loaded)
+const StudentDashboard = lazy(() => import('./student/dashboard/page'));
+const StudentCourses = lazy(() => import('./student/courses/page'));
+const StudentCertificates = lazy(() => import('./student/certificates/page'));
+const StudentRewards = lazy(() => import('./student/rewards/page'));
+const StudentAnalytics = lazy(() => import('./student/analytics/page'));
+const StudentWorkshops = lazy(() => import('./student/workshops/page'));
+const StudentSubscriptions = lazy(() => import('./student/subscriptions/page'));
+const StudentSettings = lazy(() => import('./student/settings/page'));
 
-// Business Portal Sub-pages
-import BusinessDashboard from './business/dashboard/page';
-import BusinessAnalytics from './business/analytics/page';
-import BusinessCanvas from './business/canvas/page';
-import BusinessRoadmap from './business/roadmap/page';
-import BusinessWorkshops from './business/workshops/page';
-import BusinessLegal from './business/legal/page';
-import BusinessSubscriptions from './business/subscriptions/page';
-import BusinessSettings from './business/settings/page';
+// Business Portal Sub-pages (Lazy Loaded)
+const BusinessDashboard = lazy(() => import('./business/dashboard/page'));
+const BusinessAnalytics = lazy(() => import('./business/analytics/page'));
+const BusinessCanvas = lazy(() => import('./business/canvas/page'));
+const BusinessRoadmap = lazy(() => import('./business/roadmap/page'));
+const BusinessWorkshops = lazy(() => import('./business/workshops/page'));
+const BusinessLegal = lazy(() => import('./business/legal/page'));
+const BusinessSubscriptions = lazy(() => import('./business/subscriptions/page'));
+const BusinessSettings = lazy(() => import('./business/settings/page'));
 
 import GalleryPage from './components/GalleryPage';
 
-// Admin Portal Sub-pages
-import AdminDashboard from './admin/page';
-import AdminCertificates from './admin/certificates/page';
-import AdminEvents from './admin/events/page';
-import AdminGalleryPage from './admin/gallery/page';
-import AdminNotifications from './admin/notifications/page';
-import AdminPayments from './admin/payments/page';
-import AdminReports from './admin/reports/page';
-import AdminRewards from './admin/rewards/page';
-import AdminRoles from './admin/roles/page';
-import AdminSettings from './admin/settings/page';
-import AdminSubscriptions from './admin/subscriptions/page';
-import AdminUsers from './admin/users/page';
-import AdminWorkshops from './admin/workshops/page';
-import AdminWomenEntrepreneurs from './admin/women-entrepreneurs/page';
-import AdminStudentFounders from './admin/student-founders/page';
-import AdminBusinessFounders from './admin/business-founders/page';
-import AdminArtCompetition from './admin/art-competition/page';
-import AdminSingAlong from './admin/sing-along/page';
+// Admin Portal Sub-pages (Lazy Loaded)
+const AdminDashboard = lazy(() => import('./admin/page'));
+const AdminCertificates = lazy(() => import('./admin/certificates/page'));
+const AdminEvents = lazy(() => import('./admin/events/page'));
+const AdminGalleryPage = lazy(() => import('./admin/gallery/page'));
+const AdminNotifications = lazy(() => import('./admin/notifications/page'));
+const AdminPayments = lazy(() => import('./admin/payments/page'));
+const AdminReports = lazy(() => import('./admin/reports/page'));
+const AdminRewards = lazy(() => import('./admin/rewards/page'));
+const AdminRoles = lazy(() => import('./admin/roles/page'));
+const AdminSettings = lazy(() => import('./admin/settings/page'));
+const AdminSubscriptions = lazy(() => import('./admin/subscriptions/page'));
+const AdminUsers = lazy(() => import('./admin/users/page'));
+const AdminWorkshops = lazy(() => import('./admin/workshops/page'));
+const AdminWomenEntrepreneurs = lazy(() => import('./admin/women-entrepreneurs/page'));
+const AdminStudentFounders = lazy(() => import('./admin/student-founders/page'));
+const AdminBusinessFounders = lazy(() => import('./admin/business-founders/page'));
+const AdminArtCompetition = lazy(() => import('./admin/art-competition/page'));
+const AdminSingAlong = lazy(() => import('./admin/sing-along/page'));
 
-// Campaign Platform (Public)
-import CampaignLanding from './components/CampaignLanding';
-import CampaignRegister from './components/CampaignRegister';
-import TaskSession from './components/TaskSession';
+// Campaign Platform (Public & Admin Lazy Loaded)
+const CampaignLanding = lazy(() => import('./components/CampaignLanding'));
+const CampaignRegister = lazy(() => import('./components/CampaignRegister'));
+const TaskSession = lazy(() => import('./components/TaskSession'));
+const AdminCampaigns = lazy(() => import('./admin/campaigns/page'));
+const AdminCampaignStudents = lazy(() => import('./admin/students/page'));
+const AdminTasks = lazy(() => import('./admin/tasks/page'));
+const AdminSubmissions = lazy(() => import('./admin/submissions/page'));
 
-// Campaign Platform (Admin)
-import AdminCampaigns from './admin/campaigns/page';
-import AdminCampaignStudents from './admin/students/page';
-import AdminTasks from './admin/tasks/page';
-import AdminSubmissions from './admin/submissions/page';
+// Lightweight fallback for fast route transitions
+const RouteLoader = () => (
+  <div className="min-h-screen flex items-center justify-center bg-[#0B0F19]">
+    <div className="flex flex-col items-center gap-3">
+      <div className="w-10 h-10 border-4 border-amber-400/20 border-t-[#ff6a00] rounded-full animate-spin" />
+      <span className="text-xs text-amber-200/70 font-mono tracking-wider">LOADING...</span>
+    </div>
+  </div>
+);
 
 // Main Home Component
 function MainHomePage() {
@@ -641,7 +651,8 @@ export default function App() {
       <AuthProvider>
         <Toaster position="top-right" reverseOrder={false} toastOptions={{ duration: 4000 }} />
         <Router>
-          <Routes>
+          <Suspense fallback={<RouteLoader />}>
+            <Routes>
             {/* Public Landing & Splash */}
             <Route path="/" element={<Splash />} />
             <Route path="/home" element={<MainHomePage />} />
@@ -772,6 +783,7 @@ export default function App() {
             {/* Catch all redirecting to home */}
             <Route path="*" element={<MainHomePage />} />
           </Routes>
+          </Suspense>
         </Router>
       </AuthProvider>
     </ThemeProvider>

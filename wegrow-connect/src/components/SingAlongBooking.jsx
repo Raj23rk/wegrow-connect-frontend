@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import QRCode from 'qrcode';
-import html2canvas from 'html2canvas';
 import {
   Calendar,
   Clock,
@@ -57,7 +56,7 @@ const CONFIG = {
   dayNum: "27",
   monthAbbr: "SEP",
   dayName: "SUNDAY",
-  reportingTime: "5:30 PM to 6:00 PM",    
+  reportingTime: "5:30 PM to 6:00 PM",
   eventTime: "6:00 PM – 9:00 PM",
   venue: "Arasan Turf",
   location: "Sivakasi",
@@ -134,10 +133,7 @@ export default function SingAlongBooking() {
     fileData: ''
   });
   const [errors, setErrors] = useState({});
-  const [copiedUpi, setCopiedUpi] = useState(false);
-  const [copiedUpiNumber, setCopiedUpiNumber] = useState(false);
-  const [showOriginalQr, setShowOriginalQr] = useState(true);
-  const [paymentMode, setPaymentMode] = useState('ONLINE'); // 'ONLINE' | 'MANUAL_UPI'
+  const [paymentMode, setPaymentMode] = useState('ONLINE');
   const [isOnlinePaying, setIsOnlinePaying] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -145,8 +141,8 @@ export default function SingAlongBooking() {
   const [ticketData, setTicketData] = useState(null);
   const [isDownloading, setIsDownloading] = useState(false);
   const [showTicketDetails, setShowTicketDetails] = useState(false);
-  const [paymentQr, setPaymentQr] = useState('');
   const [ticketQr, setTicketQr] = useState('');
+  const ticketQrCacheRef = useRef({});
 
   // Mascot Concert Video & Background Song Controls
   const videoRef = useRef(null);
@@ -172,53 +168,26 @@ export default function SingAlongBooking() {
     }
   };
 
-  // Generate UPI Payment QR Code & Mobile Deep Link
-  const [upiDeepLink, setUpiDeepLink] = useState('');
-  useEffect(() => {
-    const upiUrl = `upi://pay?pa=${encodeURIComponent(CONFIG.upiId)}&pn=${encodeURIComponent(CONFIG.merchantName)}&am=${totalAmount}&cu=INR&tn=${encodeURIComponent(CONFIG.eventName + ' Ticket')}`;
-    setUpiDeepLink(upiUrl);
-    QRCode.toDataURL(upiUrl, {
-      width: 220,
-      margin: 1,
-      color: { dark: '#111827', light: '#ffffff' }
-    })
-      .then(url => setPaymentQr(url))
-      .catch(err => console.error('UPI QR Error:', err));
-  }, [totalAmount]);
-
-  // Generate Verification QR Code for confirmed ticket
+  // Generate Verification QR Code for confirmed ticket with caching
   useEffect(() => {
     if (ticketData?.bookingId) {
       const code = ticketData.verificationToken || `SINGALONG-VERIFY:${ticketData.bookingId}`;
+      if (ticketQrCacheRef.current[code]) {
+        setTicketQr(ticketQrCacheRef.current[code]);
+        return;
+      }
       QRCode.toDataURL(code, {
         width: 320,
         margin: 1,
         color: { dark: '#0B1B4A', light: '#ffffff' }
       })
-        .then(url => setTicketQr(url))
+        .then(url => {
+          ticketQrCacheRef.current[code] = url;
+          setTicketQr(url);
+        })
         .catch(err => console.error('Ticket QR Error:', err));
     }
   }, [ticketData]);
-
-  // Copy UPI ID
-  const handleCopyUpi = () => {
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(CONFIG.upiId);
-      setCopiedUpi(true);
-      toast.success('UPI ID copied to clipboard!');
-      setTimeout(() => setCopiedUpi(false), 2000);
-    }
-  };
-
-  // Copy UPI Number
-  const handleCopyUpiNumber = () => {
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(CONFIG.upiNumber);
-      setCopiedUpiNumber(true);
-      toast.success('UPI Number copied to clipboard!');
-      setTimeout(() => setCopiedUpiNumber(false), 2000);
-    }
-  };
 
   // First Screen: "Let's Book & Hear Mascot Sing" Click Handler
   const handleIntroProceed = () => {
@@ -264,7 +233,9 @@ export default function SingAlongBooking() {
     } else if (!/^[6-9]\d{9}$/.test(booker.mobile.trim())) {
       err.mobile = "Enter a valid 10-digit Indian mobile number.";
     }
-    if (booker.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(booker.email.trim())) {
+    if (!booker.email.trim()) {
+      err.email = "Email ID is mandatory for sending your entry pass.";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(booker.email.trim())) {
       err.email = "Enter a valid email address.";
     }
     setErrors(err);
@@ -272,15 +243,7 @@ export default function SingAlongBooking() {
   };
 
   const validateStep3 = () => {
-    if (paymentMode === 'ONLINE') return true;
-    const err = {};
-    if (!payment.utr.trim()) {
-      err.utr = "UPI Transaction ID / UTR is required.";
-    } else if (payment.utr.trim().length < 6) {
-      err.utr = "Enter a valid UTR / Transaction ID (min 6 characters).";
-    }
-    setErrors(err);
-    return Object.keys(err).length === 0;
+    return true;
   };
 
   const handleNext = () => {
@@ -347,7 +310,7 @@ export default function SingAlongBooking() {
             setScreen('success');
             try {
               window.history.replaceState({}, document.title, window.location.pathname);
-            } catch (_) {}
+            } catch (_) { }
           }
         })
         .catch(console.warn);
@@ -380,7 +343,7 @@ export default function SingAlongBooking() {
             setScreen('success');
             try {
               window.history.replaceState({}, document.title, window.location.pathname);
-            } catch (_) {}
+            } catch (_) { }
           }
         })
         .catch(console.warn);
@@ -576,14 +539,15 @@ export default function SingAlongBooking() {
     }
   };
 
-  // Download Ticket as PNG
+  // Download Ticket as PNG (Dynamic Import for Fast Initial Load)
   const handleDownloadTicket = async () => {
     if (!ticketCaptureRef.current) return;
     setIsDownloading(true);
     const toastId = toast.loading("Generating high-resolution ticket...");
     try {
+      const html2canvas = (await import('html2canvas')).default;
       const canvas = await html2canvas(ticketCaptureRef.current, {
-        scale: 3,
+        scale: 2.5,
         backgroundColor: '#0B0F19',
         useCORS: true,
         logging: false
@@ -609,7 +573,7 @@ export default function SingAlongBooking() {
         title: CONFIG.eventName,
         text: text,
         url: `${window.location.origin}/sing-along`
-      }).catch(() => {});
+      }).catch(() => { });
     } else {
       window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
     }
@@ -630,15 +594,51 @@ export default function SingAlongBooking() {
   return (
     <div className="min-h-screen bg-[#fdfbf7] text-[#0f172a] selection:bg-[#ff6a00] selection:text-white relative font-sans overflow-x-hidden">
 
-      {/* Embedded CSS for custom Google Fonts, Fast Blinking Multi-Color DJ Lights & Responsive Stage Layout */}
+      {/* Embedded CSS for Fast Blinking Multi-Color DJ Lights & Responsive Stage Layout */}
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Outfit:wght@500;600;700;800;900&family=Permanent+Marker&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Shrikhand&display=swap');
-
         .font-display { font-family: 'Outfit', sans-serif; }
         .font-body { font-family: 'Plus Jakarta Sans', sans-serif; }
         .font-handwritten { font-family: 'Caveat', cursive; }
-        .font-poster { font-family: 'Shrikhand', cursive; }
-        .font-brush { font-family: 'Permanent Marker', cursive; }
+        .font-poster { font-family: 'Titan One', 'Lilita One', 'Shrikhand', cursive; }
+        .font-brush { font-family: 'Outfit', sans-serif; font-weight: 900; }
+        .font-titan { font-family: 'Titan One', 'Lilita One', cursive, sans-serif; }
+
+        /* 3D Extruded Cartoon Poster Title - Matched to Image 1 */
+        .singalong-3d-text {
+          font-family: 'Titan One', 'Lilita One', cursive, sans-serif;
+          color: #FFF2A8;
+          -webkit-text-stroke: 1.5px #5C1D06;
+          letter-spacing: 0.02em;
+          text-shadow:
+            0 2px 0 #852d0a,
+            0 4px 0 #732607,
+            0 6px 0 #5c1d06,
+            0 8px 0 #421303,
+            0 10px 0 #280a01,
+            0 12px 14px rgba(0, 0, 0, 0.85),
+            0 16px 28px rgba(0, 0, 0, 0.7);
+          user-select: none;
+        }
+
+        /* Brush Banner Ribbon for LIVE MUSIC EVENT - Matched to Image 1 */
+        .live-music-brush-banner {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          padding: 5px 22px;
+          background: linear-gradient(135deg, #f59e0b 0%, #eab308 50%, #d97706 100%);
+          color: #1a1106;
+          font-family: 'Outfit', 'Inter', sans-serif;
+          font-weight: 900;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+          clip-path: polygon(
+            3% 0%, 97% 2%, 100% 25%, 98% 50%, 100% 75%, 96% 100%,
+            4% 98%, 0% 75%, 2% 50%, 0% 25%
+          );
+          transform: rotate(-1.5deg);
+        }
 
         /* =========================================================================
            HIGH-SPEED MULTI-COLOUR BLINKING CONCERT DJ LIGHTS & LASER BEAMS
@@ -918,7 +918,7 @@ export default function SingAlongBooking() {
               className="w-full h-full object-cover object-center filter brightness-90 contrast-105"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-black/80" />
-            
+
             {/* Stage DJ Lights on Intro Screen */}
             <div className="dj-laser-left-blinker opacity-60" />
             <div className="dj-laser-right-blinker opacity-60" />
@@ -942,9 +942,10 @@ export default function SingAlongBooking() {
                   WeGrow presents
                 </span>
                 <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
-                  <h2 className="text-2xl sm:text-3xl md:text-4xl font-black font-display tracking-tight text-white drop-shadow-md">
-                    <span className="text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.7)]">SING</span>{" "}
-                    <span className="bg-gradient-to-r from-[#ff4500] via-[#ff6a00] to-[#ffa500] bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(255,106,0,0.8)]">ALONG</span>
+                  <h2 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight drop-shadow-md">
+                    <span className="singalong-3d-text text-2xl sm:text-3xl md:text-4xl inline-block">
+                      SING ALONG
+                    </span>
                   </h2>
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#0D0D3A] border border-amber-400/40 text-[10px] sm:text-[11px] font-bold text-amber-300">
                     <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
@@ -1004,9 +1005,8 @@ export default function SingAlongBooking() {
             {/* Bottom Actions: Checkbox & CTA */}
             <div className="mt-5 sm:mt-6 flex flex-col gap-3.5 sm:gap-4 pt-3.5 sm:pt-4 border-t border-white/10">
               {/* Agreement Checkbox */}
-              <label className={`flex items-center gap-3 cursor-pointer select-none p-2 sm:p-2.5 rounded-xl border transition-all ${
-                shakeTerms ? 'animate-shake border-red-500 bg-red-500/10' : 'border-transparent hover:bg-white/5'
-              }`}>
+              <label className={`flex items-center gap-3 cursor-pointer select-none p-2 sm:p-2.5 rounded-xl border transition-all ${shakeTerms ? 'animate-shake border-red-500 bg-red-500/10' : 'border-transparent hover:bg-white/5'
+                }`}>
                 <input
                   type="checkbox"
                   checked={termsAccepted}
@@ -1042,7 +1042,7 @@ export default function SingAlongBooking() {
               HERO / EVENT BANNER (100VH FULLSCREEN WITH VIDEO BACKGROUND & FAST BLINKING DJ LIGHTS)
               ===================================================================== */}
           <header className="relative w-full min-h-[90vh] sm:min-h-screen bg-gradient-to-b from-[#1a0800] via-[#0d0400] to-black overflow-hidden flex flex-col justify-between shadow-2xl z-20">
-            
+
             {/* Full Video Background Layer (Real Video completely visible without black crowd silhouette) */}
             <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none z-0">
               <video
@@ -1052,6 +1052,7 @@ export default function SingAlongBooking() {
                 loop
                 muted
                 playsInline
+                preload="metadata"
               >
                 <source src={VIDEO_BANNER_SRC} type="video/mp4" />
               </video>
@@ -1061,7 +1062,7 @@ export default function SingAlongBooking() {
                 ref={audioRef}
                 src={MASCOT_SONG_AUDIO}
                 loop
-                preload="auto"
+                preload="none"
               />
 
               {/* Gentle Stage Gradient Overlay - Keeps real video vibrant and bright */}
@@ -1110,7 +1111,7 @@ export default function SingAlongBooking() {
                 Row 3: SING ALONG
                 ================================================================= */}
             <div className="relative z-20 flex flex-col items-center text-center max-w-3xl mx-auto pt-1 sm:pt-2 md:-mt-10 px-3 sm:px-4">
-              
+
               {/* Row 1: WeGrow Logo & K7 Logo Center */}
               <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-2 sm:mb-2.5 max-w-full">
                 {/* WeGrow Logo Box */}
@@ -1140,37 +1141,30 @@ export default function SingAlongBooking() {
                 </span>
               </div>
 
-              {/* Row 3: Sing Along Title Logo */}
-              <div className="relative select-none text-center group cursor-default">
+              {/* Row 3: Sing Along Title Logo - Matched to Image 1 */}
+              <div className="relative select-none text-center group cursor-default pt-1 sm:pt-2">
                 {/* Golden Crown doodle above ALONG */}
                 <div className="flex items-center justify-center -mb-1 sm:-mb-2">
                   <span className="text-amber-400 font-handwritten text-xl sm:text-3xl font-black drop-shadow-[0_0_14px_rgba(255,190,0,0.9)] rotate-6 inline-block animate-float-note">
                     👑
                   </span>
                 </div>
-                
-                <h1 className="font-poster text-3xl xs:text-5xl sm:text-6xl md:text-7xl font-black tracking-tight leading-none drop-shadow-[0_8px_30px_rgba(0,0,0,0.95)]">
-                  <span
-                    className="text-white inline-block transition-transform duration-300 group-hover:scale-105"
-                    style={{
-                      textShadow: '0 0 25px rgba(255,255,255,0.7), 0 4px 10px rgba(0,0,0,0.9)',
-                      WebkitTextStroke: '1.2px #0f172a'
-                    }}
-                  >
-                    SING{" "}
+
+                <h1 className="singalong-3d-text text-4xl xs:text-5xl sm:text-6xl md:text-7xl font-black tracking-wide leading-tight drop-shadow-[0_10px_35px_rgba(0,0,0,0.95)] -rotate-2 inline-block">
+                  <span className="inline-block transition-transform duration-300 group-hover:scale-105">
+                    SING
                   </span>
-                  <span
-                    className="bg-gradient-to-r from-[#ff3800] via-[#ff6a00] to-[#ffa500] bg-clip-text text-transparent inline-block transition-transform duration-300 group-hover:scale-105"
-                    style={{
-                      filter: 'drop-shadow(0 0 25px rgba(255,106,0,0.85)) drop-shadow(0 4px 8px #2b0c00)'
-                    }}
-                  >
+                  <span className="mx-2 sm:mx-3 inline-block transition-transform duration-300 group-hover:scale-105">
                     ALONG
                   </span>
                 </h1>
-                <p className="font-brush text-amber-300 text-[11px] sm:text-sm md:text-base tracking-[0.2em] sm:tracking-[0.3em] uppercase mt-1 drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
-                  LIVE MUSIC EVENT
-                </p>
+
+                {/* Golden Yellow Brush Banner for LIVE MUSIC EVENT (Matched to Image 1) */}
+                <div className="flex items-center justify-center mt-2 sm:mt-2.5">
+                  <div className="live-music-brush-banner text-[10px] sm:text-xs md:text-sm">
+                    LIVE MUSIC EVENT
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -1433,6 +1427,13 @@ export default function SingAlongBooking() {
                       <span>Book Another</span>
                     </button>
                   </div>
+
+                  <div className="p-3 rounded-2xl bg-white/10 border border-white/20 text-center text-xs text-white/90 mt-1">
+                    <p className="text-[11px] text-amber-300 font-semibold mb-1">If any booking or gate entry issue contact:</p>
+                    <a href="tel:+919344037331" className="font-mono font-bold text-white text-sm hover:underline">
+                      +91 93440 37331
+                    </a>
+                  </div>
                 </div>
               </div>
             )}
@@ -1450,16 +1451,15 @@ export default function SingAlongBooking() {
                       Step {step} of 4
                     </span>
                     <span className="text-xs font-black text-[#ff6a00] font-display">
-                      {step === 1 ? 'Booker Details' : step === 2 ? 'Ticket Summary' : step === 3 ? 'Payment via UPI' : 'Review & Confirm'}
+                      {step === 1 ? 'Booker Details' : step === 2 ? 'Ticket Summary' : step === 3 ? 'Online Payment' : 'Review & Confirm'}
                     </span>
                   </div>
 
                   <div className="flex items-center justify-between bg-white px-3 sm:px-8 py-3.5 sm:py-4 rounded-2xl border border-slate-200 shadow-sm">
                     {/* Step 1 */}
                     <div className="flex items-center gap-1.5 sm:gap-3">
-                      <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center font-display font-black text-xs sm:text-sm transition-all ${
-                        step >= 1 ? 'bg-gradient-to-br from-[#ff6a00] to-[#ee5007] text-white shadow-[0_0_14px_rgba(255,106,0,0.5)]' : 'bg-slate-100 text-slate-400'
-                      }`}>
+                      <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center font-display font-black text-xs sm:text-sm transition-all ${step >= 1 ? 'bg-gradient-to-br from-[#ff6a00] to-[#ee5007] text-white shadow-[0_0_14px_rgba(255,106,0,0.5)]' : 'bg-slate-100 text-slate-400'
+                        }`}>
                         {step > 1 ? <Check className="w-4 h-4" /> : '1'}
                       </div>
                       <span className={`font-display text-xs sm:text-sm hidden sm:inline ${step === 1 ? 'font-black text-slate-900' : 'font-bold text-slate-500'}`}>
@@ -1471,9 +1471,8 @@ export default function SingAlongBooking() {
 
                     {/* Step 2 */}
                     <div className="flex items-center gap-1.5 sm:gap-3">
-                      <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center font-display font-black text-xs sm:text-sm transition-all ${
-                        step >= 2 ? 'bg-gradient-to-br from-[#ff6a00] to-[#ee5007] text-white shadow-[0_0_14px_rgba(255,106,0,0.5)]' : 'bg-slate-100 text-slate-400'
-                      }`}>
+                      <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center font-display font-black text-xs sm:text-sm transition-all ${step >= 2 ? 'bg-gradient-to-br from-[#ff6a00] to-[#ee5007] text-white shadow-[0_0_14px_rgba(255,106,0,0.5)]' : 'bg-slate-100 text-slate-400'
+                        }`}>
                         {step > 2 ? <Check className="w-4 h-4" /> : '2'}
                       </div>
                       <span className={`font-display text-xs sm:text-sm hidden sm:inline ${step === 2 ? 'font-black text-slate-900' : 'font-bold text-slate-500'}`}>
@@ -1485,9 +1484,8 @@ export default function SingAlongBooking() {
 
                     {/* Step 3 */}
                     <div className="flex items-center gap-1.5 sm:gap-3">
-                      <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center font-display font-black text-xs sm:text-sm transition-all ${
-                        step >= 3 ? 'bg-gradient-to-br from-[#ff6a00] to-[#ee5007] text-white shadow-[0_0_14px_rgba(255,106,0,0.5)]' : 'bg-slate-100 text-slate-400'
-                      }`}>
+                      <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center font-display font-black text-xs sm:text-sm transition-all ${step >= 3 ? 'bg-gradient-to-br from-[#ff6a00] to-[#ee5007] text-white shadow-[0_0_14px_rgba(255,106,0,0.5)]' : 'bg-slate-100 text-slate-400'
+                        }`}>
                         {step > 3 ? <Check className="w-4 h-4" /> : '3'}
                       </div>
                       <span className={`font-display text-xs sm:text-sm hidden sm:inline ${step === 3 ? 'font-black text-slate-900' : 'font-bold text-slate-500'}`}>
@@ -1499,9 +1497,8 @@ export default function SingAlongBooking() {
 
                     {/* Step 4 */}
                     <div className="flex items-center gap-1.5 sm:gap-3">
-                      <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center font-display font-black text-xs sm:text-sm transition-all ${
-                        step >= 4 ? 'bg-gradient-to-br from-[#ff6a00] to-[#ee5007] text-white shadow-[0_0_14px_rgba(255,106,0,0.5)]' : 'bg-slate-100 text-slate-400'
-                      }`}>
+                      <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center font-display font-black text-xs sm:text-sm transition-all ${step >= 4 ? 'bg-gradient-to-br from-[#ff6a00] to-[#ee5007] text-white shadow-[0_0_14px_rgba(255,106,0,0.5)]' : 'bg-slate-100 text-slate-400'
+                        }`}>
                         4
                       </div>
                       <span className={`font-display text-xs sm:text-sm hidden sm:inline ${step === 4 ? 'font-black text-slate-900' : 'font-bold text-slate-500'}`}>
@@ -1513,7 +1510,7 @@ export default function SingAlongBooking() {
 
                 {/* SECTION 4: TWO-COLUMN BOOKING AREA (EQUAL HEIGHT ON BOTH COLUMNS) */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-8 items-stretch">
-                  
+
                   {/* LEFT SIDE — EVENT PROMOTIONAL POSTER CARD (Compact on mobile, matches right card on desktop) */}
                   <div className="lg:col-span-5 relative rounded-2xl sm:rounded-[32px] overflow-hidden shadow-xl border-2 border-amber-500/40 bg-[#160b02] min-h-[210px] sm:min-h-[360px] lg:min-h-[580px] lg:h-full flex flex-col justify-between group">
                     {/* Background Stage Poster with Mascot */}
@@ -1556,7 +1553,7 @@ export default function SingAlongBooking() {
 
                   {/* RIGHT COLUMN: BOOKING FORM CARD */}
                   <div className="lg:col-span-7 relative bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-xl p-3.5 sm:p-6 md:p-8 h-full flex flex-col justify-between">
-                    
+
                     {/* Doodles from HTML reference */}
                     <span className="absolute top-4 right-6 font-handwritten text-[#ff6a00] text-2xl opacity-30 select-none pointer-events-none rotate-12 hidden sm:block">
                       🎵 🎶
@@ -1596,9 +1593,8 @@ export default function SingAlongBooking() {
                                 value={booker.name}
                                 onChange={(e) => setBooker({ ...booker, name: e.target.value })}
                                 placeholder="e.g. Rahul Sharma"
-                                className={`w-full h-11 sm:h-12 pl-9 sm:pl-11 pr-3 sm:pr-4 rounded-xl border-2 bg-[#fdfbf7] text-slate-900 font-medium text-xs sm:text-sm outline-none transition-all ${
-                                  errors.name ? 'border-red-500' : 'border-slate-200 focus:border-[#ff6a00] focus:bg-white focus:ring-2 focus:ring-[#ff6a00]/20'
-                                }`}
+                                className={`w-full h-11 sm:h-12 pl-9 sm:pl-11 pr-3 sm:pr-4 rounded-xl border-2 bg-[#fdfbf7] text-slate-900 font-medium text-xs sm:text-sm outline-none transition-all ${errors.name ? 'border-red-500' : 'border-slate-200 focus:border-[#ff6a00] focus:bg-white focus:ring-2 focus:ring-[#ff6a00]/20'
+                                  }`}
                               />
                             </div>
                             {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name}</p>}
@@ -1617,9 +1613,8 @@ export default function SingAlongBooking() {
                                 value={booker.mobile}
                                 onChange={(e) => setBooker({ ...booker, mobile: e.target.value.replace(/\D/g, '') })}
                                 placeholder="10-digit mobile number"
-                                className={`w-full h-11 sm:h-12 pl-9 sm:pl-11 pr-3 sm:pr-4 rounded-xl border-2 bg-[#fdfbf7] text-slate-900 font-medium text-xs sm:text-sm outline-none transition-all ${
-                                  errors.mobile ? 'border-red-500' : 'border-slate-200 focus:border-[#ff6a00] focus:bg-white focus:ring-2 focus:ring-[#ff6a00]/20'
-                                }`}
+                                className={`w-full h-11 sm:h-12 pl-9 sm:pl-11 pr-3 sm:pr-4 rounded-xl border-2 bg-[#fdfbf7] text-slate-900 font-medium text-xs sm:text-sm outline-none transition-all ${errors.mobile ? 'border-red-500' : 'border-slate-200 focus:border-[#ff6a00] focus:bg-white focus:ring-2 focus:ring-[#ff6a00]/20'
+                                  }`}
                               />
                             </div>
                             {errors.mobile && <p className="text-xs text-red-500 mt-1">{errors.mobile}</p>}
@@ -1628,18 +1623,18 @@ export default function SingAlongBooking() {
                           {/* Email ID */}
                           <div>
                             <label className="block font-display text-xs font-bold text-slate-800 mb-1">
-                              Email ID <span className="text-slate-400 font-normal">(Recommended)</span>
+                              Email ID <span className="text-[#ff6a00]">*</span>
                             </label>
                             <div className="relative">
                               <Mail className="w-4 h-4 sm:w-5 sm:h-5 absolute left-3 top-1/2 -translate-y-1/2 text-[#ff6a00]" />
                               <input
                                 type="email"
+                                required
                                 value={booker.email}
                                 onChange={(e) => setBooker({ ...booker, email: e.target.value })}
                                 placeholder="e.g. rahul@example.com"
-                                className={`w-full h-11 sm:h-12 pl-9 sm:pl-11 pr-3 sm:pr-4 rounded-xl border-2 bg-[#fdfbf7] text-slate-900 font-medium text-xs sm:text-sm outline-none transition-all ${
-                                  errors.email ? 'border-red-500' : 'border-slate-200 focus:border-[#ff6a00] focus:bg-white focus:ring-2 focus:ring-[#ff6a00]/20'
-                                }`}
+                                className={`w-full h-11 sm:h-12 pl-9 sm:pl-11 pr-3 sm:pr-4 rounded-xl border-2 bg-[#fdfbf7] text-slate-900 font-medium text-xs sm:text-sm outline-none transition-all ${errors.email ? 'border-red-500' : 'border-slate-200 focus:border-[#ff6a00] focus:bg-white focus:ring-2 focus:ring-[#ff6a00]/20'
+                                  }`}
                               />
                             </div>
                             {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email}</p>}
@@ -1673,6 +1668,22 @@ export default function SingAlongBooking() {
                               >
                                 +
                               </button>
+                            </div>
+                          </div>
+
+                          {/* Booking Support Helpline */}
+                          <div className="flex flex-wrap items-center justify-between gap-2 p-2.5 sm:p-3 rounded-xl bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200/80 text-[11px] sm:text-xs">
+                            <div className="flex items-center gap-1.5 text-slate-700 font-semibold">
+                              <Phone className="w-3.5 h-3.5 text-[#ff6a00] flex-shrink-0" />
+                              <span>If any booking issue contact:</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <a
+                                href="tel:+919344037331"
+                                className="font-mono font-bold text-[#ff6a00] hover:underline"
+                              >
+                                +91 93440 37331
+                              </a>
                             </div>
                           </div>
 
@@ -1774,11 +1785,26 @@ export default function SingAlongBooking() {
                           <div className="bg-amber-50/80 border border-amber-200 rounded-xl sm:rounded-2xl p-3.5 sm:p-4 text-xs text-amber-900 space-y-1.5">
                             <div className="font-bold flex items-center gap-1.5 text-amber-800">
                               <Info className="w-4 h-4 text-amber-600 flex-shrink-0" />
-                              <span>Venue &amp; Entry Guidelines</span>
+                              <span>Entry Guidelines</span>
                             </div>
-                            <p>• Venue: <strong>{CONFIG.fullVenue}</strong></p>
                             <p>• Please bring a digital copy of your confirmed ticket QR pass.</p>
                             <p>• 1 × 500 ml sealed water bottle per person permitted.</p>
+                          </div>
+
+                          {/* Booking Support Helpline */}
+                          <div className="flex flex-wrap items-center justify-between gap-2 p-2.5 sm:p-3 rounded-xl bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200/80 text-[11px] sm:text-xs">
+                            <div className="flex items-center gap-1.5 text-slate-700 font-semibold">
+                              <Phone className="w-3.5 h-3.5 text-[#ff6a00] flex-shrink-0" />
+                              <span>If any booking issue contact:</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <a
+                                href="tel:+919344037331"
+                                className="font-mono font-bold text-[#ff6a00] hover:underline"
+                              >
+                                +91 93440 37331
+                              </a>
+                            </div>
                           </div>
 
                           {/* Navigation Actions */}
@@ -1816,351 +1842,170 @@ export default function SingAlongBooking() {
                             <span>STEP 3 OF 4</span>
                           </div>
                           <h2 className="font-display text-xl sm:text-3xl font-black text-slate-900">
-                            Choose Payment Method
+                            Instant Online Checkout
                           </h2>
                           <p className="text-xs sm:text-sm text-slate-500 mt-1">
-                            Pay instantly with real-time automated confirmation or scan the Google Pay QR directly.
+                            Pay securely with real-time automated verification via Google Pay, PhonePe, Paytm, BHIM UPI, or Cards.
                           </p>
                         </div>
 
-                        {/* Payment Method Selector Tabs */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-1.5 bg-slate-100/90 border border-slate-200 rounded-xl sm:rounded-2xl mb-4 sm:mb-6">
-                          <button
-                            type="button"
-                            onClick={() => setPaymentMode('ONLINE')}
-                            className={`py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl font-display text-xs sm:text-sm font-black flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                              paymentMode === 'ONLINE'
-                                ? 'bg-gradient-to-r from-[#ff6a00] to-[#ee5007] text-white shadow-md'
-                                : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
-                            }`}
-                          >
-                            <Zap className="w-4 h-4 text-amber-200 fill-amber-200 flex-shrink-0" />
-                            <span>⚡ Instant Online Pay (UPI / Cards)</span>
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => setPaymentMode('MANUAL_UPI')}
-                            className={`py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl font-display text-xs sm:text-sm font-black flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                              paymentMode === 'MANUAL_UPI'
-                                ? 'bg-gradient-to-r from-[#ff6a00] to-[#ee5007] text-white shadow-md'
-                                : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
-                            }`}
-                          >
-                            <CreditCard className="w-4 h-4 flex-shrink-0" />
-                            <span>📱 Scan GPay QR &amp; Enter UTR</span>
-                          </button>
-                        </div>
-
-                        {/* TAB 1: REAL-TIME ONLINE GATEWAY (DEFAULT & FIRST) */}
-                        {paymentMode === 'ONLINE' && (
-                          <div className="space-y-4 sm:space-y-5 animate-fadeIn">
-                            <div className="bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-transparent border-2 border-[#ff6a00]/30 rounded-xl sm:rounded-2xl p-3.5 sm:p-6">
-                              <div className="flex flex-row items-center justify-between gap-2 mb-3 sm:mb-4">
-                                <div>
-                                  <span className="text-[9px] sm:text-[10px] uppercase font-extrabold text-[#ff6a00] tracking-wider block">REAL-TIME CHECKOUT</span>
-                                  <h3 className="font-display text-base sm:text-xl font-black text-slate-900">Instant Verification</h3>
-                                </div>
-                                <div className="text-right">
-                                  <span className="text-[9px] sm:text-[10px] uppercase font-extrabold text-slate-400 block">TOTAL PAYABLE</span>
-                                  <span className="font-display text-xl sm:text-2xl font-black text-[#ff6a00]">{rupee(totalAmount)}</span>
-                                </div>
+                        {/* REAL-TIME ONLINE GATEWAY */}
+                        <div className="space-y-4 sm:space-y-5 animate-fadeIn">
+                          <div className="bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-transparent border-2 border-[#ff6a00]/30 rounded-xl sm:rounded-2xl p-3.5 sm:p-6">
+                            <div className="flex flex-row items-center justify-between gap-2 mb-3 sm:mb-4">
+                              <div>
+                                <span className="text-[9px] sm:text-[10px] uppercase font-extrabold text-[#ff6a00] tracking-wider block">REAL-TIME GATEWAY</span>
+                                <h3 className="font-display text-base sm:text-xl font-black text-slate-900">Instant Pass Verification</h3>
                               </div>
-
-                              <p className="text-xs text-slate-600 leading-relaxed mb-3 sm:mb-4">
-                                Supports <strong>Google Pay, PhonePe, Paytm, BHIM UPI, Credit/Debit Cards</strong>, and <strong>NetBanking</strong>. Your digital pass is generated immediately.
-                              </p>
-
-                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2 mb-4 sm:mb-5">
-                                <div className="p-2 sm:p-2.5 rounded-xl bg-white border border-slate-200 text-center shadow-xs">
-                                  <span className="text-xs font-bold text-slate-700 block">Google Pay</span>
-                                  <span className="text-[9px] sm:text-[10px] text-emerald-600 font-semibold">⚡ Instant UPI</span>
-                                </div>
-                                <div className="p-2 sm:p-2.5 rounded-xl bg-white border border-slate-200 text-center shadow-xs">
-                                  <span className="text-xs font-bold text-slate-700 block">PhonePe</span>
-                                  <span className="text-[9px] sm:text-[10px] text-emerald-600 font-semibold">⚡ Instant UPI</span>
-                                </div>
-                                <div className="p-2 sm:p-2.5 rounded-xl bg-white border border-slate-200 text-center shadow-xs">
-                                  <span className="text-xs font-bold text-slate-700 block">Paytm UPI</span>
-                                  <span className="text-[9px] sm:text-[10px] text-emerald-600 font-semibold">⚡ Instant UPI</span>
-                                </div>
-                                <div className="p-2 sm:p-2.5 rounded-xl bg-white border border-slate-200 text-center shadow-xs">
-                                  <span className="text-xs font-bold text-slate-700 block">Cards / NetBank</span>
-                                  <span className="text-[9px] sm:text-[10px] text-blue-600 font-semibold">🔒 256-bit Secure</span>
-                                </div>
+                              <div className="text-right">
+                                <span className="text-[9px] sm:text-[10px] uppercase font-extrabold text-slate-400 block">TOTAL PAYABLE</span>
+                                <span className="font-display text-xl sm:text-2xl font-black text-[#ff6a00]">{rupee(totalAmount)}</span>
                               </div>
-
-                              {isOnlinePaying && cashfreeOrder ? (
-                                <div className="bg-white border-2 border-emerald-500/40 rounded-xl sm:rounded-2xl p-4 sm:p-5 text-center space-y-3 shadow-lg animate-fadeIn">
-                                  <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto rounded-full bg-emerald-50 flex items-center justify-center">
-                                    <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-600" />
-                                  </div>
-                                  <div className="font-display font-black text-slate-900 text-sm sm:text-base">
-                                    Cashfree Checkout Active
-                                  </div>
-                                  <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                                    Please complete your payment in the checkout window. Once completed, click the button below to verify.
-                                  </p>
-                                  <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
-                                    <div className="text-[10px] sm:text-[11px] font-mono text-slate-600 bg-slate-100 py-1 px-2.5 rounded-lg inline-block">
-                                      Order ID: <strong className="text-slate-900">{cashfreeOrder.orderId || cashfreeOrder.bookingId}</strong>
-                                    </div>
-                                    <div className="text-[10px] sm:text-[11px] font-mono text-slate-600 bg-slate-100 py-1 px-2.5 rounded-lg inline-block">
-                                      Amount: <strong className="text-emerald-700 font-bold">{rupee(cashfreeOrder.amount || totalAmount)}</strong>
-                                    </div>
-                                  </div>
-                                  <div className="flex flex-col sm:flex-row items-center justify-center gap-2 pt-1">
-                                    <button
-                                      type="button"
-                                      onClick={() => handleCheckPaymentStatus()}
-                                      disabled={isCheckingPayment}
-                                      className="w-full sm:w-auto px-4 sm:px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-md cursor-pointer flex items-center justify-center gap-2 disabled:opacity-60"
-                                    >
-                                      {isCheckingPayment ? (
-                                        <>
-                                          <RefreshCw className="w-4 h-4 animate-spin" />
-                                          <span>Verifying Payment...</span>
-                                        </>
-                                      ) : (
-                                        <>
-                                          <CheckCircle2 className="w-4 h-4" />
-                                          <span>I Have Paid (Verify Status)</span>
-                                        </>
-                                      )}
-                                    </button>
-                                    {cashfreeOrder.paymentLink && (
-                                      <a
-                                        href={cashfreeOrder.paymentLink}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="w-full sm:w-auto px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-700 bg-amber-100 hover:bg-amber-200 cursor-pointer text-center"
-                                      >
-                                        Re-open Payment Page
-                                      </a>
-                                    )}
-                                    <button
-                                      type="button"
-                                      onClick={handleCancelOnlinePay}
-                                      className="w-full sm:w-auto px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 cursor-pointer"
-                                    >
-                                      Cancel
-                                    </button>
-                                  </div>
-                                </div>
-                              ) : (
-                                <button
-                                  type="button"
-                                  onClick={handleInstantOnlinePay}
-                                  disabled={isOnlinePaying}
-                                  className="w-full py-3.5 sm:py-4 px-4 sm:px-6 rounded-xl font-display font-black text-xs sm:text-base text-white bg-gradient-to-r from-[#ff6a00] via-[#ee5007] to-[#d84000] hover:brightness-110 active:scale-98 shadow-xl shadow-orange-500/30 flex items-center justify-center gap-2 cursor-pointer transition-all disabled:opacity-60"
-                                >
-                                  {isOnlinePaying ? (
-                                    <>
-                                      <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
-                                      <span>Connecting Cashfree Gateway...</span>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-amber-200 fill-amber-200 flex-shrink-0" />
-                                      <span>Pay {rupee(totalAmount)} Now (Instant Checkout)</span>
-                                    </>
-                                  )}
-                                </button>
-                              )}
                             </div>
 
-                            <div className="flex items-center justify-center gap-1.5 text-[11px] sm:text-xs text-slate-500 text-center">
-                              <ShieldCheck className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                              <span>256-bit SSL encrypted • Instant digital entry pass with QR</span>
-                            </div>
+                            <p className="text-xs text-slate-600 leading-relaxed mb-3 sm:mb-4">
+                              Supports <strong>Google Pay, PhonePe, Paytm, BHIM UPI, Credit/Debit Cards</strong>, and <strong>NetBanking</strong>. Your digital QR ticket pass is generated immediately.
+                            </p>
 
-                            <div className="pt-3.5 sm:pt-4 border-t border-slate-200 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4">
-                              <button
-                                type="button"
-                                onClick={handleBack}
-                                className="w-full sm:w-auto px-5 py-3 rounded-xl font-display font-bold text-sm text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
-                              >
-                                <ChevronLeft className="w-4 h-4" />
-                                <span>Back</span>
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setPaymentMode('MANUAL_UPI')}
-                                className="text-xs font-bold text-[#ff6a00] hover:underline cursor-pointer text-center py-1 sm:py-0"
-                              >
-                                Or scan Google Pay QR code &rarr;
-                              </button>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* TAB 2: DIRECT GOOGLE PAY QR & UTR ENTRY */}
-                        {paymentMode === 'MANUAL_UPI' && (
-                          <div className="space-y-4 sm:space-y-5 animate-fadeIn">
-                            <div className="bg-[#fdfbf7] border-2 border-amber-500/30 rounded-xl sm:rounded-2xl p-3.5 sm:p-5 flex flex-col sm:flex-row items-center gap-3.5 sm:gap-5">
-                              <div className="flex-shrink-0 flex flex-col items-center">
-                                <div className="bg-white p-2 rounded-2xl border-2 border-slate-200 shadow-sm relative">
-                                  {showOriginalQr ? (
-                                    <img
-                                      src="/ashok_kumar_upi_qr.jpg"
-                                      alt="Google Pay QR Code Ashok kumar"
-                                      className="w-36 h-36 sm:w-44 sm:h-44 object-contain rounded-lg"
-                                    />
-                                  ) : paymentQr ? (
-                                    <img
-                                      src={paymentQr}
-                                      alt="UPI Payment QR Code"
-                                      className="w-36 h-36 sm:w-44 sm:h-44 object-contain"
-                                    />
-                                  ) : (
-                                    <div className="w-36 h-36 sm:w-44 sm:h-44 flex items-center justify-center bg-slate-100 text-slate-400 text-xs">
-                                      Loading QR...
-                                    </div>
-                                  )}
-                                </div>
-                                <button
-                                  type="button"
-                                  onClick={() => setShowOriginalQr(!showOriginalQr)}
-                                  className="mt-1.5 text-[11px] text-[#ff6a00] hover:text-[#ee5007] font-bold underline underline-offset-2 cursor-pointer"
-                                >
-                                  {showOriginalQr ? "Show Dynamic Amount QR" : "Show GPay Standee QR"}
-                                </button>
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2 mb-4 sm:mb-5">
+                              <div className="p-2 sm:p-2.5 rounded-xl bg-white border border-slate-200 text-center shadow-xs">
+                                <span className="text-xs font-bold text-slate-700 block">Google Pay</span>
+                                <span className="text-[9px] sm:text-[10px] text-emerald-600 font-semibold">⚡ Instant UPI</span>
                               </div>
+                              <div className="p-2 sm:p-2.5 rounded-xl bg-white border border-slate-200 text-center shadow-xs">
+                                <span className="text-xs font-bold text-slate-700 block">PhonePe</span>
+                                <span className="text-[9px] sm:text-[10px] text-emerald-600 font-semibold">⚡ Instant UPI</span>
+                              </div>
+                              <div className="p-2 sm:p-2.5 rounded-xl bg-white border border-slate-200 text-center shadow-xs">
+                                <span className="text-xs font-bold text-slate-700 block">Paytm UPI</span>
+                                <span className="text-[9px] sm:text-[10px] text-emerald-600 font-semibold">⚡ Instant UPI</span>
+                              </div>
+                              <div className="p-2 sm:p-2.5 rounded-xl bg-white border border-slate-200 text-center shadow-xs">
+                                <span className="text-xs font-bold text-slate-700 block">Cards / NetBank</span>
+                                <span className="text-[9px] sm:text-[10px] text-blue-600 font-semibold">🔒 256-bit Secure</span>
+                              </div>
+                            </div>
 
-                              <div className="flex-grow space-y-2 text-center sm:text-left w-full sm:w-auto">
-                                <div className="flex items-center justify-center sm:justify-start gap-1.5">
-                                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                                  <span className="text-[10px] sm:text-[11px] uppercase font-extrabold text-slate-500 tracking-wider">
-                                    PAY TO: <strong className="text-slate-900">{CONFIG.payeeName}</strong>
-                                  </span>
+                            {isOnlinePaying && cashfreeOrder ? (
+                              <div className="bg-white border-2 border-emerald-500/40 rounded-xl sm:rounded-2xl p-4 sm:p-5 text-center space-y-3 shadow-lg animate-fadeIn">
+                                <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto rounded-full bg-emerald-50 flex items-center justify-center">
+                                  <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-600" />
                                 </div>
-
-                                <div className="font-display text-xl sm:text-2xl font-black text-slate-900">
-                                  {rupee(totalAmount)}
-                                  {conventionFee > 0 && (
-                                    <span className="text-xs text-slate-500 font-normal ml-1.5">({rupee(subtotal)} + {rupee(conventionFee)} fee)</span>
-                                  )}
+                                <div className="font-display font-black text-slate-900 text-sm sm:text-base">
+                                  Cashfree Checkout Active
                                 </div>
-
-                                <div className="flex flex-col gap-2 w-full">
-                                  <div className="flex w-full items-center justify-between gap-2 bg-white border border-slate-300 rounded-xl px-2.5 sm:px-3 py-1.5 shadow-xs">
-                                    <div className="flex items-center gap-1.5 text-xs text-slate-500 min-w-0">
-                                      <span className="font-bold text-slate-700 flex-shrink-0">UPI ID:</span>
-                                      <span className="font-mono font-bold text-slate-900 truncate">{CONFIG.upiId}</span>
-                                    </div>
-                                    <button
-                                      type="button"
-                                      onClick={handleCopyUpi}
-                                      className="text-[#ff6a00] hover:text-[#ee5007] text-xs font-bold flex items-center gap-1 cursor-pointer flex-shrink-0 ml-1"
-                                    >
-                                      {copiedUpi ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-                                      <span>{copiedUpi ? 'Copied' : 'Copy'}</span>
-                                    </button>
-                                  </div>
-
-                                  {CONFIG.upiNumber && (
-                                    <div className="flex w-full items-center justify-between gap-2 bg-white border border-slate-300 rounded-xl px-2.5 sm:px-3 py-1.5 shadow-xs">
-                                      <div className="flex items-center gap-1.5 text-xs text-slate-500 min-w-0">
-                                        <span className="font-bold text-slate-700 flex-shrink-0">UPI Number:</span>
-                                        <span className="font-mono font-bold text-slate-900 truncate">{CONFIG.upiNumber}</span>
-                                      </div>
-                                      <button
-                                        type="button"
-                                        onClick={handleCopyUpiNumber}
-                                        className="text-[#ff6a00] hover:text-[#ee5007] text-xs font-bold flex items-center gap-1 cursor-pointer flex-shrink-0 ml-1"
-                                      >
-                                        {copiedUpiNumber ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-                                        <span>{copiedUpiNumber ? 'Copied' : 'Copy'}</span>
-                                      </button>
-                                    </div>
-                                  )}
-                                </div>
-
-                                <p className="text-[10px] sm:text-[11px] text-slate-500 pt-0.5">
-                                  Supports GPay, PhonePe, Paytm, BHIM, Cred, and all UPI apps.
+                                <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                                  Please complete your payment in the checkout window. Once completed, click the button below to verify.
                                 </p>
+                                <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
+                                  <div className="text-[10px] sm:text-[11px] font-mono text-slate-600 bg-slate-100 py-1 px-2.5 rounded-lg inline-block">
+                                    Order ID: <strong className="text-slate-900">{cashfreeOrder.orderId || cashfreeOrder.bookingId}</strong>
+                                  </div>
+                                  <div className="text-[10px] sm:text-[11px] font-mono text-slate-600 bg-slate-100 py-1 px-2.5 rounded-lg inline-block">
+                                    Amount: <strong className="text-emerald-700 font-bold">{rupee(cashfreeOrder.amount || totalAmount)}</strong>
+                                  </div>
+                                </div>
+                                <div className="flex flex-col sm:flex-row items-center justify-center gap-2 pt-1">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleCheckPaymentStatus()}
+                                    disabled={isCheckingPayment}
+                                    className="w-full sm:w-auto px-4 sm:px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-md cursor-pointer flex items-center justify-center gap-2 disabled:opacity-60"
+                                  >
+                                    {isCheckingPayment ? (
+                                      <>
+                                        <RefreshCw className="w-4 h-4 animate-spin" />
+                                        <span>Verifying Payment...</span>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <CheckCircle2 className="w-4 h-4" />
+                                        <span>I Have Paid (Verify Status)</span>
+                                      </>
+                                    )}
+                                  </button>
+                                  {cashfreeOrder.paymentLink && (
+                                    <a
+                                      href={cashfreeOrder.paymentLink}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="w-full sm:w-auto px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-700 bg-amber-100 hover:bg-amber-200 cursor-pointer text-center"
+                                    >
+                                      Re-open Payment Page
+                                    </a>
+                                  )}
+                                  <button
+                                    type="button"
+                                    onClick={handleCancelOnlinePay}
+                                    className="w-full sm:w-auto px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 cursor-pointer"
+                                  >
+                                    Cancel
+                                  </button>
+                                </div>
                               </div>
-                            </div>
-
-                            {/* Mobile Direct UPI App Link */}
-                            {upiDeepLink && (
-                              <a
-                                href={upiDeepLink}
-                                className="sm:hidden w-full py-3 px-3.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-display font-black text-xs flex items-center justify-center gap-2 shadow-md active:scale-98 transition-all"
-                              >
-                                <CreditCard className="w-4 h-4 flex-shrink-0" />
-                                <span>Pay Directly with UPI App (GPay / PhonePe)</span>
-                              </a>
-                            )}
-
-                            {/* UTR Input */}
-                            <div>
-                              <label className="block font-display text-xs font-bold text-slate-800 mb-1">
-                                UPI Transaction ID / UTR (12 digits) <span className="text-[#ff6a00]">*</span>
-                              </label>
-                              <input
-                                type="text"
-                                value={payment.utr}
-                                onChange={(e) => setPayment({ ...payment, utr: e.target.value })}
-                                placeholder="e.g. 423819284712 or Bank Ref No."
-                                className={`w-full h-11 sm:h-12 px-3.5 sm:px-4 rounded-xl border-2 bg-[#fdfbf7] text-slate-900 font-mono font-semibold text-xs sm:text-sm outline-none transition-all ${
-                                  errors.utr ? 'border-red-500' : 'border-slate-200 focus:border-[#ff6a00] focus:bg-white focus:ring-2 focus:ring-[#ff6a00]/20'
-                                }`}
-                              />
-                              {errors.utr && <p className="text-xs text-red-500 mt-1">{errors.utr}</p>}
-                            </div>
-
-                            {/* Screenshot Upload */}
-                            <div>
-                              <label className="block font-display text-xs font-bold text-slate-800 mb-1">
-                                Payment Screenshot <span className="text-slate-400 font-normal">(Optional for faster approval)</span>
-                              </label>
-                              <label className="border-2 border-dashed border-slate-300 hover:border-[#ff6a00] bg-[#fdfbf7] hover:bg-[#fff8f0] rounded-xl p-3 sm:p-4 flex flex-col items-center justify-center gap-1 cursor-pointer transition-all">
-                                <UploadCloud className="w-5 h-5 sm:w-6 sm:h-6 text-[#ff6a00]" />
-                                <span className="text-xs font-bold text-slate-700 text-center">
-                                  {payment.fileName ? payment.fileName : 'Click to attach payment receipt'}
-                                </span>
-                                <span className="text-[10px] text-slate-400">PNG, JPG, or WEBP (Max 5MB)</span>
-                                <input
-                                  type="file"
-                                  accept="image/*"
-                                  onChange={handleFileUpload}
-                                  className="hidden"
-                                />
-                              </label>
-                            </div>
-
-                            {/* Navigation Actions */}
-                            <div className="pt-3.5 sm:pt-4 border-t border-slate-200 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 mt-5 sm:mt-6">
+                            ) : (
                               <button
                                 type="button"
-                                onClick={handleBack}
-                                className="w-full sm:w-auto px-5 py-3 rounded-xl font-display font-bold text-sm text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                                onClick={handleInstantOnlinePay}
+                                disabled={isOnlinePaying}
+                                className="w-full py-3.5 sm:py-4 px-4 sm:px-6 rounded-xl font-display font-black text-xs sm:text-base text-white bg-gradient-to-r from-[#ff6a00] via-[#ee5007] to-[#d84000] hover:brightness-110 active:scale-98 shadow-xl shadow-orange-500/30 flex items-center justify-center gap-2 cursor-pointer transition-all disabled:opacity-60"
                               >
-                                <ChevronLeft className="w-4 h-4" />
-                                <span>Back</span>
+                                {isOnlinePaying ? (
+                                  <>
+                                    <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
+                                    <span>Connecting Cashfree Gateway...</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-amber-200 fill-amber-200 flex-shrink-0" />
+                                    <span>Pay {rupee(totalAmount)} Now (Instant Checkout)</span>
+                                  </>
+                                )}
                               </button>
+                            )}
+                          </div>
 
-                              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2.5 sm:gap-3 w-full sm:w-auto">
-                                <button
-                                  type="button"
-                                  onClick={() => setPaymentMode('ONLINE')}
-                                  className="text-xs font-bold text-[#ff6a00] hover:underline cursor-pointer text-center sm:text-left py-1 sm:py-0"
-                                >
-                                  Or pay via Real-Time Online &rarr;
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={handleNext}
-                                  className="w-full sm:w-auto px-6 sm:px-8 py-3.5 rounded-xl font-display font-black text-sm text-white bg-gradient-to-r from-[#ff6a00] to-[#ee5007] hover:brightness-110 active:scale-95 shadow-lg shadow-orange-600/30 flex items-center justify-center gap-2 cursor-pointer transition-all"
-                                >
-                                  <span>Review &amp; Confirm</span>
-                                  <ChevronRight className="w-4 h-4" />
-                                </button>
-                              </div>
+                          {/* Booking Support Helpline */}
+                          <div className="flex flex-wrap items-center justify-between gap-2 p-2.5 sm:p-3 rounded-xl bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200/80 text-[11px] sm:text-xs">
+                            <div className="flex items-center gap-1.5 text-slate-700 font-semibold">
+                              <Phone className="w-3.5 h-3.5 text-[#ff6a00] flex-shrink-0" />
+                              <span>If any booking issue contact:</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <a
+                                href="tel:+919344037331"
+                                className="font-mono font-bold text-[#ff6a00] hover:underline"
+                              >
+                                +91 93440 37331
+                              </a>
                             </div>
                           </div>
-                        )}
+
+                          <div className="flex items-center justify-center gap-1.5 text-[11px] sm:text-xs text-slate-500 text-center">
+                            <ShieldCheck className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                            <span>256-bit SSL encrypted • Instant digital entry pass with QR</span>
+                          </div>
+
+                          <div className="pt-3.5 sm:pt-4 border-t border-slate-200 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4">
+                            <button
+                              type="button"
+                              onClick={handleBack}
+                              className="w-full sm:w-auto px-5 py-3 rounded-xl font-display font-bold text-sm text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                            >
+                              <ChevronLeft className="w-4 h-4" />
+                              <span>Back</span>
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={handleNext}
+                              className="w-full sm:w-auto px-6 sm:px-8 py-3.5 rounded-xl font-display font-black text-sm text-white bg-gradient-to-r from-[#ff6a00] to-[#ee5007] hover:brightness-110 active:scale-95 shadow-lg shadow-orange-600/30 flex items-center justify-center gap-2 cursor-pointer transition-all"
+                            >
+                              <span>Review &amp; Confirm</span>
+                              <ChevronRight className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     )}
 
@@ -2210,13 +2055,29 @@ export default function SingAlongBooking() {
                             </div>
                             <div className="flex justify-between items-center pb-2 border-b border-slate-200 gap-2">
                               <span className="text-xs text-slate-500 flex-shrink-0">Payment Method</span>
-                              <span className="font-mono text-xs font-bold text-slate-800 truncate max-w-[160px] sm:max-w-none text-right">
-                                {paymentMode === 'ONLINE' ? 'Cashfree Instant Checkout' : (payment.utr || 'Manual UPI / GPay')}
+                              <span className="font-display text-xs font-bold text-slate-800 truncate max-w-[200px] sm:max-w-none text-right">
+                                Instant Online Checkout (UPI / Cards)
                               </span>
                             </div>
                             <div className="flex justify-between items-center pt-1">
-                              <span className="font-display text-xs sm:text-sm font-bold text-slate-800">Total Payable / Paid</span>
+                              <span className="font-display text-xs sm:text-sm font-bold text-slate-800">Total Payable</span>
                               <span className="font-display text-lg sm:text-2xl font-black text-[#ff6a00]">{rupee(totalAmount)}</span>
+                            </div>
+                          </div>
+
+                          {/* Booking Support Helpline */}
+                          <div className="flex flex-wrap items-center justify-between gap-2 p-2.5 sm:p-3 rounded-xl bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200/80 text-[11px] sm:text-xs">
+                            <div className="flex items-center gap-1.5 text-slate-700 font-semibold">
+                              <Phone className="w-3.5 h-3.5 text-[#ff6a00] flex-shrink-0" />
+                              <span>If any booking issue contact:</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <a
+                                href="tel:+919344037331"
+                                className="font-mono font-bold text-[#ff6a00] hover:underline"
+                              >
+                                +91 93440 37331
+                              </a>
                             </div>
                           </div>
 
@@ -2231,7 +2092,7 @@ export default function SingAlongBooking() {
                             <button
                               type="button"
                               onClick={handleBack}
-                              disabled={isSubmitting}
+                              disabled={isSubmitting || isOnlinePaying}
                               className="w-full sm:w-auto px-5 py-3 rounded-xl font-display font-bold text-sm text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
                             >
                               <ChevronLeft className="w-4 h-4" />
@@ -2240,19 +2101,19 @@ export default function SingAlongBooking() {
 
                             <button
                               type="button"
-                              onClick={handleConfirmBooking}
-                              disabled={isSubmitting}
+                              onClick={handleInstantOnlinePay}
+                              disabled={isSubmitting || isOnlinePaying}
                               className="w-full sm:w-auto px-6 sm:px-8 py-3.5 rounded-xl font-display font-black text-xs sm:text-sm text-white bg-gradient-to-r from-emerald-600 to-teal-700 hover:brightness-110 active:scale-98 shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2 cursor-pointer transition-all disabled:opacity-50"
                             >
-                              {isSubmitting ? (
+                              {isOnlinePaying ? (
                                 <>
                                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                  <span>Processing...</span>
+                                  <span>Opening Checkout...</span>
                                 </>
                               ) : (
                                 <>
                                   <CheckCircle2 className="w-4 h-4" />
-                                  <span>Confirm Booking &amp; Generate Ticket</span>
+                                  <span>Pay {rupee(totalAmount)} &amp; Confirm Booking</span>
                                 </>
                               )}
                             </button>
