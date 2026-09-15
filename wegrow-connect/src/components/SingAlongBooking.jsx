@@ -55,18 +55,18 @@ const CONFIG = {
   dayNum: "27",
   monthAbbr: "SEP",
   dayName: "SUNDAY",
-  reportingTime: "6:00 PM Onwards",
+  reportingTime: "5:30 PM to 6:00 PM",    
   eventTime: "6:00 PM – 9:00 PM",
   venue: "Arasan Turf",
   location: "Sivakasi",
   fullVenue: "Arasan Turf, Sivakasi",
-  presentedBy: "WeGrow Skill Campus & B School",
+  presentedBy: "WeGrow",
   upiId: "ashokbcasvk45@oksbi",
   upiNumber: "",
   merchantName: "Ashok kumar",
   payeeName: "Ashok kumar",
   ticketPrice: 249,
-  conventionFee: 5,
+  conventionFee: 5.30,
   maxTickets: 15,
   bookingPrefix: "SA26",
   contactPhone: "+91 93440 37331",
@@ -93,7 +93,13 @@ const CONFIG = {
   ]
 };
 
-const rupee = (n) => "₹" + Number(n).toLocaleString("en-IN");
+const rupee = (n) => {
+  const num = Number(n || 0);
+  if (num % 1 !== 0) {
+    return "₹" + num.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  return "₹" + num.toLocaleString("en-IN");
+};
 
 const genBookingId = () => {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -146,8 +152,8 @@ export default function SingAlongBooking() {
   const ticketCaptureRef = useRef(null);
 
   const subtotal = qty * CONFIG.ticketPrice;
-  const conventionFee = qty * (CONFIG.conventionFee || 5);
-  const totalAmount = subtotal + conventionFee;
+  const conventionFee = Number((qty * (CONFIG.conventionFee ?? 5.30)).toFixed(2));
+  const totalAmount = Number((subtotal + conventionFee).toFixed(2));
 
   // Toggle Background Song Audio (MASCOT_SONG_AUDIO)
   const toggleAudioSound = () => {
@@ -930,7 +936,7 @@ export default function SingAlongBooking() {
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 pb-3 sm:pb-4 border-b border-amber-500/20">
               <div>
                 <span className="text-xs font-semibold text-amber-200/90 block mb-0.5">
-                  WeGrow Skill Campus &amp; B School presents
+                  WeGrow presents
                 </span>
                 <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
                   <h2 className="text-2xl sm:text-3xl md:text-4xl font-black font-display tracking-tight text-white drop-shadow-md">
@@ -1068,19 +1074,9 @@ export default function SingAlongBooking() {
             <span className="absolute top-[30%] right-[24%] text-2xl text-[#ff8c00] select-none pointer-events-none z-10 animate-float-note hidden sm:block" style={{ animationDelay: '2.5s' }}>💛</span>
 
             {/* =================================================================
-                TOP BAR: WeGrow Logo on Left & Date on Right (Responsive Flow Layout)
+                TOP BAR: Date on Right (WeGrow logo moved to Center alongside K7)
                 ================================================================= */}
-            <div className="relative z-30 w-full flex items-start justify-between px-3 pt-3 sm:px-6 sm:pt-5 md:px-8 md:pt-6 pointer-events-auto">
-              {/* Top-Left: WeGrow Logo Box */}
-              <div className="bg-white rounded-xl sm:rounded-2xl px-2 py-1.5 sm:px-4 sm:py-2 shadow-[0_8px_24px_rgba(0,0,0,0.5)] border border-slate-200/40 flex items-center justify-center">
-                <img
-                  src={WEGROW_LOGO_IMG}
-                  onError={(e) => { e.currentTarget.src = WEGROW_BACKUP_LOGO; }}
-                  alt="WeGrow Skill Campus & B School"
-                  className="h-5 sm:h-8 md:h-9 w-auto object-contain"
-                />
-              </div>
-
+            <div className="relative z-30 w-full flex items-start justify-end px-3 pt-3 sm:px-6 sm:pt-5 md:px-8 md:pt-6 pointer-events-auto">
               {/* Top-Right: Date Badge Box */}
               <div className="w-[50px] sm:w-[68px] md:w-[74px] bg-white rounded-xl sm:rounded-2xl overflow-hidden text-center shadow-[0_8px_24px_rgba(0,0,0,0.5)] border border-slate-200/40">
                 <div className="font-display text-sm sm:text-xl md:text-2xl font-black text-[#1A1A4E] pt-1 leading-none">{CONFIG.dayNum}</div>
@@ -1089,7 +1085,7 @@ export default function SingAlongBooking() {
               </div>
             </div>
 
-            {/* Left Handwritten Script under Logo (Desktop Only) */}
+            {/* Left Handwritten Script (Desktop Only) */}
             <div className="absolute top-20 left-6 sm:top-24 sm:left-8 z-20 font-handwritten text-white text-xl sm:text-2xl font-bold leading-tight drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)] -rotate-6 hidden md:block pointer-events-none">
               <span className="block">Good Music</span>
               <span className="block">Brighter</span>
@@ -1106,39 +1102,39 @@ export default function SingAlongBooking() {
 
             {/* =================================================================
                 CENTER: POSITIONED DIRECTLY ON THE STAGE TRUSS (Mobile Responsive)
+                Row 1: [ WeGrow logo ]  [ K7 logo ]
+                Row 2: presents
+                Row 3: SING ALONG
                 ================================================================= */}
-            <div className="relative z-20 flex flex-col items-center text-center max-w-3xl mx-auto pt-1 sm:pt-3 md:-mt-14 px-3 sm:px-4">
+            <div className="relative z-20 flex flex-col items-center text-center max-w-3xl mx-auto pt-1 sm:pt-2 md:-mt-10 px-3 sm:px-4">
               
-              {/* Title Sponsor: K7 Chit Funds */}
-              <div className="flex items-center justify-center gap-1.5 sm:gap-2 mb-2 sm:mb-2.5 max-w-full">
-                <div className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1 rounded-full bg-white text-slate-900 border-2 border-emerald-600 shadow-md max-w-full">
-                  <span className="bg-[#007A3D] text-white text-[7px] sm:text-[9px] font-black px-1.5 py-0.5 rounded tracking-wider uppercase flex-shrink-0">
-                    TITLE SPONSOR
-                  </span>
+              {/* Row 1: WeGrow Logo & K7 Logo Center */}
+              <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-2 sm:mb-2.5 max-w-full">
+                {/* WeGrow Logo Box */}
+                <div className="bg-white rounded-xl sm:rounded-2xl px-2.5 py-1 sm:px-4 sm:py-1.5 shadow-lg border border-slate-200/40 flex items-center justify-center h-8 sm:h-10 md:h-11">
+                  <img
+                    src={WEGROW_LOGO_IMG}
+                    onError={(e) => { e.currentTarget.src = WEGROW_BACKUP_LOGO; }}
+                    alt="WeGrow"
+                    className="h-5 sm:h-7 md:h-8 w-auto object-contain"
+                  />
+                </div>
+
+                {/* K7 Logo Box */}
+                <div className="bg-white rounded-xl sm:rounded-2xl px-2.5 py-1 sm:px-4 sm:py-1.5 shadow-lg border border-slate-200/40 flex items-center justify-center h-8 sm:h-10 md:h-11">
                   <img
                     src="/k7_sarathy_chitfunds_logo.png"
-                    alt="K7 Chit Funds"
-                    className="h-4 sm:h-6 max-h-6 w-auto object-contain flex-shrink-0"
+                    alt="K7"
+                    className="h-5 sm:h-7 md:h-8 w-auto object-contain"
                   />
-                  <span className="text-[10px] sm:text-xs font-black text-[#007A3D] tracking-tight truncate">
-                    K7 CHIT FUNDS
-                  </span>
                 </div>
               </div>
 
-              {/* Presents text + Badges */}
-              <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-3 mb-2 sm:mb-2.5">
-                <span className="font-body text-[11px] sm:text-sm md:text-base font-bold tracking-wide text-white/95 drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">
-                  WeGrow Skill Campus &amp; B School presents
+              {/* Row 2: presents */}
+              <div className="flex items-center justify-center mb-1.5 sm:mb-2">
+                <span className="font-body text-xs sm:text-sm md:text-base font-bold tracking-widest uppercase text-white/95 drop-shadow-[0_2px_8px_rgba(0,0,0,0.95)]">
+                  presents
                 </span>
-                <div className="flex items-center gap-1.5 flex-wrap justify-center">
-                  <span className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-0.5 rounded-full bg-[#0D0D3A]/90 border border-white/30 text-white font-display text-[8px] sm:text-[10px] font-extrabold shadow-md">
-                    🎵 LIVE MUSIC EVENT
-                  </span>
-                  <span className="inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full bg-[#ff6a00] text-white font-display text-[8px] sm:text-[10px] font-extrabold shadow-[0_0_15px_rgba(255,106,0,0.7)]">
-                    ₹249 per ticket
-                  </span>
-                </div>
               </div>
 
               {/* Row 3: Sing Along Title Logo */}
@@ -1232,54 +1228,7 @@ export default function SingAlongBooking() {
             </div>
           </header>
 
-          {/* =====================================================================
-              SECTION 2: SPONSOR / PARTNER MARQUEE
-              ===================================================================== */}
-          <section className="w-full bg-white py-4 sm:py-6 border-b border-slate-200 overflow-hidden relative z-10">
-            <div className="flex items-center justify-center gap-3 max-w-5xl mx-auto mb-3 sm:mb-4 px-4">
-              <span className="text-amber-400 text-sm">✨</span>
-              <h3 className="font-poster text-xs sm:text-base tracking-wider uppercase text-[#ff6a00]">OUR PARTNERS</h3>
-              <span className="text-amber-400 text-sm">✨</span>
-              <div className="flex-grow h-[2px] bg-gradient-to-r from-[#ff6a00]/30 to-transparent rounded-full ml-2" />
-            </div>
 
-            {/* Infinite Scrolling Track */}
-            <div className="w-full overflow-hidden relative [mask-image:linear-gradient(90deg,transparent_0%,#000_6%,#000_94%,transparent_100%)]">
-              <div className="sa-marquee-track">
-                {/* Set 1 */}
-                {CONFIG.partners.map((partner, idx) => (
-                  <React.Fragment key={`p1-${idx}`}>
-                    <div className="inline-flex items-center gap-2 sm:gap-3 bg-[#fdfbf7] hover:bg-[#fff8f0] border border-slate-200 hover:border-[#ff6a00] rounded-full px-3.5 sm:px-5 py-1.5 sm:py-2 shadow-sm transition-all duration-200 cursor-default">
-                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center text-sm sm:text-base flex-shrink-0">
-                        {partner.icon}
-                      </div>
-                      <div className="flex flex-col text-left">
-                        <span className="font-display text-xs sm:text-sm font-bold text-[#0f172a] leading-tight">{partner.name}</span>
-                        <span className="text-[9px] sm:text-[10px] font-extrabold tracking-wider text-[#ff6a00] uppercase">{partner.type}</span>
-                      </div>
-                    </div>
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#ff6a00] opacity-60" />
-                  </React.Fragment>
-                ))}
-
-                {/* Set 2 (Duplicated for seamless loop) */}
-                {CONFIG.partners.map((partner, idx) => (
-                  <React.Fragment key={`p2-${idx}`}>
-                    <div className="inline-flex items-center gap-2 sm:gap-3 bg-[#fdfbf7] hover:bg-[#fff8f0] border border-slate-200 hover:border-[#ff6a00] rounded-full px-3.5 sm:px-5 py-1.5 sm:py-2 shadow-sm transition-all duration-200 cursor-default">
-                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center text-sm sm:text-base flex-shrink-0">
-                        {partner.icon}
-                      </div>
-                      <div className="flex flex-col text-left">
-                        <span className="font-display text-xs sm:text-sm font-bold text-[#0f172a] leading-tight">{partner.name}</span>
-                        <span className="text-[9px] sm:text-[10px] font-extrabold tracking-wider text-[#ff6a00] uppercase">{partner.type}</span>
-                      </div>
-                    </div>
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#ff6a00] opacity-60" />
-                  </React.Fragment>
-                ))}
-              </div>
-            </div>
-          </section>
 
           {/* =====================================================================
               MAIN BOOKING PORTAL WRAPPER
@@ -1410,7 +1359,7 @@ export default function SingAlongBooking() {
 
                   {/* Ticket Footer Ribbon */}
                   <div className="bg-[#fff8f0] border-t border-amber-200 px-3 sm:px-6 py-2 text-center text-[9px] sm:text-[11px] font-bold text-[#ff6a00]">
-                    WeGrow Skill Campus &amp; B School • Present this pass at venue entry
+                    WeGrow • Present this pass at venue entry
                   </div>
                 </div>
 
@@ -1660,7 +1609,7 @@ export default function SingAlongBooking() {
                             <div>
                               <span className="font-display text-xs sm:text-sm font-bold text-slate-900 block">Number of Attendees</span>
                               <span className="text-[11px] sm:text-xs text-[#ff6a00] font-bold block">
-                                {rupee(CONFIG.ticketPrice)} × {qty} {qty > 1 ? 'Passes' : 'Pass'}{conventionFee > 0 ? ` (+${rupee(conventionFee)} fee)` : ''} = {rupee(totalAmount)}
+                                {rupee(CONFIG.ticketPrice)} × {qty} {qty > 1 ? 'Passes' : 'Pass'}
                               </span>
                             </div>
                             <div className="flex items-center gap-2 sm:gap-3 bg-white border border-slate-200 rounded-xl px-1.5 sm:px-2 py-1 shadow-xs flex-shrink-0">

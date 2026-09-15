@@ -34,7 +34,81 @@ import {
   checkInSingAlongTicket
 } from '../../services/singAlongApi';
 
-const rupee = (n: number | string) => '₹' + Number(n || 0).toLocaleString('en-IN');
+const rupee = (n: number | string) => {
+  const num = Number(n || 0);
+  if (num % 1 !== 0) {
+    return '₹' + num.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  return '₹' + num.toLocaleString('en-IN');
+};
+
+// Helper functions to safely extract list and count regardless of backend response shape
+function extractBookingsList(res: any): any[] {
+  if (!res) return [];
+
+  // 1. Direct array
+  if (Array.isArray(res)) return res;
+
+  // 2. Double-nested under data (e.g. res.data.data from NestJS/Express transform interceptors)
+  if (Array.isArray(res?.data?.data)) return res.data.data;
+
+  // 3. Named arrays under res.data
+  if (Array.isArray(res?.data?.bookings)) return res.data.bookings;
+  if (Array.isArray(res?.data?.items)) return res.data.items;
+  if (Array.isArray(res?.data?.list)) return res.data.list;
+  if (Array.isArray(res?.data?.records)) return res.data.records;
+  if (Array.isArray(res?.data?.results)) return res.data.results;
+  if (Array.isArray(res?.data?.result)) return res.data.result;
+
+  // 4. res.data directly is an array
+  if (Array.isArray(res?.data)) return res.data;
+
+  // 5. Named arrays at root
+  if (Array.isArray(res?.bookings)) return res.bookings;
+  if (Array.isArray(res?.items)) return res.items;
+  if (Array.isArray(res?.list)) return res.list;
+  if (Array.isArray(res?.records)) return res.records;
+  if (Array.isArray(res?.results)) return res.results;
+  if (Array.isArray(res?.result)) return res.result;
+
+  // 6. Inspect res.data for any array property
+  if (res?.data && typeof res.data === 'object') {
+    for (const key of Object.keys(res.data)) {
+      if (Array.isArray(res.data[key])) {
+        return res.data[key];
+      }
+    }
+  }
+
+  // 7. Inspect res for any array property
+  if (typeof res === 'object') {
+    for (const key of Object.keys(res)) {
+      if (Array.isArray(res[key])) {
+        return res[key];
+      }
+    }
+  }
+
+  return [];
+}
+
+function extractTotalCount(res: any, fallbackLength: number): number {
+  const val =
+    res?.data?.pagination?.total ??
+    res?.data?.pagination?.totalCount ??
+    res?.data?.total ??
+    res?.data?.totalCount ??
+    res?.data?.count ??
+    res?.pagination?.total ??
+    res?.pagination?.totalCount ??
+    res?.total ??
+    res?.totalCount ??
+    res?.count;
+
+  if (typeof val === 'number' && !isNaN(val)) return val;
+  if (typeof val === 'string' && !isNaN(Number(val))) return Number(val);
+  return fallbackLength;
+}
 
 export default function AdminSingAlong() {
   const [loading, setLoading] = useState(true);
@@ -69,7 +143,7 @@ export default function AdminSingAlong() {
     try {
       setStatsLoading(true);
       const res = await getSingAlongStats();
-      const statsData = res?.data || res?.stats || res;
+      const statsData = res?.data?.data || res?.data?.stats || res?.data || res?.stats || res;
       if (statsData) {
         setStats(statsData);
       }
@@ -90,10 +164,10 @@ export default function AdminSingAlong() {
       if (eventId) params.eventId = eventId;
 
       const res = await getSingAlongBookings(params);
-      const listData = res?.data?.bookings || res?.data?.items || res?.bookings || (Array.isArray(res?.data) ? res.data : []);
+      const listData = extractBookingsList(res);
       setBookings(listData);
 
-      const total = res?.data?.total || res?.data?.count || res?.total || listData.length;
+      const total = extractTotalCount(res, listData.length);
       setTotalCount(total);
       setTotalPages(Math.max(1, Math.ceil(total / limit)));
     } catch (err: any) {
