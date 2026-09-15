@@ -129,7 +129,7 @@ export default function SingAlongBooking() {
   const [copiedUpi, setCopiedUpi] = useState(false);
   const [copiedUpiNumber, setCopiedUpiNumber] = useState(false);
   const [showOriginalQr, setShowOriginalQr] = useState(true);
-  const [paymentMode, setPaymentMode] = useState('MANUAL_UPI'); // 'MANUAL_UPI' | 'ONLINE'
+  const [paymentMode, setPaymentMode] = useState('ONLINE'); // 'ONLINE' | 'MANUAL_UPI'
   const [isOnlinePaying, setIsOnlinePaying] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -1842,6 +1842,19 @@ export default function SingAlongBooking() {
                         <div className="grid grid-cols-2 gap-2.5 p-1.5 bg-slate-100/80 border border-slate-200 rounded-2xl mb-6">
                           <button
                             type="button"
+                            onClick={() => setPaymentMode('ONLINE')}
+                            className={`py-3 px-2 sm:px-4 rounded-xl font-display text-xs sm:text-sm font-black flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                              paymentMode === 'ONLINE'
+                                ? 'bg-gradient-to-r from-[#ff6a00] to-[#ee5007] text-white shadow-md'
+                                : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                            }`}
+                          >
+                            <Zap className="w-4 h-4 text-amber-200 fill-amber-200" />
+                            <span>⚡ Real-Time Online Pay</span>
+                          </button>
+
+                          <button
+                            type="button"
                             onClick={() => setPaymentMode('MANUAL_UPI')}
                             className={`py-3 px-2 sm:px-4 rounded-xl font-display text-xs sm:text-sm font-black flex items-center justify-center gap-2 transition-all cursor-pointer ${
                               paymentMode === 'MANUAL_UPI'
@@ -1852,22 +1865,151 @@ export default function SingAlongBooking() {
                             <CreditCard className="w-4 h-4" />
                             <span>📱 Scan GPay QR (Manual UTR)</span>
                           </button>
-
-                          <button
-                            type="button"
-                            onClick={() => setPaymentMode('ONLINE')}
-                            className={`py-3 px-2 sm:px-4 rounded-xl font-display text-xs sm:text-sm font-black flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                              paymentMode === 'ONLINE'
-                                ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md'
-                                : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
-                            }`}
-                          >
-                            <Zap className="w-4 h-4" />
-                            <span>⚡ Real-Time Online Pay</span>
-                          </button>
                         </div>
 
-                        {/* TAB 1: DIRECT GOOGLE PAY QR & UTR ENTRY (DEFAULT & FIRST) */}
+                        {/* TAB 1: REAL-TIME ONLINE GATEWAY (DEFAULT & FIRST) */}
+                        {paymentMode === 'ONLINE' && (
+                          <div className="space-y-5 animate-fadeIn">
+                            <div className="bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-transparent border-2 border-[#ff6a00]/30 rounded-2xl p-5 sm:p-6">
+                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                                <div>
+                                  <span className="text-[10px] uppercase font-extrabold text-[#ff6a00] tracking-wider block">REAL-TIME CHECKOUT</span>
+                                  <h3 className="font-display text-lg sm:text-xl font-black text-slate-900">Instant Automated Verification</h3>
+                                </div>
+                                <div className="sm:text-right">
+                                  <span className="text-[10px] uppercase font-extrabold text-slate-400 block">TOTAL PAYABLE</span>
+                                  <span className="font-display text-2xl font-black text-[#ff6a00]">{rupee(totalAmount)}</span>
+                                </div>
+                              </div>
+
+                              <p className="text-xs text-slate-600 leading-relaxed mb-4">
+                                Supports <strong>Google Pay, PhonePe, Paytm, BHIM UPI, Credit/Debit Cards</strong>, and <strong>NetBanking</strong>. Your digital ticket pass is confirmed immediately upon payment.
+                              </p>
+
+                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-5">
+                                <div className="p-2.5 rounded-xl bg-white border border-slate-200 text-center shadow-xs">
+                                  <span className="text-xs font-bold text-slate-700 block">Google Pay</span>
+                                  <span className="text-[10px] text-emerald-600 font-semibold">⚡ Instant UPI</span>
+                                </div>
+                                <div className="p-2.5 rounded-xl bg-white border border-slate-200 text-center shadow-xs">
+                                  <span className="text-xs font-bold text-slate-700 block">PhonePe</span>
+                                  <span className="text-[10px] text-emerald-600 font-semibold">⚡ Instant UPI</span>
+                                </div>
+                                <div className="p-2.5 rounded-xl bg-white border border-slate-200 text-center shadow-xs">
+                                  <span className="text-xs font-bold text-slate-700 block">Paytm UPI</span>
+                                  <span className="text-[10px] text-emerald-600 font-semibold">⚡ Instant UPI</span>
+                                </div>
+                                <div className="p-2.5 rounded-xl bg-white border border-slate-200 text-center shadow-xs">
+                                  <span className="text-xs font-bold text-slate-700 block">Cards / NetBank</span>
+                                  <span className="text-[10px] text-blue-600 font-semibold">🔒 256-bit Secure</span>
+                                </div>
+                              </div>
+
+                              {isOnlinePaying && cashfreeOrder ? (
+                                <div className="bg-white border-2 border-emerald-500/40 rounded-2xl p-5 text-center space-y-3 shadow-lg animate-fadeIn">
+                                  <div className="w-12 h-12 mx-auto rounded-full bg-emerald-50 flex items-center justify-center">
+                                    <ShieldCheck className="w-6 h-6 text-emerald-600" />
+                                  </div>
+                                  <div className="font-display font-black text-slate-900 text-base">
+                                    Cashfree Checkout Active
+                                  </div>
+                                  <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                                    Please complete your payment in the Cashfree checkout window or popup. Once completed, click the button below to verify and view your ticket.
+                                  </p>
+                                  <div className="flex flex-wrap items-center justify-center gap-2">
+                                    <div className="text-[11px] font-mono text-slate-600 bg-slate-100 py-1.5 px-3 rounded-lg inline-block">
+                                      Order ID: <strong className="text-slate-900">{cashfreeOrder.orderId || cashfreeOrder.bookingId}</strong>
+                                    </div>
+                                    <div className="text-[11px] font-mono text-slate-600 bg-slate-100 py-1.5 px-3 rounded-lg inline-block">
+                                      Amount: <strong className="text-emerald-700 font-bold">{rupee(cashfreeOrder.amount || totalAmount)}</strong>
+                                    </div>
+                                  </div>
+                                  <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 pt-2">
+                                    <button
+                                      type="button"
+                                      onClick={() => handleCheckPaymentStatus()}
+                                      disabled={isCheckingPayment}
+                                      className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-md cursor-pointer flex items-center justify-center gap-2 disabled:opacity-60"
+                                    >
+                                      {isCheckingPayment ? (
+                                        <>
+                                          <RefreshCw className="w-4 h-4 animate-spin" />
+                                          <span>Verifying Payment...</span>
+                                        </>
+                                      ) : (
+                                        <>
+                                          <CheckCircle2 className="w-4 h-4" />
+                                          <span>I Have Paid (Verify Status)</span>
+                                        </>
+                                      )}
+                                    </button>
+                                    {cashfreeOrder.paymentLink && (
+                                      <a
+                                        href={cashfreeOrder.paymentLink}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-bold text-slate-700 bg-amber-100 hover:bg-amber-200 cursor-pointer text-center"
+                                      >
+                                        Re-open Payment Page
+                                      </a>
+                                    )}
+                                    <button
+                                      type="button"
+                                      onClick={handleCancelOnlinePay}
+                                      className="w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 cursor-pointer"
+                                    >
+                                      Cancel
+                                    </button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={handleInstantOnlinePay}
+                                  disabled={isOnlinePaying}
+                                  className="w-full py-4 px-6 rounded-xl font-display font-black text-sm sm:text-base text-white bg-gradient-to-r from-[#ff6a00] via-[#ee5007] to-[#d84000] hover:brightness-110 active:scale-98 shadow-xl shadow-orange-500/30 flex items-center justify-center gap-2.5 cursor-pointer transition-all disabled:opacity-60"
+                                >
+                                  {isOnlinePaying ? (
+                                    <>
+                                      <RefreshCw className="w-5 h-5 animate-spin" />
+                                      <span>Connecting Cashfree Gateway...</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Zap className="w-5 h-5 text-amber-200 fill-amber-200" />
+                                      <span>Pay {rupee(totalAmount)} Now (Cashfree Instant UPI &amp; Cards)</span>
+                                    </>
+                                  )}
+                                </button>
+                              )}
+                            </div>
+
+                            <div className="flex items-center justify-center gap-2 text-xs text-slate-500">
+                              <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                              <span>256-bit SSL encrypted • Instant digital ticket pass with QR</span>
+                            </div>
+
+                            <div className="pt-4 border-t border-slate-200 flex items-center justify-between">
+                              <button
+                                type="button"
+                                onClick={handleBack}
+                                className="px-5 py-3 rounded-xl font-display font-bold text-sm text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors flex items-center gap-1.5 cursor-pointer"
+                              >
+                                <ChevronLeft className="w-4 h-4" />
+                                <span>Back</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setPaymentMode('MANUAL_UPI')}
+                                className="text-xs font-bold text-[#ff6a00] hover:underline cursor-pointer"
+                              >
+                                Or scan Google Pay QR code &rarr;
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* TAB 2: DIRECT GOOGLE PAY QR & UTR ENTRY */}
                         {paymentMode === 'MANUAL_UPI' && (
                           <div className="space-y-4 sm:space-y-5 animate-fadeIn">
                             <div className="bg-[#fdfbf7] border-2 border-amber-500/30 rounded-xl sm:rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-center gap-4 sm:gap-5">
@@ -2020,7 +2162,7 @@ export default function SingAlongBooking() {
                                   onClick={() => setPaymentMode('ONLINE')}
                                   className="text-xs font-bold text-[#ff6a00] hover:underline cursor-pointer hidden sm:inline"
                                 >
-                                  Or pay via Online Gateway &rarr;
+                                  Or pay via Real-Time Online &rarr;
                                 </button>
                                 <button
                                   type="button"
@@ -2031,148 +2173,6 @@ export default function SingAlongBooking() {
                                   <ChevronRight className="w-4 h-4" />
                                 </button>
                               </div>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* TAB 2: REAL-TIME ONLINE GATEWAY */}
-                        {paymentMode === 'ONLINE' && (
-                          <div className="space-y-5 animate-fadeIn">
-                            <div className="bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-transparent border-2 border-[#ff6a00]/30 rounded-2xl p-5 sm:p-6">
-                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-                                <div>
-                                  <span className="text-[10px] uppercase font-extrabold text-[#ff6a00] tracking-wider block">REAL-TIME CHECKOUT</span>
-                                  <h3 className="font-display text-lg sm:text-xl font-black text-slate-900">Instant Automated Verification</h3>
-                                </div>
-                                <div className="sm:text-right">
-                                  <span className="text-[10px] uppercase font-extrabold text-slate-400 block">TOTAL PAYABLE</span>
-                                  <span className="font-display text-2xl font-black text-[#ff6a00]">{rupee(totalAmount)}</span>
-                                </div>
-                              </div>
-
-                              <p className="text-xs text-slate-600 leading-relaxed mb-4">
-                                Supports <strong>Google Pay, PhonePe, Paytm, BHIM UPI, Credit/Debit Cards</strong>, and <strong>NetBanking</strong>. Your digital ticket pass is confirmed immediately upon payment.
-                              </p>
-
-                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-5">
-                                <div className="p-2.5 rounded-xl bg-white border border-slate-200 text-center shadow-xs">
-                                  <span className="text-xs font-bold text-slate-700 block">Google Pay</span>
-                                  <span className="text-[10px] text-emerald-600 font-semibold">⚡ Instant UPI</span>
-                                </div>
-                                <div className="p-2.5 rounded-xl bg-white border border-slate-200 text-center shadow-xs">
-                                  <span className="text-xs font-bold text-slate-700 block">PhonePe</span>
-                                  <span className="text-[10px] text-emerald-600 font-semibold">⚡ Instant UPI</span>
-                                </div>
-                                <div className="p-2.5 rounded-xl bg-white border border-slate-200 text-center shadow-xs">
-                                  <span className="text-xs font-bold text-slate-700 block">Paytm UPI</span>
-                                  <span className="text-[10px] text-emerald-600 font-semibold">⚡ Instant UPI</span>
-                                </div>
-                                <div className="p-2.5 rounded-xl bg-white border border-slate-200 text-center shadow-xs">
-                                  <span className="text-xs font-bold text-slate-700 block">Cards / NetBank</span>
-                                  <span className="text-[10px] text-blue-600 font-semibold">🔒 256-bit Secure</span>
-                                </div>
-                              </div>
-
-                              {isOnlinePaying && cashfreeOrder ? (
-                                <div className="bg-white border-2 border-emerald-500/40 rounded-2xl p-5 text-center space-y-3 shadow-lg animate-fadeIn">
-                                  <div className="w-12 h-12 mx-auto rounded-full bg-emerald-50 flex items-center justify-center">
-                                    <ShieldCheck className="w-6 h-6 text-emerald-600" />
-                                  </div>
-                                  <div className="font-display font-black text-slate-900 text-base">
-                                    Cashfree Checkout Active
-                                  </div>
-                                  <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                                    Please complete your payment in the Cashfree checkout window or popup. Once completed, click the button below to verify and view your ticket.
-                                  </p>
-                                  <div className="flex flex-wrap items-center justify-center gap-2">
-                                    <div className="text-[11px] font-mono text-slate-600 bg-slate-100 py-1.5 px-3 rounded-lg inline-block">
-                                      Order ID: <strong className="text-slate-900">{cashfreeOrder.orderId || cashfreeOrder.bookingId}</strong>
-                                    </div>
-                                    <div className="text-[11px] font-mono text-slate-600 bg-slate-100 py-1.5 px-3 rounded-lg inline-block">
-                                      Amount: <strong className="text-emerald-700 font-bold">{rupee(cashfreeOrder.amount || totalAmount)}</strong>
-                                    </div>
-                                  </div>
-                                  <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 pt-2">
-                                    <button
-                                      type="button"
-                                      onClick={() => handleCheckPaymentStatus()}
-                                      disabled={isCheckingPayment}
-                                      className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-md cursor-pointer flex items-center justify-center gap-2 disabled:opacity-60"
-                                    >
-                                      {isCheckingPayment ? (
-                                        <>
-                                          <RefreshCw className="w-4 h-4 animate-spin" />
-                                          <span>Verifying Payment...</span>
-                                        </>
-                                      ) : (
-                                        <>
-                                          <CheckCircle2 className="w-4 h-4" />
-                                          <span>I Have Paid (Verify Status)</span>
-                                        </>
-                                      )}
-                                    </button>
-                                    {cashfreeOrder.paymentLink && (
-                                      <a
-                                        href={cashfreeOrder.paymentLink}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-bold text-slate-700 bg-amber-100 hover:bg-amber-200 cursor-pointer text-center"
-                                      >
-                                        Re-open Payment Page
-                                      </a>
-                                    )}
-                                    <button
-                                      type="button"
-                                      onClick={handleCancelOnlinePay}
-                                      className="w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 cursor-pointer"
-                                    >
-                                      Cancel
-                                    </button>
-                                  </div>
-                                </div>
-                              ) : (
-                                <button
-                                  type="button"
-                                  onClick={handleInstantOnlinePay}
-                                  disabled={isOnlinePaying}
-                                  className="w-full py-4 px-6 rounded-xl font-display font-black text-sm sm:text-base text-white bg-gradient-to-r from-[#ff6a00] via-[#ee5007] to-[#d84000] hover:brightness-110 active:scale-98 shadow-xl shadow-orange-500/30 flex items-center justify-center gap-2.5 cursor-pointer transition-all disabled:opacity-60"
-                                >
-                                  {isOnlinePaying ? (
-                                    <>
-                                      <RefreshCw className="w-5 h-5 animate-spin" />
-                                      <span>Connecting Cashfree Gateway...</span>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <Zap className="w-5 h-5 text-amber-200 fill-amber-200" />
-                                      <span>Pay {rupee(totalAmount)} Now (Cashfree Instant UPI &amp; Cards)</span>
-                                    </>
-                                  )}
-                                </button>
-                              )}
-                            </div>
-
-                            <div className="flex items-center justify-center gap-2 text-xs text-slate-500">
-                              <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                              <span>256-bit SSL encrypted • Instant digital ticket pass with QR</span>
-                            </div>
-
-                            <div className="pt-4 border-t border-slate-200 flex items-center justify-between">
-                              <button
-                                type="button"
-                                onClick={handleBack}
-                                className="px-5 py-3 rounded-xl font-display font-bold text-sm text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors flex items-center gap-1.5 cursor-pointer"
-                              >
-                                <ChevronLeft className="w-4 h-4" />
-                                <span>Back</span>
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setPaymentMode('MANUAL_UPI')}
-                                className="text-xs font-bold text-[#ff6a00] hover:underline cursor-pointer"
-                              >
-                                Or scan Google Pay QR code &rarr;
-                              </button>
                             </div>
                           </div>
                         )}
