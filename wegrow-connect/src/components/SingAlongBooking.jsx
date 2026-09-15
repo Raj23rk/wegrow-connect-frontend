@@ -18,6 +18,8 @@ import {
   Check,
   ChevronRight,
   ChevronLeft,
+  ChevronUp,
+  ChevronDown,
   Info,
   Phone,
   Mail,
@@ -142,6 +144,7 @@ export default function SingAlongBooking() {
   // Success / Ticket Data
   const [ticketData, setTicketData] = useState(null);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [showTicketDetails, setShowTicketDetails] = useState(false);
   const [paymentQr, setPaymentQr] = useState('');
   const [ticketQr, setTicketQr] = useState('');
 
@@ -188,9 +191,9 @@ export default function SingAlongBooking() {
     if (ticketData?.bookingId) {
       const code = ticketData.verificationToken || `SINGALONG-VERIFY:${ticketData.bookingId}`;
       QRCode.toDataURL(code, {
-        width: 200,
+        width: 320,
         margin: 1,
-        color: { dark: '#0f172a', light: '#ffffff' }
+        color: { dark: '#0B1B4A', light: '#ffffff' }
       })
         .then(url => setTicketQr(url))
         .catch(err => console.error('Ticket QR Error:', err));
@@ -580,8 +583,8 @@ export default function SingAlongBooking() {
     const toastId = toast.loading("Generating high-resolution ticket...");
     try {
       const canvas = await html2canvas(ticketCaptureRef.current, {
-        scale: 2.5,
-        backgroundColor: '#0f172a',
+        scale: 3,
+        backgroundColor: '#0B0F19',
         useCORS: true,
         logging: false
       });
@@ -1253,145 +1256,183 @@ export default function SingAlongBooking() {
             )}
 
             {/* ===================================================================
-                SCREEN: SUCCESS (PERFORATED ENTRY TICKET PASS)
+                SCREEN: SUCCESS (OFFICIAL SING ALONG TICKET PASS - USER FORMAT)
                 =================================================================== */}
             {screen === 'success' && ticketData && (
-              <div className="max-w-xl mx-auto my-4 sm:my-6 animate-fadeIn px-1">
-                {/* Top Success Banner */}
-                <div className="text-center mb-5 sm:mb-6">
-                  <div className="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-emerald-100 text-emerald-600 mb-2.5 sm:mb-3 shadow-md">
-                    <CheckCircle2 className="w-7 h-7 sm:w-8 sm:h-8" />
-                  </div>
-                  <h2 className="text-2xl sm:text-3xl font-black font-display text-slate-900">
-                    Booking Confirmed! 🎉
-                  </h2>
-                  <p className="text-xs sm:text-sm text-slate-600 mt-1">
-                    Your entry pass is ready. Please save or download this ticket for venue entry.
-                  </p>
-                </div>
-
-                {/* Perforated Printable Ticket Card */}
+              <div className="w-full -mx-4 sm:-mx-6 -my-10 px-4 py-8 sm:py-12 bg-[#0B0F19] min-h-[90vh] flex flex-col items-center justify-center animate-fadeIn">
+                {/* Printable / Downloadable Ticket Card (Exact format from user screenshot) */}
                 <div
                   ref={ticketCaptureRef}
-                  className="bg-white border-2 border-slate-200 rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl relative text-slate-800"
+                  className="w-full max-w-[360px] xs:max-w-[390px] sm:max-w-[420px] bg-white rounded-[32px] sm:rounded-[36px] overflow-hidden shadow-2xl relative text-slate-800"
                 >
-                  {/* Ticket Top Header Banner */}
-                  <div className="bg-gradient-to-r from-[#0f172a] via-[#1e293b] to-[#0f172a] text-white p-3 sm:p-5 flex items-center justify-between border-b-2 border-amber-500/40">
-                    <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
-                      <div className="bg-white rounded-lg sm:rounded-xl p-1 sm:p-1.5 shadow flex-shrink-0">
-                        <img src={WEGROW_LOGO_IMG} onError={(e) => { e.currentTarget.src = WEGROW_BACKUP_LOGO; }} alt="WeGrow" className="h-5 sm:h-7 w-auto object-contain" />
-                      </div>
-                      <div className="min-w-0">
-                        <span className="font-display text-[8px] sm:text-[10px] font-extrabold uppercase tracking-widest text-amber-400 block truncate">OFFICIAL ENTRY PASS</span>
-                        <h3 className="font-display text-sm sm:text-lg font-black leading-tight text-white truncate">SING ALONG 2026</h3>
-                      </div>
+                  {/* Top Header: Mascot Image, Event Info, and Vertical "ENTRY TICKET" */}
+                  <div className="p-5 sm:p-6 pb-3 sm:pb-4 flex items-center justify-between gap-2.5 sm:gap-3">
+                    {/* Mascot */}
+                    <div className="w-16 sm:w-20 h-20 sm:h-24 flex-shrink-0 flex items-center justify-center">
+                      <img
+                        src={MASCOT_PROMO_IMG}
+                        alt="Sing Along Mascot"
+                        className="w-full h-full object-contain"
+                      />
                     </div>
-                    <div className="text-right flex-shrink-0 pl-2">
-                      <span className="text-[8px] sm:text-[10px] uppercase font-bold text-slate-400 block">PASS ID</span>
-                      <span className="font-display font-black text-amber-400 text-xs sm:text-sm tracking-wider">{ticketData.bookingId}</span>
+
+                    {/* Middle Info */}
+                    <div className="flex-grow min-w-0 pr-1">
+                      <h2 className="font-display font-bold text-lg sm:text-2xl text-slate-900 leading-tight">
+                        Sing Along
+                      </h2>
+                      <span className="text-[10px] sm:text-xs font-bold text-slate-400 tracking-wider uppercase block mt-0.5 sm:mt-1">
+                        LIVE MUSIC EVENT
+                      </span>
+                      <span className="text-xs sm:text-sm text-slate-600 font-medium block mt-1 sm:mt-1.5 truncate">
+                        {CONFIG.dateShort} | 6:00 PM
+                      </span>
+                      <span className="text-xs sm:text-sm text-slate-500 font-normal block mt-0.5 truncate">
+                        {CONFIG.fullVenue}
+                      </span>
+                    </div>
+
+                    {/* Right: Vertical ENTRY TICKET */}
+                    <div
+                      className="flex-shrink-0 text-[10px] sm:text-[11px] font-mono font-bold text-slate-400 tracking-[0.25em] select-none uppercase pl-1"
+                      style={{ writingMode: 'vertical-rl', textOrientation: 'upright' }}
+                    >
+                      ENTRY TICKET
                     </div>
                   </div>
 
-                  {/* Middle Section: Event & Attendee Details */}
-                  <div className="p-3.5 sm:p-6">
-                    <div className="grid grid-cols-2 gap-2.5 sm:gap-4 pb-3 sm:pb-4 border-b border-dashed border-slate-200">
-                      <div>
-                        <span className="text-[8px] sm:text-[10px] uppercase font-extrabold text-slate-400 block tracking-wider">ATTENDEE NAME</span>
-                        <span className="font-display text-xs sm:text-base font-black text-slate-900 block truncate">{ticketData.fullName}</span>
-                        <span className="text-[11px] sm:text-xs text-slate-500 block truncate">{ticketData.phone}</span>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-[8px] sm:text-[10px] uppercase font-extrabold text-slate-400 block tracking-wider">TICKETS &amp; AMOUNT</span>
-                        <span className="font-display text-xs sm:text-base font-black text-[#ff6a00] block truncate">
-                          {ticketData.ticketQty} Pass{ticketData.ticketQty > 1 ? 'es' : ''} ({rupee(ticketData.amount)})
-                        </span>
-                        <span className="text-[10px] sm:text-[11px] text-emerald-600 font-bold block">● Payment Verified</span>
-                      </div>
-                    </div>
+                  {/* Notch 1 & "Tap to hide details" Toggle Pill */}
+                  <div className="relative px-5 sm:px-7 py-2">
+                    {/* Left Notch */}
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-4 sm:w-4.5 h-8 sm:h-9 rounded-r-full bg-[#0B0F19] z-10 pointer-events-none" />
+                    {/* Right Notch */}
+                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-4 sm:w-4.5 h-8 sm:h-9 rounded-l-full bg-[#0B0F19] z-10 pointer-events-none" />
 
-                    <div className="grid grid-cols-2 gap-2.5 sm:gap-4 py-3 sm:py-4 border-b border-dashed border-slate-200 text-xs">
-                      <div>
-                        <span className="text-[8px] sm:text-[10px] uppercase font-extrabold text-slate-400 block tracking-wider">DATE &amp; TIME</span>
-                        <span className="font-bold text-slate-800 block text-xs sm:text-sm">{CONFIG.date}</span>
-                        <span className="text-slate-500 block text-[11px] sm:text-xs">{CONFIG.eventTime}</span>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-[8px] sm:text-[10px] uppercase font-extrabold text-slate-400 block tracking-wider">VENUE</span>
-                        <span className="font-bold text-slate-800 block text-xs sm:text-sm truncate">{CONFIG.venue}</span>
-                        <span className="text-slate-500 block text-[11px] sm:text-xs truncate">{CONFIG.location}</span>
-                      </div>
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowTicketDetails(prev => !prev)}
+                      className="w-full py-2 sm:py-2.5 px-4 rounded-full bg-[#EEF2F6] hover:bg-[#E2E8F0] text-slate-700 text-xs sm:text-sm font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                    >
+                      <span>{showTicketDetails ? 'Tap to hide details' : 'Tap to hide details'}</span>
+                      <ChevronUp className={`w-4 h-4 text-slate-500 transition-transform duration-200 ${showTicketDetails ? '' : 'rotate-180'}`} />
+                    </button>
+                  </div>
 
-                    {/* Perforation Cutout Row */}
-                    <div className="relative py-2.5 sm:py-4 my-1 sm:my-2 flex items-center justify-between">
-                      <div className="ticket-notch-left" />
-                      <div className="w-full border-b-2 border-dashed border-slate-300" />
-                      <div className="ticket-notch-right" />
-                    </div>
-
-                    {/* Bottom Section: QR Code & Instructions */}
-                    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 pt-1 sm:pt-2">
-                      <div className="flex-grow text-center sm:text-left">
-                        <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[10px] sm:text-[11px] font-extrabold mb-1">
-                          <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" />
-                          <span>VALID ENTRY CODE</span>
+                  {/* Collapsible Attendee Details */}
+                  {showTicketDetails && (
+                    <div className="mx-5 sm:mx-7 my-2 p-3.5 sm:p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs space-y-2 animate-fadeIn">
+                      <div className="flex justify-between border-b border-slate-200 pb-1.5">
+                        <span className="text-slate-500">Attendee Name</span>
+                        <strong className="text-slate-900 font-bold">{ticketData.fullName}</strong>
+                      </div>
+                      <div className="flex justify-between border-b border-slate-200 pb-1.5">
+                        <span className="text-slate-500">Contact Mobile</span>
+                        <span className="font-mono text-slate-800">{ticketData.phone}</span>
+                      </div>
+                      {ticketData.email && ticketData.email !== 'Not provided' && (
+                        <div className="flex justify-between border-b border-slate-200 pb-1.5">
+                          <span className="text-slate-500">Email Address</span>
+                          <span className="text-slate-800 truncate max-w-[180px]">{ticketData.email}</span>
                         </div>
-                        <p className="text-[11px] sm:text-xs text-slate-500 leading-relaxed max-w-xs mx-auto sm:mx-0">
-                          Scan this QR code at Arasan Turf gate for instant badge check-in.
-                        </p>
-                        <span className="text-[9px] sm:text-[10px] text-slate-400 block mt-1 font-mono truncate">
-                          Ref: {ticketData.utr || 'UPI-DIRECT'}
-                        </span>
+                      )}
+                      <div className="flex justify-between border-b border-slate-200 pb-1.5">
+                        <span className="text-slate-500">Gate Reporting</span>
+                        <span className="font-bold text-amber-600">{CONFIG.reportingTime}</span>
                       </div>
-
-                      {/* QR Code */}
-                      <div className="flex-shrink-0 bg-slate-50 border-2 border-slate-200 rounded-2xl p-2 shadow-inner">
-                        {ticketQr ? (
-                          <img src={ticketQr} alt="Verification QR Code" className="w-24 h-24 sm:w-28 sm:h-28 object-contain" />
-                        ) : (
-                          <div className="w-24 h-24 sm:w-28 sm:h-28 flex items-center justify-center bg-slate-100 text-slate-400 text-xs">
-                            QR Code
-                          </div>
-                        )}
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">Booking Ref / UTR</span>
+                        <span className="font-mono text-slate-600 truncate max-w-[150px]">{ticketData.utr || ticketData.paymentMethod || 'DIRECT'}</span>
                       </div>
                     </div>
+                  )}
+
+                  {/* Main QR Code & Ticket Body */}
+                  <div className="px-5 sm:px-7 pt-4 sm:pt-5 pb-3 sm:pb-4 text-center">
+                    <span className="text-slate-500 text-xs sm:text-sm font-medium block">
+                      {ticketData.ticketQty || 1} {(ticketData.ticketQty || 1) > 1 ? 'Tickets' : 'Ticket'}
+                    </span>
+                    <h3 className="font-display font-bold text-base sm:text-lg text-slate-900 tracking-wide uppercase mt-1">
+                      SING ALONG TICKET
+                    </h3>
+                    <span className="text-slate-500 text-xs sm:text-sm block mt-0.5">
+                      General Admission · {rupee(CONFIG.ticketPrice)} each
+                    </span>
+
+                    {/* QR Code Container */}
+                    <div className="inline-block p-3.5 sm:p-4 rounded-2xl sm:rounded-3xl border border-slate-200/90 bg-white shadow-xs my-4 sm:my-5">
+                      {ticketQr ? (
+                        <img
+                          src={ticketQr}
+                          alt="Verification QR Code"
+                          className="w-44 h-44 xs:w-48 xs:h-48 sm:w-56 sm:h-56 object-contain"
+                        />
+                      ) : (
+                        <div className="w-44 h-44 sm:w-56 sm:h-56 flex items-center justify-center bg-slate-50 text-slate-400 text-xs">
+                          Generating QR Code...
+                        </div>
+                      )}
+                    </div>
+
+                    <p className="text-slate-500 text-xs sm:text-sm font-normal">
+                      Scan at entry for verification
+                    </p>
+
+                    <p className="font-display font-black text-slate-900 text-sm sm:text-base tracking-wider mt-2 sm:mt-2.5">
+                      BOOKING ID: {ticketData.bookingId}
+                    </p>
                   </div>
 
-                  {/* Ticket Footer Ribbon */}
-                  <div className="bg-[#fff8f0] border-t border-amber-200 px-3 sm:px-6 py-2 text-center text-[9px] sm:text-[11px] font-bold text-[#ff6a00]">
-                    WeGrow • Present this pass at venue entry
+                  {/* Notch 2 & Divider */}
+                  <div className="relative py-2 flex items-center justify-between">
+                    {/* Left Notch */}
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-4 sm:w-4.5 h-8 sm:h-9 rounded-r-full bg-[#0B0F19] z-10 pointer-events-none" />
+                    <div className="w-full border-b border-slate-100 mx-6" />
+                    {/* Right Notch */}
+                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-4 sm:w-4.5 h-8 sm:h-9 rounded-l-full bg-[#0B0F19] z-10 pointer-events-none" />
+                  </div>
+
+                  {/* Ticket Footer */}
+                  <div className="px-6 sm:px-8 py-4 sm:py-5 flex items-center justify-between bg-white rounded-b-[32px] sm:rounded-b-[36px]">
+                    <span className="text-slate-500 font-medium text-sm sm:text-base">
+                      Total Amount
+                    </span>
+                    <span className="font-display font-black text-slate-900 text-xl sm:text-2xl">
+                      {rupee(ticketData.amount || totalAmount)}
+                    </span>
                   </div>
                 </div>
 
-                {/* Action Buttons: Download, Share, Reset */}
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2.5 sm:gap-3 mt-5 sm:mt-6">
+                {/* Action Buttons: Download, Share, Book Another */}
+                <div className="w-full max-w-[360px] xs:max-w-[390px] sm:max-w-[420px] flex flex-col gap-2.5 sm:gap-3 mt-6">
                   <button
                     type="button"
                     onClick={handleDownloadTicket}
                     disabled={isDownloading}
-                    className="w-full sm:w-auto px-5 sm:px-6 py-3 rounded-xl font-display font-black text-sm text-white bg-gradient-to-r from-emerald-600 to-teal-700 hover:brightness-110 shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2 cursor-pointer transition-all"
+                    className="w-full py-3 sm:py-3.5 px-6 rounded-2xl font-display font-black text-sm text-white bg-gradient-to-r from-emerald-600 to-teal-700 hover:brightness-110 shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2 cursor-pointer transition-all"
                   >
                     <Download className="w-4 h-4" />
                     <span>{isDownloading ? 'Saving Pass...' : 'Download Pass (PNG)'}</span>
                   </button>
 
-                  <button
-                    type="button"
-                    onClick={handleShareTicket}
-                    className="w-full sm:w-auto px-5 sm:px-6 py-3 rounded-xl font-display font-black text-sm text-white bg-gradient-to-r from-[#ff6a00] to-[#ee5007] hover:brightness-110 shadow-lg shadow-orange-600/30 flex items-center justify-center gap-2 cursor-pointer transition-all"
-                  >
-                    <Share2 className="w-4 h-4" />
-                    <span>Share via WhatsApp</span>
-                  </button>
+                  <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
+                    <button
+                      type="button"
+                      onClick={handleShareTicket}
+                      className="w-full py-2.5 sm:py-3 px-4 rounded-xl font-display font-black text-xs text-white bg-gradient-to-r from-[#ff6a00] to-[#ee5007] hover:brightness-110 shadow-md flex items-center justify-center gap-2 cursor-pointer transition-all"
+                    >
+                      <Share2 className="w-3.5 h-3.5" />
+                      <span>Share Pass</span>
+                    </button>
 
-                  <button
-                    type="button"
-                    onClick={handleReset}
-                    className="w-full sm:w-auto px-5 py-3 rounded-xl font-display font-bold text-sm text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-300 flex items-center justify-center gap-2 cursor-pointer transition-all"
-                  >
-                    <RefreshCw className="w-4 h-4" />
-                    <span>Book Another</span>
-                  </button>
+                    <button
+                      type="button"
+                      onClick={handleReset}
+                      className="w-full py-2.5 sm:py-3 px-4 rounded-xl font-display font-bold text-xs text-slate-300 bg-slate-800/80 hover:bg-slate-700 border border-slate-700 flex items-center justify-center gap-1.5 cursor-pointer transition-all"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5" />
+                      <span>Book Another</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
