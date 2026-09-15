@@ -1068,40 +1068,36 @@ export default function SingAlongBooking() {
             <span className="absolute top-[30%] right-[24%] text-2xl text-[#ff8c00] select-none pointer-events-none z-10 animate-float-note hidden sm:block" style={{ animationDelay: '2.5s' }}>💛</span>
 
             {/* =================================================================
-                PROPER SYMMETRICAL TOP BAR ALIGNMENT:
-                Logo on Top Left & Date on Top Right at the exact same vertical offset
+                TOP BAR: WeGrow Logo on Left & Date on Right (Responsive Flow Layout)
                 ================================================================= */}
-            
-            {/* Top-Left: WeGrow Logo Box */}
-            <div className="absolute top-3.5 left-3.5 sm:top-6 sm:left-8 z-30">
-              <div className="bg-white rounded-xl sm:rounded-2xl px-2.5 py-1.5 sm:px-4 sm:py-2 shadow-[0_8px_24px_rgba(0,0,0,0.5)] border border-slate-200/40 flex items-center justify-center">
+            <div className="relative z-30 w-full flex items-start justify-between px-3 pt-3 sm:px-6 sm:pt-5 md:px-8 md:pt-6 pointer-events-auto">
+              {/* Top-Left: WeGrow Logo Box */}
+              <div className="bg-white rounded-xl sm:rounded-2xl px-2 py-1.5 sm:px-4 sm:py-2 shadow-[0_8px_24px_rgba(0,0,0,0.5)] border border-slate-200/40 flex items-center justify-center">
                 <img
                   src={WEGROW_LOGO_IMG}
                   onError={(e) => { e.currentTarget.src = WEGROW_BACKUP_LOGO; }}
                   alt="WeGrow Skill Campus & B School"
-                  className="h-6 sm:h-8 md:h-9 w-auto object-contain"
+                  className="h-5 sm:h-8 md:h-9 w-auto object-contain"
                 />
+              </div>
+
+              {/* Top-Right: Date Badge Box */}
+              <div className="w-[50px] sm:w-[68px] md:w-[74px] bg-white rounded-xl sm:rounded-2xl overflow-hidden text-center shadow-[0_8px_24px_rgba(0,0,0,0.5)] border border-slate-200/40">
+                <div className="font-display text-sm sm:text-xl md:text-2xl font-black text-[#1A1A4E] pt-1 leading-none">{CONFIG.dayNum}</div>
+                <div className="bg-[#ff6a00] text-white font-body text-[8px] sm:text-xs font-black tracking-wider py-0.5">{CONFIG.monthAbbr}</div>
+                <div className="bg-white text-[#ff6a00] font-body text-[7px] sm:text-[10px] font-black tracking-wider py-0.5">{CONFIG.dayName}</div>
               </div>
             </div>
 
-            {/* Left Handwritten Script under Logo */}
-            <div className="absolute top-20 left-6 sm:top-24 sm:left-8 z-20 font-handwritten text-white text-xl sm:text-2xl font-bold leading-tight drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)] -rotate-6 hidden md:block">
+            {/* Left Handwritten Script under Logo (Desktop Only) */}
+            <div className="absolute top-20 left-6 sm:top-24 sm:left-8 z-20 font-handwritten text-white text-xl sm:text-2xl font-bold leading-tight drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)] -rotate-6 hidden md:block pointer-events-none">
               <span className="block">Good Music</span>
               <span className="block">Brighter</span>
               <span className="block text-amber-300">People 🎶</span>
             </div>
 
-            {/* Top-Right: Date Badge Box */}
-            <div className="absolute top-3.5 right-3.5 sm:top-6 sm:right-8 z-30">
-              <div className="w-[58px] sm:w-[68px] md:w-[74px] bg-white rounded-xl sm:rounded-2xl overflow-hidden text-center shadow-[0_8px_24px_rgba(0,0,0,0.5)] border border-slate-200/40">
-                <div className="font-display text-base sm:text-xl md:text-2xl font-black text-[#1A1A4E] pt-1 leading-none">{CONFIG.dayNum}</div>
-                <div className="bg-[#ff6a00] text-white font-body text-[9px] sm:text-xs font-black tracking-wider py-0.5">{CONFIG.monthAbbr}</div>
-                <div className="bg-white text-[#ff6a00] font-body text-[8px] sm:text-[10px] font-black tracking-wider py-0.5">{CONFIG.dayName}</div>
-              </div>
-            </div>
-
-            {/* Right Handwritten Script under Date */}
-            <div className="absolute top-24 right-6 sm:top-28 sm:right-8 z-20 font-handwritten text-white text-xl sm:text-2xl font-bold leading-tight drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)] rotate-6 text-right hidden md:block">
+            {/* Right Handwritten Script under Date (Desktop Only) */}
+            <div className="absolute top-24 right-6 sm:top-28 sm:right-8 z-20 font-handwritten text-white text-xl sm:text-2xl font-bold leading-tight drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)] rotate-6 text-right hidden md:block pointer-events-none">
               <span className="block">Same</span>
               <span className="block">Tickets</span>
               <span className="block">More</span>
@@ -1109,58 +1105,57 @@ export default function SingAlongBooking() {
             </div>
 
             {/* =================================================================
-                CENTER: POSITIONED DIRECTLY ON THE STAGE TRUSS (Exact place from Image 2)
-                All elements arranged and centered in the middle
+                CENTER: POSITIONED DIRECTLY ON THE STAGE TRUSS (Mobile Responsive)
                 ================================================================= */}
-            <div className="relative z-20 flex flex-col items-center text-center max-w-3xl mx-auto pt-14 sm:pt-18 md:pt-10 px-3 sm:px-4">
+            <div className="relative z-20 flex flex-col items-center text-center max-w-3xl mx-auto pt-1 sm:pt-3 md:-mt-14 px-3 sm:px-4">
               
-              {/* Title Sponsor: K7 Chit Funds (Added ONLY on Hero stage banner) */}
-              <div className="flex items-center justify-center gap-2 mb-2 sm:mb-2.5">
-                <div className="inline-flex items-center gap-2 px-3 sm:px-3.5 py-1 rounded-full bg-white text-slate-900 border-2 border-emerald-600 shadow-md">
-                  <span className="bg-[#007A3D] text-white text-[8px] sm:text-[9px] font-black px-1.5 py-0.5 rounded tracking-wider uppercase">
+              {/* Title Sponsor: K7 Chit Funds */}
+              <div className="flex items-center justify-center gap-1.5 sm:gap-2 mb-2 sm:mb-2.5 max-w-full">
+                <div className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1 rounded-full bg-white text-slate-900 border-2 border-emerald-600 shadow-md max-w-full">
+                  <span className="bg-[#007A3D] text-white text-[7px] sm:text-[9px] font-black px-1.5 py-0.5 rounded tracking-wider uppercase flex-shrink-0">
                     TITLE SPONSOR
                   </span>
                   <img
                     src="/k7_sarathy_chitfunds_logo.png"
                     alt="K7 Chit Funds"
-                    className="h-5 sm:h-6 max-h-6 w-auto object-contain"
+                    className="h-4 sm:h-6 max-h-6 w-auto object-contain flex-shrink-0"
                   />
-                  <span className="text-[11px] sm:text-xs font-black text-[#007A3D] tracking-tight">
+                  <span className="text-[10px] sm:text-xs font-black text-[#007A3D] tracking-tight truncate">
                     K7 CHIT FUNDS
                   </span>
                 </div>
               </div>
 
-              {/* Presents text + Badges (Centered in the middle) */}
-              <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-2 sm:mb-2.5">
-                <span className="font-body text-xs sm:text-sm md:text-base font-bold tracking-wide text-white/95 drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">
+              {/* Presents text + Badges */}
+              <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-3 mb-2 sm:mb-2.5">
+                <span className="font-body text-[11px] sm:text-sm md:text-base font-bold tracking-wide text-white/95 drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">
                   WeGrow Skill Campus &amp; B School presents
                 </span>
-                <div className="flex items-center gap-1.5">
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#0D0D3A]/90 border border-white/30 text-white font-display text-[9px] sm:text-[10px] font-extrabold shadow-md">
+                <div className="flex items-center gap-1.5 flex-wrap justify-center">
+                  <span className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-0.5 rounded-full bg-[#0D0D3A]/90 border border-white/30 text-white font-display text-[8px] sm:text-[10px] font-extrabold shadow-md">
                     🎵 LIVE MUSIC EVENT
                   </span>
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-[#ff6a00] text-white font-display text-[9px] sm:text-[10px] font-extrabold shadow-[0_0_15px_rgba(255,106,0,0.7)]">
+                  <span className="inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full bg-[#ff6a00] text-white font-display text-[8px] sm:text-[10px] font-extrabold shadow-[0_0_15px_rgba(255,106,0,0.7)]">
                     ₹249 per ticket
                   </span>
                 </div>
               </div>
 
-              {/* Row 3: Sing Along Title Logo with Vibrant Color Change (Crisp White SING + Fiery Orange ALONG + Crown) */}
+              {/* Row 3: Sing Along Title Logo */}
               <div className="relative select-none text-center group cursor-default">
                 {/* Golden Crown doodle above ALONG */}
-                <div className="flex items-center justify-center -mb-1.5 sm:-mb-2">
-                  <span className="text-amber-400 font-handwritten text-2xl sm:text-3xl font-black drop-shadow-[0_0_14px_rgba(255,190,0,0.9)] rotate-6 inline-block animate-float-note">
+                <div className="flex items-center justify-center -mb-1 sm:-mb-2">
+                  <span className="text-amber-400 font-handwritten text-xl sm:text-3xl font-black drop-shadow-[0_0_14px_rgba(255,190,0,0.9)] rotate-6 inline-block animate-float-note">
                     👑
                   </span>
                 </div>
                 
-                <h1 className="font-poster text-4xl sm:text-6xl md:text-7xl font-black tracking-tight leading-none drop-shadow-[0_8px_30px_rgba(0,0,0,0.95)]">
+                <h1 className="font-poster text-3xl xs:text-5xl sm:text-6xl md:text-7xl font-black tracking-tight leading-none drop-shadow-[0_8px_30px_rgba(0,0,0,0.95)]">
                   <span
                     className="text-white inline-block transition-transform duration-300 group-hover:scale-105"
                     style={{
                       textShadow: '0 0 25px rgba(255,255,255,0.7), 0 4px 10px rgba(0,0,0,0.9)',
-                      WebkitTextStroke: '1.5px #0f172a'
+                      WebkitTextStroke: '1.2px #0f172a'
                     }}
                   >
                     SING{" "}
@@ -1174,64 +1169,64 @@ export default function SingAlongBooking() {
                     ALONG
                   </span>
                 </h1>
-                <p className="font-brush text-amber-300 text-xs sm:text-sm md:text-base tracking-[0.25em] sm:tracking-[0.3em] uppercase mt-1 drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
+                <p className="font-brush text-amber-300 text-[11px] sm:text-sm md:text-base tracking-[0.2em] sm:tracking-[0.3em] uppercase mt-1 drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
                   LIVE MUSIC EVENT
                 </p>
               </div>
             </div>
 
-            {/* Middle Stage Space: Mascot's Head, Face, Glasses, Ears, Mic & Smiling Expression are 100% VISIBLE! */}
+            {/* Middle Stage Space */}
             <div className="relative z-10 flex-grow pointer-events-none" />
 
             {/* Video Stage Bottom Floating Badge: MUSIC CONNECTS US */}
             <div className="relative z-20 flex justify-center mb-2 px-3">
-              <div className="inline-flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-1.5 sm:py-2 rounded-full bg-gradient-to-r from-[#ff7800]/40 via-[#cc5500]/30 to-[#1a0c00]/80 border border-amber-400/60 backdrop-blur-md shadow-[0_0_24px_rgba(255,153,0,0.5)] text-amber-200">
-                <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-300 fill-amber-300 animate-heart-pulse flex-shrink-0" />
-                <span className="font-display text-[11px] sm:text-xs md:text-sm font-black tracking-[0.15em] sm:tracking-[0.2em] uppercase bg-gradient-to-r from-white via-[#ffe6a7] to-[#ffb703] bg-clip-text text-transparent text-center">
+              <div className="inline-flex items-center gap-1.5 sm:gap-3 px-3.5 sm:px-6 py-1 sm:py-2 rounded-full bg-gradient-to-r from-[#ff7800]/40 via-[#cc5500]/30 to-[#1a0c00]/80 border border-amber-400/60 backdrop-blur-md shadow-[0_0_24px_rgba(255,153,0,0.5)] text-amber-200">
+                <Heart className="w-3 h-3 sm:w-4 sm:h-4 text-amber-300 fill-amber-300 animate-heart-pulse flex-shrink-0" />
+                <span className="font-display text-[10px] sm:text-xs md:text-sm font-black tracking-[0.12em] sm:tracking-[0.2em] uppercase bg-gradient-to-r from-white via-[#ffe6a7] to-[#ffb703] bg-clip-text text-transparent text-center">
                   MUSIC CONNECTS US
                 </span>
-                <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-300 fill-amber-300 animate-heart-pulse flex-shrink-0" />
+                <Heart className="w-3 h-3 sm:w-4 sm:h-4 text-amber-300 fill-amber-300 animate-heart-pulse flex-shrink-0" />
               </div>
             </div>
 
             {/* Bottom Info Bar */}
-            <div className="relative z-30 w-full bg-black/90 backdrop-blur-md border-t border-[#ff6a00]/40 py-2 sm:py-2.5 px-3 sm:px-6 flex flex-wrap items-center justify-center gap-2 sm:gap-6 md:gap-8 text-[11px] sm:text-xs font-bold text-white">
-              <div className="inline-flex items-center gap-1.5 bg-white/5 sm:bg-transparent rounded-full px-2.5 py-1 sm:p-0 border border-white/10 sm:border-0">
-                <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 flex-shrink-0" />
+            <div className="relative z-30 w-full bg-black/90 backdrop-blur-md border-t border-[#ff6a00]/40 py-2 sm:py-2.5 px-2.5 sm:px-6 flex flex-wrap items-center justify-center gap-1.5 sm:gap-4 md:gap-8 text-[10px] sm:text-xs font-bold text-white">
+              <div className="inline-flex items-center gap-1 bg-white/5 sm:bg-transparent rounded-full px-2 py-0.5 sm:p-0 border border-white/10 sm:border-0">
+                <Calendar className="w-3 sm:w-4 h-3 sm:h-4 text-amber-400 flex-shrink-0" />
                 <span>{CONFIG.dateShort}</span>
               </div>
               <span className="hidden md:inline text-slate-600">|</span>
-              <div className="inline-flex items-center gap-1.5 bg-white/5 sm:bg-transparent rounded-full px-2.5 py-1 sm:p-0 border border-white/10 sm:border-0">
-                <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 flex-shrink-0" />
+              <div className="inline-flex items-center gap-1 bg-white/5 sm:bg-transparent rounded-full px-2 py-0.5 sm:p-0 border border-white/10 sm:border-0">
+                <Clock className="w-3 sm:w-4 h-3 sm:h-4 text-amber-400 flex-shrink-0" />
                 <span>Rep: {CONFIG.reportingTime}</span>
               </div>
               <span className="hidden md:inline text-slate-600">|</span>
-              <div className="inline-flex items-center gap-1.5 bg-white/5 sm:bg-transparent rounded-full px-2.5 py-1 sm:p-0 border border-white/10 sm:border-0">
-                <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 flex-shrink-0" />
+              <div className="inline-flex items-center gap-1 bg-white/5 sm:bg-transparent rounded-full px-2 py-0.5 sm:p-0 border border-white/10 sm:border-0">
+                <Clock className="w-3 sm:w-4 h-3 sm:h-4 text-amber-400 flex-shrink-0" />
                 <span>Event: {CONFIG.eventTime}</span>
               </div>
               <span className="hidden md:inline text-slate-600">|</span>
-              <div className="inline-flex items-center gap-1.5 bg-white/5 sm:bg-transparent rounded-full px-2.5 py-1 sm:p-0 border border-white/10 sm:border-0">
-                <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 flex-shrink-0" />
+              <div className="inline-flex items-center gap-1 bg-white/5 sm:bg-transparent rounded-full px-2 py-0.5 sm:p-0 border border-white/10 sm:border-0">
+                <MapPin className="w-3 sm:w-4 h-3 sm:h-4 text-amber-400 flex-shrink-0" />
                 <span>{CONFIG.fullVenue}</span>
               </div>
               <span className="hidden md:inline text-slate-600">|</span>
               <button
                 type="button"
                 onClick={toggleAudioSound}
-                className="text-amber-400 hover:text-amber-300 inline-flex items-center gap-1 cursor-pointer bg-amber-500/10 sm:bg-transparent rounded-full px-2.5 py-1 sm:p-0 border border-amber-500/20 sm:border-0"
+                className="text-amber-400 hover:text-amber-300 inline-flex items-center gap-1 cursor-pointer bg-amber-500/10 sm:bg-transparent rounded-full px-2 py-0.5 sm:p-0 border border-amber-500/20 sm:border-0"
                 title={isAudioMuted ? "Unmute Music" : "Mute Music"}
               >
-                {isAudioMuted ? <VolumeX className="w-3.5 h-3.5 flex-shrink-0" /> : <Volume2 className="w-3.5 h-3.5 flex-shrink-0" />}
+                {isAudioMuted ? <VolumeX className="w-3 sm:w-3.5 h-3 sm:h-3.5 flex-shrink-0" /> : <Volume2 className="w-3 sm:w-3.5 h-3 sm:h-3.5 flex-shrink-0" />}
                 <span>{isAudioMuted ? "Music Muted" : "Music Playing 🎵"}</span>
               </button>
               <span className="hidden md:inline text-slate-600">|</span>
               <button
                 type="button"
                 onClick={() => setPageView('intro')}
-                className="text-amber-400 hover:text-amber-300 underline underline-offset-2 inline-flex items-center gap-1 cursor-pointer bg-amber-500/10 sm:bg-transparent rounded-full px-2.5 py-1 sm:p-0 border border-amber-500/20 sm:border-0"
+                className="text-amber-400 hover:text-amber-300 underline underline-offset-2 inline-flex items-center gap-1 cursor-pointer bg-amber-500/10 sm:bg-transparent rounded-full px-2 py-0.5 sm:p-0 border border-amber-500/20 sm:border-0"
               >
-                <Info className="w-3.5 h-3.5 flex-shrink-0" />
+                <Info className="w-3 sm:w-3.5 h-3 sm:h-3.5 flex-shrink-0" />
                 <span>Rules &amp; Notes</span>
               </button>
             </div>
@@ -1332,70 +1327,70 @@ export default function SingAlongBooking() {
                   className="bg-white border-2 border-slate-200 rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl relative text-slate-800"
                 >
                   {/* Ticket Top Header Banner */}
-                  <div className="bg-gradient-to-r from-[#0f172a] via-[#1e293b] to-[#0f172a] text-white p-3.5 sm:p-5 flex items-center justify-between border-b-2 border-amber-500/40">
-                    <div className="flex items-center gap-2 sm:gap-2.5">
+                  <div className="bg-gradient-to-r from-[#0f172a] via-[#1e293b] to-[#0f172a] text-white p-3 sm:p-5 flex items-center justify-between border-b-2 border-amber-500/40">
+                    <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
                       <div className="bg-white rounded-lg sm:rounded-xl p-1 sm:p-1.5 shadow flex-shrink-0">
-                        <img src={WEGROW_LOGO_IMG} onError={(e) => { e.currentTarget.src = WEGROW_BACKUP_LOGO; }} alt="WeGrow" className="h-6 sm:h-7 w-auto" />
+                        <img src={WEGROW_LOGO_IMG} onError={(e) => { e.currentTarget.src = WEGROW_BACKUP_LOGO; }} alt="WeGrow" className="h-5 sm:h-7 w-auto object-contain" />
                       </div>
-                      <div>
-                        <span className="font-display text-[9px] sm:text-[10px] font-extrabold uppercase tracking-widest text-amber-400">OFFICIAL ENTRY PASS</span>
-                        <h3 className="font-display text-base sm:text-lg font-black leading-tight text-white">SING ALONG 2026</h3>
+                      <div className="min-w-0">
+                        <span className="font-display text-[8px] sm:text-[10px] font-extrabold uppercase tracking-widest text-amber-400 block truncate">OFFICIAL ENTRY PASS</span>
+                        <h3 className="font-display text-sm sm:text-lg font-black leading-tight text-white truncate">SING ALONG 2026</h3>
                       </div>
                     </div>
                     <div className="text-right flex-shrink-0 pl-2">
-                      <span className="text-[9px] sm:text-[10px] uppercase font-bold text-slate-400 block">PASS ID</span>
+                      <span className="text-[8px] sm:text-[10px] uppercase font-bold text-slate-400 block">PASS ID</span>
                       <span className="font-display font-black text-amber-400 text-xs sm:text-sm tracking-wider">{ticketData.bookingId}</span>
                     </div>
                   </div>
 
                   {/* Middle Section: Event & Attendee Details */}
-                  <div className="p-4 sm:p-6">
-                    <div className="grid grid-cols-1 xs:grid-cols-2 gap-3 sm:gap-4 pb-3.5 sm:pb-4 border-b border-dashed border-slate-200">
+                  <div className="p-3.5 sm:p-6">
+                    <div className="grid grid-cols-2 gap-2.5 sm:gap-4 pb-3 sm:pb-4 border-b border-dashed border-slate-200">
                       <div>
-                        <span className="text-[9px] sm:text-[10px] uppercase font-extrabold text-slate-400 block tracking-wider">ATTENDEE NAME</span>
-                        <span className="font-display text-sm sm:text-base font-black text-slate-900">{ticketData.fullName}</span>
-                        <span className="text-xs text-slate-500 block">{ticketData.phone}</span>
+                        <span className="text-[8px] sm:text-[10px] uppercase font-extrabold text-slate-400 block tracking-wider">ATTENDEE NAME</span>
+                        <span className="font-display text-xs sm:text-base font-black text-slate-900 block truncate">{ticketData.fullName}</span>
+                        <span className="text-[11px] sm:text-xs text-slate-500 block truncate">{ticketData.phone}</span>
                       </div>
-                      <div className="xs:text-right">
-                        <span className="text-[9px] sm:text-[10px] uppercase font-extrabold text-slate-400 block tracking-wider">TICKETS &amp; AMOUNT</span>
-                        <span className="font-display text-sm sm:text-base font-black text-[#ff6a00]">
+                      <div className="text-right">
+                        <span className="text-[8px] sm:text-[10px] uppercase font-extrabold text-slate-400 block tracking-wider">TICKETS &amp; AMOUNT</span>
+                        <span className="font-display text-xs sm:text-base font-black text-[#ff6a00] block truncate">
                           {ticketData.ticketQty} Pass{ticketData.ticketQty > 1 ? 'es' : ''} ({rupee(ticketData.amount)})
                         </span>
-                        <span className="text-[11px] text-emerald-600 font-bold block">● Payment Verified</span>
+                        <span className="text-[10px] sm:text-[11px] text-emerald-600 font-bold block">● Payment Verified</span>
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 xs:grid-cols-2 gap-3 sm:gap-4 py-3.5 sm:py-4 border-b border-dashed border-slate-200 text-xs">
+                    <div className="grid grid-cols-2 gap-2.5 sm:gap-4 py-3 sm:py-4 border-b border-dashed border-slate-200 text-xs">
                       <div>
-                        <span className="text-[9px] sm:text-[10px] uppercase font-extrabold text-slate-400 block tracking-wider">DATE &amp; TIME</span>
-                        <span className="font-bold text-slate-800">{CONFIG.date}</span>
-                        <span className="text-slate-500 block">{CONFIG.eventTime}</span>
+                        <span className="text-[8px] sm:text-[10px] uppercase font-extrabold text-slate-400 block tracking-wider">DATE &amp; TIME</span>
+                        <span className="font-bold text-slate-800 block text-xs sm:text-sm">{CONFIG.date}</span>
+                        <span className="text-slate-500 block text-[11px] sm:text-xs">{CONFIG.eventTime}</span>
                       </div>
-                      <div className="xs:text-right">
-                        <span className="text-[9px] sm:text-[10px] uppercase font-extrabold text-slate-400 block tracking-wider">VENUE</span>
-                        <span className="font-bold text-slate-800">{CONFIG.venue}</span>
-                        <span className="text-slate-500 block">{CONFIG.location}</span>
+                      <div className="text-right">
+                        <span className="text-[8px] sm:text-[10px] uppercase font-extrabold text-slate-400 block tracking-wider">VENUE</span>
+                        <span className="font-bold text-slate-800 block text-xs sm:text-sm truncate">{CONFIG.venue}</span>
+                        <span className="text-slate-500 block text-[11px] sm:text-xs truncate">{CONFIG.location}</span>
                       </div>
                     </div>
 
                     {/* Perforation Cutout Row */}
-                    <div className="relative py-3 sm:py-4 my-1 sm:my-2 flex items-center justify-between">
+                    <div className="relative py-2.5 sm:py-4 my-1 sm:my-2 flex items-center justify-between">
                       <div className="ticket-notch-left" />
                       <div className="w-full border-b-2 border-dashed border-slate-300" />
                       <div className="ticket-notch-right" />
                     </div>
 
                     {/* Bottom Section: QR Code & Instructions */}
-                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-1 sm:pt-2">
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 pt-1 sm:pt-2">
                       <div className="flex-grow text-center sm:text-left">
-                        <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[11px] font-extrabold mb-1.5">
+                        <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[10px] sm:text-[11px] font-extrabold mb-1">
                           <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" />
                           <span>VALID ENTRY CODE</span>
                         </div>
-                        <p className="text-xs text-slate-500 leading-relaxed max-w-xs mx-auto sm:mx-0">
+                        <p className="text-[11px] sm:text-xs text-slate-500 leading-relaxed max-w-xs mx-auto sm:mx-0">
                           Scan this QR code at Arasan Turf gate for instant badge check-in.
                         </p>
-                        <span className="text-[10px] text-slate-400 block mt-1 font-mono">
+                        <span className="text-[9px] sm:text-[10px] text-slate-400 block mt-1 font-mono truncate">
                           Ref: {ticketData.utr || 'UPI-DIRECT'}
                         </span>
                       </div>
@@ -1414,7 +1409,7 @@ export default function SingAlongBooking() {
                   </div>
 
                   {/* Ticket Footer Ribbon */}
-                  <div className="bg-[#fff8f0] border-t border-amber-200 px-4 sm:px-6 py-2.5 text-center text-[10px] sm:text-[11px] font-bold text-[#ff6a00]">
+                  <div className="bg-[#fff8f0] border-t border-amber-200 px-3 sm:px-6 py-2 text-center text-[9px] sm:text-[11px] font-bold text-[#ff6a00]">
                     WeGrow Skill Campus &amp; B School • Present this pass at venue entry
                   </div>
                 </div>
@@ -1527,11 +1522,11 @@ export default function SingAlongBooking() {
                 </div>
 
                 {/* SECTION 4: TWO-COLUMN BOOKING AREA (EQUAL HEIGHT ON BOTH COLUMNS) */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-8 items-stretch">
                   
-                  {/* LEFT SIDE — EVENT PROMOTIONAL POSTER CARD (Matches right card height exactly) */}
-                  <div className="lg:col-span-5 relative rounded-2xl sm:rounded-[32px] overflow-hidden shadow-2xl border-2 border-amber-500/40 bg-[#160b02] min-h-[340px] sm:min-h-[420px] lg:min-h-[580px] lg:h-full flex flex-col justify-between group">
-                    {/* Background Stage Poster with Mascot - Updated Second Poster (Image 2) */}
+                  {/* LEFT SIDE — EVENT PROMOTIONAL POSTER CARD (Compact on mobile, matches right card on desktop) */}
+                  <div className="lg:col-span-5 relative rounded-2xl sm:rounded-[32px] overflow-hidden shadow-xl border-2 border-amber-500/40 bg-[#160b02] min-h-[210px] sm:min-h-[360px] lg:min-h-[580px] lg:h-full flex flex-col justify-between group">
+                    {/* Background Stage Poster with Mascot */}
                     <img
                       src={POSTER_CARD_IMG}
                       onError={(e) => { e.currentTarget.src = POSTER_STAGE_BG; }}
@@ -1539,18 +1534,18 @@ export default function SingAlongBooking() {
                       className="absolute inset-0 w-full h-full object-cover object-center z-0 transition-transform duration-700 group-hover:scale-105"
                     />
 
-                    {/* Gradient Overlay - Keeps mascot and stage completely clear and vibrant */}
+                    {/* Gradient Overlay */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-black/30 z-10 pointer-events-none" />
 
                     {/* Top Row: Official Event & Date Pill */}
-                    <div className="relative z-20 p-3.5 sm:p-5 flex items-center justify-between gap-2">
-                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/95 text-[#0f172a] font-display text-[10px] sm:text-[11px] font-black tracking-wide shadow-md">
+                    <div className="relative z-20 p-2.5 sm:p-5 flex items-center justify-between gap-2">
+                      <div className="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full bg-white/95 text-[#0f172a] font-display text-[9px] sm:text-[11px] font-black tracking-wide shadow-md">
                         <Sparkles className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-[#ff6a00]" />
-                        <span>OFFICIAL CONCERT POSTER</span>
+                        <span>OFFICIAL POSTER</span>
                       </div>
-                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#ff6a00] text-white font-display text-[10px] sm:text-[11px] font-black shadow-md">
-                        <Calendar className="w-3.5 h-3.5 text-white" />
-                        <span>27 SEP • 6:00 PM</span>
+                      <div className="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full bg-[#ff6a00] text-white font-display text-[9px] sm:text-[11px] font-black shadow-md">
+                        <Calendar className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-white" />
+                        <span>27 SEP • 6 PM</span>
                       </div>
                     </div>
 
@@ -1558,19 +1553,19 @@ export default function SingAlongBooking() {
                     <div className="relative z-20 flex-grow" />
 
                     {/* Bottom: Card Footer with Venue & ₹249 Flat Pass */}
-                    <div className="relative z-20 p-4 sm:p-5 flex items-center justify-between border-t border-white/20 text-white backdrop-blur-md bg-black/60">
-                      <div className="flex items-center gap-1.5 text-xs sm:text-sm font-bold text-slate-100">
-                        <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#ff6a00] flex-shrink-0" />
-                        <span className="truncate max-w-[140px] sm:max-w-none">Arasan Turf, Sivakasi</span>
+                    <div className="relative z-20 p-3 sm:p-5 flex items-center justify-between border-t border-white/20 text-white backdrop-blur-md bg-black/60">
+                      <div className="flex items-center gap-1.5 text-xs sm:text-sm font-bold text-slate-100 min-w-0">
+                        <MapPin className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-[#ff6a00] flex-shrink-0" />
+                        <span className="truncate max-w-[150px] sm:max-w-none">Arasan Turf, Sivakasi</span>
                       </div>
-                      <div className="px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl bg-gradient-to-r from-[#ff6a00] to-[#ff5000] text-white font-display text-xs sm:text-sm font-black shadow-[0_4px_16px_rgba(255,106,0,0.6)]">
+                      <div className="px-3 sm:px-4 py-1 sm:py-2 rounded-xl sm:rounded-2xl bg-gradient-to-r from-[#ff6a00] to-[#ff5000] text-white font-display text-xs sm:text-sm font-black shadow-[0_4px_16px_rgba(255,106,0,0.6)] flex-shrink-0">
                         ₹249 <span className="text-[10px] sm:text-xs font-medium opacity-90">/ Pass</span>
                       </div>
                     </div>
                   </div>
 
-                  {/* RIGHT COLUMN: BOOKING FORM CARD (Matches left card height exactly) */}
-                  <div className="lg:col-span-7 relative bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-xl p-4 sm:p-6 md:p-8 h-full flex flex-col justify-between">
+                  {/* RIGHT COLUMN: BOOKING FORM CARD */}
+                  <div className="lg:col-span-7 relative bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-xl p-3.5 sm:p-6 md:p-8 h-full flex flex-col justify-between">
                     
                     {/* Doodles from HTML reference */}
                     <span className="absolute top-4 right-6 font-handwritten text-[#ff6a00] text-2xl opacity-30 select-none pointer-events-none rotate-12 hidden sm:block">
@@ -1585,12 +1580,12 @@ export default function SingAlongBooking() {
                         ========================================================= */}
                     {step === 1 && (
                       <div className="animate-fadeIn">
-                        <div className="mb-5 sm:mb-6">
-                          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#fff3eb] text-[#ff6a00] font-display text-xs font-extrabold tracking-wider uppercase mb-2">
+                        <div className="mb-4 sm:mb-6">
+                          <div className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full bg-[#fff3eb] text-[#ff6a00] font-display text-[10px] sm:text-xs font-extrabold tracking-wider uppercase mb-1.5 sm:mb-2">
                             <User className="w-3.5 h-3.5" />
                             <span>STEP 1 OF 4</span>
                           </div>
-                          <h2 className="font-display text-xl sm:text-3xl font-black text-slate-900">
+                          <h2 className="font-display text-lg sm:text-3xl font-black text-slate-900">
                             Booker Details
                           </h2>
                           <p className="text-xs sm:text-sm text-slate-500 mt-1">
@@ -1598,20 +1593,20 @@ export default function SingAlongBooking() {
                           </p>
                         </div>
 
-                        <div className="space-y-3.5 sm:space-y-4">
+                        <div className="space-y-3 sm:space-y-4">
                           {/* Full Name */}
                           <div>
-                            <label className="block font-display text-xs font-bold text-slate-800 mb-1.5">
+                            <label className="block font-display text-xs font-bold text-slate-800 mb-1">
                               Full Name <span className="text-[#ff6a00]">*</span>
                             </label>
                             <div className="relative">
-                              <User className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#ff6a00]" />
+                              <User className="w-4 h-4 sm:w-5 sm:h-5 absolute left-3 top-1/2 -translate-y-1/2 text-[#ff6a00]" />
                               <input
                                 type="text"
                                 value={booker.name}
                                 onChange={(e) => setBooker({ ...booker, name: e.target.value })}
                                 placeholder="e.g. Rahul Sharma"
-                                className={`w-full h-12 pl-11 pr-4 rounded-xl border-2 bg-[#fdfbf7] text-slate-900 font-medium text-sm outline-none transition-all ${
+                                className={`w-full h-11 sm:h-12 pl-9 sm:pl-11 pr-3 sm:pr-4 rounded-xl border-2 bg-[#fdfbf7] text-slate-900 font-medium text-xs sm:text-sm outline-none transition-all ${
                                   errors.name ? 'border-red-500' : 'border-slate-200 focus:border-[#ff6a00] focus:bg-white focus:ring-2 focus:ring-[#ff6a00]/20'
                                 }`}
                               />
@@ -1621,18 +1616,18 @@ export default function SingAlongBooking() {
 
                           {/* Mobile / WhatsApp Number */}
                           <div>
-                            <label className="block font-display text-xs font-bold text-slate-800 mb-1.5">
+                            <label className="block font-display text-xs font-bold text-slate-800 mb-1">
                               Mobile / WhatsApp Number <span className="text-[#ff6a00]">*</span>
                             </label>
                             <div className="relative">
-                              <Phone className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#ff6a00]" />
+                              <Phone className="w-4 h-4 sm:w-5 sm:h-5 absolute left-3 top-1/2 -translate-y-1/2 text-[#ff6a00]" />
                               <input
                                 type="tel"
                                 maxLength={10}
                                 value={booker.mobile}
                                 onChange={(e) => setBooker({ ...booker, mobile: e.target.value.replace(/\D/g, '') })}
                                 placeholder="10-digit mobile number"
-                                className={`w-full h-12 pl-11 pr-4 rounded-xl border-2 bg-[#fdfbf7] text-slate-900 font-medium text-sm outline-none transition-all ${
+                                className={`w-full h-11 sm:h-12 pl-9 sm:pl-11 pr-3 sm:pr-4 rounded-xl border-2 bg-[#fdfbf7] text-slate-900 font-medium text-xs sm:text-sm outline-none transition-all ${
                                   errors.mobile ? 'border-red-500' : 'border-slate-200 focus:border-[#ff6a00] focus:bg-white focus:ring-2 focus:ring-[#ff6a00]/20'
                                 }`}
                               />
@@ -1642,17 +1637,17 @@ export default function SingAlongBooking() {
 
                           {/* Email ID */}
                           <div>
-                            <label className="block font-display text-xs font-bold text-slate-800 mb-1.5">
+                            <label className="block font-display text-xs font-bold text-slate-800 mb-1">
                               Email ID <span className="text-slate-400 font-normal">(Recommended)</span>
                             </label>
                             <div className="relative">
-                              <Mail className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#ff6a00]" />
+                              <Mail className="w-4 h-4 sm:w-5 sm:h-5 absolute left-3 top-1/2 -translate-y-1/2 text-[#ff6a00]" />
                               <input
                                 type="email"
                                 value={booker.email}
                                 onChange={(e) => setBooker({ ...booker, email: e.target.value })}
                                 placeholder="e.g. rahul@example.com"
-                                className={`w-full h-12 pl-11 pr-4 rounded-xl border-2 bg-[#fdfbf7] text-slate-900 font-medium text-sm outline-none transition-all ${
+                                className={`w-full h-11 sm:h-12 pl-9 sm:pl-11 pr-3 sm:pr-4 rounded-xl border-2 bg-[#fdfbf7] text-slate-900 font-medium text-xs sm:text-sm outline-none transition-all ${
                                   errors.email ? 'border-red-500' : 'border-slate-200 focus:border-[#ff6a00] focus:bg-white focus:ring-2 focus:ring-[#ff6a00]/20'
                                 }`}
                               />
@@ -1661,30 +1656,30 @@ export default function SingAlongBooking() {
                           </div>
 
                           {/* Attendee Ticket Quantity Counter Card */}
-                          <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between gap-3 bg-[#fff8f0] border-2 border-amber-500/30 rounded-xl sm:rounded-2xl p-3.5 sm:p-4 mt-2">
+                          <div className="flex items-center justify-between gap-2.5 bg-[#fff8f0] border-2 border-amber-500/30 rounded-xl sm:rounded-2xl p-3 sm:p-4 mt-2">
                             <div>
-                              <span className="font-display text-sm font-bold text-slate-900 block">Number of Attendees</span>
-                              <span className="text-xs text-[#ff6a00] font-bold block">
+                              <span className="font-display text-xs sm:text-sm font-bold text-slate-900 block">Number of Attendees</span>
+                              <span className="text-[11px] sm:text-xs text-[#ff6a00] font-bold block">
                                 {rupee(CONFIG.ticketPrice)} × {qty} {qty > 1 ? 'Passes' : 'Pass'}{conventionFee > 0 ? ` (+${rupee(conventionFee)} fee)` : ''} = {rupee(totalAmount)}
                               </span>
                             </div>
-                            <div className="flex items-center gap-3 bg-white border border-slate-200 rounded-xl px-2 py-1 shadow-sm self-end xs:self-auto">
+                            <div className="flex items-center gap-2 sm:gap-3 bg-white border border-slate-200 rounded-xl px-1.5 sm:px-2 py-1 shadow-xs flex-shrink-0">
                               <button
                                 type="button"
                                 onClick={() => handleQtyChange(-1)}
                                 disabled={qty <= 1}
-                                className="w-8 h-8 rounded-lg bg-[#fff3eb] text-[#ff6a00] font-black text-lg flex items-center justify-center hover:bg-[#ffe5d4] disabled:opacity-30 cursor-pointer"
+                                className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#fff3eb] text-[#ff6a00] font-black text-base sm:text-lg flex items-center justify-center hover:bg-[#ffe5d4] disabled:opacity-30 cursor-pointer"
                               >
                                 −
                               </button>
-                              <span className="font-display font-black text-base w-6 text-center text-slate-900">
+                              <span className="font-display font-black text-sm sm:text-base w-5 sm:w-6 text-center text-slate-900">
                                 {qty}
                               </span>
                               <button
                                 type="button"
                                 onClick={() => handleQtyChange(1)}
                                 disabled={qty >= CONFIG.maxTickets}
-                                className="w-8 h-8 rounded-lg bg-[#fff3eb] text-[#ff6a00] font-black text-lg flex items-center justify-center hover:bg-[#ffe5d4] disabled:opacity-30 cursor-pointer"
+                                className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#fff3eb] text-[#ff6a00] font-black text-base sm:text-lg flex items-center justify-center hover:bg-[#ffe5d4] disabled:opacity-30 cursor-pointer"
                               >
                                 +
                               </button>
@@ -1692,27 +1687,27 @@ export default function SingAlongBooking() {
                           </div>
 
                           {/* Privacy Shield Notice */}
-                          <div className="flex items-start gap-2.5 bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-500">
-                            <ShieldCheck className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
+                          <div className="flex items-start gap-2 bg-slate-50 border border-slate-200 rounded-xl p-2.5 sm:p-3 text-[11px] sm:text-xs text-slate-500">
+                            <ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
                             <p>
                               Your information is safe with us. We'll never share your contact details with third parties.
                             </p>
                           </div>
 
                           {/* Bottom Checkout Action */}
-                          <div className="pt-4 border-t border-slate-200 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3.5 sm:gap-4 mt-6">
+                          <div className="pt-3.5 sm:pt-4 border-t border-slate-200 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 mt-5 sm:mt-6">
                             <div className="flex items-center justify-between sm:block">
-                              <span className="text-[11px] uppercase font-bold text-slate-400 block tracking-wider">Payable Amount:</span>
-                              <span className="font-display text-2xl font-black text-[#ff6a00]">{rupee(totalAmount)}</span>
+                              <span className="text-[10px] sm:text-[11px] uppercase font-bold text-slate-400 block tracking-wider">Payable Amount:</span>
+                              <span className="font-display text-xl sm:text-2xl font-black text-[#ff6a00]">{rupee(totalAmount)}</span>
                             </div>
 
                             <button
                               type="button"
                               onClick={handleNext}
-                              className="w-full sm:w-auto px-6 sm:px-8 py-3.5 rounded-xl font-display font-black text-sm text-white bg-gradient-to-r from-[#ff6a00] to-[#ee5007] hover:brightness-110 active:scale-95 shadow-lg shadow-orange-600/30 flex items-center justify-center gap-2 cursor-pointer transition-all"
+                              className="w-full sm:w-auto px-5 sm:px-8 py-3 sm:py-3.5 rounded-xl font-display font-black text-xs sm:text-sm text-white bg-gradient-to-r from-[#ff6a00] to-[#ee5007] hover:brightness-110 active:scale-98 shadow-lg shadow-orange-600/30 flex items-center justify-center gap-2 cursor-pointer transition-all"
                             >
                               <span>Proceed to Ticket Details</span>
-                              <ChevronRight className="w-4 h-4" />
+                              <ChevronRight className="w-4 h-4 flex-shrink-0" />
                             </button>
                           </div>
                         </div>
@@ -1839,97 +1834,97 @@ export default function SingAlongBooking() {
                         </div>
 
                         {/* Payment Method Selector Tabs */}
-                        <div className="grid grid-cols-2 gap-2.5 p-1.5 bg-slate-100/80 border border-slate-200 rounded-2xl mb-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-1.5 bg-slate-100/90 border border-slate-200 rounded-xl sm:rounded-2xl mb-4 sm:mb-6">
                           <button
                             type="button"
                             onClick={() => setPaymentMode('ONLINE')}
-                            className={`py-3 px-2 sm:px-4 rounded-xl font-display text-xs sm:text-sm font-black flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                            className={`py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl font-display text-xs sm:text-sm font-black flex items-center justify-center gap-2 transition-all cursor-pointer ${
                               paymentMode === 'ONLINE'
                                 ? 'bg-gradient-to-r from-[#ff6a00] to-[#ee5007] text-white shadow-md'
                                 : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
                             }`}
                           >
-                            <Zap className="w-4 h-4 text-amber-200 fill-amber-200" />
-                            <span>⚡ Real-Time Online Pay</span>
+                            <Zap className="w-4 h-4 text-amber-200 fill-amber-200 flex-shrink-0" />
+                            <span>⚡ Instant Online Pay (UPI / Cards)</span>
                           </button>
 
                           <button
                             type="button"
                             onClick={() => setPaymentMode('MANUAL_UPI')}
-                            className={`py-3 px-2 sm:px-4 rounded-xl font-display text-xs sm:text-sm font-black flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                            className={`py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl font-display text-xs sm:text-sm font-black flex items-center justify-center gap-2 transition-all cursor-pointer ${
                               paymentMode === 'MANUAL_UPI'
                                 ? 'bg-gradient-to-r from-[#ff6a00] to-[#ee5007] text-white shadow-md'
                                 : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
                             }`}
                           >
-                            <CreditCard className="w-4 h-4" />
-                            <span>📱 Scan GPay QR (Manual UTR)</span>
+                            <CreditCard className="w-4 h-4 flex-shrink-0" />
+                            <span>📱 Scan GPay QR &amp; Enter UTR</span>
                           </button>
                         </div>
 
                         {/* TAB 1: REAL-TIME ONLINE GATEWAY (DEFAULT & FIRST) */}
                         {paymentMode === 'ONLINE' && (
-                          <div className="space-y-5 animate-fadeIn">
-                            <div className="bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-transparent border-2 border-[#ff6a00]/30 rounded-2xl p-5 sm:p-6">
-                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                          <div className="space-y-4 sm:space-y-5 animate-fadeIn">
+                            <div className="bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-transparent border-2 border-[#ff6a00]/30 rounded-xl sm:rounded-2xl p-3.5 sm:p-6">
+                              <div className="flex flex-row items-center justify-between gap-2 mb-3 sm:mb-4">
                                 <div>
-                                  <span className="text-[10px] uppercase font-extrabold text-[#ff6a00] tracking-wider block">REAL-TIME CHECKOUT</span>
-                                  <h3 className="font-display text-lg sm:text-xl font-black text-slate-900">Instant Automated Verification</h3>
+                                  <span className="text-[9px] sm:text-[10px] uppercase font-extrabold text-[#ff6a00] tracking-wider block">REAL-TIME CHECKOUT</span>
+                                  <h3 className="font-display text-base sm:text-xl font-black text-slate-900">Instant Verification</h3>
                                 </div>
-                                <div className="sm:text-right">
-                                  <span className="text-[10px] uppercase font-extrabold text-slate-400 block">TOTAL PAYABLE</span>
-                                  <span className="font-display text-2xl font-black text-[#ff6a00]">{rupee(totalAmount)}</span>
+                                <div className="text-right">
+                                  <span className="text-[9px] sm:text-[10px] uppercase font-extrabold text-slate-400 block">TOTAL PAYABLE</span>
+                                  <span className="font-display text-xl sm:text-2xl font-black text-[#ff6a00]">{rupee(totalAmount)}</span>
                                 </div>
                               </div>
 
-                              <p className="text-xs text-slate-600 leading-relaxed mb-4">
-                                Supports <strong>Google Pay, PhonePe, Paytm, BHIM UPI, Credit/Debit Cards</strong>, and <strong>NetBanking</strong>. Your digital ticket pass is confirmed immediately upon payment.
+                              <p className="text-xs text-slate-600 leading-relaxed mb-3 sm:mb-4">
+                                Supports <strong>Google Pay, PhonePe, Paytm, BHIM UPI, Credit/Debit Cards</strong>, and <strong>NetBanking</strong>. Your digital pass is generated immediately.
                               </p>
 
-                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-5">
-                                <div className="p-2.5 rounded-xl bg-white border border-slate-200 text-center shadow-xs">
+                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2 mb-4 sm:mb-5">
+                                <div className="p-2 sm:p-2.5 rounded-xl bg-white border border-slate-200 text-center shadow-xs">
                                   <span className="text-xs font-bold text-slate-700 block">Google Pay</span>
-                                  <span className="text-[10px] text-emerald-600 font-semibold">⚡ Instant UPI</span>
+                                  <span className="text-[9px] sm:text-[10px] text-emerald-600 font-semibold">⚡ Instant UPI</span>
                                 </div>
-                                <div className="p-2.5 rounded-xl bg-white border border-slate-200 text-center shadow-xs">
+                                <div className="p-2 sm:p-2.5 rounded-xl bg-white border border-slate-200 text-center shadow-xs">
                                   <span className="text-xs font-bold text-slate-700 block">PhonePe</span>
-                                  <span className="text-[10px] text-emerald-600 font-semibold">⚡ Instant UPI</span>
+                                  <span className="text-[9px] sm:text-[10px] text-emerald-600 font-semibold">⚡ Instant UPI</span>
                                 </div>
-                                <div className="p-2.5 rounded-xl bg-white border border-slate-200 text-center shadow-xs">
+                                <div className="p-2 sm:p-2.5 rounded-xl bg-white border border-slate-200 text-center shadow-xs">
                                   <span className="text-xs font-bold text-slate-700 block">Paytm UPI</span>
-                                  <span className="text-[10px] text-emerald-600 font-semibold">⚡ Instant UPI</span>
+                                  <span className="text-[9px] sm:text-[10px] text-emerald-600 font-semibold">⚡ Instant UPI</span>
                                 </div>
-                                <div className="p-2.5 rounded-xl bg-white border border-slate-200 text-center shadow-xs">
+                                <div className="p-2 sm:p-2.5 rounded-xl bg-white border border-slate-200 text-center shadow-xs">
                                   <span className="text-xs font-bold text-slate-700 block">Cards / NetBank</span>
-                                  <span className="text-[10px] text-blue-600 font-semibold">🔒 256-bit Secure</span>
+                                  <span className="text-[9px] sm:text-[10px] text-blue-600 font-semibold">🔒 256-bit Secure</span>
                                 </div>
                               </div>
 
                               {isOnlinePaying && cashfreeOrder ? (
-                                <div className="bg-white border-2 border-emerald-500/40 rounded-2xl p-5 text-center space-y-3 shadow-lg animate-fadeIn">
-                                  <div className="w-12 h-12 mx-auto rounded-full bg-emerald-50 flex items-center justify-center">
-                                    <ShieldCheck className="w-6 h-6 text-emerald-600" />
+                                <div className="bg-white border-2 border-emerald-500/40 rounded-xl sm:rounded-2xl p-4 sm:p-5 text-center space-y-3 shadow-lg animate-fadeIn">
+                                  <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto rounded-full bg-emerald-50 flex items-center justify-center">
+                                    <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-600" />
                                   </div>
-                                  <div className="font-display font-black text-slate-900 text-base">
+                                  <div className="font-display font-black text-slate-900 text-sm sm:text-base">
                                     Cashfree Checkout Active
                                   </div>
                                   <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                                    Please complete your payment in the Cashfree checkout window or popup. Once completed, click the button below to verify and view your ticket.
+                                    Please complete your payment in the checkout window. Once completed, click the button below to verify.
                                   </p>
-                                  <div className="flex flex-wrap items-center justify-center gap-2">
-                                    <div className="text-[11px] font-mono text-slate-600 bg-slate-100 py-1.5 px-3 rounded-lg inline-block">
+                                  <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
+                                    <div className="text-[10px] sm:text-[11px] font-mono text-slate-600 bg-slate-100 py-1 px-2.5 rounded-lg inline-block">
                                       Order ID: <strong className="text-slate-900">{cashfreeOrder.orderId || cashfreeOrder.bookingId}</strong>
                                     </div>
-                                    <div className="text-[11px] font-mono text-slate-600 bg-slate-100 py-1.5 px-3 rounded-lg inline-block">
+                                    <div className="text-[10px] sm:text-[11px] font-mono text-slate-600 bg-slate-100 py-1 px-2.5 rounded-lg inline-block">
                                       Amount: <strong className="text-emerald-700 font-bold">{rupee(cashfreeOrder.amount || totalAmount)}</strong>
                                     </div>
                                   </div>
-                                  <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 pt-2">
+                                  <div className="flex flex-col sm:flex-row items-center justify-center gap-2 pt-1">
                                     <button
                                       type="button"
                                       onClick={() => handleCheckPaymentStatus()}
                                       disabled={isCheckingPayment}
-                                      className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-md cursor-pointer flex items-center justify-center gap-2 disabled:opacity-60"
+                                      className="w-full sm:w-auto px-4 sm:px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-md cursor-pointer flex items-center justify-center gap-2 disabled:opacity-60"
                                     >
                                       {isCheckingPayment ? (
                                         <>
@@ -1948,7 +1943,7 @@ export default function SingAlongBooking() {
                                         href={cashfreeOrder.paymentLink}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-bold text-slate-700 bg-amber-100 hover:bg-amber-200 cursor-pointer text-center"
+                                        className="w-full sm:w-auto px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-700 bg-amber-100 hover:bg-amber-200 cursor-pointer text-center"
                                       >
                                         Re-open Payment Page
                                       </a>
@@ -1956,7 +1951,7 @@ export default function SingAlongBooking() {
                                     <button
                                       type="button"
                                       onClick={handleCancelOnlinePay}
-                                      className="w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 cursor-pointer"
+                                      className="w-full sm:w-auto px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 cursor-pointer"
                                     >
                                       Cancel
                                     </button>
@@ -1967,33 +1962,33 @@ export default function SingAlongBooking() {
                                   type="button"
                                   onClick={handleInstantOnlinePay}
                                   disabled={isOnlinePaying}
-                                  className="w-full py-4 px-6 rounded-xl font-display font-black text-sm sm:text-base text-white bg-gradient-to-r from-[#ff6a00] via-[#ee5007] to-[#d84000] hover:brightness-110 active:scale-98 shadow-xl shadow-orange-500/30 flex items-center justify-center gap-2.5 cursor-pointer transition-all disabled:opacity-60"
+                                  className="w-full py-3.5 sm:py-4 px-4 sm:px-6 rounded-xl font-display font-black text-xs sm:text-base text-white bg-gradient-to-r from-[#ff6a00] via-[#ee5007] to-[#d84000] hover:brightness-110 active:scale-98 shadow-xl shadow-orange-500/30 flex items-center justify-center gap-2 cursor-pointer transition-all disabled:opacity-60"
                                 >
                                   {isOnlinePaying ? (
                                     <>
-                                      <RefreshCw className="w-5 h-5 animate-spin" />
+                                      <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
                                       <span>Connecting Cashfree Gateway...</span>
                                     </>
                                   ) : (
                                     <>
-                                      <Zap className="w-5 h-5 text-amber-200 fill-amber-200" />
-                                      <span>Pay {rupee(totalAmount)} Now (Cashfree Instant UPI &amp; Cards)</span>
+                                      <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-amber-200 fill-amber-200 flex-shrink-0" />
+                                      <span>Pay {rupee(totalAmount)} Now (Instant Checkout)</span>
                                     </>
                                   )}
                                 </button>
                               )}
                             </div>
 
-                            <div className="flex items-center justify-center gap-2 text-xs text-slate-500">
-                              <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                              <span>256-bit SSL encrypted • Instant digital ticket pass with QR</span>
+                            <div className="flex items-center justify-center gap-1.5 text-[11px] sm:text-xs text-slate-500 text-center">
+                              <ShieldCheck className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                              <span>256-bit SSL encrypted • Instant digital entry pass with QR</span>
                             </div>
 
-                            <div className="pt-4 border-t border-slate-200 flex items-center justify-between">
+                            <div className="pt-3.5 sm:pt-4 border-t border-slate-200 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4">
                               <button
                                 type="button"
                                 onClick={handleBack}
-                                className="px-5 py-3 rounded-xl font-display font-bold text-sm text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors flex items-center gap-1.5 cursor-pointer"
+                                className="w-full sm:w-auto px-5 py-3 rounded-xl font-display font-bold text-sm text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                               >
                                 <ChevronLeft className="w-4 h-4" />
                                 <span>Back</span>
@@ -2001,7 +1996,7 @@ export default function SingAlongBooking() {
                               <button
                                 type="button"
                                 onClick={() => setPaymentMode('MANUAL_UPI')}
-                                className="text-xs font-bold text-[#ff6a00] hover:underline cursor-pointer"
+                                className="text-xs font-bold text-[#ff6a00] hover:underline cursor-pointer text-center py-1 sm:py-0"
                               >
                                 Or scan Google Pay QR code &rarr;
                               </button>
@@ -2012,9 +2007,9 @@ export default function SingAlongBooking() {
                         {/* TAB 2: DIRECT GOOGLE PAY QR & UTR ENTRY */}
                         {paymentMode === 'MANUAL_UPI' && (
                           <div className="space-y-4 sm:space-y-5 animate-fadeIn">
-                            <div className="bg-[#fdfbf7] border-2 border-amber-500/30 rounded-xl sm:rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-center gap-4 sm:gap-5">
+                            <div className="bg-[#fdfbf7] border-2 border-amber-500/30 rounded-xl sm:rounded-2xl p-3.5 sm:p-5 flex flex-col sm:flex-row items-center gap-3.5 sm:gap-5">
                               <div className="flex-shrink-0 flex flex-col items-center">
-                                <div className="bg-white p-2.5 rounded-2xl border-2 border-slate-200 shadow-sm relative">
+                                <div className="bg-white p-2 rounded-2xl border-2 border-slate-200 shadow-sm relative">
                                   {showOriginalQr ? (
                                     <img
                                       src="/ashok_kumar_upi_qr.jpg"
@@ -2036,7 +2031,7 @@ export default function SingAlongBooking() {
                                 <button
                                   type="button"
                                   onClick={() => setShowOriginalQr(!showOriginalQr)}
-                                  className="mt-2 text-[11px] text-[#ff6a00] hover:text-[#ee5007] font-bold underline underline-offset-2 cursor-pointer"
+                                  className="mt-1.5 text-[11px] text-[#ff6a00] hover:text-[#ee5007] font-bold underline underline-offset-2 cursor-pointer"
                                 >
                                   {showOriginalQr ? "Show Dynamic Amount QR" : "Show GPay Standee QR"}
                                 </button>
@@ -2045,28 +2040,28 @@ export default function SingAlongBooking() {
                               <div className="flex-grow space-y-2 text-center sm:text-left w-full sm:w-auto">
                                 <div className="flex items-center justify-center sm:justify-start gap-1.5">
                                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                                  <span className="text-[11px] uppercase font-extrabold text-slate-500 tracking-wider">
+                                  <span className="text-[10px] sm:text-[11px] uppercase font-extrabold text-slate-500 tracking-wider">
                                     PAY TO: <strong className="text-slate-900">{CONFIG.payeeName}</strong>
                                   </span>
                                 </div>
 
-                                <div className="font-display text-2xl font-black text-slate-900">
+                                <div className="font-display text-xl sm:text-2xl font-black text-slate-900">
                                   {rupee(totalAmount)}
                                   {conventionFee > 0 && (
-                                    <span className="text-xs text-slate-500 font-normal ml-2">({rupee(subtotal)} + {rupee(conventionFee)} fee)</span>
+                                    <span className="text-xs text-slate-500 font-normal ml-1.5">({rupee(subtotal)} + {rupee(conventionFee)} fee)</span>
                                   )}
                                 </div>
 
-                                <div className="flex flex-col gap-2">
-                                  <div className="inline-flex items-center justify-between gap-2 bg-white border border-slate-300 rounded-xl px-3 py-1.5 shadow-sm max-w-full">
-                                    <div className="flex items-center gap-1.5 text-xs text-slate-500 truncate">
-                                      <span className="font-bold text-slate-700">UPI ID:</span>
+                                <div className="flex flex-col gap-2 w-full">
+                                  <div className="flex w-full items-center justify-between gap-2 bg-white border border-slate-300 rounded-xl px-2.5 sm:px-3 py-1.5 shadow-xs">
+                                    <div className="flex items-center gap-1.5 text-xs text-slate-500 min-w-0">
+                                      <span className="font-bold text-slate-700 flex-shrink-0">UPI ID:</span>
                                       <span className="font-mono font-bold text-slate-900 truncate">{CONFIG.upiId}</span>
                                     </div>
                                     <button
                                       type="button"
                                       onClick={handleCopyUpi}
-                                      className="text-[#ff6a00] hover:text-[#ee5007] text-xs font-bold flex items-center gap-1 cursor-pointer flex-shrink-0"
+                                      className="text-[#ff6a00] hover:text-[#ee5007] text-xs font-bold flex items-center gap-1 cursor-pointer flex-shrink-0 ml-1"
                                     >
                                       {copiedUpi ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
                                       <span>{copiedUpi ? 'Copied' : 'Copy'}</span>
@@ -2074,15 +2069,15 @@ export default function SingAlongBooking() {
                                   </div>
 
                                   {CONFIG.upiNumber && (
-                                    <div className="inline-flex items-center justify-between gap-2 bg-white border border-slate-300 rounded-xl px-3 py-1.5 shadow-sm max-w-full">
-                                      <div className="flex items-center gap-1.5 text-xs text-slate-500 truncate">
-                                        <span className="font-bold text-slate-700">UPI Number:</span>
-                                        <span className="font-mono font-bold text-slate-900">{CONFIG.upiNumber}</span>
+                                    <div className="flex w-full items-center justify-between gap-2 bg-white border border-slate-300 rounded-xl px-2.5 sm:px-3 py-1.5 shadow-xs">
+                                      <div className="flex items-center gap-1.5 text-xs text-slate-500 min-w-0">
+                                        <span className="font-bold text-slate-700 flex-shrink-0">UPI Number:</span>
+                                        <span className="font-mono font-bold text-slate-900 truncate">{CONFIG.upiNumber}</span>
                                       </div>
                                       <button
                                         type="button"
                                         onClick={handleCopyUpiNumber}
-                                        className="text-[#ff6a00] hover:text-[#ee5007] text-xs font-bold flex items-center gap-1 cursor-pointer flex-shrink-0"
+                                        className="text-[#ff6a00] hover:text-[#ee5007] text-xs font-bold flex items-center gap-1 cursor-pointer flex-shrink-0 ml-1"
                                       >
                                         {copiedUpiNumber ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
                                         <span>{copiedUpiNumber ? 'Copied' : 'Copy'}</span>
@@ -2091,8 +2086,8 @@ export default function SingAlongBooking() {
                                   )}
                                 </div>
 
-                                <p className="text-[11px] text-slate-500 pt-0.5">
-                                  Supports GPay, PhonePe, Paytm, BHIM, Cred, and all UPI banking apps.
+                                <p className="text-[10px] sm:text-[11px] text-slate-500 pt-0.5">
+                                  Supports GPay, PhonePe, Paytm, BHIM, Cred, and all UPI apps.
                                 </p>
                               </div>
                             </div>
@@ -2101,16 +2096,16 @@ export default function SingAlongBooking() {
                             {upiDeepLink && (
                               <a
                                 href={upiDeepLink}
-                                className="sm:hidden w-full py-3 px-4 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-display font-black text-xs flex items-center justify-center gap-2 shadow-md active:scale-98 transition-all"
+                                className="sm:hidden w-full py-3 px-3.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-display font-black text-xs flex items-center justify-center gap-2 shadow-md active:scale-98 transition-all"
                               >
-                                <CreditCard className="w-4 h-4" />
+                                <CreditCard className="w-4 h-4 flex-shrink-0" />
                                 <span>Pay Directly with UPI App (GPay / PhonePe)</span>
                               </a>
                             )}
 
                             {/* UTR Input */}
                             <div>
-                              <label className="block font-display text-xs font-bold text-slate-800 mb-1.5">
+                              <label className="block font-display text-xs font-bold text-slate-800 mb-1">
                                 UPI Transaction ID / UTR (12 digits) <span className="text-[#ff6a00]">*</span>
                               </label>
                               <input
@@ -2118,7 +2113,7 @@ export default function SingAlongBooking() {
                                 value={payment.utr}
                                 onChange={(e) => setPayment({ ...payment, utr: e.target.value })}
                                 placeholder="e.g. 423819284712 or Bank Ref No."
-                                className={`w-full h-12 px-4 rounded-xl border-2 bg-[#fdfbf7] text-slate-900 font-mono font-semibold text-sm outline-none transition-all ${
+                                className={`w-full h-11 sm:h-12 px-3.5 sm:px-4 rounded-xl border-2 bg-[#fdfbf7] text-slate-900 font-mono font-semibold text-xs sm:text-sm outline-none transition-all ${
                                   errors.utr ? 'border-red-500' : 'border-slate-200 focus:border-[#ff6a00] focus:bg-white focus:ring-2 focus:ring-[#ff6a00]/20'
                                 }`}
                               />
@@ -2127,11 +2122,11 @@ export default function SingAlongBooking() {
 
                             {/* Screenshot Upload */}
                             <div>
-                              <label className="block font-display text-xs font-bold text-slate-800 mb-1.5">
+                              <label className="block font-display text-xs font-bold text-slate-800 mb-1">
                                 Payment Screenshot <span className="text-slate-400 font-normal">(Optional for faster approval)</span>
                               </label>
-                              <label className="border-2 border-dashed border-slate-300 hover:border-[#ff6a00] bg-[#fdfbf7] hover:bg-[#fff8f0] rounded-xl p-4 flex flex-col items-center justify-center gap-1.5 cursor-pointer transition-all">
-                                <UploadCloud className="w-6 h-6 text-[#ff6a00]" />
+                              <label className="border-2 border-dashed border-slate-300 hover:border-[#ff6a00] bg-[#fdfbf7] hover:bg-[#fff8f0] rounded-xl p-3 sm:p-4 flex flex-col items-center justify-center gap-1 cursor-pointer transition-all">
+                                <UploadCloud className="w-5 h-5 sm:w-6 sm:h-6 text-[#ff6a00]" />
                                 <span className="text-xs font-bold text-slate-700 text-center">
                                   {payment.fileName ? payment.fileName : 'Click to attach payment receipt'}
                                 </span>
@@ -2146,7 +2141,7 @@ export default function SingAlongBooking() {
                             </div>
 
                             {/* Navigation Actions */}
-                            <div className="pt-4 border-t border-slate-200 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 mt-6">
+                            <div className="pt-3.5 sm:pt-4 border-t border-slate-200 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 mt-5 sm:mt-6">
                               <button
                                 type="button"
                                 onClick={handleBack}
@@ -2156,11 +2151,11 @@ export default function SingAlongBooking() {
                                 <span>Back</span>
                               </button>
 
-                              <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
+                              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2.5 sm:gap-3 w-full sm:w-auto">
                                 <button
                                   type="button"
                                   onClick={() => setPaymentMode('ONLINE')}
-                                  className="text-xs font-bold text-[#ff6a00] hover:underline cursor-pointer hidden sm:inline"
+                                  className="text-xs font-bold text-[#ff6a00] hover:underline cursor-pointer text-center sm:text-left py-1 sm:py-0"
                                 >
                                   Or pay via Real-Time Online &rarr;
                                 </button>
@@ -2194,53 +2189,55 @@ export default function SingAlongBooking() {
                           </p>
                         </div>
 
-                        <div className="space-y-4">
+                        <div className="space-y-3.5 sm:space-y-4">
                           {/* Summary Table Card */}
-                          <div className="bg-[#fdfbf7] border-2 border-slate-200 rounded-xl sm:rounded-2xl p-4 sm:p-5 space-y-3">
-                            <div className="flex justify-between items-center pb-2 border-b border-slate-200">
+                          <div className="bg-[#fdfbf7] border-2 border-slate-200 rounded-xl sm:rounded-2xl p-3.5 sm:p-5 space-y-2.5 sm:space-y-3">
+                            <div className="flex justify-between items-center pb-2 border-b border-slate-200 gap-2">
                               <span className="text-xs text-slate-500">Attendee Name</span>
-                              <strong className="text-sm font-black text-slate-900">{booker.name}</strong>
+                              <strong className="text-xs sm:text-sm font-black text-slate-900 truncate">{booker.name}</strong>
                             </div>
-                            <div className="flex justify-between items-center pb-2 border-b border-slate-200">
+                            <div className="flex justify-between items-center pb-2 border-b border-slate-200 gap-2">
                               <span className="text-xs text-slate-500">Mobile Number</span>
-                              <strong className="text-sm font-black text-slate-900">+91 {booker.mobile}</strong>
+                              <strong className="text-xs sm:text-sm font-black text-slate-900">+91 {booker.mobile}</strong>
                             </div>
                             {booker.email && (
-                              <div className="flex justify-between items-center pb-2 border-b border-slate-200">
+                              <div className="flex justify-between items-center pb-2 border-b border-slate-200 gap-2">
                                 <span className="text-xs text-slate-500">Email</span>
-                                <strong className="text-sm font-semibold text-slate-700">{booker.email}</strong>
+                                <strong className="text-xs sm:text-sm font-semibold text-slate-700 truncate">{booker.email}</strong>
                               </div>
                             )}
-                            <div className="flex justify-between items-center pb-2 border-b border-slate-200">
+                            <div className="flex justify-between items-center pb-2 border-b border-slate-200 gap-2">
                               <span className="text-xs text-slate-500">Number of Passes</span>
-                              <strong className="text-sm font-black text-[#ff6a00]">{qty} General Pass{qty > 1 ? 'es' : ''}</strong>
+                              <strong className="text-xs sm:text-sm font-black text-[#ff6a00]">{qty} General Pass{qty > 1 ? 'es' : ''}</strong>
                             </div>
-                            <div className="flex justify-between items-center pb-2 border-b border-slate-200">
+                            <div className="flex justify-between items-center pb-2 border-b border-slate-200 gap-2">
                               <span className="text-xs text-slate-500">Ticket Price</span>
                               <strong className="text-xs font-bold text-slate-800">{qty} × {rupee(CONFIG.ticketPrice)} = {rupee(subtotal)}</strong>
                             </div>
-                            <div className="flex justify-between items-center pb-2 border-b border-slate-200">
+                            <div className="flex justify-between items-center pb-2 border-b border-slate-200 gap-2">
                               <span className="text-xs text-slate-500">Convention Fee</span>
                               <strong className="text-xs font-bold text-slate-800">{qty > 1 ? `${qty} × ${rupee(CONFIG.conventionFee)} = ` : ''}{rupee(conventionFee)}</strong>
                             </div>
-                            <div className="flex justify-between items-center pb-2 border-b border-slate-200">
-                              <span className="text-xs text-slate-500">Payment Reference (UTR)</span>
-                              <span className="font-mono text-xs font-bold text-slate-800 truncate max-w-[150px] sm:max-w-none">{payment.utr || 'Auto Online (Razorpay)'}</span>
+                            <div className="flex justify-between items-center pb-2 border-b border-slate-200 gap-2">
+                              <span className="text-xs text-slate-500 flex-shrink-0">Payment Method</span>
+                              <span className="font-mono text-xs font-bold text-slate-800 truncate max-w-[160px] sm:max-w-none text-right">
+                                {paymentMode === 'ONLINE' ? 'Cashfree Instant Checkout' : (payment.utr || 'Manual UPI / GPay')}
+                              </span>
                             </div>
                             <div className="flex justify-between items-center pt-1">
-                              <span className="font-display text-sm font-bold text-slate-800">Total Payable / Paid</span>
-                              <span className="font-display text-xl sm:text-2xl font-black text-[#ff6a00]">{rupee(totalAmount)}</span>
+                              <span className="font-display text-xs sm:text-sm font-bold text-slate-800">Total Payable / Paid</span>
+                              <span className="font-display text-lg sm:text-2xl font-black text-[#ff6a00]">{rupee(totalAmount)}</span>
                             </div>
                           </div>
 
                           {/* Non-refundable notice */}
-                          <div className="flex items-center gap-2 text-xs text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                          <div className="flex items-center gap-2 text-[11px] sm:text-xs text-slate-500 bg-slate-50 p-2.5 sm:p-3 rounded-xl border border-slate-200">
                             <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0" />
                             <span>All ticket bookings are final and non-refundable as per event policy.</span>
                           </div>
 
                           {/* Navigation Actions */}
-                          <div className="pt-4 border-t border-slate-200 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 mt-6">
+                          <div className="pt-3.5 sm:pt-4 border-t border-slate-200 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 mt-5 sm:mt-6">
                             <button
                               type="button"
                               onClick={handleBack}
@@ -2255,7 +2252,7 @@ export default function SingAlongBooking() {
                               type="button"
                               onClick={handleConfirmBooking}
                               disabled={isSubmitting}
-                              className="w-full sm:w-auto px-6 sm:px-8 py-3.5 rounded-xl font-display font-black text-sm text-white bg-gradient-to-r from-emerald-600 to-teal-700 hover:brightness-110 active:scale-95 shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2 cursor-pointer transition-all disabled:opacity-50"
+                              className="w-full sm:w-auto px-6 sm:px-8 py-3.5 rounded-xl font-display font-black text-xs sm:text-sm text-white bg-gradient-to-r from-emerald-600 to-teal-700 hover:brightness-110 active:scale-98 shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2 cursor-pointer transition-all disabled:opacity-50"
                             >
                               {isSubmitting ? (
                                 <>
@@ -2278,22 +2275,22 @@ export default function SingAlongBooking() {
                 </div>
 
                 {/* EVENT QUICK INFO FOOTER */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-8 sm:mt-10 p-4 sm:p-5 bg-white rounded-2xl border border-slate-200 shadow-sm text-xs font-bold text-slate-700">
-                  <div className="flex items-center gap-2.5 p-2 rounded-xl bg-[#fdfbf7]">
-                    <MapPin className="w-4 h-4 text-[#ff6a00] flex-shrink-0" />
-                    <span className="truncate">{CONFIG.fullVenue}</span>
+                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 mt-6 sm:mt-10 p-3 sm:p-5 bg-white rounded-2xl border border-slate-200 shadow-sm text-xs font-bold text-slate-700">
+                  <div className="flex items-center gap-2 p-2 rounded-xl bg-[#fdfbf7] min-w-0">
+                    <MapPin className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-[#ff6a00] flex-shrink-0" />
+                    <span className="truncate text-[11px] sm:text-xs">{CONFIG.fullVenue}</span>
                   </div>
-                  <div className="flex items-center gap-2.5 p-2 rounded-xl bg-[#fdfbf7]">
-                    <Calendar className="w-4 h-4 text-[#ff6a00] flex-shrink-0" />
-                    <span className="truncate">{CONFIG.dateShort} • {CONFIG.eventTime}</span>
+                  <div className="flex items-center gap-2 p-2 rounded-xl bg-[#fdfbf7] min-w-0">
+                    <Calendar className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-[#ff6a00] flex-shrink-0" />
+                    <span className="truncate text-[11px] sm:text-xs">{CONFIG.dateShort}</span>
                   </div>
-                  <div className="flex items-center gap-2.5 p-2 rounded-xl bg-[#fdfbf7]">
-                    <Sparkles className="w-4 h-4 text-[#ff6a00] flex-shrink-0" />
-                    <span className="truncate">Instant WhatsApp Pass</span>
+                  <div className="flex items-center gap-2 p-2 rounded-xl bg-[#fdfbf7] min-w-0">
+                    <Sparkles className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-[#ff6a00] flex-shrink-0" />
+                    <span className="truncate text-[11px] sm:text-xs">Instant QR Pass</span>
                   </div>
-                  <div className="flex items-center gap-2.5 p-2 rounded-xl bg-[#fdfbf7]">
-                    <Phone className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                    <span className="truncate">Support: {CONFIG.contactPhone}</span>
+                  <div className="flex items-center gap-2 p-2 rounded-xl bg-[#fdfbf7] min-w-0">
+                    <Phone className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-emerald-600 flex-shrink-0" />
+                    <span className="truncate text-[11px] sm:text-xs">{CONFIG.contactPhone}</span>
                   </div>
                 </div>
               </div>
