@@ -1080,10 +1080,9 @@ export default function SingAlongBooking() {
             <span className="absolute top-[30%] right-[24%] text-2xl text-[#ff8c00] select-none pointer-events-none z-10 animate-float-note hidden sm:block" style={{ animationDelay: '2.5s' }}>💛</span>
 
             {/* =================================================================
-                TOP BAR: Date on Right (WeGrow logo moved to Center alongside K7)
+                TOP-RIGHT DATE BADGE (Positioned Absolute so it doesn't skew center alignment)
                 ================================================================= */}
-            <div className="relative z-30 w-full flex items-start justify-end px-3 pt-3 sm:px-6 sm:pt-5 md:px-8 md:pt-6 pointer-events-auto">
-              {/* Top-Right: Date Badge Box */}
+            <div className="absolute top-3 right-3 sm:top-5 sm:right-6 md:top-6 md:right-8 z-30 pointer-events-auto">
               <div className="w-[50px] sm:w-[68px] md:w-[74px] bg-white rounded-xl sm:rounded-2xl overflow-hidden text-center shadow-[0_8px_24px_rgba(0,0,0,0.5)] border border-slate-200/40">
                 <div className="font-display text-sm sm:text-xl md:text-2xl font-black text-[#1A1A4E] pt-1 leading-none">{CONFIG.dayNum}</div>
                 <div className="bg-[#ff6a00] text-white font-body text-[8px] sm:text-xs font-black tracking-wider py-0.5">{CONFIG.monthAbbr}</div>
@@ -1107,41 +1106,41 @@ export default function SingAlongBooking() {
             </div>
 
             {/* =================================================================
-                CENTER: POSITIONED DIRECTLY ON THE STAGE TRUSS (Mobile & Desktop Responsive)
+                CENTER: POSITIONED DIRECTLY ON THE STAGE TRUSS (Perfect Desktop & Mobile Alignment)
                 Line 1: [ WeGrow Skill Campus & B School ] (BIG)
-                Line 2: [ K7 Chitfunds (P) Ltd. ] (MEDIUM)
+                Line 2: [ K7 Chitfunds (P) Ltd. ] (BALANCED)
                 Line 3: presents
                 Line 4: SING ALONG
                 ================================================================= */}
-            <div className="relative z-20 flex flex-col items-center text-center max-w-3xl mx-auto pt-1 sm:pt-2 md:-mt-10 px-3 sm:px-4">
+            <div className="relative z-20 flex flex-col items-center text-center max-w-2xl mx-auto pt-3 sm:pt-5 md:pt-6 px-3 sm:px-4">
 
-              {/* Line 1: WeGrow Skill Campus & B School (BIG - Main Brand Host) */}
-              <div className="bg-white rounded-2xl sm:rounded-3xl px-5 sm:px-8 py-2.5 sm:py-3.5 shadow-2xl border border-white/60 flex items-center justify-center w-full max-w-[280px] xs:max-w-[330px] sm:max-w-[400px] md:max-w-[440px] mb-2 sm:mb-3">
+              {/* Line 1: WeGrow Skill Campus & B School (BIG - Primary Host) */}
+              <div className="bg-white rounded-2xl sm:rounded-3xl px-4 sm:px-6 py-2 sm:py-2.5 shadow-2xl border border-white/60 flex items-center justify-center w-full max-w-[270px] xs:max-w-[310px] sm:max-w-[340px] md:max-w-[360px] mb-2 sm:mb-2.5">
                 <img
                   src={WEGROW_BACKUP_LOGO}
                   alt="WeGrow Skill Campus & B School"
-                  className="h-11 xs:h-13 sm:h-16 md:h-20 w-auto max-w-full object-contain filter drop-shadow-xs"
+                  className="h-8 xs:h-9 sm:h-11 md:h-12 w-auto max-w-full object-contain filter drop-shadow-xs"
                 />
               </div>
 
-              {/* Line 2: K7 Chitfunds (P) Ltd. Banner & Logo (Compact / Reduced Width) */}
-              <div className="bg-white rounded-xl sm:rounded-2xl px-2.5 sm:px-3.5 py-1 sm:py-1.5 shadow-xl border border-white/50 flex flex-col items-center justify-center w-auto max-w-[190px] xs:max-w-[210px] sm:max-w-[240px] mb-2 sm:mb-2.5 select-none">
+              {/* Line 2: K7 Chitfunds (P) Ltd. Banner & Logo (Balanced & Proportional) */}
+              <div className="bg-white rounded-xl sm:rounded-2xl px-3 sm:px-4 py-1.5 sm:py-2 shadow-xl border border-white/50 flex flex-col items-center justify-center w-full max-w-[220px] xs:max-w-[245px] sm:max-w-[270px] md:max-w-[290px] mb-1.5 sm:mb-2 select-none">
                 {/* K7 Logo Mark */}
                 <img
                   src="/k7_sarathy_chitfunds_logo.png"
                   alt="K7 Chitfunds"
-                  className="h-5 sm:h-7 md:h-8 w-auto object-contain mb-0.5"
+                  className="h-5 sm:h-6 md:h-7 w-auto object-contain mb-0.5"
                 />
                 {/* HARIHARA WIN */}
-                <span className="text-[#13522a] font-serif font-black text-[7px] xs:text-[8px] sm:text-[9.5px] tracking-[0.18em] uppercase leading-tight">
+                <span className="text-[#13522a] font-serif font-black text-[7.5px] xs:text-[8.5px] sm:text-[10px] tracking-[0.18em] uppercase leading-tight">
                   HARIHARA WIN
                 </span>
                 {/* K7 CHITFUNDS (P) Ltd., */}
-                <span className="text-[#13522a] font-serif font-black text-[8.5px] xs:text-[10px] sm:text-[11.5px] tracking-wide leading-tight mt-0.5">
+                <span className="text-[#13522a] font-serif font-black text-[9px] xs:text-[10.5px] sm:text-[12px] tracking-wide leading-tight mt-0.5">
                   K7 CHITFUNDS (P) Ltd.,
                 </span>
                 {/* The Experts In Finance Divider */}
-                <div className="flex items-center justify-center gap-1 w-full my-0.5 px-0.5">
+                <div className="flex items-center justify-center gap-1.5 w-full my-0.5 sm:my-1 px-1">
                   <div className="h-[1px] bg-[#13522a] flex-1" />
                   <span className="text-[#13522a] font-serif italic text-[6.5px] xs:text-[7.5px] sm:text-[8.5px] px-0.5 whitespace-nowrap">
                     The Experts In Finance
@@ -1150,29 +1149,29 @@ export default function SingAlongBooking() {
                 </div>
                 {/* CALL $ARATHY 805 66666 16 */}
                 <div className="w-full bg-[#fef043] rounded py-0.5 px-1 text-center shadow-xs">
-                  <span className="text-[#13522a] font-serif font-black text-[6.5px] xs:text-[7.5px] sm:text-[8.5px] tracking-wider block">
+                  <span className="text-[#13522a] font-serif font-black text-[7px] xs:text-[8px] sm:text-[9px] tracking-wider block">
                     CALL $ARATHY 805 66666 16
                   </span>
                 </div>
               </div>
 
               {/* Line 3: presents */}
-              <div className="flex items-center justify-center mb-1.5 sm:mb-2">
+              <div className="flex items-center justify-center mb-1 sm:mb-1.5">
                 <span className="font-body text-xs sm:text-sm md:text-base font-black tracking-widest uppercase text-white/95 drop-shadow-[0_2px_8px_rgba(0,0,0,0.95)]">
                   presents
                 </span>
               </div>
 
-              {/* Row 3: Sing Along Title Logo - Matched to Image 1 */}
-              <div className="relative select-none text-center group cursor-default pt-1 sm:pt-2">
+              {/* Row 3: Sing Along Title Logo */}
+              <div className="relative select-none text-center group cursor-default pt-0.5 sm:pt-1">
                 {/* Golden Crown doodle above ALONG */}
                 <div className="flex items-center justify-center -mb-1 sm:-mb-2">
-                  <span className="text-amber-400 font-handwritten text-xl sm:text-3xl font-black drop-shadow-[0_0_14px_rgba(255,190,0,0.9)] rotate-6 inline-block animate-float-note">
+                  <span className="text-amber-400 font-handwritten text-xl sm:text-2xl md:text-3xl font-black drop-shadow-[0_0_14px_rgba(255,190,0,0.9)] rotate-6 inline-block animate-float-note">
                     👑
                   </span>
                 </div>
 
-                <h1 className="singalong-3d-text text-4xl xs:text-5xl sm:text-6xl md:text-7xl font-black tracking-wide leading-tight drop-shadow-[0_10px_35px_rgba(0,0,0,0.95)] -rotate-2 inline-block">
+                <h1 className="singalong-3d-text text-4xl xs:text-5xl sm:text-6xl md:text-6xl font-black tracking-wide leading-tight drop-shadow-[0_10px_35px_rgba(0,0,0,0.95)] -rotate-2 inline-block">
                   <span className="inline-block transition-transform duration-300 group-hover:scale-105">
                     SING
                   </span>
@@ -1181,8 +1180,8 @@ export default function SingAlongBooking() {
                   </span>
                 </h1>
 
-                {/* Golden Yellow Brush Banner for LIVE MUSIC EVENT (Matched to Image 1) */}
-                <div className="flex items-center justify-center mt-2 sm:mt-2.5">
+                {/* Golden Yellow Brush Banner for LIVE MUSIC EVENT */}
+                <div className="flex items-center justify-center mt-1.5 sm:mt-2">
                   <div className="live-music-brush-banner text-[10px] sm:text-xs md:text-sm">
                     LIVE MUSIC EVENT
                   </div>
