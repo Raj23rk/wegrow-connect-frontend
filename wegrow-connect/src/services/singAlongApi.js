@@ -1,10 +1,6 @@
 import { getAuthHeaders } from './api';
-
-// Base URLs: Local backend if running on localhost, otherwise Render production
-const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-export const API_BASE = isLocal
-  ? 'http://localhost:3000/api/v1'
-  : 'https://wegrow-connect-backend-1.onrender.com/api/v1';
+import { API_BASE } from './config';
+export { API_BASE };
 
 async function parseResponse(response) {
   const contentType = response.headers.get('content-type');
@@ -68,6 +64,14 @@ export const submitSingPaymentUtr = singAlongApi.submitManualUtr;
 export const createSingPaymentOrder = singAlongApi.createOnlineOrder;
 export const getSingPaymentStatus = singAlongApi.checkPaymentStatus;
 export const verifySingAlongTicket = singAlongApi.verifyTicket;
+
+// Ticket View & Download URLs
+export function getSingAlongTicketUrl(bookingId) {
+  return `${API_BASE}/sing-along/ticket/${encodeURIComponent(bookingId)}`;
+}
+export function getSingAlongTicketDownloadUrl(bookingId) {
+  return `${API_BASE}/sing-along/ticket/${encodeURIComponent(bookingId)}/download`;
+}
 
 // =====================================================
 // ADDITIONAL TICKET BOOKING & ADMIN GATEWAY HELPERS

@@ -33,9 +33,16 @@ import {
   Heart,
   FileCheck,
   RefreshCw,
-  Zap
+  Zap,
+  Printer,
+  ExternalLink
 } from 'lucide-react';
-import { bookSingAlongTicket, singAlongApi } from '../services/singAlongApi';
+import {
+  bookSingAlongTicket,
+  singAlongApi,
+  getSingAlongTicketUrl,
+  getSingAlongTicketDownloadUrl
+} from '../services/singAlongApi';
 
 // Brand & Event Assets
 const VIDEO_BANNER_SRC = "/Animate_concert_banner_mascot_1080p_20260912195333.mp4";
@@ -142,6 +149,8 @@ export default function SingAlongBooking() {
   const [ticketData, setTicketData] = useState(null);
   const [isDownloading, setIsDownloading] = useState(false);
   const [showTicketDetails, setShowTicketDetails] = useState(false);
+  const [showTicketModal, setShowTicketModal] = useState(false);
+  const [isCopiedBookingId, setIsCopiedBookingId] = useState(false);
   const [ticketQr, setTicketQr] = useState('');
   const ticketQrCacheRef = useRef({});
 
@@ -309,7 +318,9 @@ export default function SingAlongBooking() {
         .then((res) => {
           if (res?.success && (res?.booking || res?.data?.booking)) {
             setTicketData(res.booking || res.data.booking);
+            setPageView('booking');
             setScreen('success');
+            setShowTicketModal(true);
             try {
               window.history.replaceState({}, document.title, window.location.pathname);
             } catch (_) { }
@@ -342,7 +353,9 @@ export default function SingAlongBooking() {
               paidAt: b.paidAt || new Date().toISOString(),
               verificationToken: b.verificationToken || `SINGALONG-VERIFY:${b.bookingId || orderIdParam}`,
             });
+            setPageView('booking');
             setScreen('success');
+            setShowTicketModal(true);
             try {
               window.history.replaceState({}, document.title, window.location.pathname);
             } catch (_) { }
@@ -451,6 +464,7 @@ export default function SingAlongBooking() {
 
         setTicketData(confirmedTicketData);
         setScreen('success');
+        setShowTicketModal(true);
         setIsOnlinePaying(false);
         setCashfreeOrder(null);
         toast.success("Payment Confirmed! Ticket Booked Successfully! 🎟️🎉");
@@ -530,6 +544,7 @@ export default function SingAlongBooking() {
       setTimeout(() => {
         setTicketData(confirmedTicketData);
         setScreen('success');
+        setShowTicketModal(true);
         setIsSubmitting(false);
         toast.success("Ticket booked successfully! 🎟️🎉");
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -541,11 +556,274 @@ export default function SingAlongBooking() {
     }
   };
 
+  // Copy Booking ID to Clipboard
+  const handleCopyBookingId = () => {
+    if (!ticketData?.bookingId) return;
+    navigator.clipboard.writeText(ticketData.bookingId)
+      .then(() => {
+        setIsCopiedBookingId(true);
+        toast.success(`Copied Booking ID: ${ticketData.bookingId}`);
+        setTimeout(() => setIsCopiedBookingId(false), 2500);
+      })
+      .catch(() => {
+        toast.error("Could not copy Booking ID.");
+      });
+  };
+
+  // Printable Client-side Ticket Pass Window Fallback
+  const openClientPrintTicket = (tData, qrDataUrl) => {
+    if (!tData) return;
+    const printWindow = window.open('', '_blank', 'width=840,height=960');
+    if (!printWindow) {
+      toast.error("Please allow popups in your browser to print the ticket.");
+      return;
+    }
+
+    const printHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sing Along Live - Official Ticket Pass (${tData.bookingId})</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap');
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #0b0f19;
+      color: #1e293b;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 12px;
+      min-height: 100vh;
+    }
+    .print-controls {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .btn {
+      padding: 10px 24px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+    .btn-print {
+      background: linear-gradient(135deg, #059669, #047857);
+      color: white;
+      box-shadow: 0 4px 14px rgba(5, 150, 105, 0.4);
+    }
+    .btn-close {
+      background: #334155;
+      color: #e2e8f0;
+    }
+    .ticket-container {
+      width: 100%;
+      max-width: 440px;
+      background: #ffffff;
+      border-radius: 32px;
+      overflow: hidden;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+      border: 1px solid #e2e8f0;
+      position: relative;
+    }
+    .header-bar {
+      background: linear-gradient(135deg, #1c0d02 0%, #3d1403 50%, #542207 100%);
+      color: white;
+      padding: 22px 24px;
+      text-align: center;
+      border-bottom: 3px dashed #f59e0b;
+    }
+    .header-tag {
+      display: inline-block;
+      background: rgba(245, 158, 11, 0.2);
+      border: 1px solid #f59e0b;
+      color: #fef3c7;
+      padding: 3px 14px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .header-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+      color: #fff2a8;
+      text-transform: uppercase;
+    }
+    .header-sub {
+      font-size: 12px;
+      color: #fed7aa;
+      margin-top: 4px;
+      font-weight: 600;
+    }
+    .pills-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      padding: 14px 20px;
+      background: #fdfbf7;
+      border-bottom: 1px solid #e2e8f0;
+      font-size: 11px;
+    }
+    .pill {
+      background: white;
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      font-weight: 600;
+      color: #334155;
+    }
+    .pill strong {
+      color: #d97706;
+      display: block;
+      font-size: 9px;
+      text-transform: uppercase;
+    }
+    .body-card {
+      padding: 24px 20px;
+      text-align: center;
+    }
+    .attendee-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 14px 18px;
+      text-align: left;
+      margin-bottom: 18px;
+      font-size: 13px;
+    }
+    .attendee-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .attendee-row:last-child { margin-bottom: 0; }
+    .label { color: #64748b; }
+    .value { font-weight: 700; color: #0f172a; }
+    .qr-box {
+      display: inline-block;
+      padding: 12px;
+      border-radius: 20px;
+      border: 2px solid #e2e8f0;
+      background: white;
+      margin-bottom: 12px;
+    }
+    .qr-box img {
+      width: 200px;
+      height: 200px;
+      display: block;
+    }
+    .booking-id {
+      font-family: 'Outfit', monospace;
+      font-size: 18px;
+      font-weight: 900;
+      color: #0f172a;
+      letter-spacing: 0.08em;
+    }
+    .footer-bar {
+      padding: 16px 24px;
+      background: #f1f5f9;
+      border-top: 2px dashed #cbd5e1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 700;
+    }
+    .footer-bar .amount {
+      font-family: 'Outfit', sans-serif;
+      font-size: 20px;
+      color: #d97706;
+      font-weight: 900;
+    }
+    @media print {
+      body { background: white; padding: 0; }
+      .print-controls { display: none; }
+      .ticket-container { box-shadow: none; border: 2px solid #334155; margin: 0 auto; page-break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <div class="print-controls">
+    <button class="btn btn-print" onclick="window.print()">🖨️ Print / Save as PDF</button>
+    <button class="btn btn-close" onclick="window.close()">Close</button>
+  </div>
+  <div class="ticket-container">
+    <div class="header-bar">
+      <div class="header-tag">🎵 Official Digital Entry Pass</div>
+      <div class="header-title">SING ALONG</div>
+      <div class="header-sub">LIVE MUSIC EVENT • WEGROW B SCHOOL</div>
+    </div>
+    <div class="pills-grid">
+      <div class="pill"><strong>Event Date</strong>Sun, Sep 27, 2026</div>
+      <div class="pill"><strong>Event Time</strong>6:00 PM – 9:00 PM</div>
+      <div class="pill"><strong>Venue</strong>Arasan Turf, Sivakasi</div>
+      <div class="pill"><strong>Gate Entry</strong>5:30 PM Onwards</div>
+    </div>
+    <div class="body-card">
+      <div class="attendee-box">
+        <div class="attendee-row"><span class="label">Attendee</span><span class="value">${tData.fullName || 'Valued Guest'}</span></div>
+        <div class="attendee-row"><span class="label">Contact</span><span class="value">${tData.phone || ''}</span></div>
+        <div class="attendee-row"><span class="label">Passes</span><span class="value">${tData.ticketQty || 1} General Admission Pass${(tData.ticketQty || 1) > 1 ? 'es' : ''}</span></div>
+        <div class="attendee-row"><span class="label">Status</span><span class="value" style="color:#059669;">CONFIRMED & ACTIVE</span></div>
+      </div>
+      <div class="qr-box">
+        <img src="${qrDataUrl || ticketQr}" alt="QR Entry Pass" />
+      </div>
+      <div style="font-size: 12px; color: #64748b; margin-bottom: 4px;">Present this QR code at the entrance scanner</div>
+      <div class="booking-id">BOOKING ID: ${tData.bookingId}</div>
+    </div>
+    <div class="footer-bar">
+      <span>Total Paid</span>
+      <span class="amount">₹${tData.amount || 254.30}</span>
+    </div>
+  </div>
+  <script>
+    window.addEventListener('load', function() {
+      setTimeout(function() { window.print(); }, 400);
+    });
+  </script>
+</body>
+</html>`;
+
+    printWindow.document.open();
+    printWindow.document.write(printHtml);
+    printWindow.document.close();
+  };
+
+  // Download / Print Official PDF Ticket Pass
+  const handleDownloadPdfTicket = async () => {
+    if (!ticketData?.bookingId) return;
+    const backendUrl = getSingAlongTicketUrl(ticketData.bookingId);
+    
+    // Check if backend endpoint is accessible, otherwise use high-fidelity client print
+    try {
+      const checkRes = await fetch(backendUrl, { method: 'HEAD' }).catch(() => null);
+      if (checkRes && checkRes.ok) {
+        window.open(backendUrl, '_blank');
+        toast.success("Opening official printable ticket pass... 🖨️📄");
+        return;
+      }
+    } catch (_) {}
+
+    // Instant client-side printable PDF window
+    openClientPrintTicket(ticketData, ticketQr);
+    toast.success("Opening official printable ticket pass (Save as PDF)... 🖨️📄");
+  };
+
   // Download Ticket as PNG (Dynamic Import for Fast Initial Load)
   const handleDownloadTicket = async () => {
     if (!ticketCaptureRef.current) return;
     setIsDownloading(true);
-    const toastId = toast.loading("Generating high-resolution ticket...");
+    const toastId = toast.loading("Generating high-resolution ticket image...");
     try {
       const html2canvas = (await import('html2canvas')).default;
       const canvas = await html2canvas(ticketCaptureRef.current, {
@@ -558,10 +836,10 @@ export default function SingAlongBooking() {
       link.download = `SingAlong_Pass_${ticketData?.bookingId || "2026"}.png`;
       link.href = canvas.toDataURL("image/png");
       link.click();
-      toast.success("Ticket downloaded successfully! 📥", { id: toastId });
+      toast.success("Ticket image downloaded successfully! 📥", { id: toastId });
     } catch (err) {
       console.error("Ticket download error:", err);
-      toast.error("Could not download ticket. Please take a screenshot.", { id: toastId });
+      toast.error("Could not download ticket image. Please use PDF print or take a screenshot.", { id: toastId });
     } finally {
       setIsDownloading(false);
     }
@@ -594,7 +872,7 @@ export default function SingAlongBooking() {
   };
 
   return (
-    <div className="min-h-screen bg-[#fdfbf7] text-[#0f172a] selection:bg-[#ff6a00] selection:text-white relative font-sans overflow-x-hidden">
+    <div className={`min-h-screen ${screen === 'success' ? 'bg-[#0B0F19] text-white' : 'bg-[#fdfbf7] text-[#0f172a]'} selection:bg-[#ff6a00] selection:text-white relative font-sans overflow-x-hidden`}>
 
       {/* Embedded CSS for Fast Blinking Multi-Color DJ Lights & Responsive Stage Layout */}
       <style>{`
@@ -1251,7 +1529,7 @@ export default function SingAlongBooking() {
           {/* =====================================================================
               MAIN BOOKING PORTAL WRAPPER
               ===================================================================== */}
-          <main className="w-full max-w-6xl mx-auto px-4 sm:px-6 py-10 relative z-10">
+          <main className={`w-full ${screen === 'success' ? 'max-w-none px-4 py-8 sm:py-12 bg-[#0B0F19]' : 'max-w-6xl mx-auto px-4 sm:px-6 py-10'} relative z-10`}>
 
             {/* ===================================================================
                 SCREEN: STATUS / PROCESSING
@@ -1274,7 +1552,31 @@ export default function SingAlongBooking() {
                 SCREEN: SUCCESS (OFFICIAL SING ALONG TICKET PASS - USER FORMAT)
                 =================================================================== */}
             {screen === 'success' && ticketData && (
-              <div className="w-full -mx-4 sm:-mx-6 -my-10 px-4 py-8 sm:py-12 bg-[#0B0F19] min-h-[90vh] flex flex-col items-center justify-center animate-fadeIn">
+              <div className="w-full max-w-4xl mx-auto flex flex-col items-center justify-center animate-fadeIn pb-12">
+                {/* Top Quick Download & Celebration Banner */}
+                <div className="w-full max-w-[420px] mb-5 text-center">
+                  <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 font-display text-xs font-black tracking-wider uppercase mb-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                    <span>BOOKING CONFIRMED &amp; VERIFIED</span>
+                  </div>
+                  <h1 className="font-display text-xl sm:text-2xl font-black text-white">
+                    Your Official Ticket Pass
+                  </h1>
+                  <p className="text-xs text-slate-400 mt-1">
+                    Present the QR code below at the entrance or download for offline access.
+                  </p>
+                  <div className="mt-3 flex items-center justify-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowTicketModal(true)}
+                      className="px-4 py-2 rounded-xl text-xs font-bold text-amber-300 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 flex items-center gap-1.5 cursor-pointer transition-all"
+                    >
+                      <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Open Download Popup Modal</span>
+                    </button>
+                  </div>
+                </div>
+
                 {/* Printable / Downloadable Ticket Card (Exact format from user screenshot) */}
                 <div
                   ref={ticketCaptureRef}
@@ -1417,16 +1719,27 @@ export default function SingAlongBooking() {
                   </div>
                 </div>
 
-                {/* Action Buttons: Download, Share, Book Another */}
+                {/* Action Buttons: Download PDF, Save PNG, Share, Book Another */}
                 <div className="w-full max-w-[360px] xs:max-w-[390px] sm:max-w-[420px] flex flex-col gap-2.5 sm:gap-3 mt-6">
+                  {/* Primary PDF Download / Print Button */}
+                  <button
+                    type="button"
+                    onClick={handleDownloadPdfTicket}
+                    className="w-full py-3.5 sm:py-4 px-6 rounded-2xl font-display font-black text-sm text-white bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:brightness-110 active:scale-98 shadow-xl shadow-emerald-600/30 flex items-center justify-center gap-2 cursor-pointer transition-all"
+                  >
+                    <Download className="w-4 h-4 flex-shrink-0" />
+                    <span>Download Ticket Pass (PDF / Print)</span>
+                  </button>
+
+                  {/* Secondary PNG Image Save */}
                   <button
                     type="button"
                     onClick={handleDownloadTicket}
                     disabled={isDownloading}
-                    className="w-full py-3 sm:py-3.5 px-6 rounded-2xl font-display font-black text-sm text-white bg-gradient-to-r from-emerald-600 to-teal-700 hover:brightness-110 shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2 cursor-pointer transition-all"
+                    className="w-full py-3 px-6 rounded-xl font-display font-bold text-xs sm:text-sm text-amber-300 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 flex items-center justify-center gap-2 cursor-pointer transition-all"
                   >
-                    <Download className="w-4 h-4" />
-                    <span>{isDownloading ? 'Saving Pass...' : 'Download Pass (PNG)'}</span>
+                    <Sparkles className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
+                    <span>{isDownloading ? 'Saving Pass...' : 'Save Pass Image (PNG)'}</span>
                   </button>
 
                   <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
@@ -2143,6 +2456,166 @@ export default function SingAlongBooking() {
             )}
 
           </main>
+        </div>
+      )}
+
+      {/* =====================================================================
+          AUTOMATED POST-PAYMENT TICKET DOWNLOAD POPUP MODAL
+          ===================================================================== */}
+      {showTicketModal && ticketData && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/85 backdrop-blur-md animate-fadeIn overflow-y-auto">
+          {/* Backdrop click to dismiss */}
+          <div
+            className="fixed inset-0"
+            onClick={() => setShowTicketModal(false)}
+          />
+
+          {/* Modal Container */}
+          <div className="relative w-full max-w-lg bg-gradient-to-b from-[#182132] via-[#0f172a] to-[#0b0f19] text-white rounded-3xl border-2 border-amber-500/50 shadow-[0_25px_60px_rgba(0,0,0,0.95)] p-5 sm:p-7 overflow-hidden z-10 my-auto">
+            {/* Ambient Corner Glow */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+
+            {/* Top Close Button */}
+            <button
+              type="button"
+              onClick={() => setShowTicketModal(false)}
+              className="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center text-slate-300 hover:text-white transition-colors cursor-pointer z-20"
+              title="Close modal"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Header: Celebration & Verification */}
+            <div className="text-center mb-5 pr-6 sm:pr-0">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 mx-auto rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center shadow-lg shadow-emerald-500/30 mb-3">
+                <CheckCircle2 className="w-8 h-8 sm:w-9 sm:h-9 text-white stroke-[2.5]" />
+              </div>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-black uppercase tracking-wider mb-1.5">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>PAYMENT SUCCESSFUL • TICKET CONFIRMED</span>
+              </div>
+              <h2 className="font-display text-xl sm:text-2xl font-black text-white tracking-tight">
+                Your Entry Pass is Ready!
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-300 mt-1 max-w-sm mx-auto">
+                Download your official QR pass now. Present this digital ticket at the gate for fast entry.
+              </p>
+            </div>
+
+            {/* Ticket Summary Box */}
+            <div className="bg-slate-900/90 border border-slate-700/80 rounded-2xl p-4 mb-5 space-y-3 shadow-inner">
+              <div className="flex items-center justify-between pb-2.5 border-b border-slate-800 gap-2">
+                <div>
+                  <span className="text-[10px] text-slate-400 uppercase tracking-wider block">Booking Reference ID</span>
+                  <div className="font-mono text-base sm:text-lg font-black text-amber-300 tracking-wider">
+                    {ticketData.bookingId}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleCopyBookingId}
+                  className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-600 text-xs text-slate-300 hover:text-white flex items-center gap-1.5 cursor-pointer transition-all"
+                  title="Copy Booking ID"
+                >
+                  {isCopiedBookingId ? (
+                    <>
+                      <Check className="w-3.5 h-3.5 text-emerald-400" />
+                      <span className="text-emerald-400 font-bold">Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>Copy</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div>
+                  <span className="text-slate-400 text-[11px] block">Attendee:</span>
+                  <strong className="text-white font-bold truncate block">{ticketData.fullName}</strong>
+                </div>
+                <div className="text-right">
+                  <span className="text-slate-400 text-[11px] block">Pass Quantity:</span>
+                  <strong className="text-[#ff6a00] font-black">{ticketData.ticketQty || 1} Pass{(ticketData.ticketQty || 1) > 1 ? 'es' : ''}</strong>
+                </div>
+                <div>
+                  <span className="text-slate-400 text-[11px] block">Event Date:</span>
+                  <strong className="text-slate-200 font-semibold">{CONFIG.dateShort} (6 PM)</strong>
+                </div>
+                <div className="text-right">
+                  <span className="text-slate-400 text-[11px] block">Venue:</span>
+                  <strong className="text-slate-200 font-semibold">{CONFIG.venue}, Sivakasi</strong>
+                </div>
+              </div>
+
+              {/* QR Thumbnail */}
+              {ticketQr && (
+                <div className="pt-2 border-t border-slate-800 flex items-center justify-center gap-3">
+                  <div className="p-1.5 bg-white rounded-xl shadow-xs">
+                    <img src={ticketQr} alt="QR" className="w-16 h-16 object-contain" />
+                  </div>
+                  <div className="text-left text-[11px] text-slate-300">
+                    <div className="font-bold text-white">Entry QR Pass Generated</div>
+                    <div className="text-slate-400">Scan at entrance scanner</div>
+                    <div className="text-emerald-400 font-mono text-[10px] mt-0.5">Paid: {rupee(ticketData.amount || totalAmount)}</div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="space-y-2.5">
+              {/* Primary: Download Official Ticket Pass (PDF / Print) */}
+              <button
+                type="button"
+                onClick={handleDownloadPdfTicket}
+                className="w-full py-3.5 px-4 rounded-2xl font-display font-black text-sm sm:text-base text-white bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:brightness-110 active:scale-98 shadow-xl shadow-emerald-600/30 flex items-center justify-center gap-2 cursor-pointer transition-all"
+              >
+                <Download className="w-5 h-5 flex-shrink-0" />
+                <span>Download Ticket Pass (PDF / Print)</span>
+              </button>
+
+              {/* Secondary: Save Pass as PNG Image */}
+              <button
+                type="button"
+                onClick={handleDownloadTicket}
+                disabled={isDownloading}
+                className="w-full py-3 px-4 rounded-xl font-display font-bold text-xs sm:text-sm text-amber-300 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 flex items-center justify-center gap-2 cursor-pointer transition-all"
+              >
+                <Sparkles className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                <span>{isDownloading ? 'Generating High-Res Pass...' : 'Save Pass as Image (PNG)'}</span>
+              </button>
+
+              {/* Share & View actions */}
+              <div className="grid grid-cols-2 gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={handleShareTicket}
+                  className="py-2.5 px-3 rounded-xl font-display font-bold text-xs text-white bg-gradient-to-r from-[#ff6a00] to-[#ee5007] hover:brightness-110 flex items-center justify-center gap-1.5 cursor-pointer transition-all"
+                >
+                  <Share2 className="w-3.5 h-3.5" />
+                  <span>Share on WhatsApp</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setShowTicketModal(false)}
+                  className="py-2.5 px-3 rounded-xl font-display font-bold text-xs text-slate-300 bg-slate-800 hover:bg-slate-700 border border-slate-700 flex items-center justify-center gap-1.5 cursor-pointer transition-all"
+                >
+                  <span>View Ticket on Page</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Email Notification & Helpline Note */}
+            <div className="mt-4 pt-3 border-t border-slate-800 text-center text-[11px] text-slate-400 space-y-1">
+              <p>📧 A confirmation copy with your QR pass has also been dispatched to your email.</p>
+              <p className="text-amber-300 font-medium">Gate helpline: <a href="tel:+919344037331" className="underline font-bold">+91 93440 37331</a></p>
+            </div>
+          </div>
         </div>
       )}
     </div>
