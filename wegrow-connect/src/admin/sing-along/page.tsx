@@ -24,8 +24,7 @@ import {
   AlertCircle,
   ShieldCheck,
   ExternalLink,
-  Calendar,
-  BarChart2
+  Calendar
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import {
@@ -443,66 +442,7 @@ export default function AdminSingAlong() {
             </div>
           </div>
 
-          {/* ─── Date-wise Booking Count Panel ───────────────────────────────── */}
-          {(() => {
-            // Build date-wise count from current loaded bookings
-            const dateCounts: Record<string, { total: number; confirmed: number; pending: number }> = {};
-            bookings.forEach((b: any) => {
-              const raw = b.createdAt || b.paidAt || b.bookedAt || b.updatedAt;
-              if (!raw) return;
-              const d = new Date(raw).toLocaleDateString('en-CA'); // YYYY-MM-DD
-              if (!dateCounts[d]) dateCounts[d] = { total: 0, confirmed: 0, pending: 0 };
-              dateCounts[d].total += 1;
-              const s = (b.status || '').toUpperCase();
-              if (s === 'CONFIRMED' || s === 'ATTENDED') dateCounts[d].confirmed += 1;
-              else dateCounts[d].pending += 1;
-            });
-            const dates = Object.keys(dateCounts).sort().reverse();
-            if (dates.length === 0) return null;
-            return (
-              <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs">
-                <div className="flex items-center gap-2 mb-3">
-                  <BarChart2 className="w-4 h-4 text-[#ff6a00]" />
-                  <span className="text-xs font-black uppercase tracking-wider text-slate-700">Date-wise Booking Count</span>
-                  <span className="ml-auto text-[10px] text-slate-400 font-medium">Showing counts from current page results</span>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {dates.map(d => (
-                    <button
-                      key={d}
-                      type="button"
-                      onClick={() => { setDateFilter(prev => prev === d ? '' : d); setPage(1); }}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
-                        dateFilter === d
-                          ? 'border-[#ff6a00] bg-orange-50 text-[#ff6a00] shadow-sm'
-                          : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-[#ff6a00]/50 hover:bg-orange-50/50'
-                      }`}
-                      title={`Filter by ${d}`}
-                    >
-                      <Calendar className="w-3 h-3" />
-                      <span>{new Date(d + 'T00:00:00').toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
-                      <span className="inline-flex items-center gap-1 ml-1">
-                        <span className="px-1.5 py-0.5 rounded-md bg-emerald-100 text-emerald-700 font-bold text-[10px]" title="Confirmed">{dateCounts[d].confirmed}✓</span>
-                        {dateCounts[d].pending > 0 && (
-                          <span className="px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-700 font-bold text-[10px]" title="Pending">{dateCounts[d].pending}⏳</span>
-                        )}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-                {dateFilter && (
-                  <div className="mt-2 flex items-center gap-2">
-                    <span className="text-[11px] text-[#ff6a00] font-bold">📅 Filtered by: {dateFilter}</span>
-                    <button
-                      type="button"
-                      onClick={() => { setDateFilter(''); setPage(1); }}
-                      className="text-[10px] px-2 py-0.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 font-semibold cursor-pointer transition-colors"
-                    >Clear</button>
-                  </div>
-                )}
-              </div>
-            );
-          })()}
+
 
           {/* ─── Search & Filters Card ────────────────────────────────────────── */}
           <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs">
