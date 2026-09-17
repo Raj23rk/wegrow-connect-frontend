@@ -534,27 +534,6 @@ export default function AdminSingAlong() {
                   <option value="CANCELLED">CANCELLED</option>
                 </select>
 
-                {/* Date Filter */}
-                <div className="relative flex items-center">
-                  <Calendar className="w-3.5 h-3.5 absolute left-2.5 text-slate-400 pointer-events-none" />
-                  <input
-                    type="date"
-                    value={dateFilter}
-                    onChange={(e) => { setDateFilter(e.target.value); setPage(1); }}
-                    className="h-10 pl-8 pr-3 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 bg-white focus:border-[#ff6a00] outline-none cursor-pointer"
-                    title="Filter by booking date"
-                  />
-                  {dateFilter && (
-                    <button
-                      type="button"
-                      onClick={() => { setDateFilter(''); setPage(1); }}
-                      className="absolute right-2 text-slate-400 hover:text-slate-700 cursor-pointer"
-                      title="Clear date filter"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  )}
-                </div>
 
                 {/* Limit */}
                 <select
@@ -576,7 +555,7 @@ export default function AdminSingAlong() {
                 <span className="text-[11px] text-slate-500">
                   Active filters:
                   {status && <span className="ml-1 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold">{status}</span>}
-                  {dateFilter && <span className="ml-1 px-2 py-0.5 rounded-full bg-orange-50 border border-orange-200 text-[#ff6a00] font-bold">{dateFilter}</span>}
+                  {dateFilter && <span className="ml-1 px-2 py-0.5 rounded-full bg-orange-50 border border-orange-200 text-[#ff6a00] font-bold">📅 {dateFilter}</span>}
                 </span>
                 <span className="text-[11px] text-slate-400">
                   💡 Export CSV will download only the filtered results
