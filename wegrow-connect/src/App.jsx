@@ -36,6 +36,7 @@ import WomensCommunityV1 from './components/WomensCommunityV1';
 
 // Lazy load Sing Along Page for ultra-fast initial paint
 const SingAlongBooking = lazy(() => import('./components/SingAlongBooking'));
+const BusinessDependencyTest = lazy(() => import('./components/BusinessDependencyTest'));
 
 // Auth Context, Theme Context and Guard
 import { AuthProvider, ProtectedRoute } from './context/AuthContext';
@@ -700,6 +701,11 @@ export default function App() {
             <Route path="/events/sing-along" element={<SingAlongBooking />} />
             <Route path="/events/singalong" element={<SingAlongBooking />} />
             <Route path="/book-tickets" element={<SingAlongBooking />} />
+
+            {/* WeGrow Business Dependency Test */}
+            <Route path="/business-dependency-test" element={<BusinessDependencyTest />} />
+            <Route path="/dependency-test" element={<BusinessDependencyTest />} />
+            <Route path="/business/dependency-test" element={<BusinessDependencyTest />} />
 
             {/* Student Dashboard Routes (Protected) */}
             <Route path="/student/dashboard" element={<ProtectedRoute allowedRoles={['student']}><StudentDashboard /></ProtectedRoute>} />
