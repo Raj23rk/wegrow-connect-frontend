@@ -4,15 +4,196 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>WeGrow B School</title>
-    <link rel="icon" type="image/webp" href="/wegrow-mascot.webp" />
+    <link rel="icon" type="image/jpeg" href="/we_mascot.jpeg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Inter:wght@400;600;700;800&family=Lilita+One&family=Outfit:wght@500;600;700;800;900&family=Permanent+Marker&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Shrikhand&family=Titan+One&display=swap" rel="stylesheet" />
     <script defer src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script defer src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+
+    <style>
+      /* ── Splash Screen ── */
+      #splash {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 28px;
+        background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+        transition: opacity 0.6s ease, visibility 0.6s ease;
+      }
+      #splash.hide {
+        opacity: 0;
+        visibility: hidden;
+      }
+
+      /* Mascot */
+      #splash-img {
+        width: 140px;
+        height: 140px;
+        border-radius: 50%;
+        object-fit: cover;
+        box-shadow: 0 0 0 4px rgba(255,255,255,0.15),
+                    0 0 50px rgba(168, 85, 247, 0.7);
+        animation: mascotPop 0.7s cubic-bezier(0.34,1.56,0.64,1) both;
+      }
+      @keyframes mascotPop {
+        from { transform: scale(0.3) rotate(-15deg); opacity: 0; }
+        to   { transform: scale(1)   rotate(0deg);   opacity: 1; }
+      }
+
+      /* Colourful sing-along text */
+      #splash-text {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 4px;
+        font-family: 'Titan One', 'Outfit', sans-serif;
+        font-size: clamp(2.2rem, 8vw, 4rem);
+        line-height: 1;
+        letter-spacing: 3px;
+        user-select: none;
+      }
+      .splash-word { display: inline-flex; gap: 0; }
+      .splash-letter {
+        display: inline-block;
+        animation: letterBounce 0.9s ease both;
+        text-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      }
+      @keyframes letterBounce {
+        0%   { transform: translateY(50px) scale(0.4); opacity: 0; }
+        55%  { transform: translateY(-14px) scale(1.2); opacity: 1; }
+        80%  { transform: translateY(5px)  scale(0.95); }
+        100% { transform: translateY(0)    scale(1); }
+      }
+
+      /* Per-letter vibrant colours + staggered delays */
+      .l0  { color: #ff4d6d; animation-delay: 0.05s; }  /* W */
+      .l1  { color: #ff9f43; animation-delay: 0.13s; }  /* e */
+      .l2  { color: #ffd32a; animation-delay: 0.21s; }  /* G */
+      .l3  { color: #0be881; animation-delay: 0.29s; }  /* r */
+      .l4  { color: #00d2d3; animation-delay: 0.37s; }  /* o */
+      .l5  { color: #a29bfe; animation-delay: 0.45s; }  /* w */
+      .l6  { color: #fdcb6e; animation-delay: 0.57s; }  /* B */
+      .l7  { color: #55efc4; animation-delay: 0.67s; }  /* S */
+      .l8  { color: #74b9ff; animation-delay: 0.75s; }  /* c */
+      .l9  { color: #fd79a8; animation-delay: 0.83s; }  /* h */
+      .l10 { color: #ffeaa7; animation-delay: 0.91s; }  /* o */
+      .l11 { color: #ff7675; animation-delay: 0.99s; }  /* o */
+      .l12 { color: #6c5ce7; animation-delay: 1.07s; }  /* l */
+
+      /* Tagline */
+      #splash-tag {
+        font-family: 'Outfit', sans-serif;
+        font-size: clamp(0.75rem, 2.5vw, 1rem);
+        color: rgba(255,255,255,0.55);
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        animation: fadeUp 0.7s 1.3s ease both;
+        opacity: 0;
+      }
+      @keyframes fadeUp {
+        from { transform: translateY(16px); opacity: 0; }
+        to   { transform: translateY(0);    opacity: 1; }
+      }
+
+      /* Animated dots */
+      #splash-dots {
+        display: flex;
+        gap: 8px;
+        animation: fadeUp 0.5s 1.5s ease both;
+        opacity: 0;
+      }
+      #splash-dots span {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.7);
+        animation: dot 1.3s 1.7s infinite ease-in-out both;
+      }
+      #splash-dots span:nth-child(2) { animation-delay: 1.85s; }
+      #splash-dots span:nth-child(3) { animation-delay: 2.00s; }
+      @keyframes dot {
+        0%, 80%, 100% { transform: scale(0.5); opacity: 0.35; }
+        40%            { transform: scale(1.3); opacity: 1;    }
+      }
+    </style>
   </head>
+
   <body>
+    <!-- ── Splash screen ── -->
+    <div id="splash" aria-hidden="true">
+
+      <!-- Mascot image -->
+      <img id="splash-img" src="/we_mascot.jpeg" alt="WeGrow mascot" />
+
+      <!-- Colourful letter-by-letter text -->
+      <div id="splash-text" aria-label="WeGrow B School">
+
+        <!-- WeGrow -->
+        <span class="splash-word">
+          <span class="splash-letter l0">W</span>
+          <span class="splash-letter l1">e</span>
+          <span class="splash-letter l2">G</span>
+          <span class="splash-letter l3">r</span>
+          <span class="splash-letter l4">o</span>
+          <span class="splash-letter l5">w</span>
+        </span>
+
+        <span style="width:0.5em; display:inline-block;"></span>
+
+        <!-- B -->
+        <span class="splash-word">
+          <span class="splash-letter l6">B</span>
+        </span>
+
+        <span style="width:0.5em; display:inline-block;"></span>
+
+        <!-- School -->
+        <span class="splash-word">
+          <span class="splash-letter l7">S</span>
+          <span class="splash-letter l8">c</span>
+          <span class="splash-letter l9">h</span>
+          <span class="splash-letter l10">o</span>
+          <span class="splash-letter l11">o</span>
+          <span class="splash-letter l12">l</span>
+        </span>
+      </div>
+
+      <div id="splash-tag">Where Leaders Grow</div>
+
+      <div id="splash-dots">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+
+    <!-- ── React root ── -->
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+
+    <!-- Auto-hide splash as soon as React renders -->
+    <script>
+      (function () {
+        var splash = document.getElementById('splash');
+        var observer = new MutationObserver(function () {
+          var root = document.getElementById('root');
+          if (root && root.children.length > 0) {
+            splash.classList.add('hide');
+            setTimeout(function () { splash.remove(); }, 650);
+            observer.disconnect();
+          }
+        });
+        observer.observe(document.getElementById('root'), { childList: true, subtree: true });
+        // Safety fallback — remove after 5 s regardless
+        setTimeout(function () {
+          var s = document.getElementById('splash');
+          if (s) { s.classList.add('hide'); setTimeout(function(){ s.remove(); }, 650); }
+        }, 5000);
+      })();
+    </script>
   </body>
 </html>

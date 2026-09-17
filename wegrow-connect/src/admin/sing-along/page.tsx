@@ -23,7 +23,9 @@ import {
   Check,
   AlertCircle,
   ShieldCheck,
-  ExternalLink
+  ExternalLink,
+  Calendar,
+  BarChart2
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import {
@@ -125,6 +127,7 @@ export default function AdminSingAlong() {
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('');
   const [eventId, setEventId] = useState('');
+  const [dateFilter, setDateFilter] = useState(''); // YYYY-MM-DD
 
   // Modals
   const [viewingItem, setViewingItem] = useState<any>(null);
@@ -169,6 +172,7 @@ export default function AdminSingAlong() {
       if (search.trim()) params.search = search.trim();
       if (status) params.status = status;
       if (eventId) params.eventId = eventId;
+      if (dateFilter) params.date = dateFilter;
 
       const res = await getSingAlongBookings(params);
       const listData = extractBookingsList(res);
@@ -212,7 +216,7 @@ export default function AdminSingAlong() {
       setLoading(false);
       setStatsLoading(false);
     }
-  }, [page, limit, search, status, eventId]);
+  }, [page, limit, search, status, eventId, dateFilter]);
 
   useEffect(() => {
     loadStats();
@@ -222,12 +226,21 @@ export default function AdminSingAlong() {
     loadBookings();
   }, [loadBookings]);
 
-  // ─── Export CSV ──────────────────────────────────────────────────────────────
+  // ─── Export CSV (filter-aware: only confirmed + date when filters are set) ───
   const handleExportCsv = async () => {
     try {
       setIsExporting(true);
-      await exportSingAlongCsv();
-      toast.success('Sing Along attendees CSV exported successfully!');
+      const exportParams: any = {};
+      // Pass current status filter — if CONFIRMED is selected, export only confirmed
+      if (status) exportParams.status = status;
+      // Pass current date filter — export only that date's bookings
+      if (dateFilter) exportParams.date = dateFilter;
+      await exportSingAlongCsv(exportParams);
+      let label = 'Sing Along';
+      if (status && dateFilter) label = `${status} bookings on ${dateFilter}`;
+      else if (status) label = `${status} bookings`;
+      else if (dateFilter) label = `bookings on ${dateFilter}`;
+      toast.success(`CSV exported: ${label}`);
     } catch (err: any) {
       toast.error('Failed to export CSV: ' + (err.message || 'Server error'));
     } finally {
@@ -370,6 +383,7 @@ export default function AdminSingAlong() {
         <main className="p-6 space-y-6 flex-1">
           {/* ─── Metric Cards ─────────────────────────────────────────────────── */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+
             {/* Total Bookings */}
             <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs flex items-center justify-between">
               <div>
@@ -429,6 +443,67 @@ export default function AdminSingAlong() {
             </div>
           </div>
 
+          {/* ─── Date-wise Booking Count Panel ───────────────────────────────── */}
+          {(() => {
+            // Build date-wise count from current loaded bookings
+            const dateCounts: Record<string, { total: number; confirmed: number; pending: number }> = {};
+            bookings.forEach((b: any) => {
+              const raw = b.createdAt || b.paidAt || b.bookedAt || b.updatedAt;
+              if (!raw) return;
+              const d = new Date(raw).toLocaleDateString('en-CA'); // YYYY-MM-DD
+              if (!dateCounts[d]) dateCounts[d] = { total: 0, confirmed: 0, pending: 0 };
+              dateCounts[d].total += 1;
+              const s = (b.status || '').toUpperCase();
+              if (s === 'CONFIRMED' || s === 'ATTENDED') dateCounts[d].confirmed += 1;
+              else dateCounts[d].pending += 1;
+            });
+            const dates = Object.keys(dateCounts).sort().reverse();
+            if (dates.length === 0) return null;
+            return (
+              <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs">
+                <div className="flex items-center gap-2 mb-3">
+                  <BarChart2 className="w-4 h-4 text-[#ff6a00]" />
+                  <span className="text-xs font-black uppercase tracking-wider text-slate-700">Date-wise Booking Count</span>
+                  <span className="ml-auto text-[10px] text-slate-400 font-medium">Showing counts from current page results</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {dates.map(d => (
+                    <button
+                      key={d}
+                      type="button"
+                      onClick={() => { setDateFilter(prev => prev === d ? '' : d); setPage(1); }}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
+                        dateFilter === d
+                          ? 'border-[#ff6a00] bg-orange-50 text-[#ff6a00] shadow-sm'
+                          : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-[#ff6a00]/50 hover:bg-orange-50/50'
+                      }`}
+                      title={`Filter by ${d}`}
+                    >
+                      <Calendar className="w-3 h-3" />
+                      <span>{new Date(d + 'T00:00:00').toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                      <span className="inline-flex items-center gap-1 ml-1">
+                        <span className="px-1.5 py-0.5 rounded-md bg-emerald-100 text-emerald-700 font-bold text-[10px]" title="Confirmed">{dateCounts[d].confirmed}✓</span>
+                        {dateCounts[d].pending > 0 && (
+                          <span className="px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-700 font-bold text-[10px]" title="Pending">{dateCounts[d].pending}⏳</span>
+                        )}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+                {dateFilter && (
+                  <div className="mt-2 flex items-center gap-2">
+                    <span className="text-[11px] text-[#ff6a00] font-bold">📅 Filtered by: {dateFilter}</span>
+                    <button
+                      type="button"
+                      onClick={() => { setDateFilter(''); setPage(1); }}
+                      className="text-[10px] px-2 py-0.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 font-semibold cursor-pointer transition-colors"
+                    >Clear</button>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+
           {/* ─── Search & Filters Card ────────────────────────────────────────── */}
           <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs">
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
@@ -444,8 +519,8 @@ export default function AdminSingAlong() {
                 />
               </div>
 
-              {/* Status Filter */}
-              <div className="flex items-center gap-2">
+              {/* Status Filter + Date Filter + Limit */}
+              <div className="flex items-center gap-2 flex-wrap">
                 <Filter className="w-4 h-4 text-slate-400 flex-shrink-0" />
                 <select
                   value={status}
@@ -458,6 +533,28 @@ export default function AdminSingAlong() {
                   <option value="ATTENDED">ATTENDED</option>
                   <option value="CANCELLED">CANCELLED</option>
                 </select>
+
+                {/* Date Filter */}
+                <div className="relative flex items-center">
+                  <Calendar className="w-3.5 h-3.5 absolute left-2.5 text-slate-400 pointer-events-none" />
+                  <input
+                    type="date"
+                    value={dateFilter}
+                    onChange={(e) => { setDateFilter(e.target.value); setPage(1); }}
+                    className="h-10 pl-8 pr-3 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 bg-white focus:border-[#ff6a00] outline-none cursor-pointer"
+                    title="Filter by booking date"
+                  />
+                  {dateFilter && (
+                    <button
+                      type="button"
+                      onClick={() => { setDateFilter(''); setPage(1); }}
+                      className="absolute right-2 text-slate-400 hover:text-slate-700 cursor-pointer"
+                      title="Clear date filter"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
 
                 {/* Limit */}
                 <select
@@ -472,6 +569,20 @@ export default function AdminSingAlong() {
                 </select>
               </div>
             </div>
+
+            {/* Active filter summary + Export hint */}
+            {(status || dateFilter) && (
+              <div className="mt-2.5 flex items-center gap-3 flex-wrap">
+                <span className="text-[11px] text-slate-500">
+                  Active filters:
+                  {status && <span className="ml-1 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold">{status}</span>}
+                  {dateFilter && <span className="ml-1 px-2 py-0.5 rounded-full bg-orange-50 border border-orange-200 text-[#ff6a00] font-bold">{dateFilter}</span>}
+                </span>
+                <span className="text-[11px] text-slate-400">
+                  💡 Export CSV will download only the filtered results
+                </span>
+              </div>
+            )}
           </div>
 
           {/* ─── Bookings Table ───────────────────────────────────────────────── */}

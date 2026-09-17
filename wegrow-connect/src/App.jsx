@@ -33,9 +33,6 @@ import WomensCommunity from './components/WomensCommunity';
 import StudentFoundersCommunity from './components/StudentFoundersCommunity';
 import BusinessFoundersCommunity from './components/BusinessFoundersCommunity';
 import WomensCommunityV1 from './components/WomensCommunityV1';
-import StudentFoundersCommunityV1 from './components/StudentFoundersCommunityV1';
-import BusinessFoundersCommunityV1 from './components/BusinessFoundersCommunityV1';
-import VinayagarCompetition from './components/VinayagarCompetition';
 
 // Lazy load Sing Along Page for ultra-fast initial paint
 const SingAlongBooking = lazy(() => import('./components/SingAlongBooking'));
@@ -83,7 +80,7 @@ const AdminWorkshops = lazy(() => import('./admin/workshops/page'));
 const AdminWomenEntrepreneurs = lazy(() => import('./admin/women-entrepreneurs/page'));
 const AdminStudentFounders = lazy(() => import('./admin/student-founders/page'));
 const AdminBusinessFounders = lazy(() => import('./admin/business-founders/page'));
-const AdminArtCompetition = lazy(() => import('./admin/art-competition/page'));
+
 const AdminSingAlong = lazy(() => import('./admin/sing-along/page'));
 
 // Campaign Platform (Public & Admin Lazy Loaded)
@@ -695,30 +692,7 @@ export default function App() {
             <Route path="/women-founder-25" element={<WomensCommunityV1 />} />
             <Route path="/women-founders-25" element={<WomensCommunityV1 />} />
 
-            {/* Student Founders Community V1 */}
-            <Route path="/student-founders/v1" element={<StudentFoundersCommunityV1 />} />
-            <Route path="/student-founders-v1" element={<StudentFoundersCommunityV1 />} />
-            <Route path="/student-community-v1" element={<StudentFoundersCommunityV1 />} />
-            <Route path="/student-founder/v1" element={<StudentFoundersCommunityV1 />} />
-            <Route path="/student-founder-v1" element={<StudentFoundersCommunityV1 />} />
-            <Route path="/student-founder-oct-3" element={<StudentFoundersCommunityV1 />} />
-            <Route path="/events/student-founders-v1" element={<StudentFoundersCommunityV1 />} />
 
-            {/* Business Founders Community V1 */}
-            <Route path="/business-founders/v1" element={<BusinessFoundersCommunityV1 />} />
-            <Route path="/business-founders-v1" element={<BusinessFoundersCommunityV1 />} />
-            <Route path="/business-community-v1" element={<BusinessFoundersCommunityV1 />} />
-            <Route path="/business-founder/v1" element={<BusinessFoundersCommunityV1 />} />
-            <Route path="/business-founder-v1" element={<BusinessFoundersCommunityV1 />} />
-            <Route path="/bussiness-founder-v1" element={<BusinessFoundersCommunityV1 />} />
-            <Route path="/bussiness-founders-v1" element={<BusinessFoundersCommunityV1 />} />
-            <Route path="/business-founder-sep-30" element={<BusinessFoundersCommunityV1 />} />
-            <Route path="/events/business-founders-v1" element={<BusinessFoundersCommunityV1 />} />
-
-            {/* Vinayagar Chaturthi Drawing Competition */}
-            <Route path="/vinayagar-chaturthi" element={<VinayagarCompetition />} />
-            <Route path="/drawing-competition" element={<VinayagarCompetition />} />
-            <Route path="/events/vinayagar-chaturthi" element={<VinayagarCompetition />} />
 
             {/* Sing Along Musical Night Event — Ticket Booking */}
             <Route path="/sing-along" element={<SingAlongBooking />} />
@@ -754,8 +728,7 @@ export default function App() {
             <Route path="/admin/women-entrepreneurs" element={<ProtectedRoute allowedRoles={['admin']}><AdminWomenEntrepreneurs /></ProtectedRoute>} />
             <Route path="/admin/student-founders" element={<ProtectedRoute allowedRoles={['admin']}><AdminStudentFounders /></ProtectedRoute>} />
             <Route path="/admin/business-founders" element={<ProtectedRoute allowedRoles={['admin']}><AdminBusinessFounders /></ProtectedRoute>} />
-            <Route path="/admin/art-competition" element={<ProtectedRoute allowedRoles={['admin']}><AdminArtCompetition /></ProtectedRoute>} />
-            <Route path="/admin/drawing-competition" element={<ProtectedRoute allowedRoles={['admin']}><AdminArtCompetition /></ProtectedRoute>} />
+
             <Route path="/admin/sing-along" element={<ProtectedRoute allowedRoles={['admin']}><AdminSingAlong /></ProtectedRoute>} />
             <Route path="/admin/singalong" element={<ProtectedRoute allowedRoles={['admin']}><AdminSingAlong /></ProtectedRoute>} />
             <Route path="/admin/workshops" element={<ProtectedRoute allowedRoles={['admin']}><AdminWorkshops /></ProtectedRoute>} />

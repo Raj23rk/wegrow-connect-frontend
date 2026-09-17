@@ -151,22 +151,37 @@ export async function getSingAlongStats() {
   }
 }
 
-export async function exportSingAlongCsv() {
+export async function exportSingAlongCsv(params = {}) {
   try {
-    const response = await fetch(`${API_BASE}/sing-along/export-csv`, {
+    // Build query string from filter params (status, date, etc.)
+    const query = new URLSearchParams();
+    Object.entries(params).forEach(([k, v]) => {
+      if (v !== undefined && v !== null && v !== '') query.append(k, v);
+    });
+    const queryStr = query.toString();
+    const url = `${API_BASE}/sing-along/export-csv${queryStr ? `?${queryStr}` : ''}`;
+
+    const response = await fetch(url, {
       method: 'GET',
       headers: getAuthHeaders(),
     });
     if (!response.ok) throw new Error('Failed to export CSV');
     const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
+
+    // Build a descriptive filename based on active filters
+    let fileSuffix = new Date().toISOString().slice(0, 10);
+    if (params.date) fileSuffix = params.date;
+    const statusTag = params.status ? `_${params.status.toLowerCase()}` : '';
+    const filename = `sing_along${statusTag}_${fileSuffix}.csv`;
+
+    const objectUrl = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url;
-    a.download = `sing_along_bookings_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.href = objectUrl;
+    a.download = filename;
     document.body.appendChild(a);
     a.click();
     a.remove();
-    window.URL.revokeObjectURL(url);
+    window.URL.revokeObjectURL(objectUrl);
     return true;
   } catch (error) {
     console.error('exportSingAlongCsv error:', error);
