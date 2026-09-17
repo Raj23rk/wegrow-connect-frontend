@@ -32,26 +32,26 @@ async function parseResponse(response) {
  * POST /business-dependency/test
  */
 export async function submitBusinessTest(data) {
+  const payload = {
+    name: data.fullName || data.name || 'Anonymous',
+    company: data.company || data.business || 'Not Specified',
+    phone: data.phone || '',
+    score: Number(data.score ?? 0),
+  };
+  if (Array.isArray(data.answers)) {
+    payload.answers = data.answers;
+  }
+
   try {
     const response = await fetch(`${API_BASE}/business-dependency/test`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
+      body: JSON.stringify(payload),
     });
     return await parseResponse(response);
   } catch (error) {
-    // If endpoint returns 404, fallback to /business-dependency
-    try {
-      const fallback = await fetch(`${API_BASE}/business-dependency`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...data, type: 'Business Test' }),
-      });
-      return await parseResponse(fallback);
-    } catch (fallbackErr) {
-      console.warn('submitBusinessTest backend offline or failed, handled locally:', error);
-      throw error;
-    }
+    console.warn('submitBusinessTest failed:', error);
+    throw error;
   }
 }
 
@@ -60,26 +60,32 @@ export async function submitBusinessTest(data) {
  * POST /business-dependency/diagnostic
  */
 export async function submitBusinessDiagnostic(data) {
+  const payload = {
+    name: data.fullName || data.name || '',
+    company: data.company || data.business || '',
+    phone: data.phone || '',
+    email: data.email || '',
+    designation: data.designation || '',
+    industry: data.industry || '',
+    businessSize: data.businessSize || data.size || '',
+    biggestChallenge: data.biggestChallenge || data.challengeSelect || '',
+    challengeDetails: data.challengeDetails || data.challengeNote || '',
+    score: Number(data.score ?? 0),
+  };
+  if (Array.isArray(data.answers)) {
+    payload.answers = data.answers;
+  }
+
   try {
     const response = await fetch(`${API_BASE}/business-dependency/diagnostic`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
+      body: JSON.stringify(payload),
     });
     return await parseResponse(response);
   } catch (error) {
-    // Fallback to /business-dependency
-    try {
-      const fallback = await fetch(`${API_BASE}/business-dependency`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...data, type: 'Business Diagnostic' }),
-      });
-      return await parseResponse(fallback);
-    } catch (fallbackErr) {
-      console.warn('submitBusinessDiagnostic backend offline or failed, handled locally:', error);
-      throw error;
-    }
+    console.warn('submitBusinessDiagnostic failed:', error);
+    throw error;
   }
 }
 

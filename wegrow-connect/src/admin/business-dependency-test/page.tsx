@@ -272,7 +272,9 @@ export default function AdminBusinessDependencyTest() {
 
     // Call DELETE /business-dependency/:id
     try {
-      await deleteBusinessDependency(id);
+      if (!id.startsWith('bdt_')) {
+        await deleteBusinessDependency(id);
+      }
     } catch (err: any) {
       console.warn("Server delete notice (removing locally):", err?.message || err);
     }
