@@ -83,6 +83,7 @@ const AdminStudentFounders = lazy(() => import('./admin/student-founders/page'))
 const AdminBusinessFounders = lazy(() => import('./admin/business-founders/page'));
 
 const AdminSingAlong = lazy(() => import('./admin/sing-along/page'));
+const AdminBusinessDependencyTest = lazy(() => import('./admin/business-dependency-test/page'));
 
 // Campaign Platform (Public & Admin Lazy Loaded)
 const CampaignLanding = lazy(() => import('./components/CampaignLanding'));
@@ -737,6 +738,8 @@ export default function App() {
 
             <Route path="/admin/sing-along" element={<ProtectedRoute allowedRoles={['admin']}><AdminSingAlong /></ProtectedRoute>} />
             <Route path="/admin/singalong" element={<ProtectedRoute allowedRoles={['admin']}><AdminSingAlong /></ProtectedRoute>} />
+            <Route path="/admin/business-dependency-test" element={<ProtectedRoute allowedRoles={['admin']}><AdminBusinessDependencyTest /></ProtectedRoute>} />
+            <Route path="/admin/dependency-test" element={<ProtectedRoute allowedRoles={['admin']}><AdminBusinessDependencyTest /></ProtectedRoute>} />
             <Route path="/admin/workshops" element={<ProtectedRoute allowedRoles={['admin']}><AdminWorkshops /></ProtectedRoute>} />
             <Route path="/admin/events" element={<ProtectedRoute allowedRoles={['admin']}><AdminEvents /></ProtectedRoute>} />
             <Route path="/admin/gallery" element={<ProtectedRoute allowedRoles={['admin']}><AdminGalleryPage /></ProtectedRoute>} />

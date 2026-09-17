@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { submitBusinessTest, submitBusinessDiagnostic } from '../services/businessDependencyApi';
 
 const QUESTIONS = [
   "Sales and new customer acquisition happen without my direct involvement.",
@@ -90,6 +91,9 @@ export default function BusinessDependencyTest() {
   // Admin panel state
   const [adminOpen, setAdminOpen] = useState(false);
   const [submissions, setSubmissions] = useState([]);
+  const [adminTypeFilter, setAdminTypeFilter] = useState('ALL');
+  const [adminPage, setAdminPage] = useState(1);
+  const adminLimit = 10;
 
   // Scroll to top on screen change
   useEffect(() => {
@@ -114,7 +118,13 @@ export default function BusinessDependencyTest() {
     try {
       const stored = JSON.parse(localStorage.getItem('wegrow_bdt_submissions') || '[]');
       if (Array.isArray(stored)) {
-        setSubmissions(stored);
+        const normalized = stored.map((s, idx) => ({
+          ...s,
+          id: s.id || `bdt_${Date.now()}_${idx}`,
+          type: s.type || (s.challengeSelect || s.email ? 'Business Diagnostic' : 'Business Test'),
+          company: s.company || s.business || ''
+        }));
+        setSubmissions(normalized);
       }
     } catch (e) {
       console.error("Failed to load submissions:", e);
@@ -160,6 +170,41 @@ export default function BusinessDependencyTest() {
     const band = BANDS.find(b => score >= b.min && score <= b.max) || BANDS[BANDS.length - 1];
 
     setResultState({ score, band });
+
+    // Store Business Test attempt in submissions
+    const testSubmission = {
+      id: "bdt_test_" + Date.now() + "_" + Math.random().toString(36).substring(2, 7),
+      type: 'Business Test',
+      submittedAt: new Date().toISOString(),
+      name: openInfo.name || 'Anonymous',
+      business: openInfo.business || '',
+      company: openInfo.business || '',
+      phone: openInfo.phone || '',
+      score,
+      category: band.name,
+      answers: [...answers],
+      stage: 'Test Completed'
+    };
+
+    // Save locally for instant UI update & offline resiliency
+    try {
+      const stored = JSON.parse(localStorage.getItem('wegrow_bdt_submissions') || '[]');
+      stored.unshift(testSubmission);
+      localStorage.setItem('wegrow_bdt_submissions', JSON.stringify(stored));
+      localStorage.setItem(`submission:${Date.now()}`, JSON.stringify(testSubmission));
+    } catch (e) {
+      console.error("Storage write error for test submission:", e);
+    }
+
+    // Call backend API: POST /business-dependency/test
+    submitBusinessTest(testSubmission).then(apiRes => {
+      if (apiRes && apiRes.data && apiRes.data.id) {
+        testSubmission.id = apiRes.data.id;
+      }
+    }).catch(err => {
+      console.warn("Backend sync notice for Business Test:", err.message);
+    });
+
     setScreen('result');
   };
 
@@ -190,25 +235,35 @@ export default function BusinessDependencyTest() {
     if (Object.keys(errs).length > 0) return;
 
     const submission = {
-      id: "bdt_" + Date.now() + "_" + Math.random().toString(36).substring(2, 7),
+      id: "bdt_diag_" + Date.now() + "_" + Math.random().toString(36).substring(2, 7),
+      type: 'Business Diagnostic',
       submittedAt: new Date().toISOString(),
       ...leadVals,
       score: resultState.score,
       category: resultState.band.name,
       originalTestName: openInfo.name,
-      originalBusiness: openInfo.business
+      originalBusiness: openInfo.business,
+      stage: 'Diagnostic Booked'
     };
 
-    // Save to localStorage
+    // Save locally for instant UI update & offline resiliency
     try {
       const stored = JSON.parse(localStorage.getItem('wegrow_bdt_submissions') || '[]');
       stored.unshift(submission);
       localStorage.setItem('wegrow_bdt_submissions', JSON.stringify(stored));
-      // Also save individual key for backward-compatibility
       localStorage.setItem(`submission:${Date.now()}`, JSON.stringify(submission));
     } catch (e) {
       console.error("Storage write error:", e);
     }
+
+    // Call backend API: POST /business-dependency/diagnostic
+    submitBusinessDiagnostic(submission).then(apiRes => {
+      if (apiRes && apiRes.data && apiRes.data.id) {
+        submission.id = apiRes.data.id;
+      }
+    }).catch(err => {
+      console.warn("Backend sync notice for Business Diagnostic:", err.message);
+    });
 
     setScreen('thanks');
   };
@@ -381,16 +436,32 @@ export default function BusinessDependencyTest() {
               fontSize: '15px',
               color: '#4B5170',
               lineHeight: 1.55,
-              margin: '14px 0 26px',
+              margin: '14px 0 20px',
               maxWidth: '52ch'
             }}>
               Answer 8 quick questions about how your business runs today. We'll calculate your Business Independence Score and show you exactly where the business still leans on you.
             </p>
 
+            <div style={{
+              fontSize: '12px',
+              color: '#C1541B',
+              fontWeight: 600,
+              marginBottom: '16px',
+              background: '#FDF0E2',
+              border: '1px solid #F3D3AC',
+              padding: '6px 12px',
+              borderRadius: '6px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}>
+              <span style={{ color: '#C63B32', fontWeight: 800, fontSize: '14px' }}>*</span> All fields are mandatory
+            </div>
+
             {/* Input Name */}
             <div style={{ marginBottom: '14px' }}>
               <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#131C3A', marginBottom: '6px' }}>
-                Your name
+                Your name <span style={{ color: '#C63B32' }}>*</span>
               </label>
               <input 
                 type="text" 
@@ -419,7 +490,7 @@ export default function BusinessDependencyTest() {
             {/* Input Business */}
             <div style={{ marginBottom: '14px' }}>
               <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#131C3A', marginBottom: '6px' }}>
-                Business name
+                Business name <span style={{ color: '#C63B32' }}>*</span>
               </label>
               <input 
                 type="text" 
@@ -448,7 +519,7 @@ export default function BusinessDependencyTest() {
             {/* Input Phone */}
             <div style={{ marginBottom: '22px' }}>
               <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#131C3A', marginBottom: '6px' }}>
-                Phone number
+                Phone number <span style={{ color: '#C63B32' }}>*</span>
               </label>
               <input 
                 type="tel" 
@@ -813,7 +884,7 @@ export default function BusinessDependencyTest() {
               border: '1px solid #F3D3AC',
               borderRadius: '7px',
               padding: '10px 14px',
-              marginBottom: '20px',
+              marginBottom: '16px',
               fontSize: '13.5px',
               color: '#131C3A',
               fontWeight: 600
@@ -824,11 +895,27 @@ export default function BusinessDependencyTest() {
               </span>
             </div>
 
+            <div style={{
+              fontSize: '12px',
+              color: '#C1541B',
+              fontWeight: 600,
+              marginBottom: '16px',
+              background: '#FDF0E2',
+              border: '1px solid #F3D3AC',
+              padding: '6px 12px',
+              borderRadius: '6px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}>
+              <span style={{ color: '#C63B32', fontWeight: 800, fontSize: '14px' }}>*</span> All fields are mandatory
+            </div>
+
             {/* Row 1 */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '0 14px' }}>
               <div style={{ marginBottom: '14px' }}>
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#131C3A', marginBottom: '6px' }}>
-                  Full name
+                  Full name <span style={{ color: '#C63B32' }}>*</span>
                 </label>
                 <input 
                   type="text" 
@@ -849,7 +936,7 @@ export default function BusinessDependencyTest() {
 
               <div style={{ marginBottom: '14px' }}>
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#131C3A', marginBottom: '6px' }}>
-                  Company
+                  Company <span style={{ color: '#C63B32' }}>*</span>
                 </label>
                 <input 
                   type="text" 
@@ -873,7 +960,7 @@ export default function BusinessDependencyTest() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '0 14px' }}>
               <div style={{ marginBottom: '14px' }}>
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#131C3A', marginBottom: '6px' }}>
-                  Designation
+                  Designation <span style={{ color: '#C63B32' }}>*</span>
                 </label>
                 <input 
                   type="text" 
@@ -895,7 +982,7 @@ export default function BusinessDependencyTest() {
 
               <div style={{ marginBottom: '14px' }}>
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#131C3A', marginBottom: '6px' }}>
-                  Industry
+                  Industry <span style={{ color: '#C63B32' }}>*</span>
                 </label>
                 <select 
                   value={leadVals.industry}
@@ -929,7 +1016,7 @@ export default function BusinessDependencyTest() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '0 14px' }}>
               <div style={{ marginBottom: '14px' }}>
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#131C3A', marginBottom: '6px' }}>
-                  Phone
+                  Phone <span style={{ color: '#C63B32' }}>*</span>
                 </label>
                 <input 
                   type="tel" 
@@ -950,7 +1037,7 @@ export default function BusinessDependencyTest() {
 
               <div style={{ marginBottom: '14px' }}>
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#131C3A', marginBottom: '6px' }}>
-                  Email
+                  Email <span style={{ color: '#C63B32' }}>*</span>
                 </label>
                 <input 
                   type="email" 
@@ -975,7 +1062,7 @@ export default function BusinessDependencyTest() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '0 14px' }}>
               <div style={{ marginBottom: '14px' }}>
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#131C3A', marginBottom: '6px' }}>
-                  Business size
+                  Business size <span style={{ color: '#C63B32' }}>*</span>
                 </label>
                 <select 
                   value={leadVals.size}
@@ -1002,7 +1089,7 @@ export default function BusinessDependencyTest() {
 
               <div style={{ marginBottom: '14px' }}>
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#131C3A', marginBottom: '6px' }}>
-                  Biggest challenge
+                  Biggest challenge <span style={{ color: '#C63B32' }}>*</span>
                 </label>
                 <select 
                   value={leadVals.challengeSelect}
@@ -1173,113 +1260,253 @@ export default function BusinessDependencyTest() {
       </button>
 
       {/* Admin Panel Details */}
-      {adminOpen && (
-        <div style={{
-          width: '100%',
-          maxWidth: '640px',
-          marginTop: '14px',
-          background: '#FFFFFF',
-          borderRadius: '10px',
-          border: '1px solid #E7E2D6',
-          padding: '20px',
-          boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
-          boxSizing: 'border-box'
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
-            <h3 style={{ fontFamily: "'Sora', sans-serif", fontSize: '16px', color: '#131C3A', margin: 0 }}>
-              Captured submissions ({submissions.length})
-            </h3>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              {submissions.length > 0 && (
-                <button
-                  type="button"
-                  onClick={handleExportCSV}
-                  style={{
-                    background: '#1E8A5F',
-                    color: '#FFFFFF',
-                    border: 'none',
-                    borderRadius: '6px',
-                    padding: '6px 12px',
-                    fontSize: '12px',
-                    fontWeight: 600,
-                    cursor: 'pointer'
-                  }}
-                >
-                  Download CSV
-                </button>
-              )}
-              {submissions.length > 0 && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (window.confirm("Are you sure you want to clear stored test submissions?")) {
-                      localStorage.removeItem('wegrow_bdt_submissions');
-                      setSubmissions([]);
-                    }
-                  }}
-                  style={{
-                    background: '#C63B32',
-                    color: '#FFFFFF',
-                    border: 'none',
-                    borderRadius: '6px',
-                    padding: '6px 12px',
-                    fontSize: '12px',
-                    fontWeight: 600,
-                    cursor: 'pointer'
-                  }}
-                >
-                  Clear All
-                </button>
+      {adminOpen && (() => {
+        const filteredList = submissions.filter(s => {
+          if (adminTypeFilter === 'ALL') return true;
+          return s.type === adminTypeFilter;
+        });
+        const totalFiltered = filteredList.length;
+        const totalPages = Math.max(1, Math.ceil(totalFiltered / adminLimit));
+        const currPage = Math.min(adminPage, totalPages);
+        const startIndex = (currPage - 1) * adminLimit;
+        const pageItems = filteredList.slice(startIndex, startIndex + adminLimit);
+
+        const testCount = submissions.filter(s => s.type === 'Business Test').length;
+        const diagCount = submissions.filter(s => s.type === 'Business Diagnostic').length;
+
+        return (
+          <div style={{
+            width: '100%',
+            maxWidth: '680px',
+            marginTop: '14px',
+            background: '#FFFFFF',
+            borderRadius: '12px',
+            border: '1px solid #E7E2D6',
+            padding: '20px',
+            boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
+            boxSizing: 'border-box'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
+              <div>
+                <h3 style={{ fontFamily: "'Sora', sans-serif", fontSize: '16px', color: '#131C3A', margin: '0 0 4px' }}>
+                  Captured Submissions ({submissions.length})
+                </h3>
+                <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                  <Link
+                    to="/admin/business-dependency-test"
+                    style={{
+                      fontSize: '11.5px',
+                      color: '#2F4FD6',
+                      fontWeight: 700,
+                      textDecoration: 'underline'
+                    }}
+                  >
+                    Open Full Admin Dashboard ↗
+                  </Link>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '8px' }}>
+                {submissions.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={handleExportCSV}
+                    style={{
+                      background: '#1E8A5F',
+                      color: '#FFFFFF',
+                      border: 'none',
+                      borderRadius: '6px',
+                      padding: '6px 12px',
+                      fontSize: '12px',
+                      fontWeight: 600,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Download CSV
+                  </button>
+                )}
+                {submissions.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (window.confirm("Are you sure you want to clear stored test submissions?")) {
+                        localStorage.removeItem('wegrow_bdt_submissions');
+                        setSubmissions([]);
+                      }
+                    }}
+                    style={{
+                      background: '#C63B32',
+                      color: '#FFFFFF',
+                      border: 'none',
+                      borderRadius: '6px',
+                      padding: '6px 12px',
+                      fontSize: '12px',
+                      fontWeight: 600,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Clear All
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Filter Tabs: All, Business Test, Business Diagnostic */}
+            <div style={{ display: 'flex', gap: '6px', marginBottom: '12px', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                onClick={() => { setAdminTypeFilter('ALL'); setAdminPage(1); }}
+                style={{
+                  padding: '5px 10px',
+                  borderRadius: '6px',
+                  fontSize: '11.5px',
+                  fontWeight: 600,
+                  border: '1px solid',
+                  cursor: 'pointer',
+                  borderColor: adminTypeFilter === 'ALL' ? '#131C3A' : '#E7E2D6',
+                  background: adminTypeFilter === 'ALL' ? '#131C3A' : '#FBF9F5',
+                  color: adminTypeFilter === 'ALL' ? '#FFFFFF' : '#4B5170'
+                }}
+              >
+                All ({submissions.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => { setAdminTypeFilter('Business Test'); setAdminPage(1); }}
+                style={{
+                  padding: '5px 10px',
+                  borderRadius: '6px',
+                  fontSize: '11.5px',
+                  fontWeight: 600,
+                  border: '1px solid',
+                  cursor: 'pointer',
+                  borderColor: adminTypeFilter === 'Business Test' ? '#0891b2' : '#E7E2D6',
+                  background: adminTypeFilter === 'Business Test' ? '#0891b2' : '#FBF9F5',
+                  color: adminTypeFilter === 'Business Test' ? '#FFFFFF' : '#4B5170'
+                }}
+              >
+                Business Test ({testCount})
+              </button>
+              <button
+                type="button"
+                onClick={() => { setAdminTypeFilter('Business Diagnostic'); setAdminPage(1); }}
+                style={{
+                  padding: '5px 10px',
+                  borderRadius: '6px',
+                  fontSize: '11.5px',
+                  fontWeight: 600,
+                  border: '1px solid',
+                  cursor: 'pointer',
+                  borderColor: adminTypeFilter === 'Business Diagnostic' ? '#F07E1B' : '#E7E2D6',
+                  background: adminTypeFilter === 'Business Diagnostic' ? '#F07E1B' : '#FBF9F5',
+                  color: adminTypeFilter === 'Business Diagnostic' ? '#FFFFFF' : '#4B5170'
+                }}
+              >
+                Business Diagnostic ({diagCount})
+              </button>
+            </div>
+
+            <div style={{ overflowX: 'auto', border: '1px solid #E7E2D6', borderRadius: '6px' }}>
+              {totalFiltered === 0 ? (
+                <p style={{ fontSize: '13px', color: '#4B5170', padding: '16px', textAlign: 'center', margin: 0 }}>
+                  No submissions match the current filter.
+                </p>
+              ) : (
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+                  <thead>
+                    <tr style={{ background: '#FBF9F5', borderBottom: '1.5px solid #E7E2D6' }}>
+                      <th style={{ textAlign: 'left', padding: '9px 10px', color: '#131C3A', whiteSpace: 'nowrap' }}>Type</th>
+                      <th style={{ textAlign: 'left', padding: '9px 10px', color: '#131C3A', whiteSpace: 'nowrap' }}>Date</th>
+                      <th style={{ textAlign: 'left', padding: '9px 10px', color: '#131C3A', whiteSpace: 'nowrap' }}>Name</th>
+                      <th style={{ textAlign: 'left', padding: '9px 10px', color: '#131C3A', whiteSpace: 'nowrap' }}>Company</th>
+                      <th style={{ textAlign: 'left', padding: '9px 10px', color: '#131C3A', whiteSpace: 'nowrap' }}>Phone</th>
+                      <th style={{ textAlign: 'left', padding: '9px 10px', color: '#131C3A', whiteSpace: 'nowrap' }}>Score</th>
+                      <th style={{ textAlign: 'left', padding: '9px 10px', color: '#131C3A', whiteSpace: 'nowrap' }}>Category</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {pageItems.map((r, i) => (
+                      <tr key={r.id || i} style={{ borderBottom: '1px solid #E7E2D6' }}>
+                        <td style={{ padding: '8px 10px', whiteSpace: 'nowrap' }}>
+                          <span style={{
+                            padding: '2px 8px',
+                            borderRadius: '12px',
+                            fontSize: '10px',
+                            fontWeight: 800,
+                            background: r.type === 'Business Diagnostic' ? '#FDF0E2' : '#E0F2FE',
+                            color: r.type === 'Business Diagnostic' ? '#D9661A' : '#0369A1',
+                            border: `1px solid ${r.type === 'Business Diagnostic' ? '#F3D3AC' : '#BAE6FD'}`
+                          }}>
+                            {r.type || 'Business Test'}
+                          </span>
+                        </td>
+                        <td style={{ padding: '8px 10px', whiteSpace: 'nowrap', color: '#4B5170' }}>
+                          {r.submittedAt ? new Date(r.submittedAt).toLocaleDateString() : ''}
+                        </td>
+                        <td style={{ padding: '8px 10px', whiteSpace: 'nowrap', fontWeight: 600, color: '#131C3A' }}>{r.name}</td>
+                        <td style={{ padding: '8px 10px', whiteSpace: 'nowrap' }}>{r.company || r.business || '-'}</td>
+                        <td style={{ padding: '8px 10px', whiteSpace: 'nowrap' }}>{r.phone}</td>
+                        <td style={{ padding: '8px 10px', whiteSpace: 'nowrap', fontWeight: 700, color: '#F07E1B' }}>{r.score}</td>
+                        <td style={{ padding: '8px 10px', whiteSpace: 'nowrap', fontWeight: 600 }}>{r.category}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               )}
             </div>
-          </div>
 
-          <div style={{ overflowX: 'auto', border: '1px solid #E7E2D6', borderRadius: '6px' }}>
-            {submissions.length === 0 ? (
-              <p style={{ fontSize: '13px', color: '#4B5170', padding: '16px', textAlign: 'center', margin: 0 }}>
-                No submissions captured yet. Take the test above and submit to see entries here.
-              </p>
-            ) : (
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
-                <thead>
-                  <tr style={{ background: '#FBF9F5', borderBottom: '1.5px solid #E7E2D6' }}>
-                    <th style={{ textAlign: 'left', padding: '9px 10px', color: '#131C3A', whiteSpace: 'nowrap' }}>Date</th>
-                    <th style={{ textAlign: 'left', padding: '9px 10px', color: '#131C3A', whiteSpace: 'nowrap' }}>Name</th>
-                    <th style={{ textAlign: 'left', padding: '9px 10px', color: '#131C3A', whiteSpace: 'nowrap' }}>Company</th>
-                    <th style={{ textAlign: 'left', padding: '9px 10px', color: '#131C3A', whiteSpace: 'nowrap' }}>Designation</th>
-                    <th style={{ textAlign: 'left', padding: '9px 10px', color: '#131C3A', whiteSpace: 'nowrap' }}>Industry</th>
-                    <th style={{ textAlign: 'left', padding: '9px 10px', color: '#131C3A', whiteSpace: 'nowrap' }}>Phone</th>
-                    <th style={{ textAlign: 'left', padding: '9px 10px', color: '#131C3A', whiteSpace: 'nowrap' }}>Email</th>
-                    <th style={{ textAlign: 'left', padding: '9px 10px', color: '#131C3A', whiteSpace: 'nowrap' }}>Size</th>
-                    <th style={{ textAlign: 'left', padding: '9px 10px', color: '#131C3A', whiteSpace: 'nowrap' }}>Challenge</th>
-                    <th style={{ textAlign: 'left', padding: '9px 10px', color: '#131C3A', whiteSpace: 'nowrap' }}>Score</th>
-                    <th style={{ textAlign: 'left', padding: '9px 10px', color: '#131C3A', whiteSpace: 'nowrap' }}>Category</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {submissions.map((r, i) => (
-                    <tr key={i} style={{ borderBottom: '1px solid #E7E2D6' }}>
-                      <td style={{ padding: '8px 10px', whiteSpace: 'nowrap', color: '#4B5170' }}>
-                        {r.submittedAt ? new Date(r.submittedAt).toLocaleDateString() : ''}
-                      </td>
-                      <td style={{ padding: '8px 10px', whiteSpace: 'nowrap', fontWeight: 600, color: '#131C3A' }}>{r.name}</td>
-                      <td style={{ padding: '8px 10px', whiteSpace: 'nowrap' }}>{r.company}</td>
-                      <td style={{ padding: '8px 10px', whiteSpace: 'nowrap' }}>{r.designation}</td>
-                      <td style={{ padding: '8px 10px', whiteSpace: 'nowrap' }}>{r.industry}</td>
-                      <td style={{ padding: '8px 10px', whiteSpace: 'nowrap' }}>{r.phone}</td>
-                      <td style={{ padding: '8px 10px', whiteSpace: 'nowrap' }}>{r.email}</td>
-                      <td style={{ padding: '8px 10px', whiteSpace: 'nowrap' }}>{r.size}</td>
-                      <td style={{ padding: '8px 10px', whiteSpace: 'nowrap' }}>{r.challengeSelect}</td>
-                      <td style={{ padding: '8px 10px', whiteSpace: 'nowrap', fontWeight: 700, color: '#F07E1B' }}>{r.score}</td>
-                      <td style={{ padding: '8px 10px', whiteSpace: 'nowrap', fontWeight: 600 }}>{r.category}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            {/* Pagination Controls with Count */}
+            {totalFiltered > 0 && (
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginTop: '12px',
+                fontSize: '11.5px',
+                color: '#4B5170'
+              }}>
+                <span>
+                  Showing <strong>{startIndex + 1}</strong> to <strong>{Math.min(startIndex + adminLimit, totalFiltered)}</strong> of <strong>{totalFiltered}</strong> (Page {currPage} of {totalPages})
+                </span>
+                {totalPages > 1 && (
+                  <div style={{ display: 'flex', gap: '6px' }}>
+                    <button
+                      type="button"
+                      disabled={currPage <= 1}
+                      onClick={() => setAdminPage(prev => Math.max(1, prev - 1))}
+                      style={{
+                        padding: '4px 8px',
+                        borderRadius: '4px',
+                        border: '1px solid #E7E2D6',
+                        background: '#FFFFFF',
+                        cursor: currPage <= 1 ? 'not-allowed' : 'pointer',
+                        opacity: currPage <= 1 ? 0.4 : 1
+                      }}
+                    >
+                      Prev
+                    </button>
+                    <button
+                      type="button"
+                      disabled={currPage >= totalPages}
+                      onClick={() => setAdminPage(prev => Math.min(totalPages, prev + 1))}
+                      style={{
+                        padding: '4px 8px',
+                        borderRadius: '4px',
+                        border: '1px solid #E7E2D6',
+                        background: '#FFFFFF',
+                        cursor: currPage >= totalPages ? 'not-allowed' : 'pointer',
+                        opacity: currPage >= totalPages ? 0.4 : 1
+                      }}
+                    >
+                      Next
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
           </div>
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 }

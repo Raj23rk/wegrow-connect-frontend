@@ -261,18 +261,22 @@
       </div>
       <p class="open-sub">Answer 8 quick questions about how your business runs today. We'll calculate your Business Independence Score and show you exactly where the business still leans on you.</p>
 
+      <div style="font-size:12px; color:#C1541B; font-weight:600; margin-bottom:16px; background:#FDF0E2; border:1px solid #F3D3AC; padding:6px 12px; border-radius:6px; display:inline-flex; align-items:center; gap:6px;">
+        <span style="color:#C63B32; font-weight:800; font-size:14px;">*</span> All fields are mandatory
+      </div>
+
       <div class="field" id="f-name">
-        <label for="in-name">Your name</label>
+        <label for="in-name">Your name <span style="color:#C63B32">*</span></label>
         <input type="text" id="in-name" placeholder="e.g. Arjun Mehta">
         <div class="err">Enter your name to continue.</div>
       </div>
       <div class="field" id="f-biz">
-        <label for="in-biz">Business name</label>
+        <label for="in-biz">Business name <span style="color:#C63B32">*</span></label>
         <input type="text" id="in-biz" placeholder="e.g. Mehta Interiors">
         <div class="err">Enter your business name.</div>
       </div>
       <div class="field" id="f-phone">
-        <label for="in-phone">Phone number</label>
+        <label for="in-phone">Phone number <span style="color:#C63B32">*</span></label>
         <input type="tel" id="in-phone" placeholder="e.g. 98765 43210">
         <div class="err">Enter a valid phone number.</div>
       </div>
@@ -346,26 +350,30 @@
         <span class="cat" id="chipCat">Category</span>
       </div>
 
+      <div style="font-size:12px; color:#C1541B; font-weight:600; margin-bottom:16px; background:#FDF0E2; border:1px solid #F3D3AC; padding:6px 12px; border-radius:6px; display:inline-flex; align-items:center; gap:6px;">
+        <span style="color:#C63B32; font-weight:800; font-size:14px;">*</span> All fields are mandatory
+      </div>
+
       <div class="grid2">
         <div class="field" id="f-l-name">
-          <label for="l-name">Full name</label>
+          <label for="l-name">Full name <span style="color:#C63B32">*</span></label>
           <input type="text" id="l-name">
           <div class="err">Enter your name.</div>
         </div>
         <div class="field" id="f-l-company">
-          <label for="l-company">Company</label>
+          <label for="l-company">Company <span style="color:#C63B32">*</span></label>
           <input type="text" id="l-company">
           <div class="err">Enter your company name.</div>
         </div>
       </div>
       <div class="grid2">
         <div class="field" id="f-l-designation">
-          <label for="l-designation">Designation</label>
+          <label for="l-designation">Designation <span style="color:#C63B32">*</span></label>
           <input type="text" id="l-designation" placeholder="e.g. Founder, CEO">
           <div class="err">Enter your designation.</div>
         </div>
         <div class="field" id="f-l-industry">
-          <label for="l-industry">Industry</label>
+          <label for="l-industry">Industry <span style="color:#C63B32">*</span></label>
           <select id="l-industry">
             <option value="">Select industry</option>
             <option>Manufacturing</option>
@@ -383,19 +391,19 @@
       </div>
       <div class="grid2">
         <div class="field" id="f-l-phone">
-          <label for="l-phone">Phone</label>
+          <label for="l-phone">Phone <span style="color:#C63B32">*</span></label>
           <input type="tel" id="l-phone">
           <div class="err">Enter a valid phone number.</div>
         </div>
         <div class="field" id="f-l-email">
-          <label for="l-email">Email</label>
+          <label for="l-email">Email <span style="color:#C63B32">*</span></label>
           <input type="email" id="l-email">
           <div class="err">Enter a valid email.</div>
         </div>
       </div>
       <div class="grid2">
         <div class="field" id="f-l-size">
-          <label for="l-size">Business size</label>
+          <label for="l-size">Business size <span style="color:#C63B32">*</span></label>
           <select id="l-size">
             <option value="">Select team size</option>
             <option>Solo / just me</option>
@@ -407,7 +415,7 @@
           <div class="err">Select your business size.</div>
         </div>
         <div class="field" id="f-l-challenge-select">
-          <label for="l-challenge-select">Biggest challenge</label>
+          <label for="l-challenge-select">Biggest challenge <span style="color:#C63B32">*</span></label>
           <select id="l-challenge-select">
             <option value="">Select the closest fit</option>
             <option>Everything depends on me personally</option>
@@ -578,6 +586,22 @@ function submitTest(){
   const score = Math.round(((sum - min) / (max - min)) * 100);
   const band = BANDS.find(b => score >= b.min && score <= b.max) || BANDS[BANDS.length-1];
   resultState = {score, band};
+
+  // Save Business Test attempt
+  const testSubmission = {
+    type: 'Business Test',
+    submittedAt: new Date().toISOString(),
+    name: openInfo.name || 'Anonymous',
+    company: openInfo.business || '',
+    business: openInfo.business || '',
+    phone: openInfo.phone || '',
+    score,
+    category: band.name,
+    answers: [...answers],
+    stage: 'Test Completed'
+  };
+  saveSubmission(testSubmission);
+
   renderResult();
   showScreen("screen-result");
 }
@@ -648,12 +672,14 @@ function submitLead(){
   if(!ok) return;
 
   const submission = {
+    type: 'Business Diagnostic',
     submittedAt: new Date().toISOString(),
     ...vals,
     score: resultState.score,
     category: resultState.band.name,
     originalTestName: openInfo.name,
-    originalBusiness: openInfo.business
+    originalBusiness: openInfo.business,
+    stage: 'Diagnostic Booked'
   };
 
   saveSubmission(submission);

@@ -22,8 +22,8 @@ import {
   QrCode,
   ClipboardList,
   FileText,
-  Palette,
-  Music
+  Music,
+  ClipboardCheck
 } from "lucide-react";
 
 export default function Sidebar() {
@@ -36,8 +36,8 @@ export default function Sidebar() {
     { name: "My Profile", href: "/home/profile", icon: User },
     { name: "Users", href: "/admin/users", icon: Users },
     { name: "Roles & Permissions", href: "/admin/roles", icon: ShieldCheck },
-    { name: "Drawing Competition", href: "/admin/art-competition", icon: Palette },
     { name: "Sing Along Tickets", href: "/admin/sing-along", icon: Music },
+    { name: "Business Dependency", href: "/admin/business-dependency-test", icon: ClipboardCheck },
     { name: "Women Entrepreneurs", href: "/admin/women-entrepreneurs", icon: Sparkles },
     { name: "Student Founders", href: "/admin/student-founders", icon: GraduationCap },
     { name: "Business Founders", href: "/admin/business-founders", icon: Briefcase },

@@ -135,3 +135,26 @@ html, body {
 .sidebar .logo img:hover {
   transform: scale(1.02);
 }
+
+/* ── Custom Table Scrollbar ── */
+.table-scrollbar {
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+}
+.table-scrollbar::-webkit-scrollbar {
+  display: block !important;
+  width: 7px !important;
+  height: 7px !important;
+}
+.table-scrollbar::-webkit-scrollbar-track {
+  background: #f8fafc !important;
+  border-radius: 6px;
+}
+.table-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1 !important;
+  border-radius: 6px;
+}
+.table-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8 !important;
+}
