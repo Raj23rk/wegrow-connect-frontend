@@ -8,6 +8,7 @@ import {
   MapPin,
   Ticket,
   User,
+  Users,
   CreditCard,
   CheckCircle2,
   AlertTriangle,
@@ -160,10 +161,17 @@ export default function SingAlongBooking() {
   const [isAudioMuted, setIsAudioMuted] = useState(false);
   const ticketCaptureRef = useRef(null);
 
-  const subtotal = qty * CONFIG.ticketPrice;
+  const isGroupOffer = qty === 5;
+  const isBulkOffer = qty === 10;
+  const freeTickets = isBulkOffer ? 1 : 0;
+  const totalTickets = qty + freeTickets;
+  const unitPrice = isGroupOffer ? 200 : CONFIG.ticketPrice;
+  const regularTotal = qty * CONFIG.ticketPrice;
+  const subtotal = qty * unitPrice;
   const convenienceFee = Number((qty * (CONFIG.convenienceFee ?? CONFIG.conventionFee ?? 5.30)).toFixed(2));
   const conventionFee = convenienceFee;
   const totalAmount = Number((subtotal + convenienceFee).toFixed(2));
+  const totalSavings = isGroupOffer ? ((CONFIG.ticketPrice - 200) * 5) : (isBulkOffer ? CONFIG.ticketPrice : 0);
 
   // Toggle Background Song Audio (MASCOT_SONG_AUDIO)
   const toggleAudioSound = () => {
@@ -373,7 +381,7 @@ export default function SingAlongBooking() {
         fullName: booker.name.trim(),
         phone: booker.mobile.trim(),
         email: booker.email.trim() || undefined,
-        ticketQty: qty,
+        ticketQty: totalTickets,
         amount: totalAmount,
       };
 
@@ -498,7 +506,7 @@ export default function SingAlongBooking() {
       fullName: booker.name.trim(),
       phone: booker.mobile.trim(),
       email: booker.email.trim() || undefined,
-      ticketQty: qty,
+      ticketQty: totalTickets,
       amount: totalAmount,
       paymentMethod: CONFIG.upiId || 'ashokbcasvk45@oksbi',
       paymentScreenshot: payment.fileData || '',
@@ -518,7 +526,7 @@ export default function SingAlongBooking() {
             ...payload,
             status: 'CONFIRMED',
             eventId: "SINGALONG-SEP-27-2026",
-            notes: `Manual UPI payment. Amount: ₹${totalAmount} (${qty} pass${qty > 1 ? 'es' : ''}, incl. ₹${conventionFee} conv. fee)`
+            notes: `Manual UPI payment. Amount: ₹${totalAmount} (${qty} paid pass${qty > 1 ? 'es' : ''}${freeTickets > 0 ? ` + ${freeTickets} FREE pass` : ''} = ${totalTickets} total passes, incl. ₹${conventionFee} conv. fee)`
           });
           bookedRecord = res?.data?.booking || res?.data || res?.booking || res;
         } catch (apiErr) {
@@ -533,7 +541,7 @@ export default function SingAlongBooking() {
         fullName: bookedRecord?.fullName || booker.name.trim(),
         phone: bookedRecord?.phone || `+91 ${booker.mobile.trim()}`,
         email: bookedRecord?.email || booker.email.trim() || 'Not provided',
-        ticketQty: bookedRecord?.ticketQty || qty,
+        ticketQty: bookedRecord?.ticketQty || totalTickets,
         amount: bookedRecord?.totalAmount || totalAmount,
         utr: bookedRecord?.utr || payment.utr.trim(),
         paymentMethod: bookedRecord?.paymentMethod || 'MANUAL_UPI',
@@ -918,6 +926,23 @@ export default function SingAlongBooking() {
             4% 98%, 0% 75%, 2% 50%, 0% 25%
           );
           transform: rotate(-1.5deg);
+        }
+
+        /* Blinking / Flashing Glowing Offer Tag */
+        @keyframes offerTagBlink {
+          0%, 100% {
+            opacity: 1;
+            transform: scale(1);
+            box-shadow: 0 0 16px rgba(239, 68, 68, 0.7);
+          }
+          50% {
+            opacity: 0.3;
+            transform: scale(0.97);
+            box-shadow: 0 0 4px rgba(239, 68, 68, 0.15);
+          }
+        }
+        .blink-offer-tag {
+          animation: offerTagBlink 1.2s infinite ease-in-out;
         }
 
         /* =========================================================================
@@ -1952,9 +1977,36 @@ export default function SingAlongBooking() {
                           <div className="flex items-center justify-between gap-2.5 bg-[#fff8f0] border-2 border-amber-500/30 rounded-xl sm:rounded-2xl p-3 sm:p-4 mt-2">
                             <div>
                               <span className="font-display text-xs sm:text-sm font-bold text-slate-900 block">Number of Attendees</span>
-                              <span className="text-[11px] sm:text-xs text-[#ff6a00] font-bold block">
-                                {rupee(CONFIG.ticketPrice)} × {qty} {qty > 1 ? 'Passes' : 'Pass'}
-                              </span>
+                              <div className="flex items-center gap-1.5 flex-wrap mt-0.5">
+                                {isGroupOffer && (
+                                  <>
+                                    <span className="text-[11px] text-slate-400 line-through font-semibold">
+                                      ₹{CONFIG.ticketPrice}
+                                    </span>
+                                    <span className="text-[11px] sm:text-xs text-[#ff6a00] font-bold">
+                                      {rupee(unitPrice)} × {qty} Passes
+                                    </span>
+                                    <span className="bg-emerald-100 text-emerald-700 text-[10px] font-extrabold px-1.5 py-0.2 rounded-md">
+                                      Offer Applied (Save ₹245)
+                                    </span>
+                                  </>
+                                )}
+                                {isBulkOffer && (
+                                  <>
+                                    <span className="text-[11px] sm:text-xs text-[#ff6a00] font-bold">
+                                      ₹249 × 10 Passes
+                                    </span>
+                                    <span className="bg-emerald-100 text-emerald-800 text-[10px] font-black px-1.5 py-0.5 rounded-md border border-emerald-300 animate-pulse">
+                                      +1 Free Ticket (11 Passes Total)
+                                    </span>
+                                  </>
+                                )}
+                                {!isGroupOffer && !isBulkOffer && (
+                                  <span className="text-[11px] sm:text-xs text-[#ff6a00] font-bold">
+                                    {rupee(CONFIG.ticketPrice)} × {qty} {qty > 1 ? 'Passes' : 'Pass'}
+                                  </span>
+                                )}
+                              </div>
                             </div>
                             <div className="flex items-center gap-2 sm:gap-3 bg-white border border-slate-200 rounded-xl px-1.5 sm:px-2 py-1 shadow-xs flex-shrink-0">
                               <button
@@ -1976,6 +2028,154 @@ export default function SingAlongBooking() {
                               >
                                 +
                               </button>
+                            </div>
+                          </div>
+
+                          {/* NEW ROW: Group 5 Tickets or Bulk 10 Tickets Booking Field */}
+                          <div className="bg-gradient-to-br from-amber-500/10 via-orange-500/10 to-red-500/10 border-2 border-orange-400/40 rounded-xl sm:rounded-2xl p-3 sm:p-4 mt-2.5 relative overflow-hidden shadow-sm">
+                            {/* Header Row: Title and Blinking Offer Tag */}
+                            <div className="flex items-center justify-between gap-2 flex-wrap mb-2.5">
+                              <div className="flex items-center gap-1.5">
+                                <Users className="w-4 h-4 text-[#ff6a00] flex-shrink-0" />
+                                <span className="font-display text-xs sm:text-sm font-black text-slate-900">
+                                  Group &amp; Bulk Booking
+                                </span>
+                              </div>
+
+                              {/* Blinking Offer Tag */}
+                              <div className="blink-offer-tag inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gradient-to-r from-red-600 via-orange-600 to-amber-500 text-white font-display font-black text-[10px] sm:text-xs tracking-wider uppercase shadow-md shadow-orange-500/30 select-none">
+                                <span className="relative flex h-2 w-2">
+                                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                                  <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                                </span>
+                                <span>⚡ OFFERS: 5 PASSES @ ₹200 | 10 PASSES + 1 FREE!</span>
+                              </div>
+                            </div>
+
+                            <p className="text-[11px] sm:text-xs text-slate-600 mb-2.5">
+                              Book in group with friends &amp; family: Grab 5 passes at <strong className="text-orange-600 font-extrabold">₹200 / ticket</strong> OR book 10 passes &amp; get <strong className="text-emerald-700 font-extrabold">1 ticket FREE (Total 11 Passes)</strong>:
+                            </p>
+
+                            {/* Booking Field Options: Group 5 Tickets or Bulk 10 Tickets with Radio Buttons */}
+                            <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                              {/* Option 1: Group (5 Tickets) */}
+                              <button
+                                type="button"
+                                onClick={() => setQty(qty === 5 ? 1 : 5)}
+                                className={`relative p-2.5 sm:p-3 rounded-xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between group ${
+                                  qty === 5
+                                    ? 'bg-gradient-to-br from-[#ff6a00] to-[#ee5007] text-white border-[#ee5007] shadow-lg shadow-orange-500/30 scale-[1.02]'
+                                    : 'bg-white hover:bg-orange-50/70 text-slate-800 border-slate-200 hover:border-orange-300'
+                                }`}
+                              >
+                                <input
+                                  type="radio"
+                                  name="groupBookingOffer"
+                                  checked={qty === 5}
+                                  onChange={() => setQty(5)}
+                                  className="sr-only"
+                                />
+                                <div className="flex items-center justify-between mb-1.5 gap-1">
+                                  <div className="flex items-center gap-1.5 min-w-0">
+                                    {/* Radio Circle */}
+                                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+                                      qty === 5
+                                        ? 'border-white bg-white shadow-xs'
+                                        : 'border-slate-300 bg-white group-hover:border-orange-400'
+                                    }`}>
+                                      {qty === 5 && (
+                                        <div className="w-2 h-2 rounded-full bg-[#ff6a00]" />
+                                      )}
+                                    </div>
+                                    <span className={`font-display text-xs sm:text-sm font-black truncate ${qty === 5 ? 'text-white' : 'text-slate-900'}`}>
+                                      Group (5 Tickets)
+                                    </span>
+                                  </div>
+                                  <span className={`text-[9px] sm:text-[10px] font-black px-1.5 py-0.5 rounded-full flex-shrink-0 ${
+                                    qty === 5 ? 'bg-white/25 text-white' : 'bg-emerald-100 text-emerald-700'
+                                  }`}>
+                                    SAVE ₹245
+                                  </span>
+                                </div>
+                                <div className="text-[11px] sm:text-xs pl-5.5">
+                                  <div className="flex items-center gap-1">
+                                    <span className={`line-through ${qty === 5 ? 'text-white/60' : 'text-slate-400'}`}>₹249</span>
+                                    <span className={`font-black ${qty === 5 ? 'text-white' : 'text-[#ff6a00]'}`}>₹200 / ticket</span>
+                                  </div>
+                                  <span className={`text-[10px] block mt-0.5 ${qty === 5 ? 'text-white/90 font-bold' : 'text-slate-500'}`}>
+                                    5 × ₹200 = ₹1,000 (5 Passes)
+                                  </span>
+                                </div>
+                              </button>
+
+                              {/* Option 2: Bulk (10 Tickets) */}
+                              <button
+                                type="button"
+                                onClick={() => setQty(qty === 10 ? 1 : 10)}
+                                className={`relative p-2.5 sm:p-3 rounded-xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between group ${
+                                  qty === 10
+                                    ? 'bg-gradient-to-br from-[#ff6a00] to-[#ee5007] text-white border-[#ee5007] shadow-lg shadow-orange-500/30 scale-[1.02]'
+                                    : 'bg-white hover:bg-orange-50/70 text-slate-800 border-slate-200 hover:border-orange-300'
+                                }`}
+                              >
+                                <input
+                                  type="radio"
+                                  name="groupBookingOffer"
+                                  checked={qty === 10}
+                                  onChange={() => setQty(10)}
+                                  className="sr-only"
+                                />
+                                <div className="flex items-center justify-between mb-1.5 gap-1">
+                                  <div className="flex items-center gap-1.5 min-w-0">
+                                    {/* Radio Circle */}
+                                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+                                      qty === 10
+                                        ? 'border-white bg-white shadow-xs'
+                                        : 'border-slate-300 bg-white group-hover:border-orange-400'
+                                    }`}>
+                                      {qty === 10 && (
+                                        <div className="w-2 h-2 rounded-full bg-[#ff6a00]" />
+                                      )}
+                                    </div>
+                                    <span className={`font-display text-xs sm:text-sm font-black truncate ${qty === 10 ? 'text-white' : 'text-slate-900'}`}>
+                                      Bulk (10 Tickets)
+                                    </span>
+                                  </div>
+                                  <span className={`text-[9px] sm:text-[10px] font-black px-1.5 py-0.5 rounded-full flex-shrink-0 ${
+                                    qty === 10 ? 'bg-white/25 text-white' : 'bg-emerald-100 text-emerald-800'
+                                  }`}>
+                                    +1 FREE TICKET
+                                  </span>
+                                </div>
+                                <div className="text-[11px] sm:text-xs pl-5.5">
+                                  <div className="flex items-center gap-1">
+                                    <span className={`font-black ${qty === 10 ? 'text-white' : 'text-slate-900'}`}>₹249 / ticket</span>
+                                    <span className={`text-[10px] font-bold ${qty === 10 ? 'text-amber-200' : 'text-emerald-700'}`}>• 1 Free Pass!</span>
+                                  </div>
+                                  <span className={`text-[10px] block mt-0.5 ${qty === 10 ? 'text-white/95 font-bold' : 'text-slate-500'}`}>
+                                    Pay 10 Passes = Total 11 Passes!
+                                  </span>
+                                </div>
+                              </button>
+                            </div>
+
+                            {/* Live Calculation Display */}
+                            <div className="mt-2.5 pt-2 border-t border-orange-200/70 flex items-center justify-between flex-wrap gap-1 text-[11px] sm:text-xs">
+                              <span className="text-slate-600">
+                                <strong>Calculation:</strong> {qty} × {rupee(unitPrice)} = <strong className="text-slate-900">{rupee(subtotal)}</strong>
+                                <span className="text-slate-500 font-normal"> + {rupee(convenienceFee)} conv. fee</span>
+                              </span>
+                              {isBulkOffer ? (
+                                <span className="font-black text-emerald-800 bg-emerald-100 border border-emerald-300 rounded-md px-2 py-0.5 animate-pulse">
+                                  🎁 1 Ticket FREE (Total 11 Passes)!
+                                </span>
+                              ) : isGroupOffer ? (
+                                <span className="font-black text-emerald-700 bg-emerald-100 border border-emerald-300 rounded-md px-2 py-0.5">
+                                  🎉 You Save {rupee(totalSavings)}!
+                                </span>
+                              ) : (
+                                <span className="text-slate-400 text-[10px]">Standard rate (₹249/pass)</span>
+                              )}
                             </div>
                           </div>
 
@@ -2053,15 +2253,29 @@ export default function SingAlongBooking() {
                               </div>
                               <div className="text-right">
                                 <span className="font-display font-black text-base text-[#ff6a00] block">{rupee(totalAmount)}</span>
-                                <span className="text-xs text-slate-400">{qty} Pass{qty > 1 ? 'es' : ''} • Total</span>
+                                <span className="text-xs text-slate-400">
+                                  {totalTickets} Pass{totalTickets > 1 ? 'es' : ''} {freeTickets > 0 ? `(${qty} Paid + ${freeTickets} Free)` : '• Total'}
+                                </span>
                               </div>
                             </div>
 
                             <div className="pt-3 space-y-2 text-xs text-slate-600">
                               <div className="flex justify-between">
-                                <span>Ticket Price ({qty} × {rupee(CONFIG.ticketPrice)}):</span>
+                                <span>Ticket Price ({qty} × {rupee(unitPrice)}):</span>
                                 <span className="font-bold text-slate-800">{rupee(subtotal)}</span>
                               </div>
+                              {isBulkOffer && (
+                                <div className="flex justify-between text-emerald-600 font-semibold">
+                                  <span>🎁 Buy 10 Get 1 Free Pass:</span>
+                                  <span>+1 FREE Ticket (Worth ₹249)</span>
+                                </div>
+                              )}
+                              {isGroupOffer && (
+                                <div className="flex justify-between text-emerald-600 font-semibold">
+                                  <span>Special Group Discount:</span>
+                                  <span>-{rupee(totalSavings)}</span>
+                                </div>
+                              )}
                               <div className="flex justify-between">
                                 <span>Convenience Fee:</span>
                                 <span className="font-bold text-slate-800">{qty > 1 ? `${qty} × ${rupee(CONFIG.conventionFee)} = ` : ''}{rupee(conventionFee)}</span>
