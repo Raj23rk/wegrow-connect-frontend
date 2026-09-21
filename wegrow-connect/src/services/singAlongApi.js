@@ -69,6 +69,27 @@ export const verifySingAlongTicket = singAlongApi.verifyTicket;
 export function getSingAlongTicketUrl(bookingId) {
   return `${API_BASE}/sing-along/ticket/${encodeURIComponent(bookingId)}`;
 }
+
+export async function sendSingAlongTicketEmail(bookingId, email = '') {
+  try {
+    const response = await fetch(
+      `${API_BASE}/sing-along/send-ticket/${encodeURIComponent(bookingId)}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeaders(),
+        },
+        body: JSON.stringify({ email }),
+      }
+    );
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('sendSingAlongTicketEmail error:', error);
+    throw error;
+  }
+}
+
 export function getSingAlongTicketDownloadUrl(bookingId) {
   return `${API_BASE}/sing-along/ticket/${encodeURIComponent(bookingId)}/download`;
 }
@@ -127,7 +148,7 @@ export async function getSingAlongBookings(params = {}) {
     Object.entries(params).forEach(([k, v]) => {
       if (v !== undefined && v !== null && v !== '') query.append(k, v);
     });
-    const response = await fetch(`${API_BASE}/sing-along?${query.toString()}`, {
+    const response = await fetch(`${API_BASE}/sing-along/admin/list?${query.toString()}`, {
       method: 'GET',
       headers: getAuthHeaders(),
     });

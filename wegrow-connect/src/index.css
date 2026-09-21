@@ -157,4 +157,21 @@ html, body {
 }
 .table-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #94a3b8 !important;
-}
+}
+
+/* ── Sponsors Marquee Animation (Right to Left Continuous) ── */
+@keyframes marqueeSponsors {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-33.333%);
+  }
+}
+
+.animate-marquee-sponsors {
+  display: flex;
+  width: max-content;
+  animation: marqueeSponsors 24s linear infinite;
+}
+
