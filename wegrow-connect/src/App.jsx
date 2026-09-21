@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import MissionVisionSection from './components/MissionVisionSection';
 import CoursesSection from './components/CoursesSection';
 import GallerySection from './components/GallerySection';
@@ -18,6 +18,8 @@ import Enterprices from './components/Enterprices';
 import SuccessStories from './components/SuccessStories';
 import ContactSection from './components/ContactSection';
 import Footer from './components/Footer';
+import FloatingWhatsApp from './components/FloatingWhatsApp';
+import WeGrowChatbot from './components/WeGrowChatbot';
 import LoginScreen from './components/LoginScreen';
 import RegisterSelection from './components/RegisterSelection';
 import AuthLayout from './components/AuthLayout';
@@ -156,9 +158,9 @@ function MainHomePage() {
   };
 
   const scrollToEventsMain = () => {
-    if (eventTargetRef.current && scrollContainerRef.current) {
+    if (missionVisionTargetRef.current && scrollContainerRef.current) {
       scrollContainerRef.current.scrollTo({
-        top: Math.max(eventTargetRef.current.offsetTop - 40, 0),
+        top: Math.max(missionVisionTargetRef.current.offsetTop - 40, 0),
         behavior: 'smooth'
       });
     }
@@ -287,7 +289,6 @@ function MainHomePage() {
     }
 
     if (
-      eventTargetRef.current &&
       missionVisionTargetRef.current &&
       coursesTargetRef.current &&
       galleryTargetRef.current &&
@@ -301,7 +302,6 @@ function MainHomePage() {
       storiesTargetRef.current &&
       contactTargetRef.current
     ) {
-      const eventTop = eventTargetRef.current.getBoundingClientRect().top;
       const missionVisionTop = missionVisionTargetRef.current.getBoundingClientRect().top;
       const coursesTop = coursesTargetRef.current.getBoundingClientRect().top;
       const galleryTop = galleryTargetRef.current.getBoundingClientRect().top;
@@ -314,21 +314,6 @@ function MainHomePage() {
       const enterpricesTop = enterpricesTargetRef.current.getBoundingClientRect().top;
       const storiesTop = storiesTargetRef.current.getBoundingClientRect().top;
       const contactTop = contactTargetRef.current.getBoundingClientRect().top;
-
-      // 1. Event Section Animation
-      if (eventTop <= windowHeight) {
-        const eventFadeIn = Math.min(Math.max((windowHeight - eventTop) / (windowHeight * 0.4), 0), 1);
-        let eventFadeOut = 0;
-        if (missionVisionTop < windowHeight * 0.85) {
-          eventFadeOut = Math.min(Math.max((windowHeight * 0.85 - missionVisionTop) / (windowHeight * 0.5), 0), 1);
-        }
-        setEventStyle({
-          opacity: Math.max(eventFadeIn - eventFadeOut, 0),
-          transform: `scale(${0.98 + (0.02 * eventFadeIn) - (0.03 * eventFadeOut)})`
-        });
-      } else {
-        setEventStyle({ opacity: 0, transform: 'scale(0.98)' });
-      }
 
       // 2. Mission & Vision Animation
       if (missionVisionTop <= windowHeight) {
@@ -534,6 +519,11 @@ function MainHomePage() {
     return () => observer.disconnect();
   }, [activeItem]);
 
+  useEffect(() => {
+    // Initial scroll position calculation
+    handleScroll();
+  }, []);
+
   return (
     <div 
       className="font-['Inter'] overflow-hidden h-screen w-screen relative transition-colors duration-500" 
@@ -584,8 +574,8 @@ function MainHomePage() {
         {/* 1. HERO SECTION */}
         <Hero heroTransform={heroTransform} scrollToEvents={scrollToEventsMain} />
         
-        {/* 2. EVENT SECTION (DYNAMIC API CAROUSEL - PLACED DIRECTLY BELOW HERO) */}
-        <EventSection eventTargetRef={eventTargetRef} eventStyle={eventStyle} />
+        {/* 2. EVENT SECTION (HIDDEN) */}
+        {/* <EventSection eventTargetRef={eventTargetRef} eventStyle={eventStyle} /> */}
 
         {/* 3. MISSION & VISION SECTION */}
         <MissionVisionSection missionVisionTargetRef={missionVisionTargetRef} missionVisionStyle={missionVisionStyle} />
@@ -651,6 +641,12 @@ export default function App() {
       <AuthProvider>
         <Toaster position="top-right" reverseOrder={false} toastOptions={{ duration: 4000 }} />
         <Router>
+          {/* Left-Side Floating WhatsApp Button */}
+          <FloatingWhatsApp />
+
+          {/* WeGrow Skill Campus & B-School Search & Answer Chatbot */}
+          <WeGrowChatbot />
+
           <Suspense fallback={<RouteLoader />}>
             <Routes>
             {/* Public Landing & Splash */}
@@ -672,7 +668,9 @@ export default function App() {
             {/* Other Public/Partially Protected Routes */}
             <Route path="/gallery" element={<GalleryPage />} />
             <Route path="/home/profile" element={<ProfilePage />} />
-            <Route path="/home/events/:eventId" element={<EventDetails />} />
+            {/* Event Details Route (Hidden - redirects to home) */}
+            {/* <Route path="/home/events/:eventId" element={<EventDetails />} /> */}
+            <Route path="/home/events/:eventId" element={<Navigate to="/" replace />} />
             <Route path="/womens-community" element={<WomensCommunity />} />
             <Route path="/events/womens-community" element={<WomensCommunity />} />
             <Route path="/orientation" element={<WomensCommunity />} />
