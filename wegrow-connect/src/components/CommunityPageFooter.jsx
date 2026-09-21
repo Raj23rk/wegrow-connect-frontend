@@ -176,6 +176,11 @@ export default function CommunityPageFooter({
                 </Link>
               </li>
               <li>
+                <Link to="/vinayagar-chaturthi" className="hover:text-white transition inline-flex items-center gap-1.5 text-amber-300">
+                  <span className="text-[#F0791E] text-[10px]">🎨</span> Vinayagar Drawing Competition
+                </Link>
+              </li>
+              <li>
                 <Link to="/gallery" className="hover:text-white transition inline-flex items-center gap-1.5">
                   <span className="text-[#F0791E] text-[10px]">➔</span> Event Gallery
                 </Link>

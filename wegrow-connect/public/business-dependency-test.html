@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WeGrow B School — Business Dependency Test</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy-900:#131C3A;
+    --navy-800:#1B2A6E;
+    --navy-700:#233A8C;
+    --blue-600:#2F4FD6;
+    --orange-500:#F07E1B;
+    --orange-600:#D9661A;
+    --orange-050:#FDF0E2;
+    --cream-50:#FBF9F5;
+    --white:#FFFFFF;
+    --ink:#161B2E;
+    --ink-soft:#4B5170;
+    --line:#E7E2D6;
+    --line-strong:#D7D0C0;
+    --green-600:#1E8A5F;
+    --green-050:#E7F5EE;
+    --amber-600:#B9820A;
+    --amber-050:#FBF1DA;
+    --burnt-600:#C1541B;
+    --burnt-050:#FBEADC;
+    --red-600:#C63B32;
+    --red-050:#FBE7E5;
+    --radius:10px;
+    --shadow:0 1px 0 rgba(19,28,58,0.04);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Inter',system-ui,sans-serif;
+    background:
+      radial-gradient(1100px 500px at 15% -10%, #223a9c 0%, transparent 55%),
+      radial-gradient(900px 500px at 100% 0%, #0f1730 0%, transparent 60%),
+      var(--navy-900);
+    color:var(--ink);
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:28px 16px 60px;
+  }
+  h1,h2,h3{font-family:'Sora',sans-serif;margin:0;}
+  .brandbar{
+    width:100%;
+    max-width:640px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:18px;
+  }
+  .brandbar img{height:46px;display:block;object-fit:contain;}
+  .brandbar .tag{
+    font-size:12.5px;
+    color:#C9D2F5;
+    font-weight:500;
+    letter-spacing:.01em;
+  }
+  .shell{
+    width:100%;
+    max-width:640px;
+    background:var(--cream-50);
+    border-radius:var(--radius);
+    border:1px solid var(--line);
+    box-shadow:0 30px 60px -25px rgba(6,10,30,0.55);
+    overflow:hidden;
+    position:relative;
+  }
+  .accent-top{height:5px;background:linear-gradient(90deg,var(--orange-500),var(--navy-700));}
+  .pane{display:none;padding:40px 36px 34px;}
+  .pane.active{display:block;animation:rise .45s ease both;}
+  @keyframes rise{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+  /* ---------- Opening ---------- */
+  .open-hero{display:flex;align-items:center;gap:22px;margin-bottom:6px;}
+  .open-hero img{width:118px;flex:none;margin-top:-14px;}
+  .eyebrow-free{
+    display:inline-block;
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--navy-800);
+    background:var(--orange-050);
+    border:1px solid #F3D3AC;
+    padding:4px 10px;
+    border-radius:100px;
+    margin-bottom:12px;
+  }
+  .open-hero h1{font-size:27px;line-height:1.22;color:var(--navy-900);font-weight:700;}
+  .open-hero h1 span{color:var(--orange-600);}
+  .open-sub{font-size:15px;color:var(--ink-soft);line-height:1.55;margin:14px 0 26px;max-width:52ch;}
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:13px;font-weight:600;color:var(--navy-900);margin-bottom:6px;}
+  .field input, .field select, .field textarea{
+    width:100%;
+    font-family:inherit;
+    font-size:15px;
+    padding:12px 13px;
+    border-radius:7px;
+    border:1.5px solid var(--line-strong);
+    background:var(--white);
+    color:var(--ink);
+    outline:none;
+    transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus{
+    border-color:var(--blue-600);
+    box-shadow:0 0 0 3px rgba(47,79,214,0.14);
+  }
+  .field .err{display:none;font-size:12.5px;color:var(--red-600);margin-top:5px;font-weight:500;}
+  .field.invalid input, .field.invalid select{border-color:var(--red-600);}
+  .field.invalid .err{display:block;}
+  .btn{
+    appearance:none;border:none;cursor:pointer;
+    font-family:'Sora',sans-serif;font-weight:700;font-size:15.5px;
+    padding:14px 22px;border-radius:8px;
+    background:var(--orange-500);color:var(--white);
+    width:100%;
+    transition:background .15s ease, transform .1s ease;
+    letter-spacing:.01em;
+  }
+  .btn:hover{background:var(--orange-600);}
+  .btn:active{transform:scale(0.99);}
+  .btn:disabled{background:#D8D2C4;color:#8B8471;cursor:not-allowed;}
+  .btn-ghost{
+    background:transparent;color:var(--navy-800);border:1.5px solid var(--line-strong);
+  }
+  .btn-ghost:hover{background:var(--white);border-color:var(--navy-800);}
+  .footnote{font-size:12px;color:#9A93A0;text-align:center;margin-top:14px;}
+
+  /* ---------- Test ---------- */
+  .test-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:4px;}
+  .test-head h2{font-size:21px;color:var(--navy-900);}
+  .test-count{font-size:13px;font-weight:600;color:var(--ink-soft);white-space:nowrap;}
+  .progress-track{display:flex;gap:5px;margin:14px 0 26px;}
+  .progress-seg{flex:1;height:5px;border-radius:4px;background:var(--line);transition:background .2s ease;}
+  .progress-seg.done{background:var(--orange-500);}
+  .q{padding:18px 0;border-top:1px solid var(--line);}
+  .q:first-of-type{border-top:none;padding-top:2px;}
+  .q p{font-size:15px;font-weight:600;color:var(--navy-900);margin:0 0 12px;line-height:1.4;}
+  .scale{display:flex;gap:7px;}
+  .scale button{
+    flex:1;
+    border:1.5px solid var(--line-strong);
+    background:var(--white);
+    border-radius:7px;
+    padding:10px 4px 9px;
+    cursor:pointer;
+    text-align:center;
+    font-family:'Inter',sans-serif;
+    transition:all .12s ease;
+  }
+  .scale button .num{display:block;font-family:'Sora',sans-serif;font-weight:700;font-size:15px;color:var(--navy-900);}
+  .scale button .lbl{display:block;font-size:10px;color:var(--ink-soft);margin-top:2px;line-height:1.2;}
+  .scale button:hover{border-color:var(--blue-600);}
+  .scale button.sel{background:var(--navy-800);border-color:var(--navy-800);}
+  .scale button.sel .num, .scale button.sel .lbl{color:var(--white);}
+  .test-actions{margin-top:24px;}
+
+  /* ---------- Result ---------- */
+  .result-top{display:flex;gap:22px;align-items:flex-start;margin-bottom:22px;}
+  .gauge-wrap{position:relative;width:150px;height:150px;flex:none;}
+  .gauge-wrap svg{width:150px;height:150px;transform:rotate(-90deg);}
+  .gauge-num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .gauge-num .score{font-family:'Sora',sans-serif;font-weight:800;font-size:34px;color:var(--navy-900);line-height:1;}
+  .gauge-num .of100{font-size:11.5px;color:var(--ink-soft);font-weight:600;margin-top:2px;}
+  .result-copy{padding-top:6px;}
+  .badge{
+    display:inline-block;font-family:'Sora',sans-serif;font-weight:700;font-size:14px;
+    padding:6px 13px;border-radius:100px;margin-bottom:10px;
+  }
+  .result-copy p{font-size:14.5px;color:var(--ink-soft);line-height:1.55;margin:0;}
+  .band-rail{margin:6px 0 26px;}
+  .band-rail .track{display:flex;height:9px;border-radius:5px;overflow:hidden;}
+  .band-rail .track div{flex:1;}
+  .band-rail .labels{display:flex;justify-content:space-between;font-size:10.5px;color:#9A93A0;margin-top:6px;font-weight:600;}
+  .marker-row{position:relative;height:0;}
+  .marker{
+    position:absolute;top:-19px;transform:translateX(-50%);
+    width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;
+    border-top:7px solid var(--navy-900);
+  }
+  .cta-card{
+    background:var(--navy-900);
+    border-radius:9px;
+    padding:22px 22px 20px;
+    color:var(--white);
+    display:flex;
+    align-items:center;
+    gap:16px;
+  }
+  .cta-card img{width:66px;flex:none;}
+  .cta-card h3{font-size:16.5px;color:var(--white);margin-bottom:6px;line-height:1.3;}
+  .cta-card p{font-size:13px;color:#C9D2F5;margin:0 0 14px;line-height:1.5;}
+  .cta-card .btn{padding:12px 18px;font-size:14.5px;}
+
+  /* ---------- Lead form ---------- */
+  .lead-head{margin-bottom:18px;}
+  .lead-head h2{font-size:21px;color:var(--navy-900);margin-bottom:6px;}
+  .lead-head p{font-size:14px;color:var(--ink-soft);margin:0;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 14px;}
+  .summary-chip{
+    display:flex;align-items:center;justify-content:space-between;
+    background:var(--orange-050);border:1px solid #F3D3AC;border-radius:7px;
+    padding:10px 14px;margin-bottom:20px;font-size:13.5px;color:var(--navy-900);font-weight:600;
+  }
+  .summary-chip span.cat{font-weight:700;}
+
+  /* ---------- Thanks ---------- */
+  .thanks-wrap{text-align:center;padding:12px 0 4px;}
+  .thanks-wrap img{width:150px;margin-bottom:6px;}
+  .thanks-wrap h2{font-size:23px;color:var(--navy-900);margin-bottom:10px;}
+  .thanks-wrap p{font-size:14.5px;color:var(--ink-soft);line-height:1.6;max-width:40ch;margin:0 auto 24px;}
+
+  .admin-toggle{
+    margin-top:16px;font-size:11.5px;color:#6b7398;background:none;border:none;cursor:pointer;text-decoration:underline;
+  }
+  .admin-panel{width:100%;max-width:640px;margin-top:14px;background:var(--white);border-radius:var(--radius);border:1px solid var(--line);padding:20px;display:none;}
+  .admin-panel.active{display:block;}
+  .admin-panel h3{font-size:15px;color:var(--navy-900);margin-bottom:12px;}
+  .admin-panel table{width:100%;border-collapse:collapse;font-size:12px;}
+  .admin-panel th,.admin-panel td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);white-space:nowrap;}
+  .admin-panel .tblwrap{overflow-x:auto;}
+  .admin-empty{font-size:13px;color:var(--ink-soft);}
+
+  @media (max-width:520px){
+    .pane{padding:28px 20px 26px;}
+    .grid2{grid-template-columns:1fr;}
+    .open-hero{flex-direction:column;align-items:flex-start;}
+    .open-hero img{width:90px;margin-top:0;}
+    .result-top{flex-direction:column;align-items:center;text-align:center;}
+    .cta-card{flex-direction:column;text-align:center;}
+    .scale{flex-wrap:wrap;}
+    .scale button{flex:1 1 30%;}
+  }
+</style>
+</head>
+<body>
+
+  <div class="brandbar">
+    <img src="/bdt_logo.png" alt="WeGrow Skill Campus and B School">
+    <div class="tag">Business Dependency Test</div>
+  </div>
+
+  <div class="shell">
+    <div class="accent-top"></div>
+
+    <!-- SCREEN 1: OPENING -->
+    <section class="pane active" id="screen-open">
+      <div class="eyebrow-free">Free 2-minute test</div>
+      <div class="open-hero">
+        <img src="/bdt_mascot.webp" alt="WeGrow mascot">
+        <h1>Can your business run <span>without you?</span></h1>
+      </div>
+      <p class="open-sub">Answer 8 quick questions about how your business runs today. We'll calculate your Business Independence Score and show you exactly where the business still leans on you.</p>
+
+      <div style="font-size:12px; color:#C1541B; font-weight:600; margin-bottom:16px; background:#FDF0E2; border:1px solid #F3D3AC; padding:6px 12px; border-radius:6px; display:inline-flex; align-items:center; gap:6px;">
+        <span style="color:#C63B32; font-weight:800; font-size:14px;">*</span> All fields are mandatory
+      </div>
+
+      <div class="field" id="f-name">
+        <label for="in-name">Your name <span style="color:#C63B32">*</span></label>
+        <input type="text" id="in-name" placeholder="e.g. Arjun Mehta">
+        <div class="err">Enter your name to continue.</div>
+      </div>
+      <div class="field" id="f-biz">
+        <label for="in-biz">Business name <span style="color:#C63B32">*</span></label>
+        <input type="text" id="in-biz" placeholder="e.g. Mehta Interiors">
+        <div class="err">Enter your business name.</div>
+      </div>
+      <div class="field" id="f-phone">
+        <label for="in-phone">Phone number <span style="color:#C63B32">*</span></label>
+        <input type="tel" id="in-phone" placeholder="e.g. 98765 43210">
+        <div class="err">Enter a valid phone number.</div>
+      </div>
+
+      <button class="btn" onclick="startTest()">Start the test</button>
+      <p class="footnote">Takes about 2 minutes · No spam, ever</p>
+    </section>
+
+    <!-- SCREEN 2: TEST -->
+    <section class="pane" id="screen-test">
+      <div class="test-head">
+        <h2>The 8 questions</h2>
+        <div class="test-count" id="qcount">0 / 8 answered</div>
+      </div>
+      <div class="progress-track" id="progressTrack"></div>
+      <div id="questionList"></div>
+      <div class="test-actions">
+        <button class="btn" id="submitTestBtn" disabled onclick="submitTest()">See my score</button>
+      </div>
+    </section>
+
+    <!-- SCREEN 3: RESULT -->
+    <section class="pane" id="screen-result">
+      <div class="result-top">
+        <div class="gauge-wrap">
+          <svg viewBox="0 0 150 150">
+            <circle cx="75" cy="75" r="64" fill="none" stroke="#E7E2D6" stroke-width="12"/>
+            <circle id="gaugeArc" cx="75" cy="75" r="64" fill="none" stroke="#F07E1B" stroke-width="12" stroke-linecap="round" stroke-dasharray="402" stroke-dashoffset="402"/>
+          </svg>
+          <div class="gauge-num">
+            <div class="score" id="scoreNum">0</div>
+            <div class="of100">out of 100</div>
+          </div>
+        </div>
+        <div class="result-copy">
+          <div class="badge" id="resultBadge">Category</div>
+          <p id="resultExplain">Explanation goes here.</p>
+        </div>
+      </div>
+
+      <div class="band-rail">
+        <div class="marker-row"><div class="marker" id="scoreMarker"></div></div>
+        <div class="track">
+          <div style="background:var(--red-600)"></div>
+          <div style="background:var(--burnt-600)"></div>
+          <div style="background:var(--amber-600)"></div>
+          <div style="background:var(--green-600)"></div>
+        </div>
+        <div class="labels"><span>0</span><span>25</span><span>50</span><span>75</span><span>100</span></div>
+      </div>
+
+      <div class="cta-card">
+        <img src="/bdt_mascot.webp" alt="WeGrow mascot">
+        <div>
+          <h3>Want to know your 3 biggest gaps?</h3>
+          <p>Book a free 20-minute diagnostic and we'll walk through exactly what's keeping the business dependent on you — and what to fix first.</p>
+          <button class="btn" onclick="goLead()">Book your free business diagnostic</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCREEN 4: LEAD FORM -->
+    <section class="pane" id="screen-lead">
+      <div class="lead-head">
+        <h2>Book your free diagnostic</h2>
+        <p>A few details so our team can prepare for your session.</p>
+      </div>
+
+      <div class="summary-chip">
+        <span>Your score: <span id="chipScore">0</span>/100</span>
+        <span class="cat" id="chipCat">Category</span>
+      </div>
+
+      <div style="font-size:12px; color:#C1541B; font-weight:600; margin-bottom:16px; background:#FDF0E2; border:1px solid #F3D3AC; padding:6px 12px; border-radius:6px; display:inline-flex; align-items:center; gap:6px;">
+        <span style="color:#C63B32; font-weight:800; font-size:14px;">*</span> All fields are mandatory
+      </div>
+
+      <div class="grid2">
+        <div class="field" id="f-l-name">
+          <label for="l-name">Full name <span style="color:#C63B32">*</span></label>
+          <input type="text" id="l-name">
+          <div class="err">Enter your name.</div>
+        </div>
+        <div class="field" id="f-l-company">
+          <label for="l-company">Company <span style="color:#C63B32">*</span></label>
+          <input type="text" id="l-company">
+          <div class="err">Enter your company name.</div>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field" id="f-l-designation">
+          <label for="l-designation">Designation <span style="color:#C63B32">*</span></label>
+          <input type="text" id="l-designation" placeholder="e.g. Founder, CEO">
+          <div class="err">Enter your designation.</div>
+        </div>
+        <div class="field" id="f-l-industry">
+          <label for="l-industry">Industry <span style="color:#C63B32">*</span></label>
+          <select id="l-industry">
+            <option value="">Select industry</option>
+            <option>Manufacturing</option>
+            <option>Retail / E-commerce</option>
+            <option>IT / Technology services</option>
+            <option>Healthcare</option>
+            <option>Construction / Real estate</option>
+            <option>Education</option>
+            <option>Food & beverage</option>
+            <option>Professional services</option>
+            <option>Other</option>
+          </select>
+          <div class="err">Select your industry.</div>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field" id="f-l-phone">
+          <label for="l-phone">Phone <span style="color:#C63B32">*</span></label>
+          <input type="tel" id="l-phone">
+          <div class="err">Enter a valid phone number.</div>
+        </div>
+        <div class="field" id="f-l-email">
+          <label for="l-email">Email <span style="color:#C63B32">*</span></label>
+          <input type="email" id="l-email">
+          <div class="err">Enter a valid email.</div>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field" id="f-l-size">
+          <label for="l-size">Business size <span style="color:#C63B32">*</span></label>
+          <select id="l-size">
+            <option value="">Select team size</option>
+            <option>Solo / just me</option>
+            <option>2–10 employees</option>
+            <option>11–50 employees</option>
+            <option>51–200 employees</option>
+            <option>200+ employees</option>
+          </select>
+          <div class="err">Select your business size.</div>
+        </div>
+        <div class="field" id="f-l-challenge-select">
+          <label for="l-challenge-select">Biggest challenge <span style="color:#C63B32">*</span></label>
+          <select id="l-challenge-select">
+            <option value="">Select the closest fit</option>
+            <option>Everything depends on me personally</option>
+            <option>No documented systems or SOPs</option>
+            <option>Can't find or trust the right team</option>
+            <option>Sales relies on me</option>
+            <option>Cash flow / financial visibility</option>
+            <option>Other</option>
+          </select>
+          <div class="err">Select your biggest challenge.</div>
+        </div>
+      </div>
+      <div class="field" id="f-l-challenge">
+        <label for="l-challenge">Anything else about this challenge? (optional)</label>
+        <textarea id="l-challenge" rows="3" placeholder="A sentence or two is plenty"></textarea>
+      </div>
+
+      <button class="btn" onclick="submitLead()">Send my diagnostic request</button>
+      <p class="footnote">Your score and category are attached automatically</p>
+    </section>
+
+    <!-- SCREEN 5: THANKS -->
+    <section class="pane" id="screen-thanks">
+      <div class="thanks-wrap">
+        <img src="/bdt_mascot.webp" alt="WeGrow mascot">
+        <h2>Request received</h2>
+        <p>Our team will reach out within 1 business day to schedule your free diagnostic. Keep an eye on your phone and inbox.</p>
+        <button class="btn btn-ghost" onclick="resetAll()">Take the test again</button>
+      </div>
+    </section>
+
+  </div>
+
+  <button class="admin-toggle" onclick="toggleAdmin()">View captured submissions</button>
+  <div class="admin-panel" id="adminPanel">
+    <h3>Captured submissions</h3>
+    <div class="tblwrap" id="adminTableWrap"><p class="admin-empty">Loading…</p></div>
+  </div>
+
+<script>
+/* ---------------- Data ---------------- */
+const QUESTIONS = [
+  "Sales and new customer acquisition happen without my direct involvement.",
+  "Day-to-day operations run smoothly even when I'm not around.",
+  "My team makes key decisions without waiting for my approval.",
+  "Financial tracking and cash flow are managed without me checking daily.",
+  "Customer relationships aren't solely dependent on me personally.",
+  "We have documented processes (SOPs) for our core tasks.",
+  "My team can hire, train and manage new people without my hands-on involvement.",
+  "I could take a 2-week vacation with zero client or team disruption."
+];
+const SCALE_LABELS = [
+  {n:1, l:"Never"},
+  {n:2, l:"Rarely"},
+  {n:3, l:"Sometimes"},
+  {n:4, l:"Mostly"},
+  {n:5, l:"Always"}
+];
+const BANDS = [
+  {min:75, max:100, key:"green",  name:"Self-Running Business",
+   explain:"Your business runs on systems and people, not on you. Keep reinforcing what's working and plan your next stage of growth."},
+  {min:50, max:74,  key:"amber",  name:"Partially Systemized",
+   explain:"Good foundations exist, but a few critical functions still route through you. Closing those gaps will free up real time."},
+  {min:25, max:49,  key:"burnt",  name:"Heavily Dependent",
+   explain:"Most of the business still runs through you day to day. Without a plan to delegate, growth will keep costing you personally."},
+  {min:0,  max:24,  key:"red",    name:"100% Owner Dependent",
+   explain:"Right now, the business is you. Nothing moves without your direct involvement — the highest-risk position an owner can be in."}
+];
+const BAND_STYLES = {
+  green: {bg:"var(--green-050)", fg:"var(--green-600)", arc:"#1E8A5F"},
+  amber: {bg:"var(--amber-050)", fg:"var(--amber-600)", arc:"#B9820A"},
+  burnt: {bg:"var(--burnt-050)", fg:"var(--burnt-600)", arc:"#C1541B"},
+  red:   {bg:"var(--red-050)",   fg:"var(--red-600)",   arc:"#C63B32"}
+};
+
+let openInfo = {name:"", business:"", phone:""};
+let answers = new Array(QUESTIONS.length).fill(null);
+let resultState = {score:0, band:null};
+
+/* ---------------- Screen control ---------------- */
+function showScreen(id){
+  document.querySelectorAll(".pane").forEach(p => p.classList.remove("active"));
+  const el = document.getElementById(id);
+  if(el) el.classList.add("active");
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+/* ---------------- Screen 1: Opening ---------------- */
+function validateField(fieldId, value, testFn){
+  const el = document.getElementById(fieldId);
+  if(!el) return false;
+  const ok = testFn(value);
+  el.classList.toggle("invalid", !ok);
+  return ok;
+}
+function isPhone(v){ return /^[\d\s\-\+\(\)]{7,15}$/.test((v || "").trim()); }
+function isEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((v || "").trim()); }
+
+function startTest(){
+  const name = document.getElementById("in-name").value;
+  const biz = document.getElementById("in-biz").value;
+  const phone = document.getElementById("in-phone").value;
+
+  const okName = validateField("f-name", name, v => (v || "").trim().length > 1);
+  const okBiz = validateField("f-biz", biz, v => (v || "").trim().length > 1);
+  const okPhone = validateField("f-phone", phone, isPhone);
+
+  if(!(okName && okBiz && okPhone)) return;
+
+  openInfo = {name:name.trim(), business:biz.trim(), phone:phone.trim()};
+  renderQuestions();
+  showScreen("screen-test");
+}
+
+/* ---------------- Screen 2: Test ---------------- */
+function renderQuestions(){
+  const list = document.getElementById("questionList");
+  list.innerHTML = "";
+  QUESTIONS.forEach((qtext, qi) => {
+    const q = document.createElement("div");
+    q.className = "q";
+    const p = document.createElement("p");
+    p.textContent = (qi+1) + ". " + qtext;
+    q.appendChild(p);
+
+    const scale = document.createElement("div");
+    scale.className = "scale";
+    SCALE_LABELS.forEach(opt => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.innerHTML = '<span class="num">'+opt.n+'</span><span class="lbl">'+opt.l+'</span>';
+      b.onclick = () => selectAnswer(qi, opt.n, b);
+      scale.appendChild(b);
+    });
+    q.appendChild(scale);
+    list.appendChild(q);
+  });
+  renderProgress();
+}
+
+function selectAnswer(qi, val, btnEl){
+  answers[qi] = val;
+  const scaleEl = btnEl.parentElement;
+  Array.from(scaleEl.children).forEach(c => c.classList.remove("sel"));
+  btnEl.classList.add("sel");
+  renderProgress();
+}
+
+function renderProgress(){
+  const track = document.getElementById("progressTrack");
+  track.innerHTML = "";
+  let answeredCount = 0;
+  answers.forEach(a => {
+    const seg = document.createElement("div");
+    seg.className = "progress-seg" + (a !== null ? " done" : "");
+    if(a !== null) answeredCount++;
+    track.appendChild(seg);
+  });
+  document.getElementById("qcount").textContent = answeredCount + " / " + QUESTIONS.length + " answered";
+  document.getElementById("submitTestBtn").disabled = answeredCount < QUESTIONS.length;
+}
+
+function submitTest(){
+  if(answers.some(a => a === null)) return;
+  const sum = answers.reduce((a,b) => a+b, 0);
+  const min = QUESTIONS.length * 1;
+  const max = QUESTIONS.length * 5;
+  const score = Math.round(((sum - min) / (max - min)) * 100);
+  const band = BANDS.find(b => score >= b.min && score <= b.max) || BANDS[BANDS.length-1];
+  resultState = {score, band};
+
+  // Save Business Test attempt
+  const testSubmission = {
+    type: 'Business Test',
+    submittedAt: new Date().toISOString(),
+    name: openInfo.name || 'Anonymous',
+    company: openInfo.business || '',
+    business: openInfo.business || '',
+    phone: openInfo.phone || '',
+    score,
+    category: band.name,
+    answers: [...answers],
+    stage: 'Test Completed'
+  };
+  saveSubmission(testSubmission);
+
+  renderResult();
+  showScreen("screen-result");
+}
+
+/* ---------------- Screen 3: Result ---------------- */
+function renderResult(){
+  const {score, band} = resultState;
+  const style = BAND_STYLES[band.key];
+
+  document.getElementById("scoreNum").textContent = score;
+  const badge = document.getElementById("resultBadge");
+  badge.textContent = band.name;
+  badge.style.background = style.bg;
+  badge.style.color = style.fg;
+  document.getElementById("resultExplain").textContent = band.explain;
+
+  const circumference = 2 * Math.PI * 64;
+  const offset = circumference * (1 - score/100);
+  const arc = document.getElementById("gaugeArc");
+  arc.style.stroke = style.arc;
+  arc.setAttribute("stroke-dasharray", circumference.toFixed(1));
+  arc.style.transition = "stroke-dashoffset 1s ease";
+  arc.setAttribute("stroke-dashoffset", circumference.toFixed(1));
+  requestAnimationFrame(() => {
+    setTimeout(() => arc.setAttribute("stroke-dashoffset", offset.toFixed(1)), 50);
+  });
+
+  const marker = document.getElementById("scoreMarker");
+  marker.style.left = score + "%";
+  marker.style.borderTopColor = style.arc;
+
+  document.getElementById("chipScore").textContent = score;
+  const chipCat = document.getElementById("chipCat");
+  chipCat.textContent = band.name;
+  chipCat.style.color = style.fg;
+}
+
+function goLead(){
+  document.getElementById("l-name").value = openInfo.name;
+  document.getElementById("l-phone").value = openInfo.phone;
+  document.getElementById("l-company").value = openInfo.business;
+  showScreen("screen-lead");
+}
+
+/* ---------------- Screen 4: Lead form ---------------- */
+function submitLead(){
+  const vals = {
+    name: document.getElementById("l-name").value,
+    company: document.getElementById("l-company").value,
+    designation: document.getElementById("l-designation").value,
+    industry: document.getElementById("l-industry").value,
+    phone: document.getElementById("l-phone").value,
+    email: document.getElementById("l-email").value,
+    size: document.getElementById("l-size").value,
+    challengeSelect: document.getElementById("l-challenge-select").value,
+    challengeNote: document.getElementById("l-challenge").value
+  };
+
+  let ok = true;
+  ok = validateField("f-l-name", vals.name, v => (v || "").trim().length > 1) && ok;
+  ok = validateField("f-l-company", vals.company, v => (v || "").trim().length > 1) && ok;
+  ok = validateField("f-l-designation", vals.designation, v => (v || "").trim().length > 1) && ok;
+  ok = validateField("f-l-industry", vals.industry, v => (v || "").length > 0) && ok;
+  ok = validateField("f-l-phone", vals.phone, isPhone) && ok;
+  ok = validateField("f-l-email", vals.email, isEmail) && ok;
+  ok = validateField("f-l-size", vals.size, v => (v || "").length > 0) && ok;
+  ok = validateField("f-l-challenge-select", vals.challengeSelect, v => (v || "").length > 0) && ok;
+  if(!ok) return;
+
+  const submission = {
+    type: 'Business Diagnostic',
+    submittedAt: new Date().toISOString(),
+    ...vals,
+    score: resultState.score,
+    category: resultState.band.name,
+    originalTestName: openInfo.name,
+    originalBusiness: openInfo.business,
+    stage: 'Diagnostic Booked'
+  };
+
+  saveSubmission(submission);
+  showScreen("screen-thanks");
+}
+
+/* Robust storage helper supporting localStorage & window.storage */
+async function saveSubmission(submission){
+  try{
+    const key = "submission:" + Date.now() + ":" + Math.random().toString(36).slice(2,8);
+    // 1. window.storage fallback if available
+    if(window.storage && typeof window.storage.set === 'function'){
+      try { await window.storage.set(key, JSON.stringify(submission), true); } catch(e){}
+    }
+    // 2. Standard browser localStorage
+    try{
+      localStorage.setItem(key, JSON.stringify(submission));
+      let all = [];
+      try { all = JSON.parse(localStorage.getItem('wegrow_bdt_submissions') || '[]'); } catch(e){}
+      all.unshift(submission);
+      localStorage.setItem('wegrow_bdt_submissions', JSON.stringify(all));
+    }catch(e){}
+  }catch(e){
+    console.error("Could not save submission", e);
+  }
+}
+
+function resetAll(){
+  openInfo = {name:"", business:"", phone:""};
+  answers = new Array(QUESTIONS.length).fill(null);
+  resultState = {score:0, band:null};
+  document.getElementById("in-name").value = "";
+  document.getElementById("in-biz").value = "";
+  document.getElementById("in-phone").value = "";
+  ["f-name","f-biz","f-phone"].forEach(id => document.getElementById(id).classList.remove("invalid"));
+  document.querySelectorAll("#screen-lead input, #screen-lead select, #screen-lead textarea").forEach(el => el.value = "");
+  showScreen("screen-open");
+}
+
+/* ---------------- Admin panel ---------------- */
+let adminOpen = false;
+async function toggleAdmin(){
+  adminOpen = !adminOpen;
+  const panel = document.getElementById("adminPanel");
+  panel.classList.toggle("active", adminOpen);
+  if(adminOpen) await loadAdmin();
+}
+
+async function loadAdmin(){
+  const wrap = document.getElementById("adminTableWrap");
+  wrap.innerHTML = "<p class='admin-empty'>Loading…</p>";
+  try{
+    const rows = [];
+    
+    // Check localStorage array first
+    try {
+      const stored = JSON.parse(localStorage.getItem('wegrow_bdt_submissions') || '[]');
+      if(Array.isArray(stored) && stored.length > 0){
+        rows.push(...stored);
+      }
+    }catch(e){}
+
+    // Check localStorage keys
+    if(rows.length === 0){
+      for(let i=0; i<localStorage.length; i++){
+        const k = localStorage.key(i);
+        if(k && k.startsWith("submission:")){
+          try{ rows.push(JSON.parse(localStorage.getItem(k))); }catch(e){}
+        }
+      }
+    }
+
+    // Check window.storage if available
+    if(rows.length === 0 && window.storage && typeof window.storage.list === 'function'){
+      try{
+        const list = await window.storage.list("submission:", true);
+        if(list && list.keys){
+          for(const key of list.keys){
+            try{
+              const res = await window.storage.get(key, true);
+              if(res && res.value) rows.push(JSON.parse(res.value));
+            }catch(e){}
+          }
+        }
+      }catch(e){}
+    }
+
+    rows.sort((a,b) => (b.submittedAt || "").localeCompare(a.submittedAt || ""));
+    if(rows.length === 0){
+      wrap.innerHTML = "<p class='admin-empty'>No submissions captured yet.</p>";
+      return;
+    }
+    let html = "<table><thead><tr>"+
+      "<th>Date</th><th>Name</th><th>Company</th><th>Designation</th><th>Industry</th>"+
+      "<th>Phone</th><th>Email</th><th>Size</th><th>Challenge</th><th>Score</th><th>Category</th>"+
+      "</tr></thead><tbody>";
+    rows.forEach(r => {
+      html += "<tr>"+
+        "<td>"+ (r.submittedAt ? new Date(r.submittedAt).toLocaleString() : "") +"</td>"+
+        "<td>"+ esc(r.name) +"</td>"+
+        "<td>"+ esc(r.company) +"</td>"+
+        "<td>"+ esc(r.designation) +"</td>"+
+        "<td>"+ esc(r.industry) +"</td>"+
+        "<td>"+ esc(r.phone) +"</td>"+
+        "<td>"+ esc(r.email) +"</td>"+
+        "<td>"+ esc(r.size) +"</td>"+
+        "<td>"+ esc(r.challengeSelect) +"</td>"+
+        "<td>"+ esc(r.score) +"</td>"+
+        "<td>"+ esc(r.category) +"</td>"+
+        "</tr>";
+    });
+    html += "</tbody></table>";
+    wrap.innerHTML = html;
+  }catch(e){
+    wrap.innerHTML = "<p class='admin-empty'>Couldn't load submissions right now.</p>";
+    console.error(e);
+  }
+}
+function esc(v){
+  if(v === undefined || v === null) return "";
+  return String(v).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+}
+
+function copyBdtUrl(){
+  const url = document.getElementById("bdtPageUrl") ? document.getElementById("bdtPageUrl").innerText.trim() : window.location.href;
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(url).then(() => {
+      const btn = document.getElementById("copyBdtBtn");
+      if(btn){
+        btn.innerText = "Copied!";
+        btn.style.background = "#1E8A5F";
+        setTimeout(() => {
+          btn.innerText = "Copy";
+          btn.style.background = "#F07E1B";
+        }, 2500);
+      }
+    });
+  }
+}
+</script>
+</body>
+</html>

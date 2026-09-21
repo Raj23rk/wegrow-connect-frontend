@@ -20,7 +20,7 @@ import {
   Image as ImageIcon
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { registerWomenEntrepreneur } from '../services/api';
+import { registerWomenEntrepreneur, formatEventId } from '../services/api';
 
 export default function WomensCommunity() {
   // 1. Live Countdown Timer to Event Date: Fri, Sep 11, 2026 11:00 AM IST
@@ -106,6 +106,7 @@ export default function WomensCommunity() {
         businessStage: formData.businessStage,
         category: formData.category,
         note: formData.note?.trim() || undefined,
+        eventId: formatEventId('WOMEN', eventDate),
       };
 
       const res = await registerWomenEntrepreneur(payload);
@@ -178,13 +179,13 @@ export default function WomensCommunity() {
 
           <div className="flex items-center gap-3 sm:gap-4 lg:gap-6">
             <a
-              href="tel:+919344337331"
+              href="tel:+919344037331"
               className="flex items-center gap-2 text-sm font-semibold text-[#16225E] hover:text-[#F0791E] transition-colors"
             >
               <div className="w-8 h-8 rounded-full bg-[#16225E]/10 flex items-center justify-center">
                 <Phone className="w-4 h-4 text-[#F0791E]" />
               </div>
-              <span className="hidden sm:inline font-mono font-bold">+91 9344337331</span>
+              <span className="hidden sm:inline font-mono font-bold">+91 93440 37331</span>
             </a>
             <a
               href="#register"
@@ -480,10 +481,10 @@ export default function WomensCommunity() {
               <Headphones className="w-7 h-7 text-[#F0791E] mx-auto mb-2" />
               <div className="text-xs font-bold text-[#666C87] uppercase tracking-wider mb-1">Queries & Support</div>
               <a
-                href="tel:+919344337331"
+                href="tel:+919344037331"
                 className="inline-block text-base font-extrabold text-[#F0791E] hover:underline font-mono"
               >
-                +91 9344337331
+                +91 9344037331
               </a>
             </div>
           </div>
@@ -899,7 +900,7 @@ export default function WomensCommunity() {
         eventDate="Fri, 11 Sep 2026"
         eventTime="11:00 AM – 1:00 PM"
         venueAddress={fullAddress}
-        queriesPhone="+91 9344337331"
+        queriesPhone="+91 93440 37331"
         registerSectionId="register"
       />
     </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import MissionVisionSection from './components/MissionVisionSection';
 import CoursesSection from './components/CoursesSection';
@@ -32,61 +32,78 @@ import EventDetails from "./components/EventDetails";
 import WomensCommunity from './components/WomensCommunity';
 import StudentFoundersCommunity from './components/StudentFoundersCommunity';
 import BusinessFoundersCommunity from './components/BusinessFoundersCommunity';
+import WomensCommunityV1 from './components/WomensCommunityV1';
+
+// Lazy load Sing Along Page for ultra-fast initial paint
+const SingAlongBooking = lazy(() => import('./components/SingAlongBooking'));
+const BusinessDependencyTest = lazy(() => import('./components/BusinessDependencyTest'));
+const BusinessConsultancy = lazy(() => import('./components/BusinessConsultancy'));
 
 // Auth Context, Theme Context and Guard
 import { AuthProvider, ProtectedRoute } from './context/AuthContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 
-// Student Portal Sub-pages
-import StudentDashboard from './student/dashboard/page';
-import StudentCourses from './student/courses/page';
-import StudentCertificates from './student/certificates/page';
-import StudentRewards from './student/rewards/page';
-import StudentAnalytics from './student/analytics/page';
-import StudentWorkshops from './student/workshops/page';
-import StudentSubscriptions from './student/subscriptions/page';
-import StudentSettings from './student/settings/page';
+// Student Portal Sub-pages (Lazy Loaded)
+const StudentDashboard = lazy(() => import('./student/dashboard/page'));
+const StudentCourses = lazy(() => import('./student/courses/page'));
+const StudentCertificates = lazy(() => import('./student/certificates/page'));
+const StudentRewards = lazy(() => import('./student/rewards/page'));
+const StudentAnalytics = lazy(() => import('./student/analytics/page'));
+const StudentWorkshops = lazy(() => import('./student/workshops/page'));
+const StudentSubscriptions = lazy(() => import('./student/subscriptions/page'));
+const StudentSettings = lazy(() => import('./student/settings/page'));
 
-// Business Portal Sub-pages
-import BusinessDashboard from './business/dashboard/page';
-import BusinessAnalytics from './business/analytics/page';
-import BusinessCanvas from './business/canvas/page';
-import BusinessRoadmap from './business/roadmap/page';
-import BusinessWorkshops from './business/workshops/page';
-import BusinessLegal from './business/legal/page';
-import BusinessSubscriptions from './business/subscriptions/page';
-import BusinessSettings from './business/settings/page';
+// Business Portal Sub-pages (Lazy Loaded)
+const BusinessDashboard = lazy(() => import('./business/dashboard/page'));
+const BusinessAnalytics = lazy(() => import('./business/analytics/page'));
+const BusinessCanvas = lazy(() => import('./business/canvas/page'));
+const BusinessRoadmap = lazy(() => import('./business/roadmap/page'));
+const BusinessWorkshops = lazy(() => import('./business/workshops/page'));
+const BusinessLegal = lazy(() => import('./business/legal/page'));
+const BusinessSubscriptions = lazy(() => import('./business/subscriptions/page'));
+const BusinessSettings = lazy(() => import('./business/settings/page'));
 
 import GalleryPage from './components/GalleryPage';
 
-// Admin Portal Sub-pages
-import AdminDashboard from './admin/page';
-import AdminCertificates from './admin/certificates/page';
-import AdminEvents from './admin/events/page';
-import AdminGalleryPage from './admin/gallery/page';
-import AdminNotifications from './admin/notifications/page';
-import AdminPayments from './admin/payments/page';
-import AdminReports from './admin/reports/page';
-import AdminRewards from './admin/rewards/page';
-import AdminRoles from './admin/roles/page';
-import AdminSettings from './admin/settings/page';
-import AdminSubscriptions from './admin/subscriptions/page';
-import AdminUsers from './admin/users/page';
-import AdminWorkshops from './admin/workshops/page';
-import AdminWomenEntrepreneurs from './admin/women-entrepreneurs/page';
-import AdminStudentFounders from './admin/student-founders/page';
-import AdminBusinessFounders from './admin/business-founders/page';
+// Admin Portal Sub-pages (Lazy Loaded)
+const AdminDashboard = lazy(() => import('./admin/page'));
+const AdminCertificates = lazy(() => import('./admin/certificates/page'));
+const AdminEvents = lazy(() => import('./admin/events/page'));
+const AdminGalleryPage = lazy(() => import('./admin/gallery/page'));
+const AdminNotifications = lazy(() => import('./admin/notifications/page'));
+const AdminPayments = lazy(() => import('./admin/payments/page'));
+const AdminReports = lazy(() => import('./admin/reports/page'));
+const AdminRewards = lazy(() => import('./admin/rewards/page'));
+const AdminRoles = lazy(() => import('./admin/roles/page'));
+const AdminSettings = lazy(() => import('./admin/settings/page'));
+const AdminSubscriptions = lazy(() => import('./admin/subscriptions/page'));
+const AdminUsers = lazy(() => import('./admin/users/page'));
+const AdminWorkshops = lazy(() => import('./admin/workshops/page'));
+const AdminWomenEntrepreneurs = lazy(() => import('./admin/women-entrepreneurs/page'));
+const AdminStudentFounders = lazy(() => import('./admin/student-founders/page'));
+const AdminBusinessFounders = lazy(() => import('./admin/business-founders/page'));
 
-// Campaign Platform (Public)
-import CampaignLanding from './components/CampaignLanding';
-import CampaignRegister from './components/CampaignRegister';
-import TaskSession from './components/TaskSession';
+const AdminSingAlong = lazy(() => import('./admin/sing-along/page'));
+const AdminBusinessDependencyTest = lazy(() => import('./admin/business-dependency-test/page'));
 
-// Campaign Platform (Admin)
-import AdminCampaigns from './admin/campaigns/page';
-import AdminCampaignStudents from './admin/students/page';
-import AdminTasks from './admin/tasks/page';
-import AdminSubmissions from './admin/submissions/page';
+// Campaign Platform (Public & Admin Lazy Loaded)
+const CampaignLanding = lazy(() => import('./components/CampaignLanding'));
+const CampaignRegister = lazy(() => import('./components/CampaignRegister'));
+const TaskSession = lazy(() => import('./components/TaskSession'));
+const AdminCampaigns = lazy(() => import('./admin/campaigns/page'));
+const AdminCampaignStudents = lazy(() => import('./admin/students/page'));
+const AdminTasks = lazy(() => import('./admin/tasks/page'));
+const AdminSubmissions = lazy(() => import('./admin/submissions/page'));
+
+// Lightweight fallback for fast route transitions
+const RouteLoader = () => (
+  <div className="min-h-screen flex items-center justify-center bg-[#0B0F19]">
+    <div className="flex flex-col items-center gap-3">
+      <div className="w-10 h-10 border-4 border-amber-400/20 border-t-[#ff6a00] rounded-full animate-spin" />
+      <span className="text-xs text-amber-200/70 font-mono tracking-wider">LOADING...</span>
+    </div>
+  </div>
+);
 
 // Main Home Component
 function MainHomePage() {
@@ -634,7 +651,8 @@ export default function App() {
       <AuthProvider>
         <Toaster position="top-right" reverseOrder={false} toastOptions={{ duration: 4000 }} />
         <Router>
-          <Routes>
+          <Suspense fallback={<RouteLoader />}>
+            <Routes>
             {/* Public Landing & Splash */}
             <Route path="/" element={<Splash />} />
             <Route path="/home" element={<MainHomePage />} />
@@ -670,6 +688,32 @@ export default function App() {
             <Route path="/events/business-founders" element={<BusinessFoundersCommunity />} />
             <Route path="/founders-orientation" element={<BusinessFoundersCommunity />} />
 
+            {/* Women's Community V1 */}
+            <Route path="/womens-community/v1" element={<WomensCommunityV1 />} />
+            <Route path="/womens-community-v1" element={<WomensCommunityV1 />} />
+            <Route path="/events/womens-community-v1" element={<WomensCommunityV1 />} />
+            <Route path="/women-founder-25" element={<WomensCommunityV1 />} />
+            <Route path="/women-founders-25" element={<WomensCommunityV1 />} />
+
+
+
+            {/* Sing Along Musical Night Event — Ticket Booking */}
+            <Route path="/sing-along" element={<SingAlongBooking />} />
+            <Route path="/singalong" element={<SingAlongBooking />} />
+            <Route path="/events/sing-along" element={<SingAlongBooking />} />
+            <Route path="/events/singalong" element={<SingAlongBooking />} />
+            <Route path="/book-tickets" element={<SingAlongBooking />} />
+
+            {/* WeGrow Business Dependency Test */}
+            <Route path="/business-dependency-test" element={<BusinessDependencyTest />} />
+            <Route path="/dependency-test" element={<BusinessDependencyTest />} />
+            <Route path="/business/dependency-test" element={<BusinessDependencyTest />} />
+
+            {/* WeGrow Business Consultancy */}
+            <Route path="/consultancy" element={<BusinessConsultancy />} />
+            <Route path="/business-consultancy" element={<BusinessConsultancy />} />
+            <Route path="/business/consultancy" element={<BusinessConsultancy />} />
+
             {/* Student Dashboard Routes (Protected) */}
             <Route path="/student/dashboard" element={<ProtectedRoute allowedRoles={['student']}><StudentDashboard /></ProtectedRoute>} />
             <Route path="/student/courses" element={<ProtectedRoute allowedRoles={['student']}><StudentCourses /></ProtectedRoute>} />
@@ -697,6 +741,11 @@ export default function App() {
             <Route path="/admin/women-entrepreneurs" element={<ProtectedRoute allowedRoles={['admin']}><AdminWomenEntrepreneurs /></ProtectedRoute>} />
             <Route path="/admin/student-founders" element={<ProtectedRoute allowedRoles={['admin']}><AdminStudentFounders /></ProtectedRoute>} />
             <Route path="/admin/business-founders" element={<ProtectedRoute allowedRoles={['admin']}><AdminBusinessFounders /></ProtectedRoute>} />
+
+            <Route path="/admin/sing-along" element={<ProtectedRoute allowedRoles={['admin']}><AdminSingAlong /></ProtectedRoute>} />
+            <Route path="/admin/singalong" element={<ProtectedRoute allowedRoles={['admin']}><AdminSingAlong /></ProtectedRoute>} />
+            <Route path="/admin/business-dependency-test" element={<ProtectedRoute allowedRoles={['admin']}><AdminBusinessDependencyTest /></ProtectedRoute>} />
+            <Route path="/admin/dependency-test" element={<ProtectedRoute allowedRoles={['admin']}><AdminBusinessDependencyTest /></ProtectedRoute>} />
             <Route path="/admin/workshops" element={<ProtectedRoute allowedRoles={['admin']}><AdminWorkshops /></ProtectedRoute>} />
             <Route path="/admin/events" element={<ProtectedRoute allowedRoles={['admin']}><AdminEvents /></ProtectedRoute>} />
             <Route path="/admin/gallery" element={<ProtectedRoute allowedRoles={['admin']}><AdminGalleryPage /></ProtectedRoute>} />
@@ -722,6 +771,7 @@ export default function App() {
             {/* Catch all redirecting to home */}
             <Route path="*" element={<MainHomePage />} />
           </Routes>
+          </Suspense>
         </Router>
       </AuthProvider>
     </ThemeProvider>

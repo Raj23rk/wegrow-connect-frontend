@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WeGrow — Business Dependency Test QR Code</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy-900: #131C3A;
+      --navy-800: #1B2A6E;
+      --navy-700: #233A8C;
+      --orange-500: #F07E1B;
+      --orange-600: #D9661A;
+      --orange-050: #FDF0E2;
+      --cream-50: #FBF9F5;
+      --white: #FFFFFF;
+      --ink: #161B2E;
+      --ink-soft: #4B5170;
+      --line: #E7E2D6;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background:
+        radial-gradient(1100px 500px at 15% -10%, #223a9c 0%, transparent 55%),
+        radial-gradient(900px 500px at 100% 0%, #0f1730 0%, transparent 60%),
+        var(--navy-900);
+      color: var(--white);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px 40px;
+    }
+    .card {
+      background: var(--cream-50);
+      color: var(--ink);
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      box-shadow: 0 30px 60px -25px rgba(6, 10, 30, 0.7);
+      max-width: 460px;
+      width: 100%;
+      padding: 34px 28px 28px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .accent-top {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 5px;
+      background: linear-gradient(90deg, var(--orange-500), var(--navy-700));
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--orange-050);
+      color: var(--orange-600);
+      border: 1px solid #F3D3AC;
+      padding: 5px 14px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+    .mascot {
+      width: 80px;
+      height: auto;
+      margin: 0 auto 12px;
+      display: block;
+    }
+    h1 {
+      font-family: 'Sora', sans-serif;
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--navy-900);
+      line-height: 1.25;
+      margin-bottom: 6px;
+    }
+    h1 span {
+      color: var(--orange-600);
+    }
+    .subtitle {
+      font-size: 13.5px;
+      color: var(--ink-soft);
+      margin-bottom: 22px;
+      line-height: 1.5;
+    }
+    .qr-box {
+      background: #FFFFFF;
+      padding: 16px;
+      border-radius: 16px;
+      display: inline-block;
+      box-shadow: 0 10px 25px rgba(19, 28, 58, 0.08);
+      border: 1.5px solid var(--line);
+      margin-bottom: 18px;
+      transition: transform 0.2s ease;
+    }
+    .qr-box:hover {
+      transform: scale(1.02);
+    }
+    .qr-img {
+      width: 230px;
+      height: 230px;
+      display: block;
+      object-fit: contain;
+    }
+    .url-pill {
+      background: #F4EFE6;
+      border: 1px solid #E2DCD0;
+      border-radius: 8px;
+      padding: 9px 12px;
+      font-size: 12px;
+      font-family: monospace;
+      color: var(--navy-900);
+      font-weight: 600;
+      word-break: break-all;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .btn {
+      appearance: none;
+      border: none;
+      cursor: pointer;
+      font-family: 'Sora', sans-serif;
+      font-weight: 700;
+      font-size: 14.5px;
+      padding: 13px 20px;
+      border-radius: 8px;
+      background: var(--orange-500);
+      color: #FFFFFF;
+      width: 100%;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.15s ease, transform 0.1s ease;
+      margin-bottom: 10px;
+    }
+    .btn:hover {
+      background: var(--orange-600);
+    }
+    .btn:active {
+      transform: scale(0.99);
+    }
+    .btn-secondary {
+      background: transparent;
+      color: var(--navy-800);
+      border: 1.5px solid #D7D0C0;
+    }
+    .btn-secondary:hover {
+      background: #FFFFFF;
+      border-color: var(--navy-800);
+    }
+    .copy-toast {
+      display: none;
+      font-size: 12px;
+      color: #1E8A5F;
+      font-weight: 600;
+      margin-top: 4px;
+    }
+    .footer-links {
+      margin-top: 14px;
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      font-size: 12.5px;
+    }
+    .footer-links a {
+      color: #8D99C7;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .footer-links a:hover {
+      color: var(--orange-500);
+      text-decoration: underline;
+    }
+    @media print {
+      body {
+        background: #ffffff;
+        color: #000000;
+        padding: 0;
+      }
+      .card {
+        box-shadow: none;
+        border: none;
+        max-width: 100%;
+      }
+      .btn, .footer-links {
+        display: none ! from;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <div class="accent-top"></div>
+    
+    <div class="badge">Scan to Open Test</div>
+
+    <img src="/bdt_mascot.webp" alt="WeGrow mascot" class="mascot" onerror="this.src='/we_mascot.jpeg'">
+
+    <h1>Business <span>Dependency</span> Test</h1>
+    <p class="subtitle">Scan this QR code with any mobile phone camera or scanner app to open the test instantly.</p>
+
+    <!-- QR Code Preview -->
+    <div class="qr-box">
+      <img src="/bdt_qr_code.png" alt="Business Dependency Test QR Code" class="qr-img" id="qrImg">
+    </div>
+
+    <!-- Scannable URL info -->
+    <div class="url-pill">
+      <span id="targetUrlText">http://localhost:5173/business-dependency-test</span>
+      <button 
+        type="button" 
+        onclick="copyUrl()" 
+        style="background:none;border:none;cursor:pointer;color:var(--orange-600);font-weight:700;font-size:11px;"
+      >
+        Copy
+      </button>
+    </div>
+    <div class="copy-toast" id="copyToast">✓ Link copied to clipboard!</div>
+
+    <!-- Download Buttons -->
+    <a href="/bdt_qr_code.png" download="wegrow-business-dependency-test-qr.png" class="btn">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+        <polyline points="7 10 12 15 17 10"></polyline>
+        <line x1="12" y1="15" x2="12" y2="3"></line>
+      </svg>
+      Download High-Res PNG
+    </a>
+
+    <a href="/bdt_qr_code.svg" download="wegrow-business-dependency-test-qr.svg" class="btn btn-secondary">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+        <polyline points="7 10 12 15 17 10"></polyline>
+        <line x1="12" y1="15" x2="12" y2="3"></line>
+      </svg>
+      Download Vector SVG
+    </a>
+
+    <a href="/business-dependency-test" class="btn btn-secondary" style="margin-bottom:0;">
+      Open Test in Browser →
+    </a>
+  </div>
+
+  <div class="footer-links">
+    <a href="/business-dependency-test">Business Dependency Test</a>
+    <span>•</span>
+    <a href="/home">WeGrow Home</a>
+    <span>•</span>
+    <a href="javascript:window.print()">Print Poster</a>
+  </div>
+
+  <script>
+    function copyUrl() {
+      const url = document.getElementById("targetUrlText").innerText;
+      navigator.clipboard.writeText(url).then(() => {
+        const toast = document.getElementById("copyToast");
+        toast.style.display = "block";
+        setTimeout(() => { toast.style.display = "none"; }, 2500);
+      });
+    }
+  </script>
+</body>
+</html>

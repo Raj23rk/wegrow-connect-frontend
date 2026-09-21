@@ -20,7 +20,7 @@ import {
   Headphones
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { registerStudentFounder } from '../services/api';
+import { registerStudentFounder, formatEventId } from '../services/api';
 import CommunityPageFooter from './CommunityPageFooter';
 
 export default function StudentFoundersCommunity() {
@@ -72,7 +72,7 @@ export default function StudentFoundersCommunity() {
     },
     {
       q: 'Will I get a confirmation after registering?',
-      a: 'Yes! You will receive a confirmation via WhatsApp or a call on the number you register with. For queries, call +91 9344337331.'
+      a: 'Yes! You will receive a confirmation via WhatsApp or a call on the number you register with. For queries, call +91 9344037331.'
     },
     {
       q: 'What should I bring to the orientation?',
@@ -130,6 +130,7 @@ export default function StudentFoundersCommunity() {
         lookingForFunding: form.lookingForFunding || undefined,
         readyToLearn: form.readyToLearn || undefined,
         industryNiche: form.industryNiche || undefined,
+        eventId: formatEventId('STUDENT', eventDate),
       };
 
       const res = await registerStudentFounder(payload);
@@ -199,7 +200,7 @@ export default function StudentFoundersCommunity() {
   ];
 
   const venueAddress = 'Ayyapan Kovil Opposite, Naturals below, WeGrow B School, Sivakasi';
-  const helperPhone = '+91 9344337331';
+  const helperPhone = '+91 9344037331';
 
   return (
     <div className="min-h-screen bg-[#FBF6EE] text-[#1B2140] font-sans antialiased selection:bg-[#F0791E] selection:text-white overflow-x-hidden">
