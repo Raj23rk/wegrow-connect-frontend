@@ -190,50 +190,50 @@ export default function BusinessConsultancy() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF8F3] text-[#151E33] font-['Inter',sans-serif] selection:bg-[#F0913F] selection:text-white relative">
+    <div id="top" className="min-h-screen bg-[#FAF8F3] text-[#151E33] font-['Inter',sans-serif] selection:bg-[#F0913F] selection:text-white relative">
       {/* ============ SVG ICON SPRITE ============ */}
       <svg style={{ display: 'none' }} aria-hidden="true">
         <defs>
-          <symbol id="i-building" viewBox="0 0 24 24"><path d="M3 21V9L12 3L21 9V21" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/><path d="M9 21V13H15V21" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/></symbol>
-          <symbol id="i-compass" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="1.7"/><path d="M15 9L13 13L9 15L11 11L15 9Z" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="1.7"/></symbol>
-          <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2" fill="none" stroke="currentColor" strokeWidth="1.7"/><path d="M3 20c0-3.4 2.7-5.7 6-5.7s6 2.3 6 5.7" fill="none" stroke="currentColor" strokeWidth="1.7"/><path d="M16 5.4c1.6.4 2.8 1.8 2.8 3.5 0 1.4-.8 2.6-2 3.2M18.2 13.6c1.9.6 3.3 2.4 3.3 4.7" fill="none" stroke="currentColor" strokeWidth="1.7"/></symbol>
-          <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 5.5C6 4.3 9 4 12 5v14c-3-1-6-.7-8 .5V5.5Z" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="1.7"/><path d="M20 5.5C18 4.3 15 4 12 5v14c3-1 6-.7 8 .5V5.5Z" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="1.7"/></symbol>
-          <symbol id="i-laptop" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="10.5" rx="1.3" fill="none" stroke="currentColor" strokeWidth="1.7"/><path d="M2 19.5h20" fill="none" stroke="currentColor" strokeWidth="1.7"/></symbol>
-          <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20.5C7 17 3 13.6 3 9.6 3 6.9 5.1 5 7.6 5 9.3 5 10.8 5.9 12 7.4 13.2 5.9 14.7 5 16.4 5 18.9 5 21 6.9 21 9.6 21 13.6 17 17 12 20.5Z" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="1.7"/></symbol>
-          <symbol id="i-cross" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="1.7"/><path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/></symbol>
-          <symbol id="i-shirt" viewBox="0 0 24 24"><path d="M8 4 4 7l2 3 2-1v11h8V9l2 1 2-3-4-3-2 2h-4L8 4Z" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="1.7"/></symbol>
-          <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2" fill="none" stroke="currentColor" strokeWidth="1.7"/><path d="M12 3v2.3M12 18.7V21M21 12h-2.3M5.3 12H3M18.4 5.6l-1.6 1.6M7.2 16.8l-1.6 1.6M18.4 18.4l-1.6-1.6M7.2 7.2 5.6 5.6" fill="none" stroke="currentColor" strokeWidth="1.7"/></symbol>
-          <symbol id="i-car" viewBox="0 0 24 24"><path d="M4 16V11l2-4h12l2 4v5" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="1.7"/><rect x="2.5" y="16" width="19" height="3.4" rx="1" fill="none" stroke="currentColor" strokeWidth="1.7"/><circle cx="7" cy="19.6" r="1.5" fill="none" stroke="currentColor" strokeWidth="1.7"/><circle cx="17" cy="19.6" r="1.5" fill="none" stroke="currentColor" strokeWidth="1.7"/></symbol>
-          <symbol id="i-gem" viewBox="0 0 24 24"><path d="M5 9 9 4h6l4 5-7 11-7-11Z" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="1.7"/><path d="M5 9h14M9 4l1.5 5L9 20M15 4l-1.5 5L15 20" fill="none" stroke="currentColor" strokeWidth="1.7"/></symbol>
-          <symbol id="i-headset" viewBox="0 0 24 24"><path d="M4 13v-1a8 8 0 0 1 16 0v1" fill="none" stroke="currentColor" strokeWidth="1.7"/><rect x="2.5" y="13" width="4" height="6" rx="1.4" fill="none" stroke="currentColor" strokeWidth="1.7"/><rect x="17.5" y="13" width="4" height="6" rx="1.4" fill="none" stroke="currentColor" strokeWidth="1.7"/><path d="M19.5 19v.6a3 3 0 0 1-3 3H14" fill="none" stroke="currentColor" strokeWidth="1.7"/></symbol>
-          <symbol id="i-droplet" viewBox="0 0 24 24"><path d="M12 3c3.5 4.4 6 8 6 11.2A6 6 0 0 1 6 14.2C6 11 8.5 7.4 12 3Z" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="1.7"/></symbol>
-          <symbol id="i-bed" viewBox="0 0 24 24"><path d="M3 18v-7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v7" fill="none" stroke="currentColor" strokeWidth="1.7"/><path d="M3 15h18M3 18v2.5M21 18v2.5" fill="none" stroke="currentColor" strokeWidth="1.7"/><circle cx="7.5" cy="11" r="1.4" fill="none" stroke="currentColor" strokeWidth="1.7"/><path d="M11 11h7" fill="none" stroke="currentColor" strokeWidth="1.7"/></symbol>
-          <symbol id="i-film" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="15" rx="1.4" fill="none" stroke="currentColor" strokeWidth="1.7"/><path d="M8 4.5v15M16 4.5v15M3 9.5h5M16 9.5h5M3 15h5M16 15h5" fill="none" stroke="currentColor" strokeWidth="1.7"/></symbol>
-          <symbol id="i-swap" viewBox="0 0 24 24"><path d="M4 8h13l-3-3M20 16H7l3 3" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></symbol>
-          <symbol id="i-cart" viewBox="0 0 24 24"><path d="M3 4h2l2.4 12.2A2 2 0 0 0 9.4 18h8.2a2 2 0 0 0 2-1.6L21 8H6" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/><circle cx="10" cy="21" r="1.3" fill="none" stroke="currentColor" strokeWidth="1.7"/><circle cx="18" cy="21" r="1.3" fill="none" stroke="currentColor" strokeWidth="1.7"/></symbol>
-          <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 20 6v6c0 5-3.4 7.8-8 9-4.6-1.2-8-4-8-9V6l8-3Z" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="1.7"/><path d="m8.5 12 2.3 2.3L16 9.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/></symbol>
-          <symbol id="i-gauge" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="1.7"/><path d="M12 12 16 8.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/><path d="M7 15a6 6 0 0 1 10 0" fill="none" stroke="currentColor" strokeWidth="1.7"/></symbol>
-          <symbol id="i-barchart" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/></symbol>
-          <symbol id="i-clipboard" viewBox="0 0 24 24"><rect x="5" y="4.5" width="14" height="16" rx="1.6" fill="none" stroke="currentColor" strokeWidth="1.7"/><rect x="9" y="2.5" width="6" height="3.5" rx="1" fill="none" stroke="currentColor" strokeWidth="1.7"/><path d="M8.5 11h7M8.5 14.5h7M8.5 18h4" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/></symbol>
-          <symbol id="i-orgchart" viewBox="0 0 24 24"><circle cx="12" cy="4.5" r="2" fill="none" stroke="currentColor" strokeWidth="1.7"/><circle cx="5" cy="18.5" r="2" fill="none" stroke="currentColor" strokeWidth="1.7"/><circle cx="19" cy="18.5" r="2" fill="none" stroke="currentColor" strokeWidth="1.7"/><path d="M12 6.5v4M12 10.5 5 16.5M12 10.5l7 6" fill="none" stroke="currentColor" strokeWidth="1.7"/></symbol>
-          <symbol id="i-cap" viewBox="0 0 24 24"><path d="m2 9 10-4 10 4-10 4L2 9Z" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="1.7"/><path d="M6 11v4.3c0 1 2.7 2.7 6 2.7s6-1.7 6-2.7V11M22 9v6" fill="none" stroke="currentColor" strokeWidth="1.7"/></symbol>
-          <symbol id="i-factory" viewBox="0 0 24 24"><path d="M3 21V13l5 3v-3l5 3V8l5 4v9H3Z" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="1.7"/><path d="M8 4v3M13 3v3" fill="none" stroke="currentColor" strokeWidth="1.7"/></symbol>
-          <symbol id="i-trend" viewBox="0 0 24 24"><path d="M3 17 9.5 10.5 13.5 14.5 21 6" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/><path d="M15 6h6v6" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/></symbol>
-          <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5 9-5Z" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="1.7"/><path d="m3 13 9 5 9-5M3 8l9 5 9-5" fill="none" stroke="currentColor" strokeWidth="1.7"/></symbol>
-          <symbol id="i-workflow" viewBox="0 0 24 24"><rect x="3" y="4" width="6" height="5" rx="1.2" fill="none" stroke="currentColor" strokeWidth="1.7"/><rect x="15" y="4" width="6" height="5" rx="1.2" fill="none" stroke="currentColor" strokeWidth="1.7"/><rect x="9" y="15" width="6" height="5" rx="1.2" fill="none" stroke="currentColor" strokeWidth="1.7"/><path d="M6 9v3h12V9M12 12v3" fill="none" stroke="currentColor" strokeWidth="1.7"/></symbol>
-          <symbol id="i-mappin" viewBox="0 0 24 24"><path d="M12 21s7-6.3 7-12a7 7 0 0 0-14 0c0 5.7 7 12 7 12Z" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="1.7"/><circle cx="12" cy="9" r="2.4" fill="none" stroke="currentColor" strokeWidth="1.7"/></symbol>
-          <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="1.7"/><path d="m8 12.5 2.7 2.7L16 9.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/></symbol>
-          <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" strokeWidth="1.7"/><circle cx="12" cy="12" r="4.5" fill="none" stroke="currentColor" strokeWidth="1.7"/><circle cx="12" cy="12" r="1" fill="none" stroke="currentColor" strokeWidth="1.7"/></symbol>
-          <symbol id="i-pulse" viewBox="0 0 24 24"><path d="M2 12h4l1.5-4L11 18l2.5-11L15 12h7" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/></symbol>
-          <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7.5" height="7.5" rx="1" fill="none" stroke="currentColor" strokeWidth="1.7"/><rect x="13" y="3.5" width="7.5" height="7.5" rx="1" fill="none" stroke="currentColor" strokeWidth="1.7"/><rect x="3.5" y="13" width="7.5" height="7.5" rx="1" fill="none" stroke="currentColor" strokeWidth="1.7"/><rect x="13" y="13" width="7.5" height="7.5" rx="1" fill="none" stroke="currentColor" strokeWidth="1.7"/></symbol>
-          <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" strokeWidth="1.7"/><path d="m20 20-4.6-4.6" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/></symbol>
-          <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 5.5h16v11H9L4 20V5.5Z" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="1.7"/><path d="M8 9.5h8M8 12.8h5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/></symbol>
-          <symbol id="i-bird" viewBox="0 0 24 24"><path d="M4 15c3-6 8-9 15-8-1 1.4-1.7 2.3-3.4 2.8L17 12l-2 1 .5 3-3-1.5L10 17l-.5-2.8L6 15l1-2.6C5.5 13 4.6 14 4 15Z" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="1.7"/></symbol>
-          <symbol id="i-pill" viewBox="0 0 24 24"><rect x="3.5" y="9.5" width="17" height="5" rx="2.5" transform="rotate(-25 12 12)" fill="none" stroke="currentColor" strokeWidth="1.7"/><line x1="8.3" y1="12" x2="12.6" y2="7.7" fill="none" stroke="currentColor" strokeWidth="1.7"/></symbol>
-          <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/></symbol>
-          <symbol id="i-brain" viewBox="0 0 24 24"><path d="M9.5 2A2.5 2.5 0 0 0 7 4.5v.5A2.5 2.5 0 0 0 4.5 7.5a2.5 2.5 0 0 0 .5 4.8 2.5 2.5 0 0 0 0 4.4 2.5 2.5 0 0 0 2 2.8v.5A2.5 2.5 0 0 0 9.5 22h.5A2.5 2.5 0 0 0 12 20.5v-17A2.5 2.5 0 0 0 10 2h-.5zM14.5 2A2.5 2.5 0 0 1 17 4.5v.5a2.5 2.5 0 0 1 2.5 2.5 2.5 2.5 0 0 1-.5 4.8 2.5 2.5 0 0 1 0 4.4 2.5 2.5 0 0 1-2 2.8v.5A2.5 2.5 0 0 1 14.5 22h-.5A2.5 2.5 0 0 1 12 20.5v-17A2.5 2.5 0 0 1 14 2h.5z" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/></symbol>
-          <symbol id="i-flag" viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22v-7" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/></symbol>
-          <symbol id="i-handshake" viewBox="0 0 24 24"><path d="m11 17 2 2a1 1 0 0 0 1.4 0l4.3-4.3a1 1 0 0 0 0-1.4l-2.4-2.4a1 1 0 0 0-1.4 0L13 13M8 14l-2-2a1 1 0 0 1 0-1.4l4.3-4.3a1 1 0 0 1 1.4 0l2.4 2.4a1 1 0 0 1 0 1.4L12 12M2 9l3-3a2 2 0 0 1 2.8 0L10 8M14 16l2.2 2.2a2 2 0 0 0 2.8 0L22 15" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/></symbol>
+          <symbol id="i-building" viewBox="0 0 24 24"><path d="M3 21V9L12 3L21 9V21" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /><path d="M9 21V13H15V21" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /></symbol>
+          <symbol id="i-compass" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="1.7" /><path d="M15 9L13 13L9 15L11 11L15 9Z" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="1.7" /></symbol>
+          <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2" fill="none" stroke="currentColor" strokeWidth="1.7" /><path d="M3 20c0-3.4 2.7-5.7 6-5.7s6 2.3 6 5.7" fill="none" stroke="currentColor" strokeWidth="1.7" /><path d="M16 5.4c1.6.4 2.8 1.8 2.8 3.5 0 1.4-.8 2.6-2 3.2M18.2 13.6c1.9.6 3.3 2.4 3.3 4.7" fill="none" stroke="currentColor" strokeWidth="1.7" /></symbol>
+          <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 5.5C6 4.3 9 4 12 5v14c-3-1-6-.7-8 .5V5.5Z" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="1.7" /><path d="M20 5.5C18 4.3 15 4 12 5v14c3-1 6-.7 8 .5V5.5Z" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="1.7" /></symbol>
+          <symbol id="i-laptop" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="10.5" rx="1.3" fill="none" stroke="currentColor" strokeWidth="1.7" /><path d="M2 19.5h20" fill="none" stroke="currentColor" strokeWidth="1.7" /></symbol>
+          <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20.5C7 17 3 13.6 3 9.6 3 6.9 5.1 5 7.6 5 9.3 5 10.8 5.9 12 7.4 13.2 5.9 14.7 5 16.4 5 18.9 5 21 6.9 21 9.6 21 13.6 17 17 12 20.5Z" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="1.7" /></symbol>
+          <symbol id="i-cross" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="1.7" /><path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /></symbol>
+          <symbol id="i-shirt" viewBox="0 0 24 24"><path d="M8 4 4 7l2 3 2-1v11h8V9l2 1 2-3-4-3-2 2h-4L8 4Z" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="1.7" /></symbol>
+          <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2" fill="none" stroke="currentColor" strokeWidth="1.7" /><path d="M12 3v2.3M12 18.7V21M21 12h-2.3M5.3 12H3M18.4 5.6l-1.6 1.6M7.2 16.8l-1.6 1.6M18.4 18.4l-1.6-1.6M7.2 7.2 5.6 5.6" fill="none" stroke="currentColor" strokeWidth="1.7" /></symbol>
+          <symbol id="i-car" viewBox="0 0 24 24"><path d="M4 16V11l2-4h12l2 4v5" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="1.7" /><rect x="2.5" y="16" width="19" height="3.4" rx="1" fill="none" stroke="currentColor" strokeWidth="1.7" /><circle cx="7" cy="19.6" r="1.5" fill="none" stroke="currentColor" strokeWidth="1.7" /><circle cx="17" cy="19.6" r="1.5" fill="none" stroke="currentColor" strokeWidth="1.7" /></symbol>
+          <symbol id="i-gem" viewBox="0 0 24 24"><path d="M5 9 9 4h6l4 5-7 11-7-11Z" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="1.7" /><path d="M5 9h14M9 4l1.5 5L9 20M15 4l-1.5 5L15 20" fill="none" stroke="currentColor" strokeWidth="1.7" /></symbol>
+          <symbol id="i-headset" viewBox="0 0 24 24"><path d="M4 13v-1a8 8 0 0 1 16 0v1" fill="none" stroke="currentColor" strokeWidth="1.7" /><rect x="2.5" y="13" width="4" height="6" rx="1.4" fill="none" stroke="currentColor" strokeWidth="1.7" /><rect x="17.5" y="13" width="4" height="6" rx="1.4" fill="none" stroke="currentColor" strokeWidth="1.7" /><path d="M19.5 19v.6a3 3 0 0 1-3 3H14" fill="none" stroke="currentColor" strokeWidth="1.7" /></symbol>
+          <symbol id="i-droplet" viewBox="0 0 24 24"><path d="M12 3c3.5 4.4 6 8 6 11.2A6 6 0 0 1 6 14.2C6 11 8.5 7.4 12 3Z" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="1.7" /></symbol>
+          <symbol id="i-bed" viewBox="0 0 24 24"><path d="M3 18v-7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v7" fill="none" stroke="currentColor" strokeWidth="1.7" /><path d="M3 15h18M3 18v2.5M21 18v2.5" fill="none" stroke="currentColor" strokeWidth="1.7" /><circle cx="7.5" cy="11" r="1.4" fill="none" stroke="currentColor" strokeWidth="1.7" /><path d="M11 11h7" fill="none" stroke="currentColor" strokeWidth="1.7" /></symbol>
+          <symbol id="i-film" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="15" rx="1.4" fill="none" stroke="currentColor" strokeWidth="1.7" /><path d="M8 4.5v15M16 4.5v15M3 9.5h5M16 9.5h5M3 15h5M16 15h5" fill="none" stroke="currentColor" strokeWidth="1.7" /></symbol>
+          <symbol id="i-swap" viewBox="0 0 24 24"><path d="M4 8h13l-3-3M20 16H7l3 3" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" /></symbol>
+          <symbol id="i-cart" viewBox="0 0 24 24"><path d="M3 4h2l2.4 12.2A2 2 0 0 0 9.4 18h8.2a2 2 0 0 0 2-1.6L21 8H6" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /><circle cx="10" cy="21" r="1.3" fill="none" stroke="currentColor" strokeWidth="1.7" /><circle cx="18" cy="21" r="1.3" fill="none" stroke="currentColor" strokeWidth="1.7" /></symbol>
+          <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 20 6v6c0 5-3.4 7.8-8 9-4.6-1.2-8-4-8-9V6l8-3Z" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="1.7" /><path d="m8.5 12 2.3 2.3L16 9.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /></symbol>
+          <symbol id="i-gauge" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="1.7" /><path d="M12 12 16 8.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /><path d="M7 15a6 6 0 0 1 10 0" fill="none" stroke="currentColor" strokeWidth="1.7" /></symbol>
+          <symbol id="i-barchart" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /></symbol>
+          <symbol id="i-clipboard" viewBox="0 0 24 24"><rect x="5" y="4.5" width="14" height="16" rx="1.6" fill="none" stroke="currentColor" strokeWidth="1.7" /><rect x="9" y="2.5" width="6" height="3.5" rx="1" fill="none" stroke="currentColor" strokeWidth="1.7" /><path d="M8.5 11h7M8.5 14.5h7M8.5 18h4" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /></symbol>
+          <symbol id="i-orgchart" viewBox="0 0 24 24"><circle cx="12" cy="4.5" r="2" fill="none" stroke="currentColor" strokeWidth="1.7" /><circle cx="5" cy="18.5" r="2" fill="none" stroke="currentColor" strokeWidth="1.7" /><circle cx="19" cy="18.5" r="2" fill="none" stroke="currentColor" strokeWidth="1.7" /><path d="M12 6.5v4M12 10.5 5 16.5M12 10.5l7 6" fill="none" stroke="currentColor" strokeWidth="1.7" /></symbol>
+          <symbol id="i-cap" viewBox="0 0 24 24"><path d="m2 9 10-4 10 4-10 4L2 9Z" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="1.7" /><path d="M6 11v4.3c0 1 2.7 2.7 6 2.7s6-1.7 6-2.7V11M22 9v6" fill="none" stroke="currentColor" strokeWidth="1.7" /></symbol>
+          <symbol id="i-factory" viewBox="0 0 24 24"><path d="M3 21V13l5 3v-3l5 3V8l5 4v9H3Z" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="1.7" /><path d="M8 4v3M13 3v3" fill="none" stroke="currentColor" strokeWidth="1.7" /></symbol>
+          <symbol id="i-trend" viewBox="0 0 24 24"><path d="M3 17 9.5 10.5 13.5 14.5 21 6" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /><path d="M15 6h6v6" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /></symbol>
+          <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5 9-5Z" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="1.7" /><path d="m3 13 9 5 9-5M3 8l9 5 9-5" fill="none" stroke="currentColor" strokeWidth="1.7" /></symbol>
+          <symbol id="i-workflow" viewBox="0 0 24 24"><rect x="3" y="4" width="6" height="5" rx="1.2" fill="none" stroke="currentColor" strokeWidth="1.7" /><rect x="15" y="4" width="6" height="5" rx="1.2" fill="none" stroke="currentColor" strokeWidth="1.7" /><rect x="9" y="15" width="6" height="5" rx="1.2" fill="none" stroke="currentColor" strokeWidth="1.7" /><path d="M6 9v3h12V9M12 12v3" fill="none" stroke="currentColor" strokeWidth="1.7" /></symbol>
+          <symbol id="i-mappin" viewBox="0 0 24 24"><path d="M12 21s7-6.3 7-12a7 7 0 0 0-14 0c0 5.7 7 12 7 12Z" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="1.7" /><circle cx="12" cy="9" r="2.4" fill="none" stroke="currentColor" strokeWidth="1.7" /></symbol>
+          <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="1.7" /><path d="m8 12.5 2.7 2.7L16 9.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /></symbol>
+          <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" strokeWidth="1.7" /><circle cx="12" cy="12" r="4.5" fill="none" stroke="currentColor" strokeWidth="1.7" /><circle cx="12" cy="12" r="1" fill="none" stroke="currentColor" strokeWidth="1.7" /></symbol>
+          <symbol id="i-pulse" viewBox="0 0 24 24"><path d="M2 12h4l1.5-4L11 18l2.5-11L15 12h7" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /></symbol>
+          <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7.5" height="7.5" rx="1" fill="none" stroke="currentColor" strokeWidth="1.7" /><rect x="13" y="3.5" width="7.5" height="7.5" rx="1" fill="none" stroke="currentColor" strokeWidth="1.7" /><rect x="3.5" y="13" width="7.5" height="7.5" rx="1" fill="none" stroke="currentColor" strokeWidth="1.7" /><rect x="13" y="13" width="7.5" height="7.5" rx="1" fill="none" stroke="currentColor" strokeWidth="1.7" /></symbol>
+          <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" strokeWidth="1.7" /><path d="m20 20-4.6-4.6" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /></symbol>
+          <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 5.5h16v11H9L4 20V5.5Z" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="1.7" /><path d="M8 9.5h8M8 12.8h5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /></symbol>
+          <symbol id="i-bird" viewBox="0 0 24 24"><path d="M4 15c3-6 8-9 15-8-1 1.4-1.7 2.3-3.4 2.8L17 12l-2 1 .5 3-3-1.5L10 17l-.5-2.8L6 15l1-2.6C5.5 13 4.6 14 4 15Z" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="1.7" /></symbol>
+          <symbol id="i-pill" viewBox="0 0 24 24"><rect x="3.5" y="9.5" width="17" height="5" rx="2.5" transform="rotate(-25 12 12)" fill="none" stroke="currentColor" strokeWidth="1.7" /><line x1="8.3" y1="12" x2="12.6" y2="7.7" fill="none" stroke="currentColor" strokeWidth="1.7" /></symbol>
+          <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /></symbol>
+          <symbol id="i-brain" viewBox="0 0 24 24"><path d="M9.5 2A2.5 2.5 0 0 0 7 4.5v.5A2.5 2.5 0 0 0 4.5 7.5a2.5 2.5 0 0 0 .5 4.8 2.5 2.5 0 0 0 0 4.4 2.5 2.5 0 0 0 2 2.8v.5A2.5 2.5 0 0 0 9.5 22h.5A2.5 2.5 0 0 0 12 20.5v-17A2.5 2.5 0 0 0 10 2h-.5zM14.5 2A2.5 2.5 0 0 1 17 4.5v.5a2.5 2.5 0 0 1 2.5 2.5 2.5 2.5 0 0 1-.5 4.8 2.5 2.5 0 0 1 0 4.4 2.5 2.5 0 0 1-2 2.8v.5A2.5 2.5 0 0 1 14.5 22h-.5A2.5 2.5 0 0 1 12 20.5v-17A2.5 2.5 0 0 1 14 2h.5z" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /></symbol>
+          <symbol id="i-flag" viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22v-7" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /></symbol>
+          <symbol id="i-handshake" viewBox="0 0 24 24"><path d="m11 17 2 2a1 1 0 0 0 1.4 0l4.3-4.3a1 1 0 0 0 0-1.4l-2.4-2.4a1 1 0 0 0-1.4 0L13 13M8 14l-2-2a1 1 0 0 1 0-1.4l4.3-4.3a1 1 0 0 1 1.4 0l2.4 2.4a1 1 0 0 1 0 1.4L12 12M2 9l3-3a2 2 0 0 1 2.8 0L10 8M14 16l2.2 2.2a2 2 0 0 0 2.8 0L22 15" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /></symbol>
         </defs>
       </svg>
 
@@ -649,24 +649,76 @@ export default function BusinessConsultancy() {
           color: #AEB6CD;
         }
         .ind-grid {
-          grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+          display: grid;
+          grid-template-columns: repeat(7, 1fr);
+          gap: 12px;
         }
         .ind-tile {
           flex-direction: row;
           align-items: center;
-          padding: 14px 16px;
-          gap: 12px;
-          min-height: 70px;
+          padding: 10px 10px;
+          gap: 8px;
+          min-height: 56px;
+          border-radius: 14px;
+          box-sizing: border-box;
+          transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+        .ind-tile:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 18px rgba(21, 30, 51, 0.07);
+          border-color: var(--orange-400);
         }
         .ind-tile .tile-ic {
-          width: 38px;
-          height: 38px;
-          flex: 0 0 auto;
+          width: 32px;
+          height: 32px;
+          border-radius: 8px;
+          flex: 0 0 32px;
+        }
+        .ind-tile .tile-ic .ic {
+          width: 17px;
+          height: 17px;
         }
         .ind-tile span {
-          font-size: 13px;
+          font-size: 11.5px;
           font-weight: 600;
-          line-height: 1.3;
+          line-height: 1.2;
+          white-space: nowrap;
+          color: var(--ink);
+        }
+        .ind-tile-more {
+          background: rgba(231, 117, 43, 0.06);
+          border-color: rgba(231, 117, 43, 0.3);
+        }
+        .ind-tile-more .tile-ic {
+          background: rgba(231, 117, 43, 0.14);
+          color: var(--orange-500);
+        }
+        .ind-tile-more span {
+          color: var(--orange-500);
+          font-weight: 700;
+        }
+        @media (max-width: 1100px) {
+          .ind-grid {
+            grid-template-columns: repeat(4, 1fr);
+          }
+        }
+        @media (max-width: 780px) {
+          .ind-grid {
+            grid-template-columns: repeat(3, 1fr);
+          }
+        }
+        @media (max-width: 540px) {
+          .ind-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+          }
+          .ind-tile {
+            padding: 10px 8px;
+            gap: 6px;
+          }
+          .ind-tile span {
+            font-size: 11px;
+          }
         }
         .svc-tile .svc-code {
           font-family: 'Fraunces', serif;
@@ -1047,7 +1099,6 @@ export default function BusinessConsultancy() {
           <Link to="/" className="flex items-center gap-2 group flex-shrink-0">
             <img
               src="/bdt_logo.png"
-              alt="WeGrow Business Consultancy"
               className="h-8 sm:h-9 w-auto object-contain transition-transform group-hover:scale-105"
               onError={(e) => { e.target.src = '/wegrow-logo.webp'; }}
             />
@@ -1073,7 +1124,7 @@ export default function BusinessConsultancy() {
               className="inline-flex items-center gap-1.5 sm:gap-2 bg-[#122242] text-white px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-[13px] font-bold whitespace-nowrap hover:bg-[#E7752B] hover:-translate-y-0.5 transition-all shadow-md"
             >
               <span>Book Diagnostic</span>
-              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
             </button>
 
             {/* Mobile Hamburger Toggle */}
@@ -1159,9 +1210,9 @@ export default function BusinessConsultancy() {
                 <a className="btn btn-ghost" href="#triangle">See Our Approach</a>
               </div>
               <div className="hero-marquee">
-                <div className="mq-stat"><svg className="ic"><use href="#i-building"/></svg><div><b>2+1</b><span>Campuses</span></div></div>
-                <div className="mq-stat"><svg className="ic"><use href="#i-compass"/></svg><div><b>13</b><span>Industries</span></div></div>
-                <div className="mq-stat"><svg className="ic"><use href="#i-cap"/></svg><div><b>11 yrs</b><span>Track record</span></div></div>
+                <div className="mq-stat"><svg className="ic"><use href="#i-building" /></svg><div><b>2+1</b><span>Campuses</span></div></div>
+                <div className="mq-stat"><svg className="ic"><use href="#i-compass" /></svg><div><b>13</b><span>Industries</span></div></div>
+                <div className="mq-stat"><svg className="ic"><use href="#i-cap" /></svg><div><b>11 yrs</b><span>Track record</span></div></div>
               </div>
             </div>
             <div className="hero-visual reveal">
@@ -1188,10 +1239,10 @@ export default function BusinessConsultancy() {
             </div>
           </div>
           <div className="tile-grid q-grid reveal">
-            <div className="tile q-tile"><div className="tile-ic"><svg className="ic"><use href="#i-target"/></svg></div><span className="qnum">01</span><h4>Who takes decisions?</h4></div>
-            <div className="tile q-tile"><div className="tile-ic"><svg className="ic"><use href="#i-headset"/></svg></div><span className="qnum">02</span><h4>Who handles customers?</h4></div>
-            <div className="tile q-tile"><div className="tile-ic"><svg className="ic"><use href="#i-workflow"/></svg></div><span className="qnum">03</span><h4>Who knows your processes?</h4></div>
-            <div className="tile q-tile"><div className="tile-ic"><svg className="ic"><use href="#i-bolt"/></svg></div><span className="qnum">04</span><h4>Who solves problems?</h4></div>
+            <div className="tile q-tile"><div className="tile-ic"><svg className="ic"><use href="#i-target" /></svg></div><span className="qnum">01</span><h4>Who takes decisions?</h4></div>
+            <div className="tile q-tile"><div className="tile-ic"><svg className="ic"><use href="#i-headset" /></svg></div><span className="qnum">02</span><h4>Who handles customers?</h4></div>
+            <div className="tile q-tile"><div className="tile-ic"><svg className="ic"><use href="#i-workflow" /></svg></div><span className="qnum">03</span><h4>Who knows your processes?</h4></div>
+            <div className="tile q-tile"><div className="tile-ic"><svg className="ic"><use href="#i-bolt" /></svg></div><span className="qnum">04</span><h4>Who solves problems?</h4></div>
           </div>
           <div className="disappear-cta reveal">
             <p>"If the answer is you — every time — we need to talk."</p>
@@ -1212,10 +1263,10 @@ export default function BusinessConsultancy() {
             </div>
           </div>
           <div className="tile-grid tg-4 reveal">
-            <div className="tile vital-card"><div className="tile-ic"><svg className="ic"><use href="#i-heart"/></svg></div><h4>People</h4><p>Does your team function independently?</p></div>
-            <div className="tile vital-card"><div className="tile-ic"><svg className="ic"><use href="#i-brain"/></svg></div><h4>Process</h4><p>Does work happen systematically?</p></div>
-            <div className="tile vital-card"><div className="tile-ic"><svg className="ic"><use href="#i-gear"/></svg></div><h4>Operations</h4><p>Can it run without constant supervision?</p></div>
-            <div className="tile vital-card"><div className="tile-ic"><svg className="ic"><use href="#i-laptop"/></svg></div><h4>Technology</h4><p>Are you using it effectively?</p></div>
+            <div className="tile vital-card"><div className="tile-ic"><svg className="ic"><use href="#i-heart" /></svg></div><h4>People</h4><p>Does your team function independently?</p></div>
+            <div className="tile vital-card"><div className="tile-ic"><svg className="ic"><use href="#i-brain" /></svg></div><h4>Process</h4><p>Does work happen systematically?</p></div>
+            <div className="tile vital-card"><div className="tile-ic"><svg className="ic"><use href="#i-gear" /></svg></div><h4>Operations</h4><p>Can it run without constant supervision?</p></div>
+            <div className="tile vital-card"><div className="tile-ic"><svg className="ic"><use href="#i-laptop" /></svg></div><h4>Technology</h4><p>Are you using it effectively?</p></div>
           </div>
         </div>
       </section>
@@ -1233,14 +1284,14 @@ export default function BusinessConsultancy() {
           </div>
           <div className="triangle-wrap reveal">
             <svg className="triangle-svg" viewBox="-25 -10 570 460" xmlns="http://www.w3.org/2000/svg">
-              <polygon points="260,35 470,395 50,395" fill="none" stroke="#F0913F" strokeWidth="2.5" strokeLinejoin="round"/>
-              <circle cx="260" cy="35" r="46" fill="#182C54" stroke="#F0913F" strokeWidth="2"/>
-              <circle cx="470" cy="395" r="46" fill="#182C54" stroke="#F0913F" strokeWidth="2"/>
-              <circle cx="50" cy="395" r="46" fill="#182C54" stroke="#F0913F" strokeWidth="2"/>
+              <polygon points="260,35 470,395 50,395" fill="none" stroke="#F0913F" strokeWidth="2.5" strokeLinejoin="round" />
+              <circle cx="260" cy="35" r="46" fill="#182C54" stroke="#F0913F" strokeWidth="2" />
+              <circle cx="470" cy="395" r="46" fill="#182C54" stroke="#F0913F" strokeWidth="2" />
+              <circle cx="50" cy="395" r="46" fill="#182C54" stroke="#F0913F" strokeWidth="2" />
               <text x="260" y="32" textAnchor="middle" className="tri-label">PEOPLE</text>
               <text x="470" y="391" textAnchor="middle" className="tri-label">TECH</text>
               <text x="50" y="391" textAnchor="middle" className="tri-label">PROCESS</text>
-              <circle cx="260" cy="275" r="68" fill="#E7752B"/>
+              <circle cx="260" cy="275" r="68" fill="#E7752B" />
               <text x="260" y="268" textAnchor="middle" className="tri-label tri-center" fontSize="16" fill="#fff">INDEPENDENT</text>
               <text x="260" y="290" textAnchor="middle" className="tri-label tri-center" fontSize="16" fill="#fff">BUSINESS</text>
             </svg>
@@ -1290,17 +1341,17 @@ export default function BusinessConsultancy() {
           <div className="sol-grid reveal">
             <div className="sol-col">
               <div className="sol-eyebrow">Foundational</div><h3>Building the base</h3>
-              <div className="sol-item"><svg className="ic"><use href="#i-gear"/></svg><span>Operational management</span></div>
-              <div className="sol-item"><svg className="ic"><use href="#i-clipboard"/></svg><span>Process management (SOPs)</span></div>
-              <div className="sol-item"><svg className="ic"><use href="#i-users"/></svg><span>Organisation management</span></div>
-              <div className="sol-item"><svg className="ic"><use href="#i-barchart"/></svg><span>Data &amp; tech support</span></div>
+              <div className="sol-item"><svg className="ic"><use href="#i-gear" /></svg><span>Operational management</span></div>
+              <div className="sol-item"><svg className="ic"><use href="#i-clipboard" /></svg><span>Process management (SOPs)</span></div>
+              <div className="sol-item"><svg className="ic"><use href="#i-users" /></svg><span>Team Handling</span></div>
+              <div className="sol-item"><svg className="ic"><use href="#i-barchart" /></svg><span>Data &amp; tech support</span></div>
             </div>
             <div className="sol-col">
               <div className="sol-eyebrow">Advanced</div><h3>Scaling with strategy</h3>
-              <div className="sol-item"><svg className="ic"><use href="#i-flag"/></svg><span>Organisational strategy</span></div>
-              <div className="sol-item"><svg className="ic"><use href="#i-layers"/></svg><span>Operational strategy</span></div>
-              <div className="sol-item"><svg className="ic"><use href="#i-workflow"/></svg><span>Business process design</span></div>
-              <div className="sol-item"><svg className="ic"><use href="#i-cap"/></svg><span>CEO / MD training</span></div>
+              <div className="sol-item"><svg className="ic"><use href="#i-flag" /></svg><span>Organisational strategy</span></div>
+              <div className="sol-item"><svg className="ic"><use href="#i-layers" /></svg><span>Operational strategy</span></div>
+              <div className="sol-item"><svg className="ic"><use href="#i-workflow" /></svg><span>Business process design</span></div>
+              <div className="sol-item"><svg className="ic"><use href="#i-cap" /></svg><span>CEO / MD training</span></div>
             </div>
           </div>
         </div>
@@ -1314,17 +1365,17 @@ export default function BusinessConsultancy() {
             <div className="sec-title"><span className="kicker">Core services</span><h2>Eleven ways we get involved</h2></div>
           </div>
           <div className="tile-grid tg-4 reveal">
-            <div className="tile svc-tile"><div className="tile-ic"><svg className="ic"><use href="#i-shield"/></svg></div><div className="svc-code">WGBC–ISO</div><h4>ISO Implementation</h4></div>
-            <div className="tile svc-tile"><div className="tile-ic"><svg className="ic"><use href="#i-gauge"/></svg></div><div className="svc-code">WGBC–PMS</div><h4>Performance Management</h4></div>
-            <div className="tile svc-tile"><div className="tile-ic"><svg className="ic"><use href="#i-barchart"/></svg></div><div className="svc-code">WGBC–MIS</div><h4>Management Info System</h4></div>
-            <div className="tile svc-tile"><div className="tile-ic"><svg className="ic"><use href="#i-clipboard"/></svg></div><div className="svc-code">WGBC–SOP</div><h4>Standard Procedures</h4></div>
-            <div className="tile svc-tile"><div className="tile-ic"><svg className="ic"><use href="#i-orgchart"/></svg></div><div className="svc-code">WGBC–OSS/HY</div><h4>Structure &amp; Hierarchy</h4></div>
-            <div className="tile svc-tile"><div className="tile-ic"><svg className="ic"><use href="#i-grid"/></svg></div><div className="svc-code">WGBC–5S</div><h4>5S Methodology</h4></div>
-            <div className="tile svc-tile"><div className="tile-ic"><svg className="ic"><use href="#i-search"/></svg></div><div className="svc-code">WGBC–ODR</div><h4>Diagnosis Report</h4></div>
-            <div className="tile svc-tile"><div className="tile-ic"><svg className="ic"><use href="#i-chat"/></svg></div><div className="svc-code">WGBC–CEO</div><h4>CEO Coaching</h4></div>
-            <div className="tile svc-tile"><div className="tile-ic"><svg className="ic"><use href="#i-cap"/></svg></div><div className="svc-code">WGBC–LDP</div><h4>Leadership Program</h4></div>
-            <div className="tile svc-tile"><div className="tile-ic"><svg className="ic"><use href="#i-factory"/></svg></div><div className="svc-code">Prod. Mgmt</div><h4>Production Management</h4></div>
-            <div className="tile svc-tile"><div className="tile-ic"><svg className="ic"><use href="#i-trend"/></svg></div><div className="svc-code">Market</div><h4>Market &amp; Competitor Analysis</h4></div>
+            <div className="tile svc-tile"><div className="tile-ic"><svg className="ic"><use href="#i-shield" /></svg></div><div className="svc-code">WGBC–ISO</div><h4>ISO Implementation</h4></div>
+            <div className="tile svc-tile"><div className="tile-ic"><svg className="ic"><use href="#i-gauge" /></svg></div><div className="svc-code">WGBC–PMS</div><h4>Performance Management</h4></div>
+            <div className="tile svc-tile"><div className="tile-ic"><svg className="ic"><use href="#i-barchart" /></svg></div><div className="svc-code">WGBC–MIS</div><h4>Management Info System</h4></div>
+            <div className="tile svc-tile"><div className="tile-ic"><svg className="ic"><use href="#i-clipboard" /></svg></div><div className="svc-code">WGBC–SOP</div><h4>Standard Procedures</h4></div>
+            <div className="tile svc-tile"><div className="tile-ic"><svg className="ic"><use href="#i-orgchart" /></svg></div><div className="svc-code">WGBC–OSS/HY</div><h4>Structure &amp; Hierarchy</h4></div>
+            <div className="tile svc-tile"><div className="tile-ic"><svg className="ic"><use href="#i-grid" /></svg></div><div className="svc-code">WGBC–5S</div><h4>5S Methodology</h4></div>
+            <div className="tile svc-tile"><div className="tile-ic"><svg className="ic"><use href="#i-search" /></svg></div><div className="svc-code">WGBC–ODR</div><h4>Diagnosis Report</h4></div>
+            <div className="tile svc-tile"><div className="tile-ic"><svg className="ic"><use href="#i-chat" /></svg></div><div className="svc-code">WGBC–CEO</div><h4>CEO Coaching</h4></div>
+            <div className="tile svc-tile"><div className="tile-ic"><svg className="ic"><use href="#i-cap" /></svg></div><div className="svc-code">WGBC–LDP</div><h4>Leadership Program</h4></div>
+            <div className="tile svc-tile"><div className="tile-ic"><svg className="ic"><use href="#i-factory" /></svg></div><div className="svc-code">Prod. Mgmt</div><h4>Production Management</h4></div>
+            <div className="tile svc-tile"><div className="tile-ic"><svg className="ic"><use href="#i-trend" /></svg></div><div className="svc-code">Market</div><h4>Market &amp; Competitor Analysis</h4></div>
           </div>
         </div>
       </section>
@@ -1337,19 +1388,20 @@ export default function BusinessConsultancy() {
             <div className="sec-title"><span className="kicker">Where we work</span><h2>Industries we serve</h2></div>
           </div>
           <div className="tile-grid ind-grid reveal">
-            <div className="tile ind-tile"><div className="tile-ic"><svg className="ic"><use href="#i-shirt"/></svg></div><span>Textile Retail</span></div>
-            <div className="tile ind-tile"><div className="tile-ic"><svg className="ic"><use href="#i-gear"/></svg></div><span>Manufacturing</span></div>
-            <div className="tile ind-tile"><div className="tile-ic"><svg className="ic"><use href="#i-car"/></svg></div><span>Automobiles</span></div>
-            <div className="tile ind-tile"><div className="tile-ic"><svg className="ic"><use href="#i-gem"/></svg></div><span>Jewellery Retail</span></div>
-            <div className="tile ind-tile"><div className="tile-ic"><svg className="ic"><use href="#i-headset"/></svg></div><span>Service Industry</span></div>
-            <div className="tile ind-tile"><div className="tile-ic"><svg className="ic"><use href="#i-droplet"/></svg></div><span>Oil Industry</span></div>
-            <div className="tile ind-tile"><div className="tile-ic"><svg className="ic"><use href="#i-bird"/></svg></div><span>Poultry</span></div>
-            <div className="tile ind-tile"><div className="tile-ic"><svg className="ic"><use href="#i-bed"/></svg></div><span>Hotel Industry</span></div>
-            <div className="tile ind-tile"><div className="tile-ic"><svg className="ic"><use href="#i-film"/></svg></div><span>Entertainment</span></div>
-            <div className="tile ind-tile"><div className="tile-ic"><svg className="ic"><use href="#i-swap"/></svg></div><span>Trading</span></div>
-            <div className="tile ind-tile"><div className="tile-ic"><svg className="ic"><use href="#i-cross"/></svg></div><span>Hospitals</span></div>
-            <div className="tile ind-tile"><div className="tile-ic"><svg className="ic"><use href="#i-pill"/></svg></div><span>Retail Pharma</span></div>
-            <div className="tile ind-tile"><div className="tile-ic"><svg className="ic"><use href="#i-cart"/></svg></div><span>Supermarkets</span></div>
+            <div className="tile ind-tile"><div className="tile-ic"><svg className="ic"><use href="#i-shirt" /></svg></div><span>Textile Retail</span></div>
+            <div className="tile ind-tile"><div className="tile-ic"><svg className="ic"><use href="#i-gear" /></svg></div><span>Manufacturing</span></div>
+            <div className="tile ind-tile"><div className="tile-ic"><svg className="ic"><use href="#i-car" /></svg></div><span>Automobiles</span></div>
+            <div className="tile ind-tile"><div className="tile-ic"><svg className="ic"><use href="#i-gem" /></svg></div><span>Jewellery Retail</span></div>
+            <div className="tile ind-tile"><div className="tile-ic"><svg className="ic"><use href="#i-headset" /></svg></div><span>Service Industry</span></div>
+            <div className="tile ind-tile"><div className="tile-ic"><svg className="ic"><use href="#i-droplet" /></svg></div><span>Oil Industry</span></div>
+            <div className="tile ind-tile"><div className="tile-ic"><svg className="ic"><use href="#i-bird" /></svg></div><span>Poultry</span></div>
+            <div className="tile ind-tile"><div className="tile-ic"><svg className="ic"><use href="#i-bed" /></svg></div><span>Hotel Industry</span></div>
+            <div className="tile ind-tile"><div className="tile-ic"><svg className="ic"><use href="#i-film" /></svg></div><span>Entertainment</span></div>
+            <div className="tile ind-tile"><div className="tile-ic"><svg className="ic"><use href="#i-swap" /></svg></div><span>Trading</span></div>
+            <div className="tile ind-tile"><div className="tile-ic"><svg className="ic"><use href="#i-cross" /></svg></div><span>Hospitals</span></div>
+            <div className="tile ind-tile"><div className="tile-ic"><svg className="ic"><use href="#i-pill" /></svg></div><span>Retail Pharma</span></div>
+            <div className="tile ind-tile"><div className="tile-ic"><svg className="ic"><use href="#i-cart" /></svg></div><span>Supermarkets</span></div>
+            <div className="tile ind-tile ind-tile-more"><div className="tile-ic"><svg className="ic"><use href="#i-compass" /></svg></div><span>&amp; More Sectors</span></div>
           </div>
         </div>
       </section>
@@ -1362,39 +1414,24 @@ export default function BusinessConsultancy() {
             <div className="sec-title"><span className="kicker">Our edge</span><h2>Why owners choose WeGrow</h2></div>
           </div>
           <div className="tile-grid tg-5 reveal">
-            <div className="tile"><div className="tile-ic"><svg className="ic"><use href="#i-cap"/></svg></div><h4>Training pedigree</h4></div>
-            <div className="tile"><div className="tile-ic"><svg className="ic"><use href="#i-building"/></svg></div><h4>We run what we teach</h4></div>
-            <div className="tile"><div className="tile-ic"><svg className="ic"><use href="#i-mappin"/></svg></div><h4>Deep regional context</h4></div>
-            <div className="tile"><div className="tile-ic"><svg className="ic"><use href="#i-handshake"/></svg></div><h4>Founder-led coaching</h4></div>
-            <div className="tile"><div className="tile-ic"><svg className="ic"><use href="#i-heart"/></svg></div><h4>Community-rooted trust</h4></div>
+            <div className="tile"><div className="tile-ic"><svg className="ic"><use href="#i-cap" /></svg></div><h4>Training pedigree</h4></div>
+            <div className="tile"><div className="tile-ic"><svg className="ic"><use href="#i-building" /></svg></div><h4>We run what we teach</h4></div>
+            <div className="tile"><div className="tile-ic"><svg className="ic"><use href="#i-mappin" /></svg></div><h4>Deep regional context</h4></div>
+            <div className="tile"><div className="tile-ic"><svg className="ic"><use href="#i-handshake" /></svg></div><h4>Founder-led coaching</h4></div>
+            <div className="tile"><div className="tile-ic"><svg className="ic"><use href="#i-heart" /></svg></div><h4>Community-rooted trust</h4></div>
           </div>
         </div>
       </section>
 
       {/* ===================== LEADERSHIP ===================== */}
       <section className="navy" id="leadership">
-        <span className="sec-num" aria-hidden="true">11</span>
         <div className="wrap">
-          <div className="sec-head reveal">
-            <div className="sec-title"><span className="kicker">Leadership</span><h2>Led by someone who has sat on both sides of the table.</h2></div>
-          </div>
-          <div className="lead-grid">
-            <div className="lead-photo-wrap reveal">
-              <div className="lead-photo"><img src="/founder-desk.jpg" alt="Thavabalan, Founder and Managing Director of WeGrow, working at his desk" onError={(e) => { e.target.src = '/thavabalan.jpg'; }} /></div>
-              <div className="lead-badge">Founder &amp; MD, WeGrow</div>
-            </div>
-            <div className="lead-copy reveal">
-              <div className="lead-name">Thavabalan</div>
-              <div className="lead-role">Founder &amp; Managing Director</div>
-              <p className="lead-bio">Classroom patience meets corporate rigor — that's how he coaches owners today.</p>
-              <div className="cred-grid">
-                <div className="cred-tile"><svg className="ic"><use href="#i-book"/></svg><span>8 yrs teaching</span></div>
-                <div className="cred-tile"><svg className="ic"><use href="#i-laptop"/></svg><span>3 yrs IT Manager</span></div>
-                <div className="cred-tile"><svg className="ic"><use href="#i-heart"/></svg><span>Founder, Vallalar Illam</span></div>
-                <div className="cred-tile"><svg className="ic"><use href="#i-cross"/></svg><span>Founder, Anbagam Hospital</span></div>
-              </div>
-              <p className="lead-close">Now coaching SME owners, one business at a time.</p>
-            </div>
+          <div className="reveal flex justify-center">
+            <img
+              src="/learn-from-experts.jpg"
+              alt="WeGrow B School - Learn from Real Business Experts"
+              className="w-full max-w-5xl rounded-2xl shadow-2xl block mx-auto"
+            />
           </div>
         </div>
       </section>
@@ -1412,10 +1449,10 @@ export default function BusinessConsultancy() {
         </div>
       </section>
 
-{/* ===================== SECTION 8: CTA & FOOTER ===================== */}
+      {/* ===================== SECTION 8: CTA & FOOTER ===================== */}
       <footer id="contact" className="bg-[#0C1730] text-[#F4F1E8] pt-20 pb-10">
         <div className="max-w-[1200px] mx-auto px-5 sm:px-8">
-          
+
           {/* Main CTA block */}
           <div className="text-center pb-16 border-b border-white/10 reveal">
             <h2 className="ff-fraunces text-3xl sm:text-4xl md:text-5xl font-semibold text-white max-w-2xl mx-auto leading-tight">
@@ -1431,7 +1468,7 @@ export default function BusinessConsultancy() {
                 className="inline-flex items-center gap-2.5 bg-[#E7752B] hover:bg-[#F0913F] text-white px-8 py-4 rounded-full text-base font-bold shadow-xl transition-all hover:-translate-y-0.5"
               >
                 <span>Book Your Free Diagnostic</span>
-                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
               </button>
 
               <Link
@@ -1445,25 +1482,25 @@ export default function BusinessConsultancy() {
             {/* Campus Chips */}
             <div className="flex flex-wrap justify-center gap-3.5 mt-12">
               <div className="flex items-center gap-3 border border-white/10 rounded-2xl px-4 py-3 text-xs sm:text-sm text-[#E4E7F0] bg-white/[0.02]">
-                <svg className="w-5 h-5 text-[#F0913F] flex-shrink-0"><use href="#i-mappin"/></svg>
+                <svg className="w-5 h-5 text-[#F0913F] flex-shrink-0"><use href="#i-mappin" /></svg>
                 <div className="text-left">
-                  <b className="block font-bold text-white">Sivakasi Campus</b>
+                  <b className="block font-bold text-white">Sivakasi Campus 1.0</b>
                   <span className="text-[11.5px] text-[#9AA4BE]">Headquarters & Incubation Center</span>
                 </div>
               </div>
 
               <div className="flex items-center gap-3 border border-white/10 rounded-2xl px-4 py-3 text-xs sm:text-sm text-[#E4E7F0] bg-white/[0.02]">
-                <svg className="w-5 h-5 text-[#F0913F] flex-shrink-0"><use href="#i-mappin"/></svg>
+                <svg className="w-5 h-5 text-[#F0913F] flex-shrink-0"><use href="#i-mappin" /></svg>
                 <div className="text-left">
-                  <b className="block font-bold text-white">Madurai Campus</b>
+                  <b className="block font-bold text-white">srivilliputhur Campus 2.0</b>
                   <span className="text-[11.5px] text-[#9AA4BE]">Executive Learning Center</span>
                 </div>
               </div>
 
               <div className="flex items-center gap-3 border border-white/10 rounded-2xl px-4 py-3 text-xs sm:text-sm text-[#E4E7F0] bg-white/[0.02]">
-                <svg className="w-5 h-5 text-[#F0913F] flex-shrink-0"><use href="#i-mappin"/></svg>
+                <svg className="w-5 h-5 text-[#F0913F] flex-shrink-0"><use href="#i-mappin" /></svg>
                 <div className="text-left">
-                  <b className="block font-bold text-white">Upcoming Chennai Hub</b>
+                  <b className="block font-bold text-white">Sivakasi Campus 3.0</b>
                   <span className="text-[11.5px] text-[#9AA4BE]">Regional Corporate Center</span>
                 </div>
               </div>
@@ -1471,27 +1508,40 @@ export default function BusinessConsultancy() {
           </div>
 
           {/* Footer bottom */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-8 text-xs text-[#8890A6]">
-            <div className="flex items-center gap-3">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6 pt-10 text-xs text-[#8890A6]">
+            {/* Left: Brand */}
+            <div className="flex items-center">
               <img
-                src="/bdt_logo.png"
-                alt="WeGrow Logo"
-                className="h-7 w-auto object-contain brightness-0 invert opacity-80"
-                onError={(e) => { e.target.src = '/wegrow-logo.webp'; }}
+                src="/wegrow-logo.webp"
+                alt="WeGrow Business Consultancy"
+                className="h-8 sm:h-9 w-auto object-contain brightness-0 invert opacity-90"
+                onError={(e) => { e.target.src = '/bdt_logo.png'; }}
               />
-              <span>WeGrow Business Consultancy</span>
             </div>
 
-            <div className="flex flex-wrap gap-5 text-[#9AA4BE]">
-              <a href="#icu" className="hover:text-[#F0913F] transition-colors">Diagnosis</a>
-              <a href="#services" className="hover:text-[#F0913F] transition-colors">Services</a>
-              <a href="#industries" className="hover:text-[#F0913F] transition-colors">Industries</a>
-              <a href="#leadership" className="hover:text-[#F0913F] transition-colors">Leadership</a>
-              <Link to="/business-dependency-test" className="hover:text-[#F0913F] transition-colors">Self-Audit</Link>
-              <a href="#top" className="hover:text-white transition-colors font-bold">Back to top ↑</a>
+            {/* Middle: Links + Back to top */}
+            <div className="flex flex-col items-center md:items-start gap-2 text-[#9AA4BE]">
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-6 lg:gap-8">
+                <a href="#icu" className="hover:text-[#F0913F] transition-colors">Diagnosis</a>
+                <a href="#services" className="hover:text-[#F0913F] transition-colors">Services</a>
+                <a href="#industries" className="hover:text-[#F0913F] transition-colors">Industries</a>
+                <a href="#leadership" className="hover:text-[#F0913F] transition-colors">Leadership</a>
+                <Link to="/business-dependency-test" className="hover:text-[#F0913F] transition-colors">Self-Audit</Link>
+              </div>
+              <a
+                href="#top"
+                onClick={(e) => {
+                  e.preventDefault();
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                className="text-xs font-medium text-[#8890A6] hover:text-white transition-colors cursor-pointer self-center md:self-start mt-0.5"
+              >
+                Back to top ↑
+              </a>
             </div>
 
-            <div className="text-center sm:text-right">
+            {/* Right: Copyright */}
+            <div className="text-center md:text-right text-xs text-[#8890A6] leading-relaxed">
               © {new Date().getFullYear()} WeGrow Connect. All rights reserved.
             </div>
           </div>
@@ -1503,7 +1553,7 @@ export default function BusinessConsultancy() {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm overflow-y-auto">
           <div className="bg-[#FAF8F3] text-[#151E33] border border-[#E4DFD3] rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl relative my-8">
-            
+
             {/* Close button */}
             <button
               onClick={() => setIsModalOpen(false)}
@@ -1515,7 +1565,7 @@ export default function BusinessConsultancy() {
             {submittedSuccess ? (
               <div className="text-center py-6">
                 <div className="w-16 h-16 rounded-full bg-[#3FA96A]/20 text-[#3FA96A] flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+                  <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 6L9 17l-5-5" /></svg>
                 </div>
                 <h3 className="ff-fraunces text-2xl font-bold text-[#122242] mb-2">
                   Diagnostic Booked Successfully!
@@ -1694,7 +1744,7 @@ export default function BusinessConsultancy() {
                       ) : (
                         <>
                           <span>Confirm My 45-Min Diagnostic</span>
-                          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
                         </>
                       )}
                     </button>
