@@ -807,14 +807,14 @@ export default function SingAlongSponsorBooking() {
               )}
 
               {/* Pass Download Action Bar */}
-              <div className="flex flex-wrap items-center justify-between gap-3 bg-[#0e1626] border border-white/10 p-4 rounded-2xl">
-                <div>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-[#0e1626] border border-white/10 p-4 rounded-2xl">
+                <div className="min-w-0">
                   <span className="text-xs font-bold text-gray-400 block">Pass Booking ID:</span>
-                  <span className="text-base font-black text-amber-400 flex items-center gap-2">
+                  <span className="text-base font-black text-amber-400 flex items-center gap-2 break-all">
                     {ticketData.bookingId}
                     <button
                       onClick={handleCopyBookingId}
-                      className="p-1 rounded bg-white/10 hover:bg-white/20 text-xs text-white cursor-pointer"
+                      className="p-1 rounded bg-white/10 hover:bg-white/20 text-xs text-white cursor-pointer shrink-0"
                       title="Copy Pass ID"
                     >
                       {isCopiedBookingId ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
@@ -822,19 +822,19 @@ export default function SingAlongSponsorBooking() {
                   </span>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 w-full sm:w-auto">
                   <button
                     onClick={() => window.print()}
-                    className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold text-white flex items-center gap-1.5 transition cursor-pointer"
+                    className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold text-white flex items-center justify-center gap-1.5 transition cursor-pointer"
                   >
                     <Printer className="w-4 h-4" /> Print
                   </button>
 
                   <button
                     onClick={handleShareWhatsApp}
-                    className="px-4 py-2.5 rounded-xl bg-[#25D366] hover:bg-[#1EBE5D] text-xs font-black text-white flex items-center gap-1.5 transition cursor-pointer shadow-md"
+                    className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-[#25D366] hover:bg-[#1EBE5D] text-xs font-black text-white flex items-center justify-center gap-1.5 transition cursor-pointer shadow-md"
                   >
-                    <Share2 className="w-4 h-4" /> Share on WhatsApp
+                    <Share2 className="w-4 h-4" /> Share
                   </button>
                 </div>
               </div>
@@ -852,8 +852,8 @@ export default function SingAlongSponsorBooking() {
                 </div>
 
                 {/* Ticket Header */}
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-white/10 pb-6 mb-6">
-                  <div>
+                <div className="flex flex-col items-start justify-between gap-3 border-b border-white/10 pb-5 mb-5">
+                  <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
                       <span className="text-xs font-black uppercase tracking-widest text-emerald-400">
@@ -868,7 +868,7 @@ export default function SingAlongSponsorBooking() {
                     </p>
                   </div>
 
-                  <div className="text-left sm:text-right">
+                  <div className="">
                     <span className="inline-block px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-amber-400 text-slate-950">
                       {ticketData.passTitle}
                     </span>
@@ -878,18 +878,18 @@ export default function SingAlongSponsorBooking() {
                   </div>
                 </div>
 
-                {/* Ticket Details & QR Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+                {/* Ticket Details & QR Grid — QR first on mobile */}
+                <div className="flex flex-col-reverse md:grid md:grid-cols-3 gap-5 items-start">
                   {/* Attendee Details */}
-                  <div className="md:col-span-2 space-y-4 text-xs">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
+                  <div className="md:col-span-2 space-y-4 text-xs w-full">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="min-w-0">
                         <span className="text-[10px] uppercase font-bold text-gray-400 block">Attendee Name</span>
-                        <strong className="text-base text-white font-black block">{ticketData.fullName}</strong>
+                        <strong className="text-sm sm:text-base text-white font-black block truncate">{ticketData.fullName}</strong>
                       </div>
-                      <div>
+                      <div className="min-w-0">
                         <span className="text-[10px] uppercase font-bold text-gray-400 block">Company / Guest</span>
-                        <strong className="text-sm text-amber-300 font-bold block">{ticketData.company}</strong>
+                        <strong className="text-xs sm:text-sm text-amber-300 font-bold block truncate">{ticketData.company}</strong>
                       </div>
                     </div>
 
@@ -910,36 +910,35 @@ export default function SingAlongSponsorBooking() {
                       <strong className="text-white font-bold block">{CONFIG.fullVenue}</strong>
                     </div>
 
-                    <div className="pt-2 border-t border-white/10 flex items-center gap-4 text-gray-400 text-[11px]">
-                      <span>Issued to: <b>{ticketData.email}</b></span>
-                      <span>•</span>
+                    <div className="pt-2 border-t border-white/10 flex flex-col gap-1 text-gray-400 text-[11px]">
+                      <span className="truncate">Issued to: <b>{ticketData.email}</b></span>
                       <span>Phone: <b>{ticketData.phone}</b></span>
                     </div>
                   </div>
 
                   {/* Verification QR Code Area */}
-                  <div className="bg-white rounded-2xl p-4 flex flex-col items-center justify-center text-slate-900 shadow-xl text-center">
+                  <div className="bg-white rounded-2xl p-3 flex flex-col items-center justify-center text-slate-900 shadow-xl text-center w-full max-w-[180px] mx-auto md:mx-0">
                     {ticketQr ? (
-                      <img src={ticketQr} alt="Verification QR" className="w-36 h-36 object-contain" />
+                      <img src={ticketQr} alt="Verification QR" className="w-32 h-32 sm:w-36 sm:h-36 object-contain" />
                     ) : (
-                      <div className="w-36 h-36 bg-gray-100 animate-pulse rounded-lg" />
+                      <div className="w-32 h-32 sm:w-36 sm:h-36 bg-gray-100 animate-pulse rounded-lg" />
                     )}
                     <span className="text-[10px] font-black uppercase tracking-wider text-slate-700 mt-2 block">
                       Gate QR Scanner Pass
                     </span>
-                    <span className="text-[9px] font-mono font-bold text-slate-500">
+                    <span className="text-[9px] font-mono font-bold text-slate-500 break-all">
                       {ticketData.bookingId}
                     </span>
                   </div>
                 </div>
 
                 {/* Bottom Sponsor Ribbon on Ticket */}
-                <div className="mt-6 pt-4 border-t border-white/10 flex flex-wrap items-center justify-between gap-2 text-[11px] text-gray-400">
-                  <div className="flex items-center gap-2">
-                    <Award className="w-4 h-4 text-amber-400" />
-                    <span>Sponsored by <b>Fashion Woorld, Mahaan Ventures, Mayann Architectx, Sense Connect &amp; Kerala Wood Furniture</b></span>
+                <div className="mt-5 pt-4 border-t border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-[11px] text-gray-400">
+                  <div className="flex items-start gap-2">
+                    <Award className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                    <span className="leading-snug">Sponsored by <b>Fashion Woorld, Mahaan Ventures, Mayann Architectx &amp; Partners</b></span>
                   </div>
-                  <span className="text-emerald-400 font-bold">100% Free Entry • Verified Pass</span>
+                  <span className="text-emerald-400 font-bold whitespace-nowrap">100% Free • Verified Pass</span>
                 </div>
               </div>
 

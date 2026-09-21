@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Sidebar from '../../components/Sidebar';
 import {
   Music,
@@ -314,21 +314,56 @@ export default function AdminSingAlong() {
       }
 
       // Extract stats from /sing-along API response
-      const resData = res?.data || {};
-      const summary = resData?.summary || res?.summary || {};
+      const resData = Array.isArray(res?.data) ? {} : (res?.data || {});
+      const summary = res?.summary || resData?.summary || {};
 
-      const confirmedCount = resData.confirmedCount ?? summary.confirmedCount ?? resData.totalConfirmed ?? summary.totalConfirmed;
-      const totalTickets = resData.totalTickets ?? summary.totalTickets;
-      const totalRevenueFormatted = resData.totalRevenueFormatted || summary.totalRevenueFormatted || (resData.totalRevenue != null ? rupee(resData.totalRevenue) : (summary.totalRevenue != null ? rupee(summary.totalRevenue) : undefined));
-      const totalRevenue = resData.totalRevenue ?? summary.totalRevenue;
-      const attendedCount = resData.attendedCount ?? summary.attendedCount ?? resData.checkedInCount ?? summary.checkedInCount;
+      const confirmedFromList = listData.filter(
+        (b: any) => b.status === 'CONFIRMED' || b.status === 'ATTENDED' || b.paymentStatus === 'SUCCESS'
+      ).length;
+
+      const confirmedCount =
+        res?.confirmedCount ??
+        res?.totalConfirmed ??
+        summary?.confirmedCount ??
+        summary?.totalConfirmed ??
+        resData?.confirmedCount ??
+        resData?.totalConfirmed;
+
+      const totalTickets =
+        res?.totalTickets ??
+        summary?.totalTickets ??
+        resData?.totalTickets;
+
+      const totalRevenueFormatted =
+        res?.totalRevenueFormatted ||
+        summary?.totalRevenueFormatted ||
+        resData?.totalRevenueFormatted ||
+        (res?.totalRevenue != null
+          ? rupee(res.totalRevenue)
+          : summary?.totalRevenue != null
+          ? rupee(summary.totalRevenue)
+          : undefined);
+
+      const totalRevenue =
+        res?.totalRevenue ??
+        summary?.totalRevenue ??
+        resData?.totalRevenue;
+
+      const attendedCount =
+        res?.attendedCount ??
+        summary?.attendedCount ??
+        res?.checkedInCount ??
+        summary?.checkedInCount ??
+        resData?.attendedCount ??
+        resData?.checkedInCount;
+
       const attendedFromList = listData.filter((b: any) => b.attended || b.status === 'ATTENDED').length;
 
       setStats((prev: any) => ({
         ...prev,
         ...resData,
         ...summary,
-        confirmedCount: confirmedCount !== undefined ? confirmedCount : prev?.confirmedCount,
+        confirmedCount: confirmedCount !== undefined ? confirmedCount : (prev?.confirmedCount ?? confirmedFromList),
         totalTickets: totalTickets !== undefined ? totalTickets : prev?.totalTickets,
         totalRevenueFormatted: totalRevenueFormatted || prev?.totalRevenueFormatted,
         totalRevenue: totalRevenue !== undefined ? totalRevenue : prev?.totalRevenue,
@@ -528,14 +563,16 @@ export default function AdminSingAlong() {
           {/* ─── Metric Cards (5 Columns with Sponsors & Free Highlight) ─────────────────── */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 shrink-0">
 
-            {/* Total Bookings */}
+            {/* Confirmed Orders */}
             <div className="bg-white rounded-xl border border-slate-200 p-3.5 px-4 shadow-xs flex items-center justify-between">
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">Total Orders</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">Confirmed Orders</span>
                 <div className="text-xl font-black text-slate-900 leading-tight">
-                  {loading && !totalCount ? '...' : (totalCount || bookings.length)}
+                  {statsLoading && !stats && loading
+                    ? '...'
+                    : (stats?.confirmedCount ?? stats?.totalConfirmed ?? bookings.filter((b: any) => b.status === 'CONFIRMED' || b.status === 'ATTENDED').length)}
                 </div>
-                <span className="text-[10px] text-slate-500 font-medium">All registered orders</span>
+                <span className="text-[10px] text-emerald-600 font-semibold">Confirmed bookings</span>
               </div>
               <div className="w-10 h-10 rounded-xl bg-orange-50 text-[#ff6a00] flex items-center justify-center">
                 <Ticket className="w-5 h-5" />
