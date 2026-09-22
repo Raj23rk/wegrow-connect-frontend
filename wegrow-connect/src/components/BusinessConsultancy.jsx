@@ -1096,7 +1096,7 @@ export default function BusinessConsultancy() {
       {/* ===================== STICKY TOPBAR ===================== */}
       <header className="sticky top-0 z-50 w-full bg-[#FAF8F3]/95 backdrop-blur-md border-b border-[#E4DFD3] transition-all">
         <div className="max-w-[1200px] mx-auto px-4 sm:px-8 py-3.5 flex items-center justify-between gap-4">
-          <Link to="/" className="flex items-center gap-2 group flex-shrink-0">
+          <Link to="/home" className="flex items-center gap-2 group flex-shrink-0" title="Return to WeGrow Home">
             <img
               src="/bdt_logo.png"
               className="h-8 sm:h-9 w-auto object-contain transition-transform group-hover:scale-105"
@@ -1105,6 +1105,7 @@ export default function BusinessConsultancy() {
           </Link>
 
           <nav className="hidden md:flex items-center gap-6 lg:gap-8 text-[13.5px] font-semibold text-[#4E5875]">
+            <Link to="/home" className="hover:text-[#E7752B] transition-colors whitespace-nowrap">Home</Link>
             <a href="#icu" className="hover:text-[#E7752B] transition-colors whitespace-nowrap">Diagnosis</a>
             <a href="#triangle" className="hover:text-[#E7752B] transition-colors whitespace-nowrap">Approach</a>
             <a href="#services" className="hover:text-[#E7752B] transition-colors whitespace-nowrap">Solutions</a>
@@ -1148,6 +1149,13 @@ export default function BusinessConsultancy() {
         {/* Mobile Navigation Drawer */}
         {mobileMenuOpen && (
           <div className="md:hidden bg-[#FAF8F3] border-b border-[#E4DFD3] px-6 py-4 space-y-2.5 shadow-lg transition-all animate-fadeIn">
+            <Link
+              to="/home"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block text-sm font-semibold text-[#4E5875] hover:text-[#E7752B] py-1"
+            >
+              Home
+            </Link>
             <a
               href="#icu"
               onClick={() => setMobileMenuOpen(false)}
@@ -1522,6 +1530,7 @@ export default function BusinessConsultancy() {
             {/* Middle: Links + Back to top */}
             <div className="flex flex-col items-center md:items-start gap-2 text-[#9AA4BE]">
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-6 lg:gap-8">
+                <Link to="/home" className="hover:text-[#F0913F] transition-colors">Home</Link>
                 <a href="#icu" className="hover:text-[#F0913F] transition-colors">Diagnosis</a>
                 <a href="#services" className="hover:text-[#F0913F] transition-colors">Services</a>
                 <a href="#industries" className="hover:text-[#F0913F] transition-colors">Industries</a>
