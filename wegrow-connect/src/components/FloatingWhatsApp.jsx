@@ -1,7 +1,24 @@
 import React, { useState } from 'react';
+<<<<<<< HEAD
 
 export default function FloatingWhatsApp() {
   const [isHovered, setIsHovered] = useState(false);
+=======
+import { useLocation } from 'react-router-dom';
+
+export default function FloatingWhatsApp() {
+  const location = useLocation();
+  const [isHovered, setIsHovered] = useState(false);
+
+  // Hide on Sing Along and Sponsor pages
+  const isHidden =
+    location.pathname.includes('sing-along') ||
+    location.pathname.includes('singalong') ||
+    location.pathname.includes('sponsors');
+
+  if (isHidden) return null;
+
+>>>>>>> 5a9e0b2569bb6cec86ced798e3374894cc1ce801
   const phoneNumber = '919363337331';
   const defaultMessage = encodeURIComponent(
     'Hi WeGrow Team! I would like to know more about WeGrow Skill Campus and B-School programs.'

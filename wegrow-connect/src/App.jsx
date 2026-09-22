@@ -35,9 +35,12 @@ import WomensCommunity from './components/WomensCommunity';
 import StudentFoundersCommunity from './components/StudentFoundersCommunity';
 import BusinessFoundersCommunity from './components/BusinessFoundersCommunity';
 import WomensCommunityV1 from './components/WomensCommunityV1';
+import FloatingWhatsApp from './components/FloatingWhatsApp';
+import WeGrowChatbot from './components/WeGrowChatbot';
 
 // Lazy load Sing Along Page for ultra-fast initial paint
 const SingAlongBooking = lazy(() => import('./components/SingAlongBooking'));
+const SingAlongSponsorBooking = lazy(() => import('./components/SingAlongSponsorBooking'));
 const BusinessDependencyTest = lazy(() => import('./components/BusinessDependencyTest'));
 const BusinessConsultancy = lazy(() => import('./components/BusinessConsultancy'));
 
@@ -176,9 +179,9 @@ function MainHomePage() {
   };
 
   const scrollToCourses = () => {
-    if (coursesTargetRef.current && scrollContainerRef.current) {
+    if (galleryTargetRef.current && scrollContainerRef.current) {
       scrollContainerRef.current.scrollTo({
-        top: Math.max(coursesTargetRef.current.offsetTop - 40, 0),
+        top: Math.max(galleryTargetRef.current.offsetTop - 40, 0),
         behavior: 'smooth'
       });
     }
@@ -290,7 +293,6 @@ function MainHomePage() {
 
     if (
       missionVisionTargetRef.current &&
-      coursesTargetRef.current &&
       galleryTargetRef.current &&
       rewardTargetRef.current && 
       resourceTargetRef.current && 
@@ -303,7 +305,6 @@ function MainHomePage() {
       contactTargetRef.current
     ) {
       const missionVisionTop = missionVisionTargetRef.current.getBoundingClientRect().top;
-      const coursesTop = coursesTargetRef.current.getBoundingClientRect().top;
       const galleryTop = galleryTargetRef.current.getBoundingClientRect().top;
       const rewardTop = rewardTargetRef.current.getBoundingClientRect().top;
       const resourceTop = resourceTargetRef.current.getBoundingClientRect().top;
@@ -319,8 +320,8 @@ function MainHomePage() {
       if (missionVisionTop <= windowHeight) {
         const mvFadeIn = Math.min(Math.max((windowHeight - missionVisionTop) / (windowHeight * 0.4), 0), 1);
         let mvFadeOut = 0;
-        if (coursesTop < windowHeight * 0.85) {
-          mvFadeOut = Math.min(Math.max((windowHeight * 0.85 - coursesTop) / (windowHeight * 0.5), 0), 1);
+        if (galleryTop < windowHeight * 0.85) {
+          mvFadeOut = Math.min(Math.max((windowHeight * 0.85 - galleryTop) / (windowHeight * 0.5), 0), 1);
         }
         setMissionVisionStyle({
           opacity: Math.max(mvFadeIn - mvFadeOut, 0),
@@ -328,21 +329,6 @@ function MainHomePage() {
         });
       } else {
         setMissionVisionStyle({ opacity: 0, transform: 'scale(0.98)' });
-      }
-
-      // 3. Courses Animation
-      if (coursesTop <= windowHeight) {
-        const cFadeIn = Math.min(Math.max((windowHeight - coursesTop) / (windowHeight * 0.4), 0), 1);
-        let cFadeOut = 0;
-        if (galleryTop < windowHeight * 0.85) {
-          cFadeOut = Math.min(Math.max((windowHeight * 0.85 - galleryTop) / (windowHeight * 0.5), 0), 1);
-        }
-        setCoursesStyle({
-          opacity: Math.max(cFadeIn - cFadeOut, 0),
-          transform: `scale(${0.98 + (0.02 * cFadeIn) - (0.03 * cFadeOut)})`
-        });
-      } else {
-        setCoursesStyle({ opacity: 0, transform: 'scale(0.98)' });
       }
 
       // 4. Gallery Animation
@@ -520,7 +506,10 @@ function MainHomePage() {
   }, [activeItem]);
 
   useEffect(() => {
+<<<<<<< HEAD
     // Initial scroll position calculation
+=======
+>>>>>>> 5a9e0b2569bb6cec86ced798e3374894cc1ce801
     handleScroll();
   }, []);
 
@@ -580,8 +569,8 @@ function MainHomePage() {
         {/* 3. MISSION & VISION SECTION */}
         <MissionVisionSection missionVisionTargetRef={missionVisionTargetRef} missionVisionStyle={missionVisionStyle} />
 
-        {/* 4. COURSES SECTION */}
-        <CoursesSection coursesTargetRef={coursesTargetRef} coursesStyle={coursesStyle} scrollToContact={scrollToContact} />
+        {/* 4. COURSES SECTION (HIDDEN) */}
+        {/* <CoursesSection coursesTargetRef={coursesTargetRef} coursesStyle={coursesStyle} scrollToContact={scrollToContact} /> */}
 
         {/* 5. GALLERY SECTION (4 CATEGORIES: WORKSHOP, ACTIVITY, STUDENT, BUSINESS) */}
         <GallerySection galleryTargetRef={galleryTargetRef} galleryStyle={galleryStyle} />
@@ -668,8 +657,12 @@ export default function App() {
             {/* Other Public/Partially Protected Routes */}
             <Route path="/gallery" element={<GalleryPage />} />
             <Route path="/home/profile" element={<ProfilePage />} />
+<<<<<<< HEAD
             {/* Event Details Route (Hidden - redirects to home) */}
             {/* <Route path="/home/events/:eventId" element={<EventDetails />} /> */}
+=======
+            {/* Event Details Route (Hidden) */}
+>>>>>>> 5a9e0b2569bb6cec86ced798e3374894cc1ce801
             <Route path="/home/events/:eventId" element={<Navigate to="/" replace />} />
             <Route path="/womens-community" element={<WomensCommunity />} />
             <Route path="/events/womens-community" element={<WomensCommunity />} />
@@ -701,6 +694,14 @@ export default function App() {
             <Route path="/events/sing-along" element={<SingAlongBooking />} />
             <Route path="/events/singalong" element={<SingAlongBooking />} />
             <Route path="/book-tickets" element={<SingAlongBooking />} />
+
+            {/* Sing Along Musical Night Event — Sponsors & VIP Passes */}
+            <Route path="/sing-along/sponsors" element={<SingAlongSponsorBooking />} />
+            <Route path="/singalong/sponsors" element={<SingAlongSponsorBooking />} />
+            <Route path="/events/sing-along/sponsors" element={<SingAlongSponsorBooking />} />
+            <Route path="/sing-along-sponsors" element={<SingAlongSponsorBooking />} />
+            <Route path="/singalong-sponsors" element={<SingAlongSponsorBooking />} />
+            <Route path="/sponsors" element={<SingAlongSponsorBooking />} />
 
             {/* WeGrow Business Dependency Test */}
             <Route path="/business-dependency-test" element={<BusinessDependencyTest />} />

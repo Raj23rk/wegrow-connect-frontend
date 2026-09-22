@@ -24,7 +24,10 @@ import {
   AlertCircle,
   ShieldCheck,
   ExternalLink,
-  Calendar
+  Calendar,
+  Award,
+  Building,
+  Gift
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import {
@@ -32,7 +35,8 @@ import {
   getSingAlongStats,
   exportSingAlongCsv,
   verifySingAlongTicket,
-  checkInSingAlongTicket
+  checkInSingAlongTicket,
+  sendSingAlongTicketEmail
 } from '../../services/singAlongApi';
 
 const rupee = (n: number | string) => {
@@ -42,6 +46,74 @@ const rupee = (n: number | string) => {
   }
   return '₹' + num.toLocaleString('en-IN');
 };
+
+// Helper to determine whether a booking is Sponsor, Promo, Free, or Paid
+export function getPassClassification(item: any) {
+  const code = String(item?.code || item?.sponsorCode || '').toUpperCase();
+  const passType = String(item?.passType || '').toUpperCase();
+  const bookingId = String(item?.bookingId || item?.id || '').toUpperCase();
+  const paymentMethod = String(item?.paymentMethod || '').toUpperCase();
+  const notes = String(item?.notes || '').toUpperCase();
+  const amount = Number(item?.totalAmount ?? item?.amount ?? 0);
+
+  if (
+    code === 'SA26_SP01' ||
+    passType.includes('SPONSOR') ||
+    bookingId.includes('-SP-') ||
+    bookingId.includes('SP01') ||
+    paymentMethod.includes('SPONSOR') ||
+    notes.includes('SA26_SP01') ||
+    notes.includes('SPONSOR')
+  ) {
+    return {
+      category: 'SPONSOR',
+      label: 'VIP Sponsor Pass',
+      code: 'SA26_SP01',
+      badgeClass: 'bg-amber-100 text-amber-900 border border-amber-300 font-extrabold shadow-2xs',
+      pillColor: 'text-amber-700 bg-amber-100',
+      company: item?.company && item.company !== 'Valued Partner' ? item.company : (item?.company || 'Sponsor Guest')
+    };
+  }
+
+  if (
+    code === 'SA26_PO01' ||
+    passType.includes('PROMO') ||
+    bookingId.includes('-PO-') ||
+    bookingId.includes('PO01') ||
+    paymentMethod.includes('PROMO') ||
+    notes.includes('SA26_PO01') ||
+    notes.includes('PROMO')
+  ) {
+    return {
+      category: 'PROMO',
+      label: 'Promo Pass',
+      code: 'SA26_PO01',
+      badgeClass: 'bg-blue-50 text-blue-700 border border-blue-200 font-extrabold shadow-2xs',
+      pillColor: 'text-blue-700 bg-blue-100',
+      company: item?.company && item.company !== 'Valued Partner' ? item.company : (item?.company || 'Special Invitee')
+    };
+  }
+
+  if (amount === 0 || item?.isFree || paymentMethod.includes('FREE') || notes.includes('FREE') || notes.includes('COMPLIMENTARY')) {
+    return {
+      category: 'FREE',
+      label: 'Free Ticket',
+      code: item?.code || 'FREE',
+      badgeClass: 'bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold',
+      pillColor: 'text-emerald-700 bg-emerald-100',
+      company: item?.company || '-'
+    };
+  }
+
+  return {
+    category: 'PAID',
+    label: 'Standard Pass',
+    code: 'PAID',
+    badgeClass: 'bg-slate-100 text-slate-700 border border-slate-200 font-semibold',
+    pillColor: 'text-slate-700 bg-slate-100',
+    company: item?.company || '-'
+  };
+}
 
 // Helper functions to safely extract list and count regardless of backend response shape
 function extractBookingsList(res: any): any[] {
@@ -127,6 +199,7 @@ export default function AdminSingAlong() {
   const [status, setStatus] = useState('');
   const [eventId, setEventId] = useState('');
   const [dateFilter, setDateFilter] = useState(''); // YYYY-MM-DD
+  const [passFilter, setPassFilter] = useState<'ALL' | 'SPONSOR' | 'PROMO' | 'FREE' | 'PAID'>('ALL');
 
   // Modals
   const [viewingItem, setViewingItem] = useState<any>(null);
@@ -139,6 +212,45 @@ export default function AdminSingAlong() {
   const [isVerifying, setIsVerifying] = useState(false);
   const [verifiedTicket, setVerifiedTicket] = useState<any>(null);
   const [isCheckingIn, setIsCheckingIn] = useState(false);
+  const [sendingEmailId, setSendingEmailId] = useState<string | null>(null);
+
+  const handleSendTicketEmail = async (item: any, overrideEmail?: string) => {
+    const bookingId = item?.bookingId || item?._id;
+    const email = (overrideEmail || item?.email || '').trim();
+    if (!bookingId) {
+      toast.error('Missing booking reference.');
+      return;
+    }
+    if (!email) {
+      toast.error('Attendee does not have an email address recorded.');
+      return;
+    }
+
+    try {
+      setSendingEmailId(bookingId);
+      const res = await sendSingAlongTicketEmail(bookingId, email);
+      if (res?.success || res?.status === 200 || res?.data?.success) {
+        toast.success(`🎟️ Ticket pass email sent successfully to ${email}!`);
+        setBookings((prev) =>
+          prev.map((b) =>
+            b.bookingId === bookingId || b._id === bookingId
+              ? { ...b, emailSent: true, emailSentAt: new Date().toISOString() }
+              : b
+          )
+        );
+        if (viewingItem && (viewingItem.bookingId === bookingId || viewingItem._id === bookingId)) {
+          setViewingItem((prev: any) => ({ ...prev, emailSent: true }));
+        }
+      } else {
+        toast.error(res?.message || 'Failed to dispatch ticket email.');
+      }
+    } catch (err: any) {
+      toast.error(err?.message || 'Could not send ticket email.');
+    } finally {
+      setSendingEmailId(null);
+    }
+  };
+
 
   // ─── Fetch Stats ─────────────────────────────────────────────────────────────
   const loadStats = useCallback(async () => {
@@ -172,9 +284,23 @@ export default function AdminSingAlong() {
       if (status) params.status = status;
       if (eventId) params.eventId = eventId;
       if (dateFilter) params.date = dateFilter;
+      if (passFilter && passFilter !== 'ALL') params.passFilter = passFilter;
 
       const res = await getSingAlongBookings(params);
-      const listData = extractBookingsList(res);
+      let listData = extractBookingsList(res);
+
+      // Seamlessly merge locally generated sponsor & promo passes (if offline or just created)
+      try {
+        const cached = JSON.parse(localStorage.getItem('wegrow_sponsor_bookings') || '[]');
+        if (Array.isArray(cached) && cached.length > 0) {
+          const serverIds = new Set(listData.map((b: any) => b.bookingId || b._id));
+          const toAdd = cached.filter((c: any) => c?.bookingId && !serverIds.has(c.bookingId));
+          listData = [...toAdd, ...listData];
+        }
+      } catch (err) {
+        console.warn("Could not load local sponsor cache:", err);
+      }
+
       setBookings(listData);
 
       const total = extractTotalCount(res, listData.length);
@@ -188,21 +314,56 @@ export default function AdminSingAlong() {
       }
 
       // Extract stats from /sing-along API response
-      const resData = res?.data || {};
-      const summary = resData?.summary || res?.summary || {};
+      const resData = Array.isArray(res?.data) ? {} : (res?.data || {});
+      const summary = res?.summary || resData?.summary || {};
 
-      const confirmedCount = resData.confirmedCount ?? summary.confirmedCount ?? resData.totalConfirmed ?? summary.totalConfirmed;
-      const totalTickets = resData.totalTickets ?? summary.totalTickets;
-      const totalRevenueFormatted = resData.totalRevenueFormatted || summary.totalRevenueFormatted || (resData.totalRevenue != null ? rupee(resData.totalRevenue) : (summary.totalRevenue != null ? rupee(summary.totalRevenue) : undefined));
-      const totalRevenue = resData.totalRevenue ?? summary.totalRevenue;
-      const attendedCount = resData.attendedCount ?? summary.attendedCount ?? resData.checkedInCount ?? summary.checkedInCount;
+      const confirmedFromList = listData.filter(
+        (b: any) => b.status === 'CONFIRMED' || b.status === 'ATTENDED' || b.paymentStatus === 'SUCCESS'
+      ).length;
+
+      const confirmedCount =
+        res?.confirmedCount ??
+        res?.totalConfirmed ??
+        summary?.confirmedCount ??
+        summary?.totalConfirmed ??
+        resData?.confirmedCount ??
+        resData?.totalConfirmed;
+
+      const totalTickets =
+        res?.totalTickets ??
+        summary?.totalTickets ??
+        resData?.totalTickets;
+
+      const totalRevenueFormatted =
+        res?.totalRevenueFormatted ||
+        summary?.totalRevenueFormatted ||
+        resData?.totalRevenueFormatted ||
+        (res?.totalRevenue != null
+          ? rupee(res.totalRevenue)
+          : summary?.totalRevenue != null
+          ? rupee(summary.totalRevenue)
+          : undefined);
+
+      const totalRevenue =
+        res?.totalRevenue ??
+        summary?.totalRevenue ??
+        resData?.totalRevenue;
+
+      const attendedCount =
+        res?.attendedCount ??
+        summary?.attendedCount ??
+        res?.checkedInCount ??
+        summary?.checkedInCount ??
+        resData?.attendedCount ??
+        resData?.checkedInCount;
+
       const attendedFromList = listData.filter((b: any) => b.attended || b.status === 'ATTENDED').length;
 
       setStats((prev: any) => ({
         ...prev,
         ...resData,
         ...summary,
-        confirmedCount: confirmedCount !== undefined ? confirmedCount : prev?.confirmedCount,
+        confirmedCount: confirmedCount !== undefined ? confirmedCount : (prev?.confirmedCount ?? confirmedFromList),
         totalTickets: totalTickets !== undefined ? totalTickets : prev?.totalTickets,
         totalRevenueFormatted: totalRevenueFormatted || prev?.totalRevenueFormatted,
         totalRevenue: totalRevenue !== undefined ? totalRevenue : prev?.totalRevenue,
@@ -215,7 +376,7 @@ export default function AdminSingAlong() {
       setLoading(false);
       setStatsLoading(false);
     }
-  }, [page, limit, search, status, eventId, dateFilter]);
+  }, [page, limit, search, status, eventId, dateFilter, passFilter]);
 
   useEffect(() => {
     loadStats();
@@ -319,6 +480,25 @@ export default function AdminSingAlong() {
     }
   };
 
+  // Derived filtered bookings & counts based on passFilter
+  const filteredBookings = bookings.filter((item) => {
+    if (passFilter === 'ALL') return true;
+    const classification = getPassClassification(item);
+    if (passFilter === 'SPONSOR') return classification.category === 'SPONSOR';
+    if (passFilter === 'PROMO') return classification.category === 'PROMO';
+    if (passFilter === 'FREE') return classification.category === 'FREE' || classification.category === 'SPONSOR' || classification.category === 'PROMO';
+    if (passFilter === 'PAID') return classification.category === 'PAID';
+    return true;
+  });
+
+  const sponsorCount = bookings.filter(b => getPassClassification(b).category === 'SPONSOR').length;
+  const promoCount = bookings.filter(b => getPassClassification(b).category === 'PROMO').length;
+  const freeCount = bookings.filter(b => {
+    const cat = getPassClassification(b).category;
+    return cat === 'FREE' || cat === 'SPONSOR' || cat === 'PROMO';
+  }).length;
+  const paidCount = bookings.filter(b => getPassClassification(b).category === 'PAID').length;
+
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden font-sans">
       {/* Admin Sidebar */}
@@ -380,17 +560,19 @@ export default function AdminSingAlong() {
 
         {/* Dashboard Content Container */}
         <main className="p-4 flex-1 min-h-0 flex flex-col gap-3 overflow-hidden">
-          {/* ─── Metric Cards ─────────────────────────────────────────────────── */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 shrink-0">
+          {/* ─── Metric Cards (5 Columns with Sponsors & Free Highlight) ─────────────────── */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 shrink-0">
 
-            {/* Total Bookings */}
+            {/* Confirmed Orders */}
             <div className="bg-white rounded-xl border border-slate-200 p-3.5 px-4 shadow-xs flex items-center justify-between">
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">Total Bookings</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">Confirmed Orders</span>
                 <div className="text-xl font-black text-slate-900 leading-tight">
-                  {statsLoading && !stats ? '...' : (stats?.confirmedCount ?? stats?.summary?.confirmedCount ?? stats?.totalConfirmed ?? 0)}
+                  {statsLoading && !stats && loading
+                    ? '...'
+                    : (stats?.confirmedCount ?? stats?.totalConfirmed ?? bookings.filter((b: any) => b.status === 'CONFIRMED' || b.status === 'ATTENDED').length)}
                 </div>
-                <span className="text-[10px] text-slate-500 font-medium">Unique booking orders</span>
+                <span className="text-[10px] text-emerald-600 font-semibold">Confirmed bookings</span>
               </div>
               <div className="w-10 h-10 rounded-xl bg-orange-50 text-[#ff6a00] flex items-center justify-center">
                 <Ticket className="w-5 h-5" />
@@ -400,14 +582,30 @@ export default function AdminSingAlong() {
             {/* Total Tickets Sold */}
             <div className="bg-white rounded-xl border border-slate-200 p-3.5 px-4 shadow-xs flex items-center justify-between">
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">Tickets Sold</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">Tickets Issued</span>
                 <div className="text-xl font-black text-slate-900 leading-tight">
-                  {statsLoading && !stats ? '...' : (stats?.totalTickets ?? stats?.summary?.totalTickets ?? 0)}
+                  {statsLoading && !stats ? '...' : (stats?.totalTickets ?? stats?.summary?.totalTickets ?? bookings.length)}
                 </div>
                 <span className="text-[10px] text-emerald-600 font-semibold">Attendees Registered</span>
               </div>
               <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
                 <Users className="w-5 h-5" />
+              </div>
+            </div>
+
+            {/* Sponsors & Promo Free Passes */}
+            <div className="bg-white rounded-xl border border-amber-200/80 bg-gradient-to-br from-amber-50/40 to-orange-50/20 p-3.5 px-4 shadow-xs flex items-center justify-between">
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800 block mb-0.5">Sponsors &amp; Free</span>
+                <div className="text-xl font-black text-amber-900 leading-tight">
+                  {sponsorCount + promoCount} <span className="text-xs font-semibold text-slate-500">({freeCount} Free)</span>
+                </div>
+                <span className="text-[10px] text-amber-700 font-semibold">
+                  {sponsorCount} VIP • {promoCount} Promo
+                </span>
+              </div>
+              <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center">
+                <Award className="w-5 h-5" />
               </div>
             </div>
 
@@ -442,8 +640,6 @@ export default function AdminSingAlong() {
             </div>
           </div>
 
-
-
           {/* ─── Search & Filters Card ────────────────────────────────────────── */}
           <div className="bg-white rounded-xl border border-slate-200 p-3 px-4 shadow-xs shrink-0">
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
@@ -454,14 +650,29 @@ export default function AdminSingAlong() {
                   type="text"
                   value={search}
                   onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-                  placeholder="Search by Name, Phone, Booking ID (SA26-...), or UTR..."
+                  placeholder="Search by Name, Phone, Booking ID (SA26-...), Sponsor, or UTR..."
                   className="w-full h-9 pl-10 pr-4 rounded-xl border border-slate-200 text-xs font-medium focus:border-[#ff6a00] focus:ring-2 focus:ring-[#ff6a00]/20 outline-none transition-all"
                 />
               </div>
 
-              {/* Status Filter + Date Filter + Limit */}
+              {/* Status Filter + Pass Filter + Date Filter + Limit */}
               <div className="flex items-center gap-2 flex-wrap">
                 <Filter className="w-4 h-4 text-slate-400 flex-shrink-0" />
+
+                {/* Pass Category / Sponsor Filter Dropdown */}
+                <select
+                  value={passFilter}
+                  onChange={(e) => { setPassFilter(e.target.value as any); setPage(1); }}
+                  className="h-9 px-3 rounded-xl border border-amber-300 bg-amber-50/40 text-xs font-bold text-amber-900 focus:border-[#ff6a00] outline-none cursor-pointer"
+                >
+                  <option value="ALL">All Passes</option>
+                  <option value="SPONSOR">⭐ Sponsor Passes (SA26_SP01)</option>
+                  <option value="PROMO">✨ Promo Passes (SA26_PO01)</option>
+                  <option value="FREE">🎁 Free Tickets (₹0)</option>
+                  <option value="PAID">💳 Paid Passes</option>
+                </select>
+
+                {/* Status Filter */}
                 <select
                   value={status}
                   onChange={(e) => { setStatus(e.target.value); setPage(1); }}
@@ -473,7 +684,6 @@ export default function AdminSingAlong() {
                   <option value="ATTENDED">ATTENDED</option>
                   <option value="CANCELLED">CANCELLED</option>
                 </select>
-
 
                 {/* Limit */}
                 <select
@@ -489,16 +699,109 @@ export default function AdminSingAlong() {
               </div>
             </div>
 
+            {/* Quick Filter Pills Row (Sponsors, Promo, Free, Paid) */}
+            <div className="mt-2.5 pt-2.5 border-t border-slate-100 flex items-center justify-between gap-2 flex-wrap">
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5">
+                <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mr-1 hidden sm:inline">
+                  Quick Filter:
+                </span>
+
+                <button
+                  type="button"
+                  onClick={() => { setPassFilter('ALL'); setPage(1); }}
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
+                    passFilter === 'ALL'
+                      ? 'bg-slate-900 text-white shadow-xs'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  <span>All Passes</span>
+                  <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-white/20">{totalCount || bookings.length}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => { setPassFilter('SPONSOR'); setPage(1); }}
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
+                    passFilter === 'SPONSOR'
+                      ? 'bg-amber-500 text-slate-950 font-black shadow-xs'
+                      : 'bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100'
+                  }`}
+                >
+                  <Award className="w-3.5 h-3.5 text-amber-700" />
+                  <span>Sponsors (SA26_SP01)</span>
+                  <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-200 font-black text-amber-950">{sponsorCount}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => { setPassFilter('PROMO'); setPage(1); }}
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
+                    passFilter === 'PROMO'
+                      ? 'bg-blue-600 text-white shadow-xs'
+                      : 'bg-blue-50 text-blue-800 border border-blue-200 hover:bg-blue-100'
+                  }`}
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+                  <span>Promo (SA26_PO01)</span>
+                  <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-blue-200 text-blue-900 font-bold">{promoCount}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => { setPassFilter('FREE'); setPage(1); }}
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
+                    passFilter === 'FREE'
+                      ? 'bg-emerald-600 text-white shadow-xs'
+                      : 'bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100'
+                  }`}
+                >
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Free Tickets (₹0)</span>
+                  <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-emerald-200 text-emerald-950 font-bold">{freeCount}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => { setPassFilter('PAID'); setPage(1); }}
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
+                    passFilter === 'PAID'
+                      ? 'bg-slate-700 text-white shadow-xs'
+                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  }`}
+                >
+                  <DollarSign className="w-3.5 h-3.5 text-slate-500" />
+                  <span>Paid Tickets</span>
+                  <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-200 text-slate-700 font-bold">{paidCount}</span>
+                </button>
+              </div>
+
+              {passFilter !== 'ALL' && (
+                <button
+                  type="button"
+                  onClick={() => setPassFilter('ALL')}
+                  className="text-[11px] font-bold text-[#ff6a00] hover:underline cursor-pointer"
+                >
+                  Reset Filter ✕
+                </button>
+              )}
+            </div>
+
             {/* Active filter summary + Export hint */}
-            {(status || dateFilter) && (
-              <div className="mt-2 flex items-center gap-3 flex-wrap">
-                <span className="text-[11px] text-slate-500">
+            {(status || dateFilter || passFilter !== 'ALL') && (
+              <div className="mt-2 flex items-center gap-3 flex-wrap text-[11px]">
+                <span className="text-slate-500">
                   Active filters:
+                  {passFilter !== 'ALL' && (
+                    <span className="ml-1 px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 font-bold">
+                      Pass: {passFilter}
+                    </span>
+                  )}
                   {status && <span className="ml-1 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold">{status}</span>}
                   {dateFilter && <span className="ml-1 px-2 py-0.5 rounded-full bg-orange-50 border border-orange-200 text-[#ff6a00] font-bold">📅 {dateFilter}</span>}
                 </span>
-                <span className="text-[11px] text-slate-400">
-                  💡 Export CSV will download only the filtered results
+                <span className="text-slate-400">
+                  Showing <b>{filteredBookings.length}</b> result{filteredBookings.length !== 1 ? 's' : ''}
                 </span>
               </div>
             )}
@@ -507,98 +810,157 @@ export default function AdminSingAlong() {
           {/* ─── Bookings Table ───────────────────────────────────────────────── */}
           <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden flex-1 min-h-0 flex flex-col">
             <div className="table-scrollbar flex-1 min-h-0 overflow-auto">
-              <table className="w-full text-left border-collapse text-xs min-w-[960px]">
+              <table className="w-full text-left border-collapse text-xs min-w-[1300px]">
+                <colgroup>
+                  <col style={{width:'110px'}} />
+                  <col style={{width:'160px'}} />
+                  <col style={{width:'180px'}} />
+                  <col style={{width:'110px'}} />
+                  <col style={{width:'64px'}} />
+                  <col style={{width:'90px'}} />
+                  <col style={{width:'160px'}} />
+                  <col style={{width:'140px'}} />
+                  <col style={{width:'110px'}} />
+                  <col style={{width:'64px'}} />
+                </colgroup>
                 <thead className="sticky top-0 z-10 bg-slate-50 border-b border-slate-200 shadow-2xs">
                   <tr className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider text-[10px]">
-                    <th className="py-3.5 px-4 bg-slate-50">Booking ID</th>
-                    <th className="py-3.5 px-4 bg-slate-50">Attendee</th>
-                    <th className="py-3.5 px-4 bg-slate-50">Contact</th>
-                    <th className="py-3.5 px-4 text-center bg-slate-50">Passes</th>
-                    <th className="py-3.5 px-4 text-right bg-slate-50">Amount</th>
-                    <th className="py-3.5 px-4 bg-slate-50">Payment / UTR</th>
-                    <th className="py-3.5 px-4 text-center bg-slate-50">Status</th>
-                    <th className="py-3.5 px-4 text-center bg-slate-50">Gate Check-in</th>
-                    <th className="py-3.5 px-4 text-right bg-slate-50">Actions</th>
+                    <th className="py-3 px-3 bg-slate-50 whitespace-nowrap">Booking ID</th>
+                    <th className="py-3 px-3 bg-slate-50 whitespace-nowrap">Attendee</th>
+                    {/* NEW COLUMN: Sponsors / Pass */}
+                    <th className="py-3 px-3 bg-slate-50 text-slate-700 font-black whitespace-nowrap">Sponsors / Pass</th>
+                    <th className="py-3 px-3 bg-slate-50 whitespace-nowrap">Contact</th>
+                    <th className="py-3 px-3 text-center bg-slate-50 whitespace-nowrap">Passes</th>
+                    <th className="py-3 px-3 text-right bg-slate-50 whitespace-nowrap">Amount</th>
+                    <th className="py-3 px-3 bg-slate-50 whitespace-nowrap">Payment / UTR</th>
+                    <th className="py-3 px-3 text-center bg-slate-50 whitespace-nowrap">Status</th>
+                    <th className="py-3 px-3 text-center bg-slate-50 whitespace-nowrap">Gate Check-in</th>
+                    <th className="py-3 px-3 text-center bg-slate-50 whitespace-nowrap">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
                   {loading ? (
                     <tr>
-                      <td colSpan={9} className="py-12 text-center text-slate-400">
+                      <td colSpan={10} className="py-12 text-center text-slate-400">
                         <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-[#ff6a00]" />
                         Loading bookings...
                       </td>
                     </tr>
-                  ) : bookings.length === 0 ? (
+                  ) : filteredBookings.length === 0 ? (
                     <tr>
-                      <td colSpan={9} className="py-12 text-center text-slate-400">
+                      <td colSpan={10} className="py-12 text-center text-slate-400">
                         <Ticket className="w-8 h-8 mx-auto mb-2 text-slate-300" />
-                        No ticket bookings found matching your criteria.
+                        No ticket bookings found matching "{passFilter !== 'ALL' ? passFilter : 'criteria'}".
+                        {passFilter !== 'ALL' && (
+                          <button
+                            type="button"
+                            onClick={() => setPassFilter('ALL')}
+                            className="block mx-auto mt-2 text-xs text-[#ff6a00] font-bold hover:underline cursor-pointer"
+                          >
+                            Show All Passes
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ) : (
-                    bookings.map((item) => {
+                    filteredBookings.map((item) => {
                       const isAttended = item.attended || item.status === 'ATTENDED' || item.status === 'USED';
                       const isConfirmed = item.status === 'CONFIRMED' || isAttended;
                       const bookingIdStr = item.bookingId || item.id || item._id;
+                      const passInfo = getPassClassification(item);
 
                       return (
                         <tr key={item._id || item.bookingId} className="hover:bg-slate-50/80 transition-colors">
                           {/* Booking ID */}
-                          <td className="py-3 px-4 font-mono font-bold text-slate-900">
-                            <span className="px-2 py-1 rounded-md bg-slate-100 text-[#ff6a00] border border-slate-200">
+                          <td className="py-2.5 px-3 font-mono font-bold text-slate-900">
+                            <span className="px-1.5 py-0.5 rounded-md bg-slate-100 text-[#ff6a00] border border-slate-200 whitespace-nowrap text-[10px]">
                               {item.bookingId || 'SA26-XXXX'}
                             </span>
                           </td>
 
                           {/* Attendee Name */}
-                          <td className="py-3 px-4">
-                            <span className="font-bold text-slate-900 block">{item.fullName}</span>
-                            {item.email && <span className="text-[10px] text-slate-400">{item.email}</span>}
+                          <td className="py-2.5 px-3">
+                            <span className="font-bold text-slate-900 block leading-tight">{item.fullName}</span>
+                            {item.email && <span className="text-[10px] text-slate-400 truncate block max-w-[150px]">{item.email}</span>}
+                          </td>
+
+                          {/* NEW COLUMN: Sponsors / Pass Type — compact single-line layout */}
+                          <td className="py-2.5 px-3">
+                            <div className="flex flex-col gap-0.5 items-start">
+                              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold whitespace-nowrap ${passInfo.badgeClass}`}>
+                                {passInfo.category === 'SPONSOR' ? (
+                                  <Award className="w-3 h-3 text-amber-700 shrink-0" />
+                                ) : passInfo.category === 'PROMO' ? (
+                                  <Sparkles className="w-3 h-3 text-blue-600 shrink-0" />
+                                ) : passInfo.category === 'FREE' ? (
+                                  <CheckCircle2 className="w-3 h-3 text-emerald-600 shrink-0" />
+                                ) : (
+                                  <Ticket className="w-3 h-3 text-slate-500 shrink-0" />
+                                )}
+                                <span>{passInfo.label}</span>
+                              </span>
+                              {passInfo.code !== 'PAID' && (
+                                <span className="font-mono text-[10px] font-semibold text-slate-400">
+                                  {passInfo.code}
+                                </span>
+                              )}
+                              {passInfo.company && passInfo.company !== '-' && (
+                                <span className="text-[10px] text-slate-500 truncate max-w-[155px] flex items-center gap-0.5" title={passInfo.company}>
+                                  <Building className="w-2.5 h-2.5 text-slate-400 shrink-0" />
+                                  <span className="truncate">{passInfo.company}</span>
+                                </span>
+                              )}
+                            </div>
                           </td>
 
                           {/* Phone */}
-                          <td className="py-3 px-4 text-slate-600 font-mono">
+                          <td className="py-2.5 px-3 text-slate-600 font-mono whitespace-nowrap">
                             {item.phone || '-'}
                           </td>
 
                           {/* Passes Count */}
-                          <td className="py-3 px-4 text-center">
+                          <td className="py-2.5 px-3 text-center">
                             <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-orange-100 text-[#ff6a00] font-black text-xs">
                               {item.ticketQty || 1}
                             </span>
                           </td>
 
-                          {/* Amount */}
-                          <td className="py-3 px-4 text-right font-bold text-slate-900">
-                            {rupee(item.totalAmount || item.amount || (item.ticketQty || 1) * 254)}
+                          {/* Amount - always use real DB value */}
+                          <td className="py-2.5 px-3 text-right font-bold text-slate-900 whitespace-nowrap">
+                            {(() => {
+                              const amt = item.totalAmount ?? item.amount ?? 0;
+                              if (Number(amt) === 0) {
+                                return <span className="text-emerald-600 font-extrabold">FREE <span className="text-[10px] font-bold">&#8377;0</span></span>;
+                              }
+                              return <span>{rupee(amt)}</span>;
+                            })()}
                           </td>
 
                           {/* Payment / UTR */}
-                          <td className="py-3 px-4">
-                            <div className="flex items-center gap-1.5">
-                              <span className="font-mono text-[11px] text-slate-600 truncate max-w-[120px]" title={item.utr}>
-                                {item.utr || 'Direct Online'}
+                          <td className="py-2.5 px-3">
+                            <div className="flex items-center gap-1">
+                              <span className="font-mono text-[11px] text-slate-600 truncate max-w-[110px]" title={item.utr}>
+                                {item.utr || (passInfo.category !== 'PAID' ? 'Complimentary Pass' : 'Direct Online')}
                               </span>
                               {item.utr && (
                                 <button
                                   type="button"
                                   onClick={() => handleCopy(item.utr, item._id)}
-                                  className="text-slate-400 hover:text-slate-700 cursor-pointer"
+                                  className="text-slate-400 hover:text-slate-700 cursor-pointer shrink-0"
                                   title="Copy UTR"
                                 >
                                   {copiedUtr === item._id ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
                                 </button>
                               )}
                             </div>
-                            <span className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">
-                              {item.paymentMethod || 'GPay / UPI'}
+                            <span className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block whitespace-nowrap">
+                              {item.paymentMethod || (passInfo.category === 'SPONSOR' ? 'SPONSOR CODE' : passInfo.category === 'PROMO' ? 'PROMO CODE' : 'GPay / UPI')}
                             </span>
                           </td>
 
                           {/* Status */}
-                          <td className="py-3 px-4 text-center">
-                            <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${
+                          <td className="py-2.5 px-3 text-center">
+                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold whitespace-nowrap ${
                               isConfirmed
                                 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                                 : 'bg-amber-50 text-amber-700 border border-amber-200'
@@ -609,9 +971,9 @@ export default function AdminSingAlong() {
                           </td>
 
                           {/* Gate Check-in Status & Button */}
-                          <td className="py-3 px-4 text-center">
+                          <td className="py-2.5 px-3 text-center">
                             {isAttended ? (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 font-bold text-[10px] border border-purple-200">
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 font-bold text-[10px] border border-purple-200 whitespace-nowrap">
                                 <Check className="w-3 h-3 text-purple-600" />
                                 Checked In
                               </span>
@@ -619,7 +981,7 @@ export default function AdminSingAlong() {
                               <button
                                 type="button"
                                 onClick={() => handleQuickCheckin(item)}
-                                className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-purple-50 hover:text-purple-700 border border-slate-300 text-[10px] font-bold text-slate-700 transition-colors cursor-pointer"
+                                className="px-2 py-1 rounded-lg bg-slate-100 hover:bg-purple-50 hover:text-purple-700 border border-slate-300 text-[10px] font-bold text-slate-700 transition-colors cursor-pointer whitespace-nowrap"
                                 title="Click to mark attendee as Checked In at gate"
                               >
                                 Mark Check-In
@@ -628,7 +990,7 @@ export default function AdminSingAlong() {
                           </td>
 
                           {/* Actions */}
-                          <td className="py-3 px-4 text-right">
+                          <td className="py-2.5 px-3 text-center">
                             <button
                               type="button"
                               onClick={() => setViewingItem(item)}
@@ -704,6 +1066,25 @@ export default function AdminSingAlong() {
                 <span className="text-slate-500">Attendee Name</span>
                 <strong className="text-slate-900">{viewingItem.fullName}</strong>
               </div>
+              {(() => {
+                const pInfo = getPassClassification(viewingItem);
+                return (
+                  <>
+                    <div className="flex justify-between border-b border-slate-200 pb-2 items-center">
+                      <span className="text-slate-500">Sponsor / Pass Type</span>
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${pInfo.badgeClass}`}>
+                        {pInfo.label} ({pInfo.code})
+                      </span>
+                    </div>
+                    {viewingItem.company && (
+                      <div className="flex justify-between border-b border-slate-200 pb-2">
+                        <span className="text-slate-500">Sponsor Company</span>
+                        <strong className="text-slate-900 font-bold">{viewingItem.company}</strong>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
               <div className="flex justify-between border-b border-slate-200 pb-2">
                 <span className="text-slate-500">Phone Number</span>
                 <strong className="text-slate-900 font-mono">{viewingItem.phone}</strong>
