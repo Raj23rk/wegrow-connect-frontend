@@ -13,7 +13,7 @@ export default function WorkshopSection({
   return (
     <section 
       ref={eventsTargetRef}
-      id="partners" 
+      id="programmes" 
       style={workshopStyle} 
       className="relative min-h-screen pt-2 pb-20 transition-all duration-300 ease-out transform-gpu"
     >
@@ -21,7 +21,7 @@ export default function WorkshopSection({
 
         {/* HEADER - NO FADE OUT */}
         <div 
-          id="events" 
+          id="workshops-header" 
           className="text-center mb-10 pt-2"
         >
           <span className="text-xs uppercase font-black tracking-widest block mb-2" style={{ color: theme.orange }}>

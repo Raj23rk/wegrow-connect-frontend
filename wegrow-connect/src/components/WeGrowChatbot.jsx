@@ -1,8 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-<<<<<<< HEAD
-=======
 import { useLocation } from 'react-router-dom';
->>>>>>> 5a9e0b2569bb6cec86ced798e3374894cc1ce801
 
 // =========================================================================
 // WEGROW SKILL CAMPUS & B-SCHOOL COMPREHENSIVE KNOWLEDGE BASE
@@ -113,19 +110,11 @@ const KNOWLEDGE_BASE = [
   },
   {
     id: 'events-workshops',
-<<<<<<< HEAD
-    keywords: ['events', 'event', 'workshop', 'workshops', 'seminar', 'webinar', 'sing along', 'competition'],
-    title: 'Events, Workshops & Cultural Meets',
-    response: `🎉 **Events & Industry Workshops**:\n\n• **Expert Masterclasses**: Regular hands-on weekend workshops covering Full Stack, AI Tools, Digital Ads, and Financial Planning.\n• **Founder Roundtables**: Monthly closed-door meetups for startup founders.\n• **Cultural & Community Celebrations**: Networking festivals including Sing-Along Musical Nights and student hackathons.`,
-    quickActions: [
-      { label: 'Upcoming Workshops', query: 'What courses do you offer?' },
-=======
     keywords: ['events', 'event', 'workshop', 'workshops', 'seminar', 'webinar', 'sing along', 'competition', 'sponsors'],
     title: 'Events, Workshops & Cultural Meets',
     response: `🎉 **Events & Industry Workshops**:\n\n• **Sing Along Live Concert**: Mega music festival at Arasan Turf, Sivakasi (Sun, Sep 27, 2026) with VIP & Sponsor passes!\n• **Expert Masterclasses**: Hands-on weekend workshops covering Full Stack, AI Tools, Digital Ads, and Financial Planning.\n• **Founder Roundtables**: Monthly closed-door meetups for startup founders.`,
     quickActions: [
       { label: 'Sponsor Passes Portal', link: '/sing-along/sponsors' },
->>>>>>> 5a9e0b2569bb6cec86ced798e3374894cc1ce801
       { label: 'Chat on WhatsApp', whatsapp: true }
     ]
   }
@@ -141,9 +130,6 @@ const POPULAR_QUESTIONS = [
 ];
 
 export default function WeGrowChatbot() {
-<<<<<<< HEAD
-  const [isOpen, setIsOpen] = useState(false);
-=======
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -154,7 +140,6 @@ export default function WeGrowChatbot() {
     location.pathname.includes('sponsors');
 
   if (isHidden) return null;
->>>>>>> 5a9e0b2569bb6cec86ced798e3374894cc1ce801
   const [messages, setMessages] = useState([
     {
       id: 'welcome-msg',
@@ -323,10 +308,7 @@ export default function WeGrowChatbot() {
         return <div key={idx} className="h-2" />;
       }
 
-<<<<<<< HEAD
       // Replace **text** with <strong>
-=======
->>>>>>> 5a9e0b2569bb6cec86ced798e3374894cc1ce801
       const parts = line.split(/(\*\*.*?\*\*|\*.*?\*)/g);
       const formattedParts = parts.map((part, pIdx) => {
         if (part.startsWith('**') && part.endsWith('**')) {

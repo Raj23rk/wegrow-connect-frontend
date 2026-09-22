@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -275,168 +274,6 @@ html, body {
   background: #94a3b8 !important;
 }
 
-=======
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-:root {
-  --wegrow-primary: #104288;
-  --wegrow-primary-hover: #0a2e61;
-  --wegrow-orange: #f3a812;
-  --wegrow-orange-hover: #d9920a;
-  --wegrow-text-main: #1e293b;
-  --wegrow-text-muted: #50637f;
-  --wegrow-text-bright: #0f172a;
-  --wegrow-card-bg: rgba(255, 255, 255, 0.90);
-  --wegrow-card-border: rgba(16, 66, 136, 0.15);
-  --wegrow-bg-dark: #f4f7fb;
-  --wegrow-bg-overlay: linear-gradient(90deg, rgba(244,247,251,0.92) 0%, rgba(235,241,250,0.85) 50%, rgba(244,247,251,0.70) 100%);
-  --wegrow-hero-overlay: linear-gradient(to bottom, rgba(242,244,248,0.78) 0%, rgba(242,244,248,0.65) 50%, rgba(242,244,248,0.82) 100%);
-  --wegrow-dropdown-bg: rgba(255, 255, 255, 0.98);
-}
-
-html.dark {
-  --wegrow-primary: #60a5fa;
-  --wegrow-primary-hover: #93c5fd;
-  --wegrow-orange: #f3a812;
-  --wegrow-orange-hover: #fbbf24;
-  --wegrow-text-main: #f8fafc;
-  --wegrow-text-muted: #cbd5e1;
-  --wegrow-text-bright: #ffffff;
-  --wegrow-card-bg: rgba(15, 23, 42, 0.85);
-  --wegrow-card-border: rgba(148, 163, 184, 0.20);
-  --wegrow-bg-dark: #061325;
-  --wegrow-bg-overlay: linear-gradient(180deg, rgba(6, 19, 37, 0.96) 0%, rgba(4, 12, 24, 0.98) 100%);
-  --wegrow-hero-overlay: linear-gradient(to bottom, rgba(6,19,37,0.88) 0%, rgba(6,19,37,0.78) 50%, rgba(6,19,37,0.94) 100%);
-  --wegrow-dropdown-bg: rgba(15, 23, 42, 0.98);
-}
-
-@keyframes floatArrow {
-  0%, 100% { transform: translateY(0); opacity: 0.8; }
-  50% { transform: translateY(10px); opacity: 1; }
-}
-
-.bounce-arrow { 
-  animation: floatArrow 1.8s infinite ease-in-out; 
-}
-
-.scroll-container {
-  height: 100vh;
-  overflow-y: auto;
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0px, transparent 40px, black 110px);
-  mask-image: linear-gradient(to bottom, transparent 0px, transparent 40px, black 110px);
-}
-
-.scroll-container::-webkit-scrollbar { width: 8px; }
-.scroll-container::-webkit-scrollbar-track { background: transparent; }
-.scroll-container::-webkit-scrollbar-thumb { background: rgba(0, 77, 64, 0.3); border-radius: 10px; }
-
-.dropdown:hover .dropdown-menu {
-  display: block;
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.dropdown-menu {
-  display: none;
-  opacity: 0;
-  transform: translateY(10px);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* Dynamic Profile Image Smooth Fade Animation */
-@keyframes fadeIn {
-  from { opacity: 0.6; transform: scale(0.99); }
-  to { opacity: 1; transform: scale(1); }
-}
-
-.animate-fadeIn {
-  animation: fadeIn 0.25s ease-out forwards;
-}
-
-/* Hide browser default scrollbars completely */
-::-webkit-scrollbar {
-  display: none !important;
-  width: 0px !important;
-  height: 0px !important;
-}
-
-html, body {
-  overflow-x: hidden;
-  overflow-y: auto;
-  min-height: 100vh;
-  scroll-behavior: smooth;
-}
-
-.page-scroll {
-  height: 100vh;
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-}
-
-.page-scroll::-webkit-scrollbar {
-  display: block !important;
-  width: 8px !important;
-}
-
-.page-scroll::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.page-scroll::-webkit-scrollbar-thumb {
-  background: rgba(16, 66, 136, 0.3);
-  border-radius: 10px;
-}
-
-/* ── Sidebar Logo ── */
-.sidebar .logo {
-  margin-bottom: 2.5rem;
-  padding: 0 0.5rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.sidebar .logo img {
-  max-width: 100%;
-  height: auto;
-  background: #fff;
-  padding: 0.5rem;
-  border-radius: 0.75rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
-              0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  transition: transform 0.3s ease;
-}
-
-.sidebar .logo img:hover {
-  transform: scale(1.02);
-}
-
-/* ── Custom Table Scrollbar ── */
-.table-scrollbar {
-  overflow: auto;
-  scrollbar-width: thin;
-  scrollbar-color: #cbd5e1 #f1f5f9;
-}
-.table-scrollbar::-webkit-scrollbar {
-  display: block !important;
-  width: 7px !important;
-  height: 7px !important;
-}
-.table-scrollbar::-webkit-scrollbar-track {
-  background: #f8fafc !important;
-  border-radius: 6px;
-}
-.table-scrollbar::-webkit-scrollbar-thumb {
-  background: #cbd5e1 !important;
-  border-radius: 6px;
-}
-.table-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8 !important;
-}
-
 /* ── Sponsors Marquee Animation (Right to Left Continuous) ── */
 @keyframes marqueeSponsors {
   0% {
@@ -453,4 +290,135 @@ html, body {
   animation: marqueeSponsors 24s linear infinite;
 }
 
->>>>>>> 5a9e0b2569bb6cec86ced798e3374894cc1ce801
+/* ── Who Can Join (Audience) Section ── */
+.audience {
+  position: relative;
+  width: 100%;
+}
+
+.audience .wrap {
+  width: 100%;
+}
+
+.section-head.center {
+  text-align: center;
+}
+
+.eyebrow.on-light {
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.aud-grid {
+  display: grid;
+}
+
+.aud-card {
+  position: relative;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.aud-icon svg.icon {
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+.aud-cta .btn-primary {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ── What is WeGrow, Philosophy & Why WeGrow ── */
+.what, .philosophy, .why {
+  position: relative;
+  width: 100%;
+}
+
+.lede {
+  line-height: 1.65;
+}
+
+.loop {
+  display: grid;
+}
+
+.loop-item {
+  position: relative;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.philosophy-words {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+}
+
+.pw {
+  transition: all 0.3s ease;
+}
+
+.pw-accent {
+  color: var(--brass, #f3a812);
+}
+
+.path-card {
+  position: relative;
+}
+
+.path-node svg.icon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+/* ── Impact Section ── */
+.impact {
+  position: relative;
+  width: 100%;
+}
+
+.impact-grid {
+  display: grid;
+}
+
+.impact-item {
+  position: relative;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.impact-num {
+  font-family: var(--serif);
+  font-weight: 800;
+  display: block;
+}
+
+.impact-label {
+  display: block;
+  font-weight: 700;
+}
+
+/* ── Final CTA Section ── */
+.final-cta {
+  position: relative;
+  text-align: center;
+}
+
+.fc-eyebrow {
+  letter-spacing: 0.2em;
+}
+
+.fc-title {
+  line-height: 1.1;
+}
+
+.fc-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fc-links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

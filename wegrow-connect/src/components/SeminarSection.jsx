@@ -13,7 +13,7 @@ export default function SeminarSection({ seminarTargetRef, seminarStyle }) {
   return (
     <section 
       ref={seminarTargetRef} 
-      id="seminars" 
+      id="events" 
       style={seminarStyle}
       className="relative pt-2 pb-16 transition-all duration-300 ease-out transform-gpu"
     >

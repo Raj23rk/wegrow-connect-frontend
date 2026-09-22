@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export default function Footer({
   scrollToHero,
+  scrollToWhoCanJoin,
   scrollToEvents,
   scrollToCourses,
   scrollToMissionVision,
@@ -15,6 +17,7 @@ export default function Footer({
   scrollToStories,
   scrollToContact
 }) {
+  const navigate = useNavigate();
   const [activeBranch, setActiveBranch] = useState('sivakasi');
 
   // BRANCH DATA
@@ -47,14 +50,15 @@ export default function Footer({
 
   const quickLinks = [
     { name: 'Home', action: scrollToHero },
+    { name: 'Who Can Join', action: scrollToWhoCanJoin },
     { name: 'Mission & Vision', action: scrollToMissionVision },
     { name: 'Featured Courses', action: scrollToCourses },
     { name: 'Campus Gallery', action: scrollToGallery },
+    { name: 'Business Consultancy', action: () => navigate('/consultancy') },
     { name: 'Events & Workshops', action: scrollToEvents },
     { name: 'Seminars & Talks', action: scrollToSeminars },
     { name: 'Industrial Visits', action: scrollToVisits },
     { name: 'Rewards & Credits', action: scrollToRewards },
-    { name: 'Mentors / Instructors', action: scrollToMentors },
     { name: 'Enterprise Training', action: scrollToEnterprices },
     { name: 'Success Stories', action: scrollToStories },
     { name: 'Contact & Support', action: scrollToContact }

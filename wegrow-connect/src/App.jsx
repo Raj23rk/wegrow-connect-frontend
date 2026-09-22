@@ -35,14 +35,16 @@ import WomensCommunity from './components/WomensCommunity';
 import StudentFoundersCommunity from './components/StudentFoundersCommunity';
 import BusinessFoundersCommunity from './components/BusinessFoundersCommunity';
 import WomensCommunityV1 from './components/WomensCommunityV1';
-import FloatingWhatsApp from './components/FloatingWhatsApp';
-import WeGrowChatbot from './components/WeGrowChatbot';
+import WhoCanJoinSection from './components/WhoCanJoinSection';
+import WhyWeGrowSection from './components/WhyWeGrowSection';
+import FinalCTASection from './components/FinalCTASection';
 
 // Lazy load Sing Along Page for ultra-fast initial paint
 const SingAlongBooking = lazy(() => import('./components/SingAlongBooking'));
 const SingAlongSponsorBooking = lazy(() => import('./components/SingAlongSponsorBooking'));
 const BusinessDependencyTest = lazy(() => import('./components/BusinessDependencyTest'));
 const BusinessConsultancy = lazy(() => import('./components/BusinessConsultancy'));
+const WhoCanJoinPage = lazy(() => import('./components/WhoCanJoinPage'));
 
 // Auth Context, Theme Context and Guard
 import { AuthProvider, ProtectedRoute } from './context/AuthContext';
@@ -117,6 +119,8 @@ function MainHomePage() {
   const [heroTransform, setHeroTransform] = useState({ opacity: 1, transform: 'scale(1) translateY(0%)' });
   
   // Section styles based on order: Hero -> EventSection -> MissionVision -> Courses -> Gallery -> Reward -> Resources -> Seminars -> Visit -> Workshops
+  const [whoCanJoinStyle, setWhoCanJoinStyle] = useState({ opacity: 1, transform: 'scale(1)' });
+  const [whyWeGrowStyle, setWhyWeGrowStyle] = useState({ opacity: 0, transform: 'scale(0.98)' });
   const [eventStyle, setEventStyle] = useState({ opacity: 0, transform: 'scale(0.98)' });
   const [missionVisionStyle, setMissionVisionStyle] = useState({ opacity: 0, transform: 'scale(0.98)' });
   const [coursesStyle, setCoursesStyle] = useState({ opacity: 0, transform: 'scale(0.98)' });
@@ -130,6 +134,7 @@ function MainHomePage() {
   const [mentorStyle, setMentorStyle] = useState({ opacity: 0, transform: 'scale(0.98)' });
   const [enterpricesStyle, setEnterpricesStyle] = useState({ opacity: 0, transform: 'scale(0.98)' });
   const [storiesStyle, setStoriesStyle] = useState({ opacity: 0, transform: 'scale(0.98)' });
+  const [ctaStyle, setCtaStyle] = useState({ opacity: 0, transform: 'scale(0.98)' });
   const [contactStyle, setContactStyle] = useState({ opacity: 0, transform: 'scale(0.98)' });
   const [imgOpacity, setImgOpacity] = useState(1);
 
@@ -138,6 +143,8 @@ function MainHomePage() {
   const scrollContainerRef = useRef(null);
   
   // Target refs in new correct order
+  const whoCanJoinTargetRef = useRef(null);
+  const whyWeGrowTargetRef = useRef(null);
   const eventTargetRef = useRef(null);
   const missionVisionTargetRef = useRef(null);
   const coursesTargetRef = useRef(null);
@@ -151,6 +158,7 @@ function MainHomePage() {
   const mentorTargetRef = useRef(null);
   const enterpricesTargetRef = useRef(null);
   const storiesTargetRef = useRef(null);
+  const ctaTargetRef = useRef(null);
   const contactTargetRef = useRef(null);
   const itemRefs = useRef([]);
 
@@ -160,8 +168,22 @@ function MainHomePage() {
     }
   };
 
+  const scrollToWhoCanJoin = () => {
+    if (whoCanJoinTargetRef.current && scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({
+        top: Math.max(whoCanJoinTargetRef.current.offsetTop - 30, 0),
+        behavior: 'smooth'
+      });
+    }
+  };
+
   const scrollToEventsMain = () => {
-    if (missionVisionTargetRef.current && scrollContainerRef.current) {
+    if (whoCanJoinTargetRef.current && scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({
+        top: Math.max(whoCanJoinTargetRef.current.offsetTop - 30, 0),
+        behavior: 'smooth'
+      });
+    } else if (missionVisionTargetRef.current && scrollContainerRef.current) {
       scrollContainerRef.current.scrollTo({
         top: Math.max(missionVisionTargetRef.current.offsetTop - 40, 0),
         behavior: 'smooth'
@@ -178,10 +200,19 @@ function MainHomePage() {
     }
   };
 
-  const scrollToCourses = () => {
-    if (galleryTargetRef.current && scrollContainerRef.current) {
+  const scrollToWhyWeGrow = () => {
+    if (whyWeGrowTargetRef.current && scrollContainerRef.current) {
       scrollContainerRef.current.scrollTo({
-        top: Math.max(galleryTargetRef.current.offsetTop - 40, 0),
+        top: Math.max(whyWeGrowTargetRef.current.offsetTop - 30, 0),
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  const scrollToCourses = () => {
+    if (eventsTargetRef.current && scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({
+        top: Math.max(eventsTargetRef.current.offsetTop - 40, 0),
         behavior: 'smooth'
       });
     }
@@ -234,9 +265,9 @@ function MainHomePage() {
   };
 
   const scrollToEvents = () => {
-    if (eventsTargetRef.current && scrollContainerRef.current) {
+    if (seminarTargetRef.current && scrollContainerRef.current) {
       scrollContainerRef.current.scrollTo({
-        top: Math.max(eventsTargetRef.current.offsetTop - 80, 0),
+        top: Math.max(seminarTargetRef.current.offsetTop - 40, 0),
         behavior: 'smooth'
       });
     }
@@ -264,6 +295,15 @@ function MainHomePage() {
     if (storiesTargetRef.current && scrollContainerRef.current) {
       scrollContainerRef.current.scrollTo({
         top: Math.max(storiesTargetRef.current.offsetTop - 80, 0),
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  const scrollToCta = () => {
+    if (ctaTargetRef.current && scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({
+        top: Math.max(ctaTargetRef.current.offsetTop - 80, 0),
         behavior: 'smooth'
       });
     }
@@ -304,7 +344,9 @@ function MainHomePage() {
       storiesTargetRef.current &&
       contactTargetRef.current
     ) {
+      const whoCanJoinTop = whoCanJoinTargetRef.current ? whoCanJoinTargetRef.current.getBoundingClientRect().top : 9999;
       const missionVisionTop = missionVisionTargetRef.current.getBoundingClientRect().top;
+      const whyWeGrowTop = whyWeGrowTargetRef.current ? whyWeGrowTargetRef.current.getBoundingClientRect().top : 9999;
       const galleryTop = galleryTargetRef.current.getBoundingClientRect().top;
       const rewardTop = rewardTargetRef.current.getBoundingClientRect().top;
       const resourceTop = resourceTargetRef.current.getBoundingClientRect().top;
@@ -314,14 +356,30 @@ function MainHomePage() {
       const mentorTop = mentorTargetRef.current.getBoundingClientRect().top;
       const enterpricesTop = enterpricesTargetRef.current.getBoundingClientRect().top;
       const storiesTop = storiesTargetRef.current.getBoundingClientRect().top;
+      const ctaTop = ctaTargetRef.current ? ctaTargetRef.current.getBoundingClientRect().top : 9999;
       const contactTop = contactTargetRef.current.getBoundingClientRect().top;
+
+      // 1. Who Can Join Animation
+      if (whoCanJoinTop <= windowHeight) {
+        const wcFadeIn = Math.min(Math.max((windowHeight - whoCanJoinTop) / (windowHeight * 0.4), 0), 1);
+        let wcFadeOut = 0;
+        if (missionVisionTop < windowHeight * 0.85) {
+          wcFadeOut = Math.min(Math.max((windowHeight * 0.85 - missionVisionTop) / (windowHeight * 0.5), 0), 1);
+        }
+        setWhoCanJoinStyle({
+          opacity: Math.max(wcFadeIn - wcFadeOut, 0),
+          transform: `scale(${0.98 + (0.02 * wcFadeIn) - (0.03 * wcFadeOut)})`
+        });
+      } else {
+        setWhoCanJoinStyle({ opacity: 0, transform: 'scale(0.98)' });
+      }
 
       // 2. Mission & Vision Animation
       if (missionVisionTop <= windowHeight) {
         const mvFadeIn = Math.min(Math.max((windowHeight - missionVisionTop) / (windowHeight * 0.4), 0), 1);
         let mvFadeOut = 0;
-        if (galleryTop < windowHeight * 0.85) {
-          mvFadeOut = Math.min(Math.max((windowHeight * 0.85 - galleryTop) / (windowHeight * 0.5), 0), 1);
+        if (whyWeGrowTop < windowHeight * 0.85) {
+          mvFadeOut = Math.min(Math.max((windowHeight * 0.85 - whyWeGrowTop) / (windowHeight * 0.5), 0), 1);
         }
         setMissionVisionStyle({
           opacity: Math.max(mvFadeIn - mvFadeOut, 0),
@@ -329,6 +387,21 @@ function MainHomePage() {
         });
       } else {
         setMissionVisionStyle({ opacity: 0, transform: 'scale(0.98)' });
+      }
+
+      // 3. Why WeGrow Animation
+      if (whyWeGrowTop <= windowHeight) {
+        const whyFadeIn = Math.min(Math.max((windowHeight - whyWeGrowTop) / (windowHeight * 0.4), 0), 1);
+        let whyFadeOut = 0;
+        if (galleryTop < windowHeight * 0.85) {
+          whyFadeOut = Math.min(Math.max((windowHeight * 0.85 - galleryTop) / (windowHeight * 0.5), 0), 1);
+        }
+        setWhyWeGrowStyle({
+          opacity: Math.max(whyFadeIn - whyFadeOut, 0),
+          transform: `scale(${0.98 + (0.02 * whyFadeIn) - (0.03 * whyFadeOut)})`
+        });
+      } else {
+        setWhyWeGrowStyle({ opacity: 0, transform: 'scale(0.98)' });
       }
 
       // 4. Gallery Animation
@@ -452,8 +525,8 @@ function MainHomePage() {
       if (storiesTop <= windowHeight) {
         const storiesFadeIn = Math.min(Math.max((windowHeight - storiesTop) / (windowHeight * 0.4), 0), 1);
         let storiesFadeOut = 0;
-        if (contactTop < windowHeight * 0.85) {
-          storiesFadeOut = Math.min(Math.max((windowHeight * 0.85 - contactTop) / (windowHeight * 0.5), 0), 1);
+        if (ctaTop < windowHeight * 0.85) {
+          storiesFadeOut = Math.min(Math.max((windowHeight * 0.85 - ctaTop) / (windowHeight * 0.5), 0), 1);
         }
         setStoriesStyle({
           opacity: Math.max(storiesFadeIn - storiesFadeOut, 0),
@@ -461,6 +534,20 @@ function MainHomePage() {
         });
       } else {
         setStoriesStyle({ opacity: 0, transform: 'scale(0.98)' });
+      }
+
+      if (ctaTop <= windowHeight) {
+        const ctaFadeIn = Math.min(Math.max((windowHeight - ctaTop) / (windowHeight * 0.4), 0), 1);
+        let ctaFadeOut = 0;
+        if (contactTop < windowHeight * 0.85) {
+          ctaFadeOut = Math.min(Math.max((windowHeight * 0.85 - contactTop) / (windowHeight * 0.5), 0), 1);
+        }
+        setCtaStyle({
+          opacity: Math.max(ctaFadeIn - ctaFadeOut, 0),
+          transform: `scale(${0.98 + (0.02 * ctaFadeIn) - (0.03 * ctaFadeOut)})`
+        });
+      } else {
+        setCtaStyle({ opacity: 0, transform: 'scale(0.98)' });
       }
 
       if (contactTop <= windowHeight) {
@@ -506,11 +593,21 @@ function MainHomePage() {
   }, [activeItem]);
 
   useEffect(() => {
-<<<<<<< HEAD
     // Initial scroll position calculation
-=======
->>>>>>> 5a9e0b2569bb6cec86ced798e3374894cc1ce801
     handleScroll();
+    if (window.location.hash === '#audience' || window.location.hash === '#who-can-join') {
+      setTimeout(scrollToWhoCanJoin, 350);
+    } else if (window.location.hash === '#why' || window.location.hash === '#what' || window.location.hash === '#why-wegrow') {
+      setTimeout(scrollToWhyWeGrow, 350);
+    } else if (window.location.hash === '#programmes' || window.location.hash === '#workshops') {
+      setTimeout(scrollToCourses, 350);
+    } else if (window.location.hash === '#events' || window.location.hash === '#seminars') {
+      setTimeout(scrollToEvents, 350);
+    } else if (window.location.hash === '#impact' || window.location.hash === '#mentors') {
+      setTimeout(scrollToMentors, 350);
+    } else if (window.location.hash === '#cta' || window.location.hash === '#final-cta') {
+      setTimeout(scrollToCta, 350);
+    }
   }, []);
 
   return (
@@ -541,9 +638,11 @@ function MainHomePage() {
 
       <Navbar 
         scrollToHero={scrollToHero}
-        scrollToEvents={scrollToEventsMain} 
+        scrollToWhoCanJoin={scrollToWhoCanJoin}
+        scrollToEvents={scrollToEvents} 
         scrollToCourses={scrollToCourses}
         scrollToMissionVision={scrollToMissionVision}
+        scrollToWhyWeGrow={scrollToWhyWeGrow}
         scrollToGallery={scrollToGallery}
         scrollToSeminars={scrollToSeminars} 
         scrollToVisits={scrollToVisits} 
@@ -561,18 +660,24 @@ function MainHomePage() {
         className="scroll-container relative z-20 w-full h-full overflow-y-auto pt-20 sm:pt-24 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
       >
         {/* 1. HERO SECTION */}
-        <Hero heroTransform={heroTransform} scrollToEvents={scrollToEventsMain} />
+        <Hero heroTransform={heroTransform} scrollToEvents={scrollToWhoCanJoin} />
         
+        {/* ============ WHO CAN JOIN ============ */}
+        <WhoCanJoinSection whoCanJoinTargetRef={whoCanJoinTargetRef} whoCanJoinStyle={whoCanJoinStyle} />
+
         {/* 2. EVENT SECTION (HIDDEN) */}
         {/* <EventSection eventTargetRef={eventTargetRef} eventStyle={eventStyle} /> */}
 
         {/* 3. MISSION & VISION SECTION */}
         <MissionVisionSection missionVisionTargetRef={missionVisionTargetRef} missionVisionStyle={missionVisionStyle} />
 
-        {/* 4. COURSES SECTION (HIDDEN) */}
+        {/* 4. WHAT IS WEGROW, PHILOSOPHY & WHY WEGROW SECTION */}
+        <WhyWeGrowSection whyWeGrowTargetRef={whyWeGrowTargetRef} whyWeGrowStyle={whyWeGrowStyle} />
+
+        {/* 5. COURSES SECTION (HIDDEN) */}
         {/* <CoursesSection coursesTargetRef={coursesTargetRef} coursesStyle={coursesStyle} scrollToContact={scrollToContact} /> */}
 
-        {/* 5. GALLERY SECTION (4 CATEGORIES: WORKSHOP, ACTIVITY, STUDENT, BUSINESS) */}
+        {/* 6. GALLERY SECTION (4 CATEGORIES: WORKSHOP, ACTIVITY, STUDENT, BUSINESS) */}
         <GallerySection galleryTargetRef={galleryTargetRef} galleryStyle={galleryStyle} />
 
         {/* 6. REWARD SECTION */}
@@ -601,16 +706,24 @@ function MainHomePage() {
         <Mentor mentorTargetRef={mentorTargetRef} mentorStyle={mentorStyle} />
         <Enterprices enterpricesTargetRef={enterpricesTargetRef} enterpricesStyle={enterpricesStyle} />
         <SuccessStories storiesTargetRef={storiesTargetRef} storiesStyle={storiesStyle} />
+        <FinalCTASection 
+          ctaTargetRef={ctaTargetRef} 
+          ctaStyle={ctaStyle} 
+          scrollToCourses={scrollToCourses}
+          scrollToContact={scrollToContact}
+        />
         <ContactSection contactTargetRef={contactTargetRef} contactStyle={contactStyle} />
 
         <Footer 
           scrollToHero={scrollToHero}
-          scrollToEvents={scrollToEventsMain}
+          scrollToWhoCanJoin={scrollToWhoCanJoin}
+          scrollToEvents={scrollToEvents} 
           scrollToCourses={scrollToCourses}
           scrollToMissionVision={scrollToMissionVision}
+          scrollToWhyWeGrow={scrollToWhyWeGrow}
           scrollToGallery={scrollToGallery}
-          scrollToSeminars={scrollToSeminars}
-          scrollToVisits={scrollToVisits}
+          scrollToSeminars={scrollToSeminars} 
+          scrollToVisits={scrollToVisits} 
           scrollToRewards={scrollToRewards}
           scrollToResources={scrollToResources}
           scrollToMentors={scrollToMentors}
@@ -655,14 +768,11 @@ export default function App() {
             <Route path="/home/login/option/business" element={<AuthLayout><BusinessRegister /></AuthLayout>} />
             
             {/* Other Public/Partially Protected Routes */}
+            <Route path="/who-can-join" element={<WhoCanJoinPage />} />
+            <Route path="/audience" element={<Navigate to="/who-can-join" replace />} />
             <Route path="/gallery" element={<GalleryPage />} />
             <Route path="/home/profile" element={<ProfilePage />} />
-<<<<<<< HEAD
             {/* Event Details Route (Hidden - redirects to home) */}
-            {/* <Route path="/home/events/:eventId" element={<EventDetails />} /> */}
-=======
-            {/* Event Details Route (Hidden) */}
->>>>>>> 5a9e0b2569bb6cec86ced798e3374894cc1ce801
             <Route path="/home/events/:eventId" element={<Navigate to="/" replace />} />
             <Route path="/womens-community" element={<WomensCommunity />} />
             <Route path="/events/womens-community" element={<WomensCommunity />} />

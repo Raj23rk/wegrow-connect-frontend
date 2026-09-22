@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { fetchProfile, logoutUser, clearAuthStorage } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 
 export default function Navbar({
   scrollToHero,
+  scrollToWhoCanJoin,
+  scrollToWhyWeGrow,
   scrollToEvents,
   scrollToCourses,
   scrollToMissionVision,
@@ -20,6 +22,7 @@ export default function Navbar({
   scrollToContact
 }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user: authUser, logout: authLogout } = useAuth();
   const { isDarkMode, toggleDarkMode } = useTheme();
 
@@ -32,6 +35,14 @@ export default function Navbar({
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [mobileUserOpen, setMobileUserOpen] = useState(false);
   const userMenuRef = useRef(null);
+
+  useEffect(() => {
+    if (location.pathname.includes('consultancy')) {
+      setActiveMenu('consultancy');
+    } else if (location.pathname.includes('who-can-join')) {
+      setActiveMenu('who-can-join');
+    }
+  }, [location.pathname]);
 
   const fullName = [user?.firstName, user?.lastName].filter(Boolean).join(' ') || user?.name || user?.username || user?.email?.split('@')[0] || 'Member';
   const firstName = user?.firstName || user?.name?.split(' ')[0] || user?.username || user?.email?.split('@')[0] || 'Member';
@@ -160,6 +171,90 @@ export default function Navbar({
   const handleNavClick = (menuId, action) => {
     setActiveMenu(menuId);
     if (action) action();
+  };
+
+  const handleWhoCanJoinClick = () => {
+    const isHomePage = window.location.pathname === '/' || window.location.pathname === '/home';
+    if (isHomePage && scrollToWhoCanJoin) {
+      handleNavClick('who-can-join', scrollToWhoCanJoin);
+    } else {
+      setActiveMenu('who-can-join');
+      navigate('/who-can-join');
+    }
+  };
+
+  const handleMobileWhoCanJoinClick = () => {
+    const isHomePage = window.location.pathname === '/' || window.location.pathname === '/home';
+    if (isHomePage && scrollToWhoCanJoin) {
+      mobileNav('who-can-join', scrollToWhoCanJoin);
+    } else {
+      setActiveMenu('who-can-join');
+      setMobileMenuOpen(false);
+      navigate('/who-can-join');
+    }
+  };
+
+  const handleWhyWeGrowClick = () => {
+    const isHomePage = window.location.pathname === '/' || window.location.pathname === '/home';
+    if (isHomePage && scrollToWhyWeGrow) {
+      handleNavClick('why-wegrow', scrollToWhyWeGrow);
+    } else {
+      setActiveMenu('why-wegrow');
+      navigate('/home#why');
+    }
+  };
+
+  const handleMobileWhyWeGrowClick = () => {
+    const isHomePage = window.location.pathname === '/' || window.location.pathname === '/home';
+    if (isHomePage && scrollToWhyWeGrow) {
+      mobileNav('why-wegrow', scrollToWhyWeGrow);
+    } else {
+      setActiveMenu('why-wegrow');
+      setMobileMenuOpen(false);
+      navigate('/home#why');
+    }
+  };
+
+  const handleProgrammesClick = () => {
+    const isHomePage = window.location.pathname === '/' || window.location.pathname === '/home';
+    if (isHomePage && scrollToCourses) {
+      handleNavClick('programmes', scrollToCourses);
+    } else {
+      setActiveMenu('programmes');
+      navigate('/home#programmes');
+    }
+  };
+
+  const handleMobileProgrammesClick = () => {
+    const isHomePage = window.location.pathname === '/' || window.location.pathname === '/home';
+    if (isHomePage && scrollToCourses) {
+      mobileNav('programmes', scrollToCourses);
+    } else {
+      setActiveMenu('programmes');
+      setMobileMenuOpen(false);
+      navigate('/home#programmes');
+    }
+  };
+
+  const handleEventsClick = () => {
+    const isHomePage = window.location.pathname === '/' || window.location.pathname === '/home';
+    if (isHomePage && scrollToEvents) {
+      handleNavClick('events', scrollToEvents);
+    } else {
+      setActiveMenu('events');
+      navigate('/home#events');
+    }
+  };
+
+  const handleMobileEventsClick = () => {
+    const isHomePage = window.location.pathname === '/' || window.location.pathname === '/home';
+    if (isHomePage && scrollToEvents) {
+      mobileNav('events', scrollToEvents);
+    } else {
+      setActiveMenu('events');
+      setMobileMenuOpen(false);
+      navigate('/home#events');
+    }
   };
 
   const mobileNav = (menuId, action) => {
@@ -307,7 +402,7 @@ export default function Navbar({
               </button>
 
               <button
-                onClick={() => handleNavClick('who-can-join', scrollToEvents)}
+                onClick={handleWhoCanJoinClick}
                 className={getNavClass('who-can-join')}
               >
                 <span className="relative z-10">Who Can Join</span>
@@ -323,7 +418,7 @@ export default function Navbar({
               </button>
 
               <button
-                onClick={() => handleNavClick('why-wegrow', scrollToGallery)}
+                onClick={handleWhyWeGrowClick}
                 className={getNavClass('why-wegrow')}
               >
                 <span className="relative z-10">Why WeGrow</span>
@@ -331,7 +426,7 @@ export default function Navbar({
               </button>
 
               <button
-                onClick={() => handleNavClick('programmes', scrollToCourses)}
+                onClick={handleProgrammesClick}
                 className={getNavClass('programmes')}
               >
                 <span className="relative z-10">Programmes</span>
@@ -339,15 +434,18 @@ export default function Navbar({
               </button>
 
               <button
-                onClick={() => handleNavClick('faculty', scrollToMentors)}
-                className={getNavClass('faculty')}
+                onClick={() => {
+                  setActiveMenu('consultancy');
+                  navigate('/consultancy');
+                }}
+                className={getNavClass('consultancy')}
               >
-                <span className="relative z-10">Faculty</span>
-                {renderIndicator('faculty')}
+                <span className="relative z-10">Business Consultancy</span>
+                {renderIndicator('consultancy')}
               </button>
 
               <button
-                onClick={() => handleNavClick('events', scrollToEvents)}
+                onClick={handleEventsClick}
                 className={`${getNavClass('events')} flex items-center gap-1.5`}
               >
                 <span className="relative z-10 flex items-center gap-1.5">
@@ -374,7 +472,7 @@ export default function Navbar({
                     <div className="font-bold text-xs text-slate-800 dark:text-white group-hover/item:text-[#104288] dark:group-hover/item:text-[#FFC862] transition-colors">Library / Blog</div>
                     <div className="text-[11px] text-slate-500 dark:text-blue-200 mt-0.5">Articles & Guides</div>
                   </button>
-                  <button onClick={() => handleNavClick('programmes', scrollToCourses)} className="group/item w-full text-left p-2.5 rounded-xl hover:bg-blue-50/80 dark:hover:bg-[#104288] transition-all cursor-pointer">
+                  <button onClick={handleProgrammesClick} className="group/item w-full text-left p-2.5 rounded-xl hover:bg-blue-50/80 dark:hover:bg-[#104288] transition-all cursor-pointer">
                     <div className="font-bold text-xs text-slate-800 dark:text-white group-hover/item:text-[#104288] dark:group-hover/item:text-[#FFC862] transition-colors">Career Courses</div>
                     <div className="text-[11px] text-slate-500 dark:text-blue-200 mt-0.5">Certifications & programs</div>
                   </button>
@@ -572,7 +670,7 @@ export default function Navbar({
             </button>
 
             <button
-              onClick={() => mobileNav('who-can-join', scrollToEvents)}
+              onClick={handleMobileWhoCanJoinClick}
               className={getMobileNavClass('who-can-join')}
             >
               <span>Who Can Join</span>
@@ -592,7 +690,7 @@ export default function Navbar({
             </button>
 
             <button
-              onClick={() => mobileNav('why-wegrow', scrollToGallery)}
+              onClick={handleMobileWhyWeGrowClick}
               className={getMobileNavClass('why-wegrow')}
             >
               <span>Why WeGrow</span>
@@ -602,7 +700,7 @@ export default function Navbar({
             </button>
 
             <button
-              onClick={() => mobileNav('programmes', scrollToCourses)}
+              onClick={handleMobileProgrammesClick}
               className={getMobileNavClass('programmes')}
             >
               <span>Programmes</span>
@@ -612,17 +710,21 @@ export default function Navbar({
             </button>
 
             <button
-              onClick={() => mobileNav('faculty', scrollToMentors)}
-              className={getMobileNavClass('faculty')}
+              onClick={() => {
+                setActiveMenu('consultancy');
+                setMobileMenuOpen(false);
+                navigate('/consultancy');
+              }}
+              className={getMobileNavClass('consultancy')}
             >
-              <span>Faculty</span>
-              {activeMenu === 'faculty' && (
+              <span>Business Consultancy</span>
+              {activeMenu === 'consultancy' && (
                 <span className="w-2 h-2 rounded-full bg-[#FFC862] shadow-[0_0_8px_#FFC862] animate-pulse"></span>
               )}
             </button>
 
             <button
-              onClick={() => mobileNav('events', scrollToEvents)}
+              onClick={handleMobileEventsClick}
               className={getMobileNavClass('events')}
             >
               <div className="flex items-center gap-2">
