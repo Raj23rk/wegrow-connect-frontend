@@ -65,7 +65,8 @@ export default function WorkshopSection({
                 ref={(el) => (itemRefs.current[index] = el)}
                 data-index={index}
                 onMouseEnter={() => updateActiveCard(item)}
-                className="text-3xl md:text-5xl font-black text-center cursor-pointer transition-all duration-300"
+                onClick={() => updateActiveCard(item)}
+                className="text-3xl md:text-5xl font-black text-center cursor-pointer transition-all duration-300 select-none"
                 style={{
                   color: activeItem.id === item.id ? theme.primary : theme.textMuted,
                   opacity: activeItem.id === item.id ? 1 : 0.4,

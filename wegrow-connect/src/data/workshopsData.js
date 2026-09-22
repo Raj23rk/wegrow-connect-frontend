@@ -1,51 +1,61 @@
 export const workshopsData = [
   {
     id: 1,
+    title: "Women Entrepreneurs Workshop",
+    leftImg: "/Images/women-workshop-meeting.jpg",
+    leftTitle: "Interactive Strategy & Mentorship",
+    leftDesc: "Hands-on business planning, financial literacy, and scaling strategies for women founders.",
+    rightImg: "/Images/women-workshop-group.jpg",
+    rightTitle: "Women Entrepreneurs Community",
+    rightDesc: "A thriving cohort of ambitious women business leaders connecting and growing together."
+  },
+  {
+    id: 2,
     title: "Digital Marketing Workshop",
-    leftImg: "Images/dm 1.webp",
+    leftImg: "/Images/dm 1.webp",
     leftTitle: "SEO & Content Strategy",
     leftDesc: "Mastering keyword research and organic growth.",
-    rightImg: "Images/dm 2.webp",
+    rightImg: "/Images/dm 2.webp",
     rightTitle: "Performance Marketing",
     rightDesc: "Scaling paid ads, ROI tracking, and brand campaigns."
   },
   {
-    id: 2,
+    id: 3,
     title: "AI Bootcamp",
-    leftImg: "Images/ai 1.webp",
+    leftImg: "/Images/ai 1.webp",
     leftTitle: "Prompt Engineering",
     leftDesc: "Foundational LLMs and automated workflows.",
-    rightImg: "Images/ai 2.webp",
+    rightImg: "/Images/ai 2.webp",
     rightTitle: "Full-Stack AI Apps",
     rightDesc: "Building customized AI agents & machine learning models."
   },
   {
-    id: 3,
+    id: 4,
     title: "Future Marketers",
-    leftImg: "Images/fu 1.webp",
+    leftImg: "/Images/fu 1.webp",
     leftTitle: "Interactive Learning Session",
     leftDesc: "Live presentation and Digital Marketing guidance at WeGrow Campus.",
-    rightImg: "Images/fu 2.webp",
+    rightImg: "/Images/fu 2.webp",
     rightTitle: "Student Community & Mentorship",
     rightDesc: "Active participants engaging in practical workshop sessions."
   },
   {
-    id: 4,
+    id: 5,
     title: "Industrial Visit",
-    leftImg: "Images/iv 1.webp",
+    leftImg: "/Images/iv 1.webp",
     leftTitle: "Factory Floor & Machinery Exposure",
     leftDesc: "On-site real-world industry operations and technical learning.",
-    rightImg: "Images/iv 2.webp",
+    rightImg: "/Images/iv 2.webp",
     rightTitle: "Corporate Team Interaction",
     rightDesc: "Direct interactions and practical workflow sessions with industrial leaders."
   },
   {
-    id: 5,
+    id: 6,
     title: "Tech Today / Career Tomorrow",
-    leftImg: "Images/tt 1.webp",
+    leftImg: "/Images/tt 1.webp",
     leftTitle: "Modern Tech Stacks",
     leftDesc: "Understanding Web3, Cloud, and Software trends.",
-    rightImg: "Images/tt 2.webp",
+    rightImg: "/Images/tt 2.webp",
     rightTitle: "Future-Proof Careers",
     rightDesc: "Interview prep, portfolio building, and placement support."
   }
