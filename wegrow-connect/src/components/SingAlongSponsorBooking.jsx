@@ -19,8 +19,6 @@ import {
   Phone,
   Mail,
   Home,
-  Volume2,
-  VolumeX,
   Music,
   ShieldCheck,
   Sparkles,
@@ -47,35 +45,36 @@ const SPONSORS = [
     name: 'Fashion Woorld',
     subtitle: 'The Readymade Showroom',
     logo: '/sponsors/fashion_world.png',
-    badge: 'Title Sponsor'
   },
   {
     id: 'mahaan-ventures',
     name: 'Mahaan Ventures',
     subtitle: 'Strategic Investments',
     logo: '/sponsors/mahaan_ventures.jpg',
-    badge: 'Associate Sponsor'
   },
   {
-    id: 'mayann-architectx',
-    name: 'Mayann Architectx',
-    subtitle: 'Thoughtful Homes. Timeless Design',
-    logo: '/sponsors/mayann_architectx.png',
-    badge: 'Design Partner'
-  },
-  {
-    id: 'sense-connect',
-    name: 'Sense Connect',
-    subtitle: 'Technology & Networking Partner',
-    logo: '/sponsors/sense_connect.jpg',
-    badge: 'Tech Partner'
+    id: 'sarathy',
+    name: 'K7 Chitfunds (P) Ltd',
+    subtitle: 'K7 Chitfunds (P) Ltd.',
+    logo: '/sponsors/sarathy.png',
   },
   {
     id: 'kerala-wood-furniture',
     name: 'Kerala Wood Furniture',
     subtitle: 'The Quality You Can Trust',
     logo: '/sponsors/kerala_wood_furniture.jpg',
-    badge: 'Official Sponsor'
+  },
+  {
+    id: 'mayann-architectx',
+    name: 'Mayann Architectx',
+    subtitle: 'Thoughtful Homes. Timeless Design',
+    logo: '/sponsors/mayann_architectx.png',
+  },
+  {
+    id: 'sense-connect',
+    name: 'Sense Connect',
+    subtitle: 'Technology & Networking Partner',
+    logo: '/sponsors/sense_connect.jpg',
   }
 ];
 
@@ -329,15 +328,6 @@ export default function SingAlongSponsorBooking() {
       {/* Background Audio */}
       <audio ref={audioRef} src={MASCOT_SONG_AUDIO} loop preload="none" />
 
-      {/* Floating Audio Toggle */}
-      <button
-        onClick={toggleAudioSound}
-        className="fixed bottom-6 right-24 z-40 p-3 rounded-full bg-black/60 hover:bg-[#F0791E] border border-white/20 text-white backdrop-blur-md shadow-xl transition-all duration-300 hover:scale-110 cursor-pointer"
-        title={isAudioMuted ? "Play concert music" : "Mute music"}
-      >
-        {isAudioMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5 text-amber-400 animate-pulse" />}
-      </button>
-
       {/* =========================================================================
           TOP BANNER: RIGHT-TO-LEFT SCROLLING SPONSORS MARQUEE
       ========================================================================= */}
@@ -377,9 +367,11 @@ export default function SingAlongSponsorBooking() {
                   <span className="text-xs font-black text-slate-900 leading-tight">
                     {sp.name}
                   </span>
-                  <span className="text-[9px] font-bold text-[#F0791E] uppercase tracking-wider">
-                    {sp.badge}
-                  </span>
+                  {sp.badge && (
+                    <span className="text-[9px] font-bold text-[#F0791E] uppercase tracking-wider">
+                      {sp.badge}
+                    </span>
+                  )}
                 </div>
               </div>
             ))}
@@ -401,9 +393,7 @@ export default function SingAlongSponsorBooking() {
                 className="h-9 sm:h-10 w-auto object-contain rounded-md bg-white p-1"
                 onError={(e) => { e.currentTarget.src = '/wegrow-logo.webp'; }}
               />
-              <span className="text-xs font-black uppercase tracking-wider text-white/90 group-hover:text-amber-400 transition">
-                WeGrow Connect
-              </span>
+
             </Link>
 
             <div className="flex items-center gap-3">
@@ -615,7 +605,7 @@ export default function SingAlongSponsorBooking() {
                       type="text"
                       value={booker.company}
                       onChange={(e) => setBooker({ ...booker, company: e.target.value })}
-                      placeholder="e.g. Fashion Woorld"
+                      placeholder="e.g. $ARATHY / Kerala Wood Furniture"
                       className="w-full bg-[#162238] border border-white/15 focus:border-[#F0791E] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 outline-none transition"
                     />
                   </div>
@@ -672,11 +662,10 @@ export default function SingAlongSponsorBooking() {
                     <div
                       key={opt.code}
                       onClick={() => setSelectedCode(opt.code)}
-                      className={`relative rounded-2xl p-5 border-2 transition-all duration-300 cursor-pointer flex flex-col justify-between ${
-                        isSelected
-                          ? 'bg-[#152442] border-amber-400 shadow-[0_0_30px_rgba(245,158,11,0.25)] scale-[1.02]'
-                          : 'bg-[#121c2e] border-white/15 hover:border-white/30 opacity-80 hover:opacity-100'
-                      }`}
+                      className={`relative rounded-2xl p-5 border-2 transition-all duration-300 cursor-pointer flex flex-col justify-between ${isSelected
+                        ? 'bg-[#152442] border-amber-400 shadow-[0_0_30px_rgba(245,158,11,0.25)] scale-[1.02]'
+                        : 'bg-[#121c2e] border-white/15 hover:border-white/30 opacity-80 hover:opacity-100'
+                        }`}
                     >
                       {/* Top Row: Radio Circle & Badge */}
                       <div className="flex items-start justify-between gap-3 mb-3">
@@ -936,7 +925,7 @@ export default function SingAlongSponsorBooking() {
                 <div className="mt-5 pt-4 border-t border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-[11px] text-gray-400">
                   <div className="flex items-start gap-2">
                     <Award className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                    <span className="leading-snug">Sponsored by <b>Fashion Woorld, Mahaan Ventures, Mayann Architectx &amp; Partners</b></span>
+                    <span className="leading-snug">Sponsored by <b>Fashion Woorld, Mahaan Ventures, K7 Chitfunds, Kerala Wood Furniture &amp; Partners</b></span>
                   </div>
                   <span className="text-emerald-400 font-bold whitespace-nowrap">100% Free • Verified Pass</span>
                 </div>

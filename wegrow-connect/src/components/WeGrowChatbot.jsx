@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 
 // =========================================================================
 // WEGROW SKILL CAMPUS & B-SCHOOL COMPREHENSIVE KNOWLEDGE BASE
@@ -129,7 +130,16 @@ const POPULAR_QUESTIONS = [
 ];
 
 export default function WeGrowChatbot() {
+  const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
+
+  // Hide on Sing Along and Sponsor pages
+  const isHidden =
+    location.pathname.includes('sing-along') ||
+    location.pathname.includes('singalong') ||
+    location.pathname.includes('sponsors');
+
+  if (isHidden) return null;
   const [messages, setMessages] = useState([
     {
       id: 'welcome-msg',
