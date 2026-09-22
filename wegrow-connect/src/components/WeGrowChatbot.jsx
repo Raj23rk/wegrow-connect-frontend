@@ -132,14 +132,6 @@ const POPULAR_QUESTIONS = [
 export default function WeGrowChatbot() {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
-
-  // Hide on Sing Along and Sponsor pages
-  const isHidden =
-    location.pathname.includes('sing-along') ||
-    location.pathname.includes('singalong') ||
-    location.pathname.includes('sponsors');
-
-  if (isHidden) return null;
   const [messages, setMessages] = useState([
     {
       id: 'welcome-msg',
@@ -175,6 +167,14 @@ export default function WeGrowChatbot() {
       setTimeout(() => inputRef.current?.focus(), 250);
     }
   }, [isOpen]);
+
+  // Hide on Sing Along and Sponsor pages
+  const isHidden =
+    location.pathname.includes('sing-along') ||
+    location.pathname.includes('singalong') ||
+    location.pathname.includes('sponsors');
+
+  if (isHidden) return null;
 
   // Search Engine: matches query against Knowledge Base
   const findAnswer = (query) => {
