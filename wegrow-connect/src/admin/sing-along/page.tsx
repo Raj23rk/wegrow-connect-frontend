@@ -47,21 +47,22 @@ const rupee = (n: number | string) => {
   return '₹' + num.toLocaleString('en-IN');
 };
 
-// Helper to determine whether a booking is Sponsor, Promo, Free, or Paid
+// Helper to determine whether a booking is Sponsor, Promo, or Paid
 export function getPassClassification(item: any) {
-  const code = String(item?.code || item?.sponsorCode || '').toUpperCase();
-  const passType = String(item?.passType || '').toUpperCase();
-  const bookingId = String(item?.bookingId || item?.id || '').toUpperCase();
-  const paymentMethod = String(item?.paymentMethod || '').toUpperCase();
-  const notes = String(item?.notes || '').toUpperCase();
-  const amount = Number(item?.totalAmount ?? item?.amount ?? 0);
+  const code = String(item?.code || item?.sponsorCode || '').toUpperCase().trim();
+  const passType = String(item?.passType || '').toUpperCase().trim();
+  const bookingId = String(item?.bookingId || item?.id || '').toUpperCase().trim();
+  const paymentMethod = String(item?.paymentMethod || '').toUpperCase().trim();
+  const notes = String(item?.notes || '').toUpperCase().trim();
 
+  // 1. VIP Sponsor Pass
   if (
+    paymentMethod.includes('VIP SPONSOR') ||
+    paymentMethod.includes('SPONSOR') ||
     code === 'SA26_SP01' ||
     passType.includes('SPONSOR') ||
     bookingId.includes('-SP-') ||
     bookingId.includes('SP01') ||
-    paymentMethod.includes('SPONSOR') ||
     notes.includes('SA26_SP01') ||
     notes.includes('SPONSOR')
   ) {
@@ -75,6 +76,7 @@ export function getPassClassification(item: any) {
     };
   }
 
+  // 2. Promo Pass
   if (
     code === 'SA26_PO01' ||
     passType.includes('PROMO') ||
@@ -94,17 +96,7 @@ export function getPassClassification(item: any) {
     };
   }
 
-  if (amount === 0 || item?.isFree || paymentMethod.includes('FREE') || notes.includes('FREE') || notes.includes('COMPLIMENTARY')) {
-    return {
-      category: 'FREE',
-      label: 'Free Ticket',
-      code: item?.code || 'FREE',
-      badgeClass: 'bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold',
-      pillColor: 'text-emerald-700 bg-emerald-100',
-      company: item?.company || '-'
-    };
-  }
-
+  // 3. Paid Booking (CASHFREE (upi), Online, etc.)
   return {
     category: 'PAID',
     label: 'Standard Pass',
@@ -199,7 +191,7 @@ export default function AdminSingAlong() {
   const [status, setStatus] = useState('');
   const [eventId, setEventId] = useState('');
   const [dateFilter, setDateFilter] = useState(''); // YYYY-MM-DD
-  const [passFilter, setPassFilter] = useState<'ALL' | 'SPONSOR' | 'PROMO' | 'FREE' | 'PAID'>('ALL');
+  const [passFilter, setPassFilter] = useState<'ALL' | 'SPONSOR' | 'PROMO' | 'PAID'>('ALL');
 
   // Modals
   const [viewingItem, setViewingItem] = useState<any>(null);
@@ -486,18 +478,44 @@ export default function AdminSingAlong() {
     const classification = getPassClassification(item);
     if (passFilter === 'SPONSOR') return classification.category === 'SPONSOR';
     if (passFilter === 'PROMO') return classification.category === 'PROMO';
-    if (passFilter === 'FREE') return classification.category === 'FREE' || classification.category === 'SPONSOR' || classification.category === 'PROMO';
     if (passFilter === 'PAID') return classification.category === 'PAID';
     return true;
   });
 
-  const sponsorCount = bookings.filter(b => getPassClassification(b).category === 'SPONSOR').length;
-  const promoCount = bookings.filter(b => getPassClassification(b).category === 'PROMO').length;
-  const freeCount = bookings.filter(b => {
-    const cat = getPassClassification(b).category;
-    return cat === 'FREE' || cat === 'SPONSOR' || cat === 'PROMO';
+  const sponsorCount = bookings.filter((b: any) => {
+    const status = String(b?.status || '').toUpperCase().trim();
+    const isConfirmed = status === 'CONFIRMED' || status === 'ATTENDED' || b?.attended;
+    const paymentMethod = String(b?.paymentMethod || '').toUpperCase().trim();
+    const code = String(b?.code || b?.sponsorCode || '').toUpperCase().trim();
+    const passType = String(b?.passType || '').toUpperCase().trim();
+    const isSponsor =
+      paymentMethod.includes('VIP SPONSOR') ||
+      paymentMethod.includes('SPONSOR') ||
+      code === 'SA26_SP01' ||
+      passType.includes('SPONSOR') ||
+      getPassClassification(b).category === 'SPONSOR';
+    return isConfirmed && isSponsor;
   }).length;
-  const paidCount = bookings.filter(b => getPassClassification(b).category === 'PAID').length;
+
+  const promoCount = bookings.filter((b: any) => {
+    const status = String(b?.status || '').toUpperCase().trim();
+    const isConfirmed = status === 'CONFIRMED' || status === 'ATTENDED' || b?.attended;
+    const isPromo = getPassClassification(b).category === 'PROMO';
+    return isConfirmed && isPromo;
+  }).length;
+
+  const paidCount = bookings.filter((b: any) => {
+    const status = String(b?.status || '').toUpperCase().trim();
+    const isConfirmed = status === 'CONFIRMED' || status === 'ATTENDED' || b?.attended;
+    const paymentMethod = String(b?.paymentMethod || '').toUpperCase().trim();
+    const isPaid =
+      paymentMethod.includes('CASHFREE') ||
+      paymentMethod.includes('RAZORPAY') ||
+      paymentMethod.includes('UPI') ||
+      getPassClassification(b).category === 'PAID';
+    const isNotSponsor = !paymentMethod.includes('SPONSOR') && !paymentMethod.includes('VIP SPONSOR');
+    return isConfirmed && isPaid && isNotSponsor;
+  }).length;
 
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden font-sans">
@@ -579,29 +597,29 @@ export default function AdminSingAlong() {
               </div>
             </div>
 
-            {/* Total Tickets Sold */}
+            {/* Paid Tickets */}
             <div className="bg-white rounded-xl border border-slate-200 p-3.5 px-4 shadow-xs flex items-center justify-between">
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">Tickets Issued</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">Paid Tickets</span>
                 <div className="text-xl font-black text-slate-900 leading-tight">
-                  {statsLoading && !stats ? '...' : (stats?.totalTickets ?? stats?.summary?.totalTickets ?? bookings.length)}
+                  {paidCount}
                 </div>
-                <span className="text-[10px] text-emerald-600 font-semibold">Attendees Registered</span>
+                <span className="text-[10px] text-emerald-600 font-semibold">CASHFREE / Online Paid</span>
               </div>
               <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-                <Users className="w-5 h-5" />
+                <Ticket className="w-5 h-5" />
               </div>
             </div>
 
-            {/* Sponsors & Promo Free Passes */}
+            {/* VIP Sponsor Passes */}
             <div className="bg-white rounded-xl border border-amber-200/80 bg-gradient-to-br from-amber-50/40 to-orange-50/20 p-3.5 px-4 shadow-xs flex items-center justify-between">
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800 block mb-0.5">Sponsors &amp; Free</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800 block mb-0.5">Sponsor Passes</span>
                 <div className="text-xl font-black text-amber-900 leading-tight">
-                  {sponsorCount + promoCount} <span className="text-xs font-semibold text-slate-500">({freeCount} Free)</span>
+                  {sponsorCount}
                 </div>
                 <span className="text-[10px] text-amber-700 font-semibold">
-                  {sponsorCount} VIP • {promoCount} Promo
+                  VIP Sponsor Passes (SA26_SP01)
                 </span>
               </div>
               <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center">
@@ -668,7 +686,6 @@ export default function AdminSingAlong() {
                   <option value="ALL">All Passes</option>
                   <option value="SPONSOR">⭐ Sponsor Passes (SA26_SP01)</option>
                   <option value="PROMO">✨ Promo Passes (SA26_PO01)</option>
-                  <option value="FREE">🎁 Free Tickets (₹0)</option>
                   <option value="PAID">💳 Paid Passes</option>
                 </select>
 
@@ -699,7 +716,7 @@ export default function AdminSingAlong() {
               </div>
             </div>
 
-            {/* Quick Filter Pills Row (Sponsors, Promo, Free, Paid) */}
+            {/* Quick Filter Pills Row (Sponsors, Promo, Paid) */}
             <div className="mt-2.5 pt-2.5 border-t border-slate-100 flex items-center justify-between gap-2 flex-wrap">
               <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5">
                 <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mr-1 hidden sm:inline">
@@ -733,46 +750,34 @@ export default function AdminSingAlong() {
                   <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-200 font-black text-amber-950">{sponsorCount}</span>
                 </button>
 
-                <button
-                  type="button"
-                  onClick={() => { setPassFilter('PROMO'); setPage(1); }}
-                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
-                    passFilter === 'PROMO'
-                      ? 'bg-blue-600 text-white shadow-xs'
-                      : 'bg-blue-50 text-blue-800 border border-blue-200 hover:bg-blue-100'
-                  }`}
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-blue-600" />
-                  <span>Promo (SA26_PO01)</span>
-                  <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-blue-200 text-blue-900 font-bold">{promoCount}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => { setPassFilter('FREE'); setPage(1); }}
-                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
-                    passFilter === 'FREE'
-                      ? 'bg-emerald-600 text-white shadow-xs'
-                      : 'bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100'
-                  }`}
-                >
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Free Tickets (₹0)</span>
-                  <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-emerald-200 text-emerald-950 font-bold">{freeCount}</span>
-                </button>
+                {promoCount > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => { setPassFilter('PROMO'); setPage(1); }}
+                    className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
+                      passFilter === 'PROMO'
+                        ? 'bg-blue-600 text-white shadow-xs'
+                        : 'bg-blue-50 text-blue-800 border border-blue-200 hover:bg-blue-100'
+                    }`}
+                  >
+                    <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+                    <span>Promo (SA26_PO01)</span>
+                    <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-blue-200 text-blue-900 font-bold">{promoCount}</span>
+                  </button>
+                )}
 
                 <button
                   type="button"
                   onClick={() => { setPassFilter('PAID'); setPage(1); }}
                   className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
                     passFilter === 'PAID'
-                      ? 'bg-slate-700 text-white shadow-xs'
-                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                      ? 'bg-emerald-600 text-white shadow-xs'
+                      : 'bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100'
                   }`}
                 >
-                  <DollarSign className="w-3.5 h-3.5 text-slate-500" />
+                  <DollarSign className="w-3.5 h-3.5 text-emerald-600" />
                   <span>Paid Tickets</span>
-                  <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-200 text-slate-700 font-bold">{paidCount}</span>
+                  <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-emerald-200 text-emerald-950 font-bold">{paidCount}</span>
                 </button>
               </div>
 
@@ -810,25 +815,22 @@ export default function AdminSingAlong() {
           {/* ─── Bookings Table ───────────────────────────────────────────────── */}
           <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden flex-1 min-h-0 flex flex-col">
             <div className="table-scrollbar flex-1 min-h-0 overflow-auto">
-              <table className="w-full text-left border-collapse text-xs min-w-[1300px]">
+              <table className="w-full text-left border-collapse text-xs min-w-[1100px]">
                 <colgroup>
+                  <col style={{width:'120px'}} />
+                  <col style={{width:'200px'}} />
+                  <col style={{width:'130px'}} />
+                  <col style={{width:'70px'}} />
                   <col style={{width:'110px'}} />
-                  <col style={{width:'160px'}} />
-                  <col style={{width:'180px'}} />
-                  <col style={{width:'110px'}} />
-                  <col style={{width:'64px'}} />
-                  <col style={{width:'90px'}} />
-                  <col style={{width:'160px'}} />
+                  <col style={{width:'190px'}} />
                   <col style={{width:'140px'}} />
-                  <col style={{width:'110px'}} />
-                  <col style={{width:'64px'}} />
+                  <col style={{width:'120px'}} />
+                  <col style={{width:'70px'}} />
                 </colgroup>
                 <thead className="sticky top-0 z-10 bg-slate-50 border-b border-slate-200 shadow-2xs">
                   <tr className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider text-[10px]">
                     <th className="py-3 px-3 bg-slate-50 whitespace-nowrap">Booking ID</th>
                     <th className="py-3 px-3 bg-slate-50 whitespace-nowrap">Attendee</th>
-                    {/* NEW COLUMN: Sponsors / Pass */}
-                    <th className="py-3 px-3 bg-slate-50 text-slate-700 font-black whitespace-nowrap">Sponsors / Pass</th>
                     <th className="py-3 px-3 bg-slate-50 whitespace-nowrap">Contact</th>
                     <th className="py-3 px-3 text-center bg-slate-50 whitespace-nowrap">Passes</th>
                     <th className="py-3 px-3 text-right bg-slate-50 whitespace-nowrap">Amount</th>
@@ -841,14 +843,14 @@ export default function AdminSingAlong() {
                 <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
                   {loading ? (
                     <tr>
-                      <td colSpan={10} className="py-12 text-center text-slate-400">
+                      <td colSpan={9} className="py-12 text-center text-slate-400">
                         <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-[#ff6a00]" />
                         Loading bookings...
                       </td>
                     </tr>
                   ) : filteredBookings.length === 0 ? (
                     <tr>
-                      <td colSpan={10} className="py-12 text-center text-slate-400">
+                      <td colSpan={9} className="py-12 text-center text-slate-400">
                         <Ticket className="w-8 h-8 mx-auto mb-2 text-slate-300" />
                         No ticket bookings found matching "{passFilter !== 'ALL' ? passFilter : 'criteria'}".
                         {passFilter !== 'ALL' && (
@@ -882,35 +884,6 @@ export default function AdminSingAlong() {
                           <td className="py-2.5 px-3">
                             <span className="font-bold text-slate-900 block leading-tight">{item.fullName}</span>
                             {item.email && <span className="text-[10px] text-slate-400 truncate block max-w-[150px]">{item.email}</span>}
-                          </td>
-
-                          {/* NEW COLUMN: Sponsors / Pass Type — compact single-line layout */}
-                          <td className="py-2.5 px-3">
-                            <div className="flex flex-col gap-0.5 items-start">
-                              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold whitespace-nowrap ${passInfo.badgeClass}`}>
-                                {passInfo.category === 'SPONSOR' ? (
-                                  <Award className="w-3 h-3 text-amber-700 shrink-0" />
-                                ) : passInfo.category === 'PROMO' ? (
-                                  <Sparkles className="w-3 h-3 text-blue-600 shrink-0" />
-                                ) : passInfo.category === 'FREE' ? (
-                                  <CheckCircle2 className="w-3 h-3 text-emerald-600 shrink-0" />
-                                ) : (
-                                  <Ticket className="w-3 h-3 text-slate-500 shrink-0" />
-                                )}
-                                <span>{passInfo.label}</span>
-                              </span>
-                              {passInfo.code !== 'PAID' && (
-                                <span className="font-mono text-[10px] font-semibold text-slate-400">
-                                  {passInfo.code}
-                                </span>
-                              )}
-                              {passInfo.company && passInfo.company !== '-' && (
-                                <span className="text-[10px] text-slate-500 truncate max-w-[155px] flex items-center gap-0.5" title={passInfo.company}>
-                                  <Building className="w-2.5 h-2.5 text-slate-400 shrink-0" />
-                                  <span className="truncate">{passInfo.company}</span>
-                                </span>
-                              )}
-                            </div>
                           </td>
 
                           {/* Phone */}
