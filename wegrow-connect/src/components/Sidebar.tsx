@@ -23,7 +23,8 @@ import {
   ClipboardList,
   FileText,
   Music,
-  ClipboardCheck
+  ClipboardCheck,
+  HelpCircle
 } from "lucide-react";
 
 export default function Sidebar() {
@@ -36,6 +37,7 @@ export default function Sidebar() {
     { name: "My Profile", href: "/home/profile", icon: User },
     { name: "Users", href: "/admin/users", icon: Users },
     { name: "Roles & Permissions", href: "/admin/roles", icon: ShieldCheck },
+    { name: "Event Teasers", href: "/admin/event-teaser", icon: HelpCircle },
     { name: "Sing Along Tickets", href: "/admin/sing-along", icon: Music },
     { name: "Business Dependency", href: "/admin/business-dependency-test", icon: ClipboardCheck },
     { name: "Women Entrepreneurs", href: "/admin/women-entrepreneurs", icon: Sparkles },

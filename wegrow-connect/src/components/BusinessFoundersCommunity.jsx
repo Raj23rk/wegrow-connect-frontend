@@ -7,6 +7,8 @@ import {
   Phone,
   CheckCircle,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   ArrowRight,
   Users,
   Lightbulb,
@@ -29,9 +31,78 @@ import { registerBusinessFounder, formatEventId } from '../services/api';
 import CommunityPageFooter from './CommunityPageFooter';
 
 export default function BusinessFoundersCommunity() {
+  // ─── Journey Slider Data ─────────────────────────────────────────────────────
+  const journeySlides = [
+    {
+      src: '/events/journey/journey-7.jpg',
+      title: 'Strategic Business Mentorship & Keynotes',
+      subtitle: 'WeGrow Executive Classrooms',
+      desc: 'Direct, actionable roadmaps to unlock business growth and transition to structured operations.'
+    },
+    {
+      src: '/events/journey/journey-6.jpg',
+      title: 'Empowering Founder Communities & Masterminds',
+      subtitle: 'Collaborative Growth Network',
+      desc: 'Building strong regional founder cohorts across Tamil Nadu with peer support and accountability.'
+    },
+    {
+      src: '/events/journey/journey-5.jpg',
+      title: 'Structured Scaling Frameworks & Roadmaps',
+      subtitle: 'WeGrow B School Sessions',
+      desc: 'Mastering execution, financial clarity, and business diagnostics with experienced mentors.'
+    },
+    {
+      src: '/events/journey/journey-3.jpg',
+      title: 'Interactive Strategy & Growth Masterclass',
+      subtitle: 'WeGrow B School Campus',
+      desc: 'Hands-on frameworks to diagnose business bottlenecks and scale systems.'
+    },
+    {
+      src: '/events/journey/journey-1.jpg',
+      title: 'Founder Roundtable & Peer Learning',
+      subtitle: 'Collaborative Knowledge Exchange',
+      desc: 'Entrepreneurs openly discussing delegation, sales growth, and cash flow.'
+    },
+    {
+      src: '/events/journey/journey-2.jpg',
+      title: 'Community Network & Delegation Cohort',
+      subtitle: 'Building Scalable Enterprises',
+      desc: 'Connecting ambitious business owners from across Tamil Nadu.'
+    },
+    {
+      src: '/events/journey/journey-4.jpg',
+      title: 'Mentor Advisory & Leadership Recognition',
+      subtitle: 'Real-World Business Impact',
+      desc: 'Direct guidance from veteran entrepreneurs and industry coaches.'
+    },
+    {
+      src: '/events/bussines founder.webp',
+      title: 'Business Transformation Meetup Sessions',
+      subtitle: 'Sivakasi Chapter',
+      desc: 'Structured sessions focused on owner-independent systems and growth.'
+    }
+  ];
+
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev === 0 ? journeySlides.length - 1 : prev - 1));
+  };
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev === journeySlides.length - 1 ? 0 : prev + 1));
+  };
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev === journeySlides.length - 1 ? 0 : prev + 1));
+    }, 4500);
+    return () => clearInterval(timer);
+  }, [journeySlides.length]);
+
   // ─── Countdown Timer ─────────────────────────────────────────────────────────
-  // Orientation Event Date: Wednesday, 16 September 2026 11:00 AM IST
-  const eventDate = new Date('2026-09-16T11:00:00+05:30').getTime();
+  // Business Transformation Meetup Date: Friday, 09 October 2026 10:00 AM IST
+  const eventDate = new Date('2026-10-09T10:00:00+05:30').getTime();
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
   useEffect(() => {
@@ -139,22 +210,22 @@ export default function BusinessFoundersCommunity() {
   // ─── Agenda Schedule ────────────────────────────────────────────────────────
   const agenda = [
     {
-      time: '10:45 AM – 11:00 AM',
+      time: '10:15 AM – 10:30 AM',
       title: 'Welcome & Founder Check-in',
       desc: 'Arrival, badge collection, morning refreshments, and casual founder-to-founder networking.'
     },
     {
-      time: '11:00 AM – 11:45 AM',
+      time: '10:30 AM – 11:00 AM',
       title: 'Keynote: From Operator to True Business Owner',
       desc: 'How to break free from daily fire-fighting and build a self-sustaining business model.'
     },
     {
-      time: '11:45 AM – 12:30 PM',
+      time: '11:00 AM – 11:45 AM',
       title: 'Interactive Framework: Unlocking Growth Bottlenecks',
       desc: 'Practical diagnostic session on cash flow management, sales pipeline scaling, and team delegation.'
     },
     {
-      time: '12:30 PM – 01:00 PM',
+      time: '11:45 AM – 1:00 PM',
       title: 'Open Q&A, Mentor Interaction & Community Roadmap',
       desc: 'Direct Q&A with WeGrow B School mentors and introduction to the ongoing Business Founders forum.'
     }
@@ -190,9 +261,16 @@ export default function BusinessFoundersCommunity() {
     fullName: '',
     phone: '',
     email: '',
-    businessName: '',
-    industry: '',
+    state: '',
+    city: '',
+    isBusinessOwner: '',
     yearsInBusiness: '',
+    teamSize: '',
+    industry: '',
+    annualTurnover: '',
+    productService: '',
+    currentRole: '',
+    businessName: '',
     biggestPriority: '',
     growthBlocker: '',
     hasTeam: '',
@@ -225,21 +303,23 @@ export default function BusinessFoundersCommunity() {
         fullName: form.fullName.trim(),
         phone: form.phone.trim(),
         email: form.email.trim() || undefined,
-        businessName: form.businessName.trim() || undefined,
-        industry: form.industry,
-        yearsInBusiness: form.yearsInBusiness,
-        biggestPriority: form.biggestPriority,
-        growthBlocker: form.growthBlocker,
-        hasTeam: form.hasTeam,
-        futureVision: form.futureVision,
-        growthChallenge: form.growthChallenge?.trim() || undefined,
+        state: form.state || undefined,
+        city: form.city || undefined,
+        isBusinessOwner: form.isBusinessOwner || undefined,
+        yearsInBusiness: form.yearsInBusiness || undefined,
+        teamSize: form.teamSize || undefined,
+        industry: form.industry || form.city || undefined,
+        annualTurnover: form.annualTurnover || undefined,
+        productService: form.productService?.trim() || undefined,
+        currentRole: form.currentRole || undefined,
+        businessName: form.businessName?.trim() || undefined,
         eventId: formatEventId('BUSINESS', eventDate)
       };
 
       const res = await registerBusinessFounder(payload);
       if (res && (res.success || res.status === 'success' || res._id || res.data)) {
         setIsRegistered(true);
-        toast.success('Registration confirmed! Welcome to WeGrow Business Founders Community 🎉');
+        toast.success('Registration confirmed! Welcome to WeGrow Business Transformation Meetup 🎉');
       } else {
         // Graceful fallback for UI demo / when backend API route is pending
         setIsRegistered(true);
@@ -319,7 +399,7 @@ export default function BusinessFoundersCommunity() {
 
               <div className="space-y-3">
                 <h1 className="text-4xl sm:text-5xl lg:text-[54px] font-black text-[#16225E] tracking-tight leading-[1.1]">
-                  Business <span className="text-[#F0791E]">Founders</span> Community
+                  Business <span className="text-[#F0791E]">Transformation</span> Meetup
                 </h1>
                 <p className="text-sm sm:text-base font-semibold text-[#666C87] tracking-wide">
                   தொழில் முனைவோர்களுக்கான நெட்வொர்க் ஃபோரம் இல்ல லேர்னிங் கம்யூனிட்டி
@@ -355,7 +435,7 @@ export default function BusinessFoundersCommunity() {
               <ul className="flex flex-wrap gap-4 sm:gap-6 pt-4 text-sm font-bold text-[#16225E] border-t border-[#E7E1D4]">
                 <li className="flex items-center gap-2">
                   <Calendar className="w-5 h-5 text-[#F0791E] flex-shrink-0" />
-                  <span>16 September 2026</span>
+                  <span>09 october 2026</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <MapPin className="w-5 h-5 text-[#F0791E] flex-shrink-0" />
@@ -363,7 +443,7 @@ export default function BusinessFoundersCommunity() {
                 </li>
                 <li className="flex items-center gap-2">
                   <Clock className="w-5 h-5 text-[#F0791E] flex-shrink-0" />
-                  <span>11:00 AM to 1:00 PM</span>
+                  <span>10:00 AM to 1:00 PM</span>
                 </li>
               </ul>
             </div>
@@ -386,9 +466,9 @@ export default function BusinessFoundersCommunity() {
                 />
                 <div className="mt-3 py-2 px-3 bg-[#FBF6EE] rounded-xl flex items-center justify-between text-xs font-bold text-[#16225E]">
                   <span className="flex items-center gap-1.5 text-[#F0791E]">
-                    <Sparkles className="w-4 h-4" /> Business Founders Orientation
+                    <Sparkles className="w-4 h-4" /> Business Transformation Meetup
                   </span>
-                  <span>16 September 2026</span>
+                  <span>09 october 2026</span>
                 </div>
               </div>
             </div>
@@ -444,7 +524,7 @@ export default function BusinessFoundersCommunity() {
 
           <div className="space-y-2 max-w-2xl mx-auto">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white">
-              Wednesday, 16 September 2026 · 11:00 AM
+              FRIday, 09 october 2026 · 10:00 AM
             </h2>
             <p className="text-[#C9CEEB] text-sm sm:text-base">
               Limited seats available to ensure personalized mentor attention and deep peer discussions
@@ -552,13 +632,13 @@ export default function BusinessFoundersCommunity() {
             <div className="border border-[#E7E1D4] rounded-2xl p-6 bg-[#FBF6EE] text-center">
               <Calendar className="w-8 h-8 text-[#F0791E] mx-auto mb-3" />
               <h4 className="text-xs uppercase tracking-wider text-[#666C87] font-bold mb-1">Date</h4>
-              <p className="text-base font-bold text-[#16225E]">16 September 2026</p>
+              <p className="text-base font-bold text-[#16225E]">09 october 2026</p>
             </div>
 
             <div className="border border-[#E7E1D4] rounded-2xl p-6 bg-[#FBF6EE] text-center">
               <Clock className="w-8 h-8 text-[#F0791E] mx-auto mb-3" />
               <h4 className="text-xs uppercase tracking-wider text-[#666C87] font-bold mb-1">Time</h4>
-              <p className="text-base font-bold text-[#16225E]">11:00 AM – 1:00 PM</p>
+              <p className="text-base font-bold text-[#16225E]">10:00 AM to 1:00 PM</p>
             </div>
 
             <div className="border border-[#E7E1D4] rounded-2xl p-6 bg-[#FBF6EE] text-center">
@@ -580,7 +660,7 @@ export default function BusinessFoundersCommunity() {
               <span className="font-bold text-sm uppercase tracking-wider flex items-center gap-2">
                 <Clock className="w-4 h-4 text-[#F0791E]" /> Orientation Schedule
               </span>
-              <span className="text-xs text-[#C9CEEB]">Wednesday, 16 Sep 2026</span>
+              <span className="text-xs text-[#C9CEEB]">FRIday, 09 october 2026</span>
             </div>
 
             <div className="divide-y divide-[#E7E1D4]">
@@ -604,62 +684,103 @@ export default function BusinessFoundersCommunity() {
         </div>
       </section>
 
-      {/* ── Gallery Section ─────────────────────────────────────────────────── */}
-      <section className="py-20 px-4 sm:px-7">
+      {/* ── Journey Slider Section ─────────────────────────────────────────── */}
+      <section className="py-20 px-4 sm:px-7 bg-[#FBF6EE]">
         <div className="max-w-[1180px] mx-auto">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
             <div>
               <span className="inline-block bg-[#16225E]/10 text-[#16225E] font-bold text-xs px-3.5 py-1.5 rounded-full mb-2">
-                Community Glimpses
+                Moments &amp; Milestones
               </span>
               <h2 className="text-3xl sm:text-4xl font-extrabold text-[#16225E]">
-                Orientation &amp; Founder Masterminds
+                A Glimpse of Our Journey
               </h2>
             </div>
             <p className="text-sm sm:text-base text-[#666C87] max-w-md">
-              Past sessions, peer discussions, and hands-on business workshops at WeGrow B School campuses.
+              Real moments from past mastermind workshops, founder strategy sessions, and peer learning meetups at WeGrow B School.
             </p>
           </div>
 
-          {/* Interactive Responsive Gallery Tiles */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="col-span-2 row-span-2 rounded-2xl overflow-hidden border border-[#E7E1D4] shadow-md group relative min-h-[260px] sm:min-h-[320px]">
-              <img
-                src="/events/bussines founder.webp"
-                alt="WeGrow Business Founders Community"
-                className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = '/wegrow-mascot.webp';
-                }}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#16225E]/90 via-transparent to-transparent flex items-end p-5 text-white">
-                <div>
-                  <div className="text-xs uppercase tracking-wider font-bold text-[#F0791E]">Sivakasi Chapter</div>
-                  <div className="text-lg font-bold">Founder Mastermind &amp; Scaling Frameworks</div>
+          {/* Interactive Responsive Image Slider */}
+          <div className="relative rounded-3xl overflow-hidden border border-[#E7E1D4] bg-[#16225E] shadow-2xl group">
+            {/* Slider Images Container */}
+            <div className="relative w-full h-[320px] sm:h-[460px] md:h-[540px] overflow-hidden">
+              {journeySlides.map((slide, idx) => (
+                <div
+                  key={idx}
+                  className={`absolute inset-0 transition-all duration-700 ease-in-out ${
+                    idx === currentSlide
+                      ? 'opacity-100 scale-100 z-10'
+                      : 'opacity-0 scale-105 pointer-events-none z-0'
+                  }`}
+                >
+                  <img
+                    src={slide.src}
+                    alt={slide.title}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = '/events/bussines founder.webp';
+                    }}
+                  />
+                  {/* Gradient Overlay & Text */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#16225E]/95 via-[#16225E]/40 to-transparent flex flex-col justify-end p-6 sm:p-10 text-white">
+                    <span className="inline-block text-xs uppercase tracking-wider font-bold text-[#F0791E] mb-1">
+                      {slide.subtitle}
+                    </span>
+                    <h3 className="text-xl sm:text-2xl md:text-3xl font-black text-white mb-2">
+                      {slide.title}
+                    </h3>
+                    <p className="text-xs sm:text-sm text-[#C9CEEB] max-w-xl">
+                      {slide.desc}
+                    </p>
+                  </div>
                 </div>
-              </div>
+              ))}
             </div>
 
-            <div className="rounded-2xl bg-gradient-to-br from-[#EFE7D6] to-[#E4DAC4] border border-[#C9BFA6] p-5 flex flex-col items-center justify-center text-center gap-2 text-[#666C87] hover:border-[#F0791E] transition-colors">
+            {/* Left Prev Arrow Button */}
+            <button
+              type="button"
+              onClick={prevSlide}
+              aria-label="Previous slide"
+              className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-white/85 hover:bg-white text-[#16225E] hover:text-[#F0791E] backdrop-blur-md flex items-center justify-center shadow-lg transition-all transform hover:scale-110 cursor-pointer"
+            >
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+
+            {/* Right Next Arrow Button */}
+            <button
+              type="button"
+              onClick={nextSlide}
+              aria-label="Next slide"
+              className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-white/85 hover:bg-white text-[#16225E] hover:text-[#F0791E] backdrop-blur-md flex items-center justify-center shadow-lg transition-all transform hover:scale-110 cursor-pointer"
+            >
+              <ChevronRight className="w-6 h-6" />
+            </button>
+          </div>
+
+          {/* Quick Stats Grid Below Slider */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+            <div className="rounded-2xl bg-white border border-[#E7E1D4] p-5 flex flex-col items-center justify-center text-center gap-2 hover:border-[#F0791E] transition-all shadow-xs">
               <Users className="w-7 h-7 text-[#16225E]" />
               <span className="text-xs sm:text-sm font-bold text-[#16225E]">40+ Founders Per Batch</span>
               <span className="text-[11px] text-[#666C87]">Curated peer rooms</span>
             </div>
 
-            <div className="rounded-2xl bg-gradient-to-br from-[#EFE7D6] to-[#E4DAC4] border border-[#C9BFA6] p-5 flex flex-col items-center justify-center text-center gap-2 text-[#666C87] hover:border-[#F0791E] transition-colors">
+            <div className="rounded-2xl bg-white border border-[#E7E1D4] p-5 flex flex-col items-center justify-center text-center gap-2 hover:border-[#F0791E] transition-all shadow-xs">
               <Award className="w-7 h-7 text-[#F0791E]" />
               <span className="text-xs sm:text-sm font-bold text-[#16225E]">Industry Mentors</span>
               <span className="text-[11px] text-[#666C87]">Real-world entrepreneurs</span>
             </div>
 
-            <div className="rounded-2xl bg-gradient-to-br from-[#EFE7D6] to-[#E4DAC4] border border-[#C9BFA6] p-5 flex flex-col items-center justify-center text-center gap-2 text-[#666C87] hover:border-[#F0791E] transition-colors">
+            <div className="rounded-2xl bg-white border border-[#E7E1D4] p-5 flex flex-col items-center justify-center text-center gap-2 hover:border-[#F0791E] transition-all shadow-xs">
               <Layers className="w-7 h-7 text-[#16225E]" />
               <span className="text-xs sm:text-sm font-bold text-[#16225E]">Business Canvas &amp; SOPs</span>
               <span className="text-[11px] text-[#666C87]">Actionable templates</span>
             </div>
 
-            <div className="rounded-2xl bg-gradient-to-br from-[#EFE7D6] to-[#E4DAC4] border border-[#C9BFA6] p-5 flex flex-col items-center justify-center text-center gap-2 text-[#666C87] hover:border-[#F0791E] transition-colors">
+            <div className="rounded-2xl bg-white border border-[#E7E1D4] p-5 flex flex-col items-center justify-center text-center gap-2 hover:border-[#F0791E] transition-all shadow-xs">
               <ShieldCheck className="w-7 h-7 text-[#F0791E]" />
               <span className="text-xs sm:text-sm font-bold text-[#16225E]">100% Practical</span>
               <span className="text-[11px] text-[#666C87]">Zero fluff, pure value</span>
@@ -784,19 +905,19 @@ export default function BusinessFoundersCommunity() {
                   <h3 className="text-2xl font-extrabold text-[#16225E]">Registration Successful!</h3>
                   <p className="text-sm text-[#666C87] max-w-md mx-auto leading-relaxed">
                     Thank you, <strong>{form.fullName}</strong>. Your seat for the{' '}
-                    <strong>WeGrow Business Founders Orientation</strong> on{' '}
-                    <strong>16 September 2026 (11:00 AM)</strong> is confirmed.
+                    <strong>WeGrow Business Transformation Meetup</strong> on{' '}
+                    <strong>09 october 2026 (11:00 AM)</strong> is confirmed.
                   </p>
                 </div>
 
                 <div className="bg-[#FBF6EE] border border-[#E7E1D4] rounded-2xl p-4 text-left text-xs sm:text-sm space-y-2 font-medium text-[#16225E]">
                   <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-[#F0791E]" />
-                    <span><strong>Date:</strong> Wednesday, 16 Sep 2026</span>
+                    <span><strong>Date:</strong> FRIday, 09 october 2026</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Clock className="w-4 h-4 text-[#F0791E]" />
-                    <span><strong>Timing:</strong> 11:00 AM to 1:00 AM</span>
+                    <span><strong>Timing:</strong> 10:00 AM to 1:00 AM</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <MapPin className="w-4 h-4 text-[#F0791E] mt-0.5" />
@@ -868,167 +989,199 @@ export default function BusinessFoundersCommunity() {
                     className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm placeholder:text-slate-400 focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm"
                   />
                 </div>
-
-                {/* Business / Company Name */}
+                {/* State */}
                 <div>
                   <label className="block text-xs font-bold text-[#16225E] uppercase tracking-wider mb-1.5">
-                    Business / Enterprise Name
+                    State
                   </label>
-                  <input
-                    type="text"
-                    name="businessName"
-                    value={form.businessName}
+                  <select
+                    name="state"
+                    value={form.state}
                     onChange={handleInputChange}
-                    placeholder="e.g. Sri Meenakshi Industries"
-                    className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm placeholder:text-slate-400 focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm"
-                  />
+                    className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm cursor-pointer"
+                  >
+                    <option value="">— Please Select State —</option>
+                    <option value="Tamil Nadu">Tamil Nadu</option>
+                    <option value="Karnataka">Karnataka</option>
+                    <option value="Kerala">Kerala</option>
+                    <option value="Andhra Pradesh">Andhra Pradesh</option>
+                    <option value="Telangana">Telangana</option>
+                  </select>
                 </div>
 
-                {/* Industry / Category & Years in Business */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* City */}
+                <div>
+                  <label className="block text-xs font-bold text-[#16225E] uppercase tracking-wider mb-1.5">
+                    City
+                  </label>
+                  <select
+                    name="city"
+                    value={form.city}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm cursor-pointer"
+                  >
+                    <option value="">— Please Select City —</option>
+                    <option value="Virudhunagar">Virudhunagar</option>
+                    <option value="Karaikudi">Karaikudi</option>
+                    <option value="Sivakasi">Sivakasi</option>
+                    <option value="Madurai">Madurai</option>
+                    <option value="Tirunelveli">Tirunelveli</option>
+                    <option value="Rajapalayam">Rajapalayam</option>
+                    <option value="Srivilliputhur">Srivilliputhur</option>
+                    <option value="Sattur">Sattur</option>
+                  </select>
+                </div>
+
+                {/* Are You a Business Owner */}
+                <div>
+                  <label className="block text-xs font-bold text-[#16225E] uppercase tracking-wider mb-1.5">
+                    Are You a Business Owner? <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    name="isBusinessOwner"
+                    required
+                    value={form.isBusinessOwner}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm cursor-pointer"
+                  >
+                    <option value="">— Please Select —</option>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                  </select>
+                </div>
+
+                {/* Conditional Fields: When Business Owner is YES */}
+                {form.isBusinessOwner === 'yes' && (
+                  <>
+                    {/* Numbers of the years in business */}
+                    <div>
+                      <label className="block text-xs font-bold text-[#16225E] uppercase tracking-wider mb-1.5">
+                        Numbers of the years in business <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        name="yearsInBusiness"
+                        required
+                        value={form.yearsInBusiness}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm cursor-pointer"
+                      >
+                        <option value="">— Please Select —</option>
+                        <option value="0 to 5 Years">0 to 5 Years</option>
+                        <option value="6 to 10 Years">6 to 10 Years</option>
+                        <option value="11 to 15 Years">11 to 15 Years</option>
+                        <option value="16 to 30 Years">16 to 30 Years</option>
+                        <option value="30 to 50 Years">30 to 50 Years</option>
+                      </select>
+                    </div>
+
+                    {/* What is your team size */}
+                    <div>
+                      <label className="block text-xs font-bold text-[#16225E] uppercase tracking-wider mb-1.5">
+                        What is your team size? <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        name="teamSize"
+                        required
+                        value={form.teamSize}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm cursor-pointer"
+                      >
+                        <option value="">— Please Select —</option>
+                        <option value="1 to 5 Members">1 to 5 Members</option>
+                        <option value="6 to 15 Members">6 to 15 Members</option>
+                        <option value="16 to 30 Members">16 to 30 Members</option>
+                        <option value="31 to 50 Members">31 to 50 Members</option>
+                        <option value="50+ Members">50+ Members</option>
+                      </select>
+                    </div>
+
+                    {/* Which industry do you belong to */}
+                    <div>
+                      <label className="block text-xs font-bold text-[#16225E] uppercase tracking-wider mb-1.5">
+                        Which industry do you belong to? <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        name="industry"
+                        required
+                        value={form.industry}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm cursor-pointer"
+                      >
+                        <option value="">— Please Select —</option>
+                        <option value="Manufacturing">Manufacturing</option>
+                        <option value="Printing & Packaging">Printing &amp; Packaging</option>
+                        <option value="Fireworks & Matches">Fireworks &amp; Matches</option>
+                        <option value="Textiles & Garments">Textiles &amp; Garments</option>
+                        <option value="Retail & Wholesale">Retail &amp; Wholesale</option>
+                        <option value="Food & Hospitality">Food &amp; Hospitality</option>
+                        <option value="Services & Agencies">Services &amp; Agencies</option>
+                        <option value="Healthcare & Pharma">Healthcare &amp; Pharma</option>
+                        <option value="Construction & Real Estate">Construction &amp; Real Estate</option>
+                        <option value="Tech & Digital">Tech &amp; Digital</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
+
+                    {/* What is the annual turnover of your business */}
+                    <div>
+                      <label className="block text-xs font-bold text-[#16225E] uppercase tracking-wider mb-1.5">
+                        What is the annual turnover of your business? <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        name="annualTurnover"
+                        required
+                        value={form.annualTurnover}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm cursor-pointer"
+                      >
+                        <option value="">— Please Select —</option>
+                        <option value="Below ₹25 Lakhs">Below ₹25 Lakhs</option>
+                        <option value="₹25 Lakhs to ₹1 Crore">₹25 Lakhs to ₹1 Crore</option>
+                        <option value="₹1 Crore to ₹5 Crore">₹1 Crore to ₹5 Crore</option>
+                        <option value="₹5 Crore to ₹10 Crore">₹5 Crore to ₹10 Crore</option>
+                        <option value="₹10 Crore+">₹10 Crore+</option>
+                      </select>
+                    </div>
+
+                    {/* Tell us about your Product/Service */}
+                    <div>
+                      <label className="block text-xs font-bold text-[#16225E] uppercase tracking-wider mb-1.5">
+                        Tell us about your Product/Service <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="productService"
+                        required
+                        value={form.productService}
+                        onChange={handleInputChange}
+                        placeholder="e.g. Offset printing, corrugated packaging, retail clothing..."
+                        className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm placeholder:text-slate-400 focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm"
+                      />
+                    </div>
+                  </>
+                )}
+
+                {/* Conditional Fields: When Business Owner is NO */}
+                {form.isBusinessOwner === 'no' && (
                   <div>
                     <label className="block text-xs font-bold text-[#16225E] uppercase tracking-wider mb-1.5">
-                      Business Sector
+                      I am a... <span className="text-red-500">*</span>
                     </label>
                     <select
-                      name="industry"
-                      value={form.industry}
+                      name="currentRole"
+                      required
+                      value={form.currentRole}
                       onChange={handleInputChange}
                       className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm cursor-pointer"
                     >
-                      <option value="">— Please Select Business Sector —</option>
-                      <option value="manufacturing">Manufacturing</option>
-                      <option value="printing_packaging">Printing &amp; Packaging</option>
-                      <option value="fireworks_matches">Fireworks &amp; Matches</option>
-                      <option value="retail_wholesale">Retail &amp; Wholesale</option>
-                      <option value="textiles_garments">Textiles &amp; Garments</option>
-                      <option value="services_agency">Services &amp; Agencies</option>
-                      <option value="food_hospitality">Food &amp; Hospitality</option>
-                      <option value="tech_digital">Tech &amp; Digital</option>
-                      <option value="other">Other Business</option>
+                      <option value="">— Please Select —</option>
+                      <option value="An Aspiring Business Owner">An Aspiring Business Owner</option>
+                      <option value="A Freelancer/Consultant">A Freelancer/Consultant</option>
+                      <option value="A Professional/Working Professional">A Professional/Working Professional</option>
+                      <option value="A Student">A Student</option>
                     </select>
                   </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-[#16225E] uppercase tracking-wider mb-1.5">
-                      Years in Business
-                    </label>
-                    <select
-                      name="yearsInBusiness"
-                      value={form.yearsInBusiness}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm cursor-pointer"
-                    >
-                      <option value="">— Please Select Experience —</option>
-                      <option value="less_than_1_year">&lt; 1 Year</option>
-                      <option value="1_to_3_years">1 – 3 Years</option>
-                      <option value="3_to_5_years">3 – 5 Years</option>
-                      <option value="5_plus_years">5+ Years</option>
-                    </select>
-                  </div>
-                </div>
-
-                {/* 1. Biggest Priority for Business */}
-                <div>
-                  <label className="block text-xs font-bold text-[#16225E] uppercase tracking-wider mb-1.5">
-                    1. What is your biggest priority for your business right now? <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    name="biggestPriority"
-                    required
-                    value={form.biggestPriority}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm cursor-pointer"
-                  >
-                    <option value="">— Please Select Priority —</option>
-                    <option value="More Sales">More Sales</option>
-                    <option value="More Customers">More Customers</option>
-                    <option value="More Profit">More Profit</option>
-                    <option value="Better Team">Better Team</option>
-                    <option value="Business Growth">Business Growth</option>
-                    <option value="Better Systems">Better Systems</option>
-                  </select>
-                </div>
-
-                {/* 2. What is stopping business from growing faster */}
-                <div>
-                  <label className="block text-xs font-bold text-[#16225E] uppercase tracking-wider mb-1.5">
-                    2. What is stopping your business from growing faster? <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    name="growthBlocker"
-                    required
-                    value={form.growthBlocker}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm cursor-pointer"
-                  >
-                    <option value="">— Please Select Growth Blocker —</option>
-                    <option value="Lack of Customers">Lack of Customers</option>
-                    <option value="Lack of Sales">Lack of Sales</option>
-                    <option value="Lack of Team">Lack of Team</option>
-                    <option value="Lack of Time">Lack of Time</option>
-                    <option value="Lack of Money">Lack of Money</option>
-                    <option value="Lack of Knowledge">Lack of Knowledge</option>
-                    <option value="Not Sure">Not Sure</option>
-                  </select>
-                </div>
-
-                {/* 3. Team Support */}
-                <div>
-                  <label className="block text-xs font-bold text-[#16225E] uppercase tracking-wider mb-1.5">
-                    3. Do you currently have a team to support you? <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    name="hasTeam"
-                    required
-                    value={form.hasTeam}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm cursor-pointer"
-                  >
-                    <option value="">— Please Select Team Status —</option>
-                    <option value="Yes">Yes</option>
-                    <option value="No">No</option>
-                    <option value="Small Team">Small Team</option>
-                  </select>
-                </div>
-
-                {/* 4. Future Vision in next 2-3 years */}
-                <div>
-                  <label className="block text-xs font-bold text-[#16225E] uppercase tracking-wider mb-1.5">
-                    4. What do you want your business to look like in the next 2–3 years? <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    name="futureVision"
-                    required
-                    value={form.futureVision}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm cursor-pointer"
-                  >
-                    <option value="">— Please Select Future Vision —</option>
-                    <option value="Bigger Sales">Bigger Sales</option>
-                    <option value="Bigger Team">Bigger Team</option>
-                    <option value="More Branches">More Branches</option>
-                    <option value="More Customers">More Customers</option>
-                    <option value="More Profit">More Profit</option>
-                    <option value="A Business That Runs Without Me">A Business That Runs Without Me</option>
-                    <option value="Not Sure Yet">Not Sure Yet</option>
-                  </select>
-                </div>
-
-                {/* Optional Growth Challenge Note */}
-                {/* <div>
-                  <label className="block text-xs font-bold text-[#16225E] uppercase tracking-wider mb-1.5">
-                    Any specific question or challenge you want to ask the mentors? (Optional)
-                  </label>
-                  <textarea
-                    rows={2}
-                    name="growthChallenge"
-                    value={form.growthChallenge}
-                    onChange={handleInputChange}
-                    placeholder="e.g. Scaling dealer network, reducing owner dependency, improving margins..."
-                    className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-[#1B2140] text-sm placeholder:text-slate-400 focus:outline-none focus:border-[#F0791E] focus:ring-2 focus:ring-[#F0791E]/20 transition-all shadow-sm resize-none"
-                  />
-                </div> */}
+                )}
 
                 {/* Submit Button */}
                 <button
@@ -1060,9 +1213,9 @@ export default function BusinessFoundersCommunity() {
 
       {/* ── Standard WeGrow Community Page Footer ───────────────────────────── */}
       <CommunityPageFooter
-        eventLabel="Business Founders Community Orientation"
+        eventLabel="Business Transformation Meetup Orientation"
         eventDate="Wed, 16 Sep 2026"
-        eventTime="11:00 AM – 1:00 PM"
+        eventTime="10:00 AM to 1:00 PM"
         venueAddress={fullAddress}
         queriesPhone={`${phoneDisplay}`}
         registerSectionId="register"

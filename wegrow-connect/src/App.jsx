@@ -45,6 +45,7 @@ const SingAlongSponsorBooking = lazy(() => import('./components/SingAlongSponsor
 const BusinessDependencyTest = lazy(() => import('./components/BusinessDependencyTest'));
 const BusinessConsultancy = lazy(() => import('./components/BusinessConsultancy'));
 const WhoCanJoinPage = lazy(() => import('./components/WhoCanJoinPage'));
+const EventTeaser = lazy(() => import('./components/EventTeaser'));
 
 // Auth Context, Theme Context and Guard
 import { AuthProvider, ProtectedRoute } from './context/AuthContext';
@@ -92,6 +93,7 @@ const AdminBusinessFounders = lazy(() => import('./admin/business-founders/page'
 
 const AdminSingAlong = lazy(() => import('./admin/sing-along/page'));
 const AdminBusinessDependencyTest = lazy(() => import('./admin/business-dependency-test/page'));
+const AdminEventTeaser = lazy(() => import('./admin/event-teaser/page'));
 
 // Campaign Platform (Public & Admin Lazy Loaded)
 const CampaignLanding = lazy(() => import('./components/CampaignLanding'));
@@ -823,6 +825,12 @@ export default function App() {
             <Route path="/business-consultancy" element={<BusinessConsultancy />} />
             <Route path="/business/consultancy" element={<BusinessConsultancy />} />
 
+            {/* Event Teaser Interactive Quiz / Mystery Page */}
+            <Route path="/event-teaser" element={<EventTeaser />} />
+            <Route path="/eventteaser" element={<EventTeaser />} />
+            <Route path="/teaser" element={<EventTeaser />} />
+            <Route path="/guess-event" element={<EventTeaser />} />
+
             {/* Student Dashboard Routes (Protected) */}
             <Route path="/student/dashboard" element={<ProtectedRoute allowedRoles={['student']}><StudentDashboard /></ProtectedRoute>} />
             <Route path="/student/courses" element={<ProtectedRoute allowedRoles={['student']}><StudentCourses /></ProtectedRoute>} />
@@ -855,6 +863,9 @@ export default function App() {
             <Route path="/admin/singalong" element={<ProtectedRoute allowedRoles={['admin']}><AdminSingAlong /></ProtectedRoute>} />
             <Route path="/admin/business-dependency-test" element={<ProtectedRoute allowedRoles={['admin']}><AdminBusinessDependencyTest /></ProtectedRoute>} />
             <Route path="/admin/dependency-test" element={<ProtectedRoute allowedRoles={['admin']}><AdminBusinessDependencyTest /></ProtectedRoute>} />
+            <Route path="/admin/event-teaser" element={<ProtectedRoute allowedRoles={['admin']}><AdminEventTeaser /></ProtectedRoute>} />
+            <Route path="/admin/event-teasers" element={<ProtectedRoute allowedRoles={['admin']}><AdminEventTeaser /></ProtectedRoute>} />
+            <Route path="/admin/teasers" element={<ProtectedRoute allowedRoles={['admin']}><AdminEventTeaser /></ProtectedRoute>} />
             <Route path="/admin/workshops" element={<ProtectedRoute allowedRoles={['admin']}><AdminWorkshops /></ProtectedRoute>} />
             <Route path="/admin/events" element={<ProtectedRoute allowedRoles={['admin']}><AdminEvents /></ProtectedRoute>} />
             <Route path="/admin/gallery" element={<ProtectedRoute allowedRoles={['admin']}><AdminGalleryPage /></ProtectedRoute>} />

@@ -1857,3 +1857,160 @@ export async function deleteArtParticipant(id) {
   }
 }
 
+// =====================================================
+// EVENT TEASERS (PUBLIC GUESS & ADMIN MANAGEMENT)
+// =====================================================
+
+export async function submitEventTeaserGuess(data) {
+  try {
+    const payload = {
+      name: data.name?.trim(),
+      phone: data.phone?.trim(),
+      email: data.email?.trim(),
+      guess: data.guess?.trim(),
+      eventId: data.eventId || 'MYSTERY-EVENT-2026',
+    };
+    const response = await fetch(`${API_BASE}/event-teasers`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('submitEventTeaserGuess error:', error);
+    throw error;
+  }
+}
+
+export const createEventTeaserGuess = submitEventTeaserGuess;
+
+export async function fetchEventTeasers({
+  page = 1,
+  limit = 10,
+  search = '',
+  guess = '',
+  status = '',
+  eventId = '',
+  sortBy = 'createdAt',
+  sortOrder = 'desc',
+  startDate = '',
+  endDate = '',
+} = {}) {
+  try {
+    const params = new URLSearchParams();
+    if (page) params.append('page', String(page));
+    if (limit) params.append('limit', String(limit));
+    if (search) params.append('search', search);
+    if (guess) params.append('guess', guess);
+    if (status) params.append('status', status);
+    if (eventId) params.append('eventId', eventId);
+    if (sortBy) params.append('sortBy', sortBy);
+    if (sortOrder) params.append('sortOrder', sortOrder);
+    if (startDate) params.append('startDate', startDate);
+    if (endDate) params.append('endDate', endDate);
+
+    const response = await fetch(`${API_BASE}/event-teasers?${params.toString()}`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('fetchEventTeasers error:', error);
+    throw error;
+  }
+}
+
+export async function fetchEventTeaserStats(eventIdOrQuery = '') {
+  try {
+    const params = new URLSearchParams();
+    const eventId = typeof eventIdOrQuery === 'string' ? eventIdOrQuery : eventIdOrQuery?.eventId;
+    if (eventId) params.append('eventId', eventId);
+    const qs = params.toString() ? `?${params.toString()}` : '';
+
+    const response = await fetch(`${API_BASE}/event-teasers/stats${qs}`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('fetchEventTeaserStats error:', error);
+    throw error;
+  }
+}
+
+export async function exportEventTeasersCsv(query = {}) {
+  try {
+    const params = new URLSearchParams();
+    const eventId = typeof query === 'string' ? query : query?.eventId;
+    if (eventId) params.append('eventId', eventId);
+    if (typeof query === 'object') {
+      if (query.status) params.append('status', query.status);
+      if (query.search) params.append('search', query.search);
+      if (query.guess) params.append('guess', query.guess);
+      if (query.startDate) params.append('startDate', query.startDate);
+      if (query.endDate) params.append('endDate', query.endDate);
+    }
+    const qs = params.toString() ? `?${params.toString()}` : '';
+
+    const response = await fetch(`${API_BASE}/event-teasers/export${qs}`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) throw new Error('Failed to export Event Teasers CSV');
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `event_teasers_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+    return true;
+  } catch (error) {
+    console.error('exportEventTeasersCsv error:', error);
+    throw error;
+  }
+}
+
+export async function getEventTeaserById(id) {
+  try {
+    const response = await fetch(`${API_BASE}/event-teasers/${id}`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('getEventTeaserById error:', error);
+    throw error;
+  }
+}
+
+export async function updateEventTeaser(id, data) {
+  try {
+    const response = await fetch(`${API_BASE}/event-teasers/${id}`, {
+      method: 'PATCH',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('updateEventTeaser error:', error);
+    throw error;
+  }
+}
+
+export async function deleteEventTeaser(id) {
+  try {
+    const response = await fetch(`${API_BASE}/event-teasers/${id}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    });
+    return await parseResponse(response);
+  } catch (error) {
+    console.error('deleteEventTeaser error:', error);
+    throw error;
+  }
+}
+
+
