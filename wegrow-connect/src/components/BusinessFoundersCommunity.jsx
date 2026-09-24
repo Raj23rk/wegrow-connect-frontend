@@ -401,15 +401,10 @@ export default function BusinessFoundersCommunity() {
                 <h1 className="text-4xl sm:text-5xl lg:text-[54px] font-black text-[#16225E] tracking-tight leading-[1.1]">
                   Business <span className="text-[#F0791E]">Transformation</span> Meetup
                 </h1>
-                <p className="text-sm sm:text-base font-semibold text-[#666C87] tracking-wide">
-                  தொழில் முனைவோர்களுக்கான நெட்வொர்க் ஃபோரம் இல்ல லேர்னிங் கம்யூனிட்டி
-                </p>
+
               </div>
 
-              <p className="text-base sm:text-lg text-[#666C87] leading-relaxed max-w-xl">
-                An orientation session for businessmen already running a business — for those who aren't starting out,
-                but ready to take what they've built to the next level.
-              </p>
+
 
               {/* Action Buttons */}
               <div className="flex flex-wrap items-center gap-4 pt-2">
@@ -524,7 +519,7 @@ export default function BusinessFoundersCommunity() {
 
           <div className="space-y-2 max-w-2xl mx-auto">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white">
-              FRIday, 09 october 2026 · 10:00 AM
+              Friday, 09 october 2026 · 10:00 AM
             </h2>
             <p className="text-[#C9CEEB] text-sm sm:text-base">
               Limited seats available to ensure personalized mentor attention and deep peer discussions
@@ -655,7 +650,7 @@ export default function BusinessFoundersCommunity() {
           </div>
 
           {/* Agenda Timeline Card */}
-          <div className="mt-12 border border-[#E7E1D4] rounded-2xl overflow-hidden bg-[#FBF6EE] shadow-sm">
+          {/* <div className="mt-12 border border-[#E7E1D4] rounded-2xl overflow-hidden bg-[#FBF6EE] shadow-sm">
             <div className="bg-[#16225E] text-white px-6 py-4 flex items-center justify-between flex-wrap gap-2">
               <span className="font-bold text-sm uppercase tracking-wider flex items-center gap-2">
                 <Clock className="w-4 h-4 text-[#F0791E]" /> Orientation Schedule
@@ -680,7 +675,7 @@ export default function BusinessFoundersCommunity() {
                 </div>
               ))}
             </div>
-          </div>
+          </div> */}
         </div>
       </section>
 
@@ -708,11 +703,10 @@ export default function BusinessFoundersCommunity() {
               {journeySlides.map((slide, idx) => (
                 <div
                   key={idx}
-                  className={`absolute inset-0 transition-all duration-700 ease-in-out ${
-                    idx === currentSlide
-                      ? 'opacity-100 scale-100 z-10'
-                      : 'opacity-0 scale-105 pointer-events-none z-0'
-                  }`}
+                  className={`absolute inset-0 transition-all duration-700 ease-in-out ${idx === currentSlide
+                    ? 'opacity-100 scale-100 z-10'
+                    : 'opacity-0 scale-105 pointer-events-none z-0'
+                    }`}
                 >
                   <img
                     src={slide.src}
@@ -885,9 +879,7 @@ export default function BusinessFoundersCommunity() {
       <section id="register" className="py-20 bg-[#F0791E] text-white px-4 sm:px-7">
         <div className="max-w-[1180px] mx-auto">
           <div className="text-center max-w-2xl mx-auto mb-10 space-y-2">
-            <span className="inline-block bg-white/20 text-white font-bold text-xs px-3.5 py-1.5 rounded-full">
-              Advance Registration
-            </span>
+
             <h2 className="text-3xl sm:text-4xl font-black text-white">
               Reserve Your Orientation Seat
             </h2>
@@ -939,8 +931,7 @@ export default function BusinessFoundersCommunity() {
             ) : (
               <form onSubmit={handleFormSubmit} className="space-y-4 sm:space-y-5">
                 <div className="border-b border-[#E7E1D4] pb-4 mb-2">
-                  <h3 className="text-xl font-extrabold text-[#16225E]">Founder Registration Form</h3>
-                  <p className="text-xs text-[#666C87] mt-1">Advance Booking Mandatory</p>
+                  <h3 className="text-xl font-extrabold text-[#16225E]">Registration Form</h3>
                 </div>
 
                 {/* Full Name */}
