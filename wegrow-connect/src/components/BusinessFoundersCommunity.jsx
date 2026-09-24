@@ -655,7 +655,7 @@ export default function BusinessFoundersCommunity() {
               <span className="font-bold text-sm uppercase tracking-wider flex items-center gap-2">
                 <Clock className="w-4 h-4 text-[#F0791E]" /> Orientation Schedule
               </span>
-              <span className="text-xs text-[#C9CEEB]">FRIday, 09 october 2026</span>
+              <span className="text-xs text-[#C9CEEB]">Friday, 09 october 2026</span>
             </div>
 
             <div className="divide-y divide-[#E7E1D4]">
@@ -905,7 +905,7 @@ export default function BusinessFoundersCommunity() {
                 <div className="bg-[#FBF6EE] border border-[#E7E1D4] rounded-2xl p-4 text-left text-xs sm:text-sm space-y-2 font-medium text-[#16225E]">
                   <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-[#F0791E]" />
-                    <span><strong>Date:</strong> FRIday, 09 october 2026</span>
+                    <span><strong>Date:</strong> Friday, 09 october 2026</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Clock className="w-4 h-4 text-[#F0791E]" />
