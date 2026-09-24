@@ -1020,6 +1020,9 @@ export default function BusinessFoundersCommunity() {
                     <option value="Rajapalayam">Rajapalayam</option>
                     <option value="Srivilliputhur">Srivilliputhur</option>
                     <option value="Sattur">Sattur</option>
+                    <option value="kovilpatti">kovilpatti</option>
+                    <option value="Tenkasi">Tenkasi</option>
+                    <option value="Other">Other</option>
                   </select>
                 </div>
 
