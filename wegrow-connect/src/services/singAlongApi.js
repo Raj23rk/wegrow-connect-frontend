@@ -14,8 +14,13 @@ async function parseResponse(response) {
 
   if (!response.ok) {
     const errorMsg =
-      (data && data.message) ||
+      (data && (data.message || data.error || data.err)) ||
       (typeof data === 'string' ? data : 'API Request Failed');
+    throw new Error(Array.isArray(errorMsg) ? errorMsg.join(', ') : errorMsg);
+  }
+
+  if (data && typeof data === 'object' && data.success === false) {
+    const errorMsg = data.message || data.error || data.err || 'Request failed';
     throw new Error(Array.isArray(errorMsg) ? errorMsg.join(', ') : errorMsg);
   }
 
@@ -33,7 +38,7 @@ export const singAlongApi = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
-    return res.json();
+    return await parseResponse(res);
   },
 
   // 2. Initialize Cashfree Online Order
@@ -43,19 +48,19 @@ export const singAlongApi = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
-    return res.json();
+    return await parseResponse(res);
   },
 
   // 3. Payment Status Check by Order ID
   async checkPaymentStatus(orderId) {
     const res = await fetch(`${API_BASE}/sing-payment/status/${encodeURIComponent(orderId)}`);
-    return res.json();
+    return await parseResponse(res);
   },
 
   // 4. Verify Ticket by Booking ID
   async verifyTicket(bookingId) {
     const res = await fetch(`${API_BASE}/sing-along/verify/${encodeURIComponent(bookingId)}`);
-    return res.json();
+    return await parseResponse(res);
   },
 };
 
@@ -155,19 +160,6 @@ export async function getSingAlongBookings(params = {}) {
     return await parseResponse(response);
   } catch (error) {
     console.error('getSingAlongBookings error:', error);
-    throw error;
-  }
-}
-
-export async function getSingAlongStats() {
-  try {
-    const response = await fetch(`${API_BASE}/sing-along/stats`, {
-      method: 'GET',
-      headers: getAuthHeaders(),
-    });
-    return await parseResponse(response);
-  } catch (error) {
-    console.error('getSingAlongStats error:', error);
     throw error;
   }
 }

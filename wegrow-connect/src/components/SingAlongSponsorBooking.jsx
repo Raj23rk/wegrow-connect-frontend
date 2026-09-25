@@ -25,7 +25,10 @@ import {
   Printer,
   Building,
   Award,
-  Star
+  Star,
+  AlertTriangle,
+  XCircle,
+  X
 } from 'lucide-react';
 import { bookSingAlongTicket } from '../services/singAlongApi';
 
@@ -149,6 +152,8 @@ export default function SingAlongSponsorBooking() {
   // Step 2: Selected Code Option (Radio)
   const [selectedCode, setSelectedCode] = useState('SA26_SP01'); // default to Sponsor VIP
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [showErrorModal, setShowErrorModal] = useState(false);
 
   // Step 3: Generated Ticket Data
   const [ticketData, setTicketData] = useState(null);
@@ -227,6 +232,7 @@ export default function SingAlongSponsorBooking() {
   // Generate Ticket Directly on Step 2 (No Payment Gateway!)
   const handleGenerateTicket = async () => {
     setIsSubmitting(true);
+    setErrorMessage('');
 
     const activeOption = PASS_OPTIONS.find(p => p.code === selectedCode) || PASS_OPTIONS[0];
     const generatedBookingId = genBookingId(activeOption.code);
@@ -259,18 +265,9 @@ export default function SingAlongSponsorBooking() {
       })
     };
 
-    // Save to local cache so Sing Along Admin immediately reflects it
     try {
-      const existing = JSON.parse(localStorage.getItem('wegrow_sponsor_bookings') || '[]');
-      const updated = [newTicket, ...existing.filter(b => b.bookingId !== generatedBookingId)];
-      localStorage.setItem('wegrow_sponsor_bookings', JSON.stringify(updated));
-    } catch (e) {
-      console.warn("Could not save to localStorage cache:", e);
-    }
-
-    // Also dispatch to backend API
-    try {
-      await bookSingAlongTicket({
+      // Dispatch to backend API
+      const res = await bookSingAlongTicket({
         bookingId: newTicket.bookingId,
         ticketId: newTicket.ticketId,
         fullName: newTicket.fullName,
@@ -290,18 +287,41 @@ export default function SingAlongSponsorBooking() {
         paymentMethod: newTicket.paymentMethod,
         isFree: true
       });
-    } catch (apiErr) {
-      console.warn("Backend API note (ticket preserved in local cache):", apiErr);
-    }
 
-    setTimeout(() => {
-      setTicketData(newTicket);
+      if (res && res.success === false) {
+        throw new Error(res.message || "Failed to generate pass.");
+      }
+
+      const bookedData = res?.data?.booking || res?.booking || res?.data || newTicket;
+      const finalTicket = {
+        ...newTicket,
+        bookingId: bookedData.bookingId || newTicket.bookingId,
+        ticketId: bookedData.ticketId || newTicket.ticketId,
+      };
+
+      // Save to local cache only after successful backend dispatch
+      try {
+        const existing = JSON.parse(localStorage.getItem('wegrow_sponsor_bookings') || '[]');
+        const updated = [finalTicket, ...existing.filter(b => b.bookingId !== finalTicket.bookingId && b.email !== finalTicket.email)];
+        localStorage.setItem('wegrow_sponsor_bookings', JSON.stringify(updated));
+      } catch (e) {
+        console.warn("Could not save to localStorage cache:", e);
+      }
+
+      setTicketData(finalTicket);
       setStep(3);
       setIsSubmitting(false);
       setEmailSentNotice(true);
       toast.success("🎉 Pass generated & confirmation email dispatched!");
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, 600);
+    } catch (apiErr) {
+      console.error("Pass booking error:", apiErr);
+      setIsSubmitting(false);
+      const msg = apiErr?.message || "Booking failed. Please try again with a different email or mobile number.";
+      setErrorMessage(msg);
+      setShowErrorModal(true);
+      toast.error(msg, { duration: 6000 });
+    }
   };
 
   const handleCopyBookingId = () => {
@@ -943,6 +963,65 @@ export default function SingAlongSponsorBooking() {
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* =========================================================================
+          POPUP ERROR MODAL (DUPLICATE EMAIL / VALIDATION ISSUES)
+      ========================================================================= */}
+      {showErrorModal && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-[#0e1626] border border-red-500/40 rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-[0_25px_60px_rgba(239,68,68,0.25)] relative overflow-hidden">
+            {/* Ambient Red Glow */}
+            <div className="absolute -top-24 -right-24 w-48 h-48 bg-red-500/20 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-amber-500/15 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="relative z-10 text-center">
+              {/* Alert Icon */}
+              <div className="w-16 h-16 rounded-2xl bg-red-500/20 border border-red-500/30 text-red-400 flex items-center justify-center mx-auto mb-4 shadow-inner">
+                <AlertTriangle className="w-8 h-8 animate-pulse" />
+              </div>
+
+              {/* Title */}
+              <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight mb-2">
+                Registration Failed
+              </h3>
+
+              {/* Error Message Box */}
+              <div className="bg-red-950/40 border border-red-500/30 rounded-2xl p-4 my-4 text-left">
+                <p className="text-sm font-semibold text-red-200 leading-relaxed">
+                  {errorMessage || "This email address is already registered for Sing Along. Duplicate registrations with the same email ID are not allowed."}
+                </p>
+              </div>
+
+              {/* Explanatory Note */}
+              <p className="text-xs text-slate-400 mb-6 leading-relaxed">
+                If you have already registered, please check your inbox / WhatsApp for your verified pass. To book another pass, please use a different email address.
+              </p>
+
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowErrorModal(false);
+                    setStep(1);
+                  }}
+                  className="w-full sm:w-1/2 py-3.5 px-4 rounded-xl bg-gradient-to-r from-[#F0791E] to-[#FF9F45] text-white font-black text-xs sm:text-sm uppercase tracking-wider shadow-lg shadow-orange-500/30 hover:scale-[1.02] active:scale-[0.98] transition cursor-pointer"
+                >
+                  Change Email / Details
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setShowErrorModal(false)}
+                  className="w-full sm:w-1/2 py-3.5 px-4 rounded-xl bg-white/10 hover:bg-white/15 text-slate-300 hover:text-white font-bold text-xs sm:text-sm uppercase tracking-wider transition cursor-pointer border border-white/10"
+                >
+                  Dismiss
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

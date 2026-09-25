@@ -151,6 +151,8 @@ export default function SingAlongBooking() {
   const [isDownloading, setIsDownloading] = useState(false);
   const [showTicketDetails, setShowTicketDetails] = useState(false);
   const [showTicketModal, setShowTicketModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [showErrorModal, setShowErrorModal] = useState(false);
   const [isCopiedBookingId, setIsCopiedBookingId] = useState(false);
   const [ticketQr, setTicketQr] = useState('');
   const ticketQrCacheRef = useRef({});
@@ -518,20 +520,29 @@ export default function SingAlongBooking() {
         const res = await singAlongApi.submitManualUtr(payload);
         if (res && res.success !== false) {
           bookedRecord = res?.booking || res?.data?.booking || res?.data || res;
+        } else {
+          throw new Error(res?.message || 'Failed to submit UTR');
         }
       } catch (utrErr) {
         console.warn("submitManualUtr error (trying bookSingAlongTicket fallback):", utrErr);
-        try {
-          const res = await bookSingAlongTicket({
-            ...payload,
-            status: 'CONFIRMED',
-            eventId: "SINGALONG-SEP-27-2026",
-            notes: `Manual UPI payment. Amount: ₹${totalAmount} (${qty} paid pass${qty > 1 ? 'es' : ''}${freeTickets > 0 ? ` + ${freeTickets} FREE pass` : ''} = ${totalTickets} total passes, incl. ₹${conventionFee} conv. fee)`
-          });
-          bookedRecord = res?.data?.booking || res?.data || res?.booking || res;
-        } catch (apiErr) {
-          console.warn("Backend API note (fallback enabled):", apiErr);
+        if (utrErr?.message && (utrErr.message.toLowerCase().includes('already registered') || utrErr.message.toLowerCase().includes('duplicate'))) {
+          throw utrErr;
         }
+        const res = await bookSingAlongTicket({
+          ...payload,
+          status: 'CONFIRMED',
+          eventId: "SINGALONG-SEP-27-2026",
+          notes: `Manual UPI payment. Amount: ₹${totalAmount} (${qty} paid pass${qty > 1 ? 'es' : ''}${freeTickets > 0 ? ` + ${freeTickets} FREE pass` : ''} = ${totalTickets} total passes, incl. ₹${conventionFee} conv. fee)`
+        });
+        if (res && res.success !== false) {
+          bookedRecord = res?.data?.booking || res?.data || res?.booking || res;
+        } else {
+          throw new Error(res?.message || utrErr?.message || 'Failed to complete booking');
+        }
+      }
+
+      if (!bookedRecord) {
+        throw new Error("Unable to complete booking. Please try again.");
       }
 
       const confirmedBookingId = bookedRecord?.bookingId || genBookingId();
@@ -558,9 +569,13 @@ export default function SingAlongBooking() {
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }, 1200);
     } catch (err) {
+      console.error("Booking submission error:", err);
       setIsSubmitting(false);
       setScreen('form');
-      toast.error(err.message || "Failed to process booking. Please try again.");
+      const msg = err.message || "Failed to process booking. Please try again.";
+      setErrorMessage(msg);
+      setShowErrorModal(true);
+      toast.error(msg, { duration: 6000 });
     }
   };
 
@@ -2828,6 +2843,66 @@ export default function SingAlongBooking() {
             <div className="mt-4 pt-3 border-t border-slate-800 text-center text-[11px] text-slate-400 space-y-1">
               <p>📧 A confirmation copy with your QR pass has also been dispatched to your email.</p>
               <p className="text-amber-300 font-medium">Gate helpline: <a href="tel:+919344037331" className="underline font-bold">+91 93440 37331</a></p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* =========================================================================
+          POPUP ERROR MODAL (DUPLICATE EMAIL / VALIDATION ISSUES)
+      ========================================================================= */}
+      {showErrorModal && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-[#0e1626] border border-red-500/40 rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-[0_25px_60px_rgba(239,68,68,0.25)] relative overflow-hidden">
+            {/* Ambient Red Glow */}
+            <div className="absolute -top-24 -right-24 w-48 h-48 bg-red-500/20 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-amber-500/15 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="relative z-10 text-center">
+              {/* Alert Icon */}
+              <div className="w-16 h-16 rounded-2xl bg-red-500/20 border border-red-500/30 text-red-400 flex items-center justify-center mx-auto mb-4 shadow-inner">
+                <AlertTriangle className="w-8 h-8 animate-pulse" />
+              </div>
+
+              {/* Title */}
+              <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight mb-2">
+                Booking Failed
+              </h3>
+
+              {/* Error Message Box */}
+              <div className="bg-red-950/40 border border-red-500/30 rounded-2xl p-4 my-4 text-left">
+                <p className="text-sm font-semibold text-red-200 leading-relaxed">
+                  {errorMessage || "This email address is already registered for Sing Along. Duplicate registrations with the same email ID are not allowed."}
+                </p>
+              </div>
+
+              {/* Explanatory Note */}
+              <p className="text-xs text-slate-400 mb-6 leading-relaxed">
+                If you have already registered, please check your inbox / WhatsApp for your pass. To book again, please use a different email address.
+              </p>
+
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowErrorModal(false);
+                    setScreen('form');
+                    setStep(1);
+                  }}
+                  className="w-full sm:w-1/2 py-3.5 px-4 rounded-xl bg-gradient-to-r from-[#F0791E] to-[#FF9F45] text-white font-black text-xs sm:text-sm uppercase tracking-wider shadow-lg shadow-orange-500/30 hover:scale-[1.02] active:scale-[0.98] transition cursor-pointer"
+                >
+                  Change Email / Details
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setShowErrorModal(false)}
+                  className="w-full sm:w-1/2 py-3.5 px-4 rounded-xl bg-white/10 hover:bg-white/15 text-slate-300 hover:text-white font-bold text-xs sm:text-sm uppercase tracking-wider transition cursor-pointer border border-white/10"
+                >
+                  Dismiss
+                </button>
+              </div>
             </div>
           </div>
         </div>

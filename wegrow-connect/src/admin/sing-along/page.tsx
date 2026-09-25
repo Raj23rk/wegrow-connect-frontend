@@ -32,7 +32,6 @@ import {
 import toast from 'react-hot-toast';
 import {
   getSingAlongBookings,
-  getSingAlongStats,
   exportSingAlongCsv,
   verifySingAlongTicket,
   checkInSingAlongTicket,
@@ -46,6 +45,19 @@ const rupee = (n: number | string) => {
   }
   return '₹' + num.toLocaleString('en-IN');
 };
+
+export function formatBookingDate(dateStr?: string) {
+  if (!dateStr) return { date: '—', time: '' };
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return { date: dateStr, time: '' };
+    const date = d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+    const time = d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+    return { date, time };
+  } catch {
+    return { date: dateStr, time: '' };
+  }
+}
 
 // Helper to determine whether a booking is Sponsor, Promo, or Paid
 export function getPassClassification(item: any) {
@@ -244,30 +256,6 @@ export default function AdminSingAlong() {
   };
 
 
-  // ─── Fetch Stats ─────────────────────────────────────────────────────────────
-  const loadStats = useCallback(async () => {
-    try {
-      setStatsLoading(true);
-      const res = await getSingAlongStats();
-      const statsData = res?.data?.data || res?.data?.stats || res?.data || res?.stats || res;
-      if (statsData) {
-        setStats((prev: any) => ({
-          ...prev,
-          ...statsData,
-          attendedCount: statsData.attendedCount ?? statsData.checkedInCount ?? prev?.attendedCount ?? 0,
-          confirmedCount: statsData.confirmedCount ?? statsData.totalConfirmed ?? prev?.confirmedCount ?? 19,
-          totalTickets: statsData.totalTickets ?? statsData.totalTicketsSold ?? prev?.totalTickets ?? 37,
-          totalRevenueFormatted: statsData.totalRevenueFormatted ?? prev?.totalRevenueFormatted ?? '₹9,154.80',
-          totalRevenue: statsData.totalRevenue ?? prev?.totalRevenue,
-        }));
-      }
-    } catch (err) {
-      console.error('Failed to load Sing Along stats:', err);
-    } finally {
-      setStatsLoading(false);
-    }
-  }, []);
-
   // ─── Fetch Bookings List ─────────────────────────────────────────────────────
   const loadBookings = useCallback(async () => {
     try {
@@ -371,10 +359,6 @@ export default function AdminSingAlong() {
   }, [page, limit, search, status, eventId, dateFilter, passFilter]);
 
   useEffect(() => {
-    loadStats();
-  }, [loadStats]);
-
-  useEffect(() => {
     loadBookings();
   }, [loadBookings]);
 
@@ -418,7 +402,7 @@ export default function AdminSingAlong() {
         setBookings(prev =>
           prev.map(b => (b._id === booking._id || b.bookingId === booking.bookingId ? { ...b, attended: true, status: 'ATTENDED' } : b))
         );
-        loadStats();
+        loadBookings();
       }
     } catch (err: any) {
       toast.error(err.message || 'Check-in failed');
@@ -463,7 +447,6 @@ export default function AdminSingAlong() {
           booking: prev?.booking ? { ...prev.booking, attended: true } : undefined,
         }));
         loadBookings();
-        loadStats();
       }
     } catch (err: any) {
       toast.error(err.message || 'Check-in failed');
@@ -548,7 +531,7 @@ export default function AdminSingAlong() {
           <div className="flex items-center gap-2.5 w-full sm:w-auto">
             <button
               type="button"
-              onClick={() => { loadStats(); loadBookings(); }}
+              onClick={() => { loadBookings(); }}
               className="p-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors flex items-center justify-center cursor-pointer shadow-xs"
               title="Refresh Data"
             >
@@ -578,8 +561,8 @@ export default function AdminSingAlong() {
 
         {/* Dashboard Content Container */}
         <main className="p-4 flex-1 min-h-0 flex flex-col gap-3 overflow-hidden">
-          {/* ─── Metric Cards (4 Columns) ─────────────────── */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 shrink-0">
+          {/* ─── Metric Cards Grid ─────────────────── */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 shrink-0">
 
             {/* Confirmed Orders */}
             <div className="bg-white rounded-xl border border-slate-200 p-3.5 px-4 shadow-xs flex items-center justify-between">
@@ -588,7 +571,7 @@ export default function AdminSingAlong() {
                 <div className="text-xl font-black text-slate-900 leading-tight">
                   {statsLoading && !stats && loading
                     ? '...'
-                    : (stats?.confirmedCount ?? stats?.totalConfirmed ?? 19)}
+                    : (stats?.confirmedCount ?? stats?.totalConfirmed ?? (totalCount || bookings.length))}
                 </div>
                 <span className="text-[10px] text-emerald-600 font-semibold">Confirmed bookings</span>
               </div>
@@ -604,12 +587,54 @@ export default function AdminSingAlong() {
                 <div className="text-xl font-black text-slate-900 leading-tight">
                   {statsLoading && !stats && loading
                     ? '...'
-                    : (stats?.totalTickets ?? stats?.summary?.totalTickets ?? 37)}
+                    : (stats?.totalTickets ?? stats?.summary?.totalTickets ?? bookings.reduce((sum: number, b: any) => sum + Number(b?.ticketQty || 1), 0))}
                 </div>
                 <span className="text-[10px] text-blue-600 font-semibold">Tickets Issued</span>
               </div>
               <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
                 <Users className="w-5 h-5" />
+              </div>
+            </div>
+
+            {/* Sponsor Passes (passType: SPONSOR CODE) */}
+            <div className="bg-white rounded-xl border border-amber-200 bg-gradient-to-br from-amber-50/40 to-white p-3.5 px-4 shadow-xs flex items-center justify-between">
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 block mb-0.5">Sponsor Passes</span>
+                <div className="text-xl font-black text-amber-950 leading-tight">
+                  {sponsorCount}
+                </div>
+                <span className="text-[10px] text-amber-600 font-bold">SPONSOR CODE</span>
+              </div>
+              <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center font-black">
+                <Award className="w-5 h-5 text-amber-700" />
+              </div>
+            </div>
+
+            {/* Promo Passes (passType: PROMO CODE) */}
+            <div className="bg-white rounded-xl border border-blue-200 bg-gradient-to-br from-blue-50/40 to-white p-3.5 px-4 shadow-xs flex items-center justify-between">
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-blue-700 block mb-0.5">Promo Passes</span>
+                <div className="text-xl font-black text-blue-950 leading-tight">
+                  {promoCount}
+                </div>
+                <span className="text-[10px] text-blue-600 font-bold">PROMO CODE</span>
+              </div>
+              <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center">
+                <Sparkles className="w-5 h-5" />
+              </div>
+            </div>
+
+            {/* Checked-In Attendee Count */}
+            <div className="bg-white rounded-xl border border-slate-200 p-3.5 px-4 shadow-xs flex items-center justify-between">
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">Checked In</span>
+                <div className="text-xl font-black text-slate-900 leading-tight">
+                  {statsLoading && !stats ? '...' : (stats?.attendedCount ?? stats?.checkedInCount ?? bookings.filter((b: any) => b.attended || b.status === 'ATTENDED').length)}
+                </div>
+                <span className="text-[10px] text-purple-600 font-semibold">Verified at Gate</span>
+              </div>
+              <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
+                <CheckCircle2 className="w-5 h-5" />
               </div>
             </div>
 
@@ -626,20 +651,6 @@ export default function AdminSingAlong() {
               </div>
               <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
                 <DollarSign className="w-5 h-5" />
-              </div>
-            </div>
-
-            {/* Checked-In Attendee Count */}
-            <div className="bg-white rounded-xl border border-slate-200 p-3.5 px-4 shadow-xs flex items-center justify-between">
-              <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">Checked In</span>
-                <div className="text-xl font-black text-slate-900 leading-tight">
-                  {statsLoading && !stats ? '...' : (stats?.attendedCount ?? stats?.checkedInCount ?? 0)}
-                </div>
-                <span className="text-[10px] text-purple-600 font-semibold">Verified at Gate</span>
-              </div>
-              <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
-                <CheckCircle2 className="w-5 h-5" />
               </div>
             </div>
           </div>
@@ -803,19 +814,21 @@ export default function AdminSingAlong() {
             <div className="table-scrollbar flex-1 min-h-0 overflow-auto">
               <table className="w-full text-left border-collapse text-xs min-w-[1100px]">
                 <colgroup>
-                  <col style={{width:'120px'}} />
-                  <col style={{width:'200px'}} />
-                  <col style={{width:'130px'}} />
-                  <col style={{width:'70px'}} />
                   <col style={{width:'110px'}} />
-                  <col style={{width:'190px'}} />
-                  <col style={{width:'140px'}} />
+                  <col style={{width:'130px'}} />
+                  <col style={{width:'180px'}} />
                   <col style={{width:'120px'}} />
-                  <col style={{width:'70px'}} />
+                  <col style={{width:'60px'}} />
+                  <col style={{width:'100px'}} />
+                  <col style={{width:'180px'}} />
+                  <col style={{width:'120px'}} />
+                  <col style={{width:'110px'}} />
+                  <col style={{width:'60px'}} />
                 </colgroup>
                 <thead className="sticky top-0 z-10 bg-slate-50 border-b border-slate-200 shadow-2xs">
                   <tr className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider text-[10px]">
                     <th className="py-3 px-3 bg-slate-50 whitespace-nowrap">Booking ID</th>
+                    <th className="py-3 px-3 bg-slate-50 whitespace-nowrap">Date</th>
                     <th className="py-3 px-3 bg-slate-50 whitespace-nowrap">Attendee</th>
                     <th className="py-3 px-3 bg-slate-50 whitespace-nowrap">Contact</th>
                     <th className="py-3 px-3 text-center bg-slate-50 whitespace-nowrap">Passes</th>
@@ -829,14 +842,14 @@ export default function AdminSingAlong() {
                 <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
                   {loading ? (
                     <tr>
-                      <td colSpan={9} className="py-12 text-center text-slate-400">
+                      <td colSpan={10} className="py-12 text-center text-slate-400">
                         <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-[#ff6a00]" />
                         Loading bookings...
                       </td>
                     </tr>
                   ) : filteredBookings.length === 0 ? (
                     <tr>
-                      <td colSpan={9} className="py-12 text-center text-slate-400">
+                      <td colSpan={10} className="py-12 text-center text-slate-400">
                         <Ticket className="w-8 h-8 mx-auto mb-2 text-slate-300" />
                         No ticket bookings found matching "{passFilter !== 'ALL' ? passFilter : 'criteria'}".
                         {passFilter !== 'ALL' && (
@@ -864,6 +877,20 @@ export default function AdminSingAlong() {
                             <span className="px-1.5 py-0.5 rounded-md bg-slate-100 text-[#ff6a00] border border-slate-200 whitespace-nowrap text-[10px]">
                               {item.bookingId || 'SA26-XXXX'}
                             </span>
+                          </td>
+
+                          {/* Date (createdAt) */}
+                          <td className="py-2.5 px-3 whitespace-nowrap">
+                            {(() => {
+                              const rawDate = item.createdAt || item.paidAt || item.issuedAt;
+                              const { date, time } = formatBookingDate(rawDate);
+                              return (
+                                <div className="flex flex-col">
+                                  <span className="font-bold text-slate-800 text-[11px]">{date}</span>
+                                  {time && <span className="text-[10px] text-slate-400 font-mono">{time}</span>}
+                                </div>
+                              );
+                            })()}
                           </td>
 
                           {/* Attendee Name */}
@@ -1021,6 +1048,16 @@ export default function AdminSingAlong() {
             </div>
 
             <div className="space-y-3.5 bg-slate-50 rounded-2xl p-4 border border-slate-200 text-xs">
+              <div className="flex justify-between border-b border-slate-200 pb-2">
+                <span className="text-slate-500">Booking Date</span>
+                <strong className="text-slate-900 font-bold">
+                  {(() => {
+                    const raw = viewingItem.createdAt || viewingItem.paidAt || viewingItem.issuedAt;
+                    const { date, time } = formatBookingDate(raw);
+                    return `${date} ${time}`;
+                  })()}
+                </strong>
+              </div>
               <div className="flex justify-between border-b border-slate-200 pb-2">
                 <span className="text-slate-500">Attendee Name</span>
                 <strong className="text-slate-900">{viewingItem.fullName}</strong>
