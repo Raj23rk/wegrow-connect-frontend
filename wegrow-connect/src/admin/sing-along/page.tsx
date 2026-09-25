@@ -612,7 +612,7 @@ export default function AdminSingAlong() {
         {/* Dashboard Content Container */}
         <main className="p-4 flex-1 min-h-0 flex flex-col gap-3 overflow-hidden">
           {/* ─── Metric Cards Grid ─────────────────── */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3 shrink-0">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-6 gap-3 shrink-0">
 
             {/* Confirmed Orders */}
             <div className="bg-white rounded-xl border border-slate-200 p-3.5 px-4 shadow-xs flex items-center justify-between">
@@ -657,20 +657,6 @@ export default function AdminSingAlong() {
               </div>
               <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center font-black">
                 <Award className="w-5 h-5 text-amber-700" />
-              </div>
-            </div>
-
-            {/* Promo Passes (passType: PROMO CODE) */}
-            <div className="bg-white rounded-xl border border-blue-200 bg-gradient-to-br from-blue-50/40 to-white p-3.5 px-4 shadow-xs flex items-center justify-between">
-              <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-blue-700 block mb-0.5">Promo Passes</span>
-                <div className="text-xl font-black text-blue-950 leading-tight">
-                  {displayPromoCount}
-                </div>
-                <span className="text-[10px] text-blue-600 font-bold">PROMO CODE</span>
-              </div>
-              <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center">
-                <Sparkles className="w-5 h-5" />
               </div>
             </div>
 
