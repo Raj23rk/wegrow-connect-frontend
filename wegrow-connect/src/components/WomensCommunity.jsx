@@ -92,8 +92,15 @@ export default function WomensCommunity() {
       toast.error('Please provide your name and phone number!');
       return;
     }
-    if (formData.phone.replace(/\D/g, '').length < 10) {
-      toast.error('Please enter a valid 10-digit mobile number.');
+    let cleanPhone = formData.phone.replace(/\D/g, '');
+    if (cleanPhone.length === 11 && cleanPhone.startsWith('0')) {
+      cleanPhone = cleanPhone.slice(1);
+    } else if (cleanPhone.length === 12 && cleanPhone.startsWith('91')) {
+      cleanPhone = cleanPhone.slice(2);
+    }
+
+    if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
+      toast.error('Phone number must be a valid 10-digit Indian mobile number (e.g. 9876543210).');
       return;
     }
 
@@ -101,7 +108,7 @@ export default function WomensCommunity() {
     try {
       const payload = {
         fullName: formData.fullName.trim(),
-        phone: formData.phone.trim(),
+        phone: cleanPhone,
         email: formData.email.trim() || undefined,
         businessStage: formData.businessStage,
         category: formData.category,
@@ -110,7 +117,7 @@ export default function WomensCommunity() {
       };
 
       const res = await registerWomenEntrepreneur(payload);
-      if (res && (res.success || res.status === 'success' || res._id || res.data)) {
+      if (res && res.success === true) {
         setIsRegistered(true);
         toast.success('Registration successful! Welcome to WeGrow Women Community 🎉');
       } else {
@@ -119,7 +126,7 @@ export default function WomensCommunity() {
       }
     } catch (err) {
       console.error('Registration error:', err);
-      toast.error('Unable to connect to server. Please try again later.');
+      toast.error(err?.message || 'Unable to connect to server. Please try again later.');
     } finally {
       setIsSubmitting(false);
     }
@@ -149,7 +156,7 @@ export default function WomensCommunity() {
     }
   ];
 
-  const fullAddress = '193/1A, Ground Floor, Ayyapan Kovil Opp. Police Station Road, Sivakasi – 626 123';
+  const fullAddress = 'WeGrow B-School, 193/1A, Ground Floor, Ayyapan Kovil Opp. Police Station Road, Sivakasi – 626 123';
   const venueAddress = 'Ayyapan Kovil Opposite, Sivakasi';
   return (
     <div className="min-h-screen bg-[#FBF6EE] text-[#1B2140] font-sans antialiased selection:bg-[#F0791E] selection:text-white overflow-x-hidden">
@@ -179,13 +186,13 @@ export default function WomensCommunity() {
 
           <div className="flex items-center gap-3 sm:gap-4 lg:gap-6">
             <a
-              href="tel:+919344037331"
+              href="tel:+919344337331"
               className="flex items-center gap-2 text-sm font-semibold text-[#16225E] hover:text-[#F0791E] transition-colors"
             >
               <div className="w-8 h-8 rounded-full bg-[#16225E]/10 flex items-center justify-center">
                 <Phone className="w-4 h-4 text-[#F0791E]" />
               </div>
-              <span className="hidden sm:inline font-mono font-bold">+91 93440 37331</span>
+              <span className="hidden sm:inline font-mono font-bold">+91 93443 37331</span>
             </a>
             <a
               href="#register"
@@ -481,10 +488,10 @@ export default function WomensCommunity() {
               <Headphones className="w-7 h-7 text-[#F0791E] mx-auto mb-2" />
               <div className="text-xs font-bold text-[#666C87] uppercase tracking-wider mb-1">Queries & Support</div>
               <a
-                href="tel:+919344037331"
+                href="tel:+919344337331"
                 className="inline-block text-base font-extrabold text-[#F0791E] hover:underline font-mono"
               >
-                +91 9344037331
+                +91 93443 37331
               </a>
             </div>
           </div>
@@ -900,7 +907,7 @@ export default function WomensCommunity() {
         eventDate="Fri, 11 Sep 2026"
         eventTime="11:00 AM – 1:00 PM"
         venueAddress={fullAddress}
-        queriesPhone="+91 93440 37331"
+        queriesPhone="+91 93443 37331"
         registerSectionId="register"
       />
     </div>

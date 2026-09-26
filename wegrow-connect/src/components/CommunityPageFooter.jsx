@@ -27,7 +27,7 @@ export default function CommunityPageFooter({
   const branchData = {
     sivakasi: {
       label: 'Sivakasi',
-      address: '193/1A, Ground Floor, Ayyapan Kovil Opp. Police Station Road, Sivakasi – 626 123',
+      address: 'WeGrow B-School, 193/1A, Ground Floor, Ayyapan Kovil Opp. Police Station Road, Sivakasi – 626 123',
       phone: '+91 93443 37331',
       email: 'wegrowskillcampus@gmail.com',
       hours: 'Mon – Sat: 10:00 AM – 7:00 PM',

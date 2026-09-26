@@ -291,9 +291,15 @@ export default function BusinessFoundersCommunity() {
       toast.error('Please enter your full name and mobile number.');
       return;
     }
-    const cleanPhone = form.phone.replace(/\D/g, '');
-    if (cleanPhone.length < 10) {
-      toast.error('Please enter a valid 10-digit mobile number.');
+    let cleanPhone = form.phone.replace(/\D/g, '');
+    if (cleanPhone.length === 11 && cleanPhone.startsWith('0')) {
+      cleanPhone = cleanPhone.slice(1);
+    } else if (cleanPhone.length === 12 && cleanPhone.startsWith('91')) {
+      cleanPhone = cleanPhone.slice(2);
+    }
+
+    if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
+      toast.error('Phone number must be a valid 10-digit Indian mobile number (e.g. 9876543210).');
       return;
     }
 
@@ -301,7 +307,7 @@ export default function BusinessFoundersCommunity() {
     try {
       const payload = {
         fullName: form.fullName.trim(),
-        phone: form.phone.trim(),
+        phone: cleanPhone,
         email: form.email.trim() || undefined,
         state: form.state || undefined,
         city: form.city || undefined,
@@ -317,25 +323,23 @@ export default function BusinessFoundersCommunity() {
       };
 
       const res = await registerBusinessFounder(payload);
-      if (res && (res.success || res.status === 'success' || res._id || res.data)) {
+      if (res && res.success === true) {
         setIsRegistered(true);
         toast.success('Registration confirmed! Welcome to WeGrow Business Transformation Meetup 🎉');
       } else {
-        // Graceful fallback for UI demo / when backend API route is pending
-        setIsRegistered(true);
-        toast.success('Registration submitted! We will contact you with session details.');
+        const errorMsg = res?.message || 'Registration failed. Please try again.';
+        toast.error(errorMsg);
       }
     } catch (err) {
-      console.warn('Backend API notification, providing graceful registration UI confirmation:', err);
-      setIsRegistered(true);
-      toast.success('Registration details received! See you at WeGrow B School 🎉');
+      console.error('Registration error:', err);
+      toast.error(err?.message || 'Unable to connect to server. Please try again later.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const phoneDisplay = '+91 9344037331';
-  const fullAddress = '193/1A, Ground Floor, Ayyapan Kovil Opp. Police Station Road, Sivakasi – 626 123';
+  const phoneDisplay = '+91 93443 37331';
+  const fullAddress = 'WeGrow B-School, 193/1A, Ground Floor, Ayyapan Kovil Opp. Police Station Road, Sivakasi – 626 123';
 
   return (
     <div className="min-h-screen bg-[#FBF6EE] text-[#1B2140] font-sans selection:bg-[#F0791E] selection:text-white">
@@ -909,7 +913,7 @@ export default function BusinessFoundersCommunity() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Clock className="w-4 h-4 text-[#F0791E]" />
-                    <span><strong>Timing:</strong> 10:00 AM to 1:00 AM</span>
+                    <span><strong>Timing:</strong> 10:00 AM to 1:00 PM</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <MapPin className="w-4 h-4 text-[#F0791E] mt-0.5" />
@@ -919,10 +923,10 @@ export default function BusinessFoundersCommunity() {
 
                 <div className="pt-2">
                   <a
-                    href={`https://wa.me/91${phoneDisplay}?text=Hi%20WeGrow%2C%20I%20have%20registered%20for%20the%20Business%20Founders%20Community%20Orientation%20on%2016%20Sep.`}
+                    href="https://wa.me/919344337331?text=Hi%20WeGrow%2C%20I%20have%20registered%20for%20the%20Business%20Transformation%20Meetup."
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1EBE5D] text-white font-bold text-sm px-6 py-3 rounded-full transition shadow-md w-full"
+                    className="inline-flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1EBE5D] text-white font-bold text-sm px-6 py-3 rounded-full transition shadow-md w-full cursor-pointer"
                   >
                     <Phone className="w-4 h-4" /> Message on WhatsApp for Queries
                   </a>

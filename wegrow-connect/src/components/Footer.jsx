@@ -23,7 +23,7 @@ export default function Footer({
   // BRANCH DATA
   const branchData = {
     sivakasi: {
-      address: '193/1A, Ground Floor, Ayyapan Kovil Opp. Police Station Road, Sivakasi – 626 123',
+      address: 'WeGrow B-School, 193/1A, Ground Floor, Ayyapan Kovil Opp. Police Station Road, Sivakasi – 626 123',
       oldAddress: '100A/5, 1st Floor, Thiruthangal Road, Opposite Bell Hotel, Sivakasi – 626123',
       phone: '+91 93443 37331',
       email: 'wegrowskillcampus@gmail.com',

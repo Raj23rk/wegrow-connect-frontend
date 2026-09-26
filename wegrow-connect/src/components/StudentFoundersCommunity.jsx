@@ -72,7 +72,7 @@ export default function StudentFoundersCommunity() {
     },
     {
       q: 'Will I get a confirmation after registering?',
-      a: 'Yes! You will receive a confirmation via WhatsApp or a call on the number you register with. For queries, call +91 9344037331.'
+      a: 'Yes! You will receive a confirmation via WhatsApp or a call on the number you register with. For queries, call +91 93443 37331.'
     },
     {
       q: 'What should I bring to the orientation?',
@@ -108,8 +108,15 @@ export default function StudentFoundersCommunity() {
       toast.error('Please provide your name, phone number, and email address!');
       return;
     }
-    if (form.phone.replace(/\D/g, '').length < 10) {
-      toast.error('Please enter a valid 10-digit mobile number.');
+    let cleanPhone = form.phone.replace(/\D/g, '');
+    if (cleanPhone.length === 11 && cleanPhone.startsWith('0')) {
+      cleanPhone = cleanPhone.slice(1);
+    } else if (cleanPhone.length === 12 && cleanPhone.startsWith('91')) {
+      cleanPhone = cleanPhone.slice(2);
+    }
+
+    if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
+      toast.error('Phone number must be a valid 10-digit Indian mobile number (e.g. 9876543210).');
       return;
     }
 
@@ -117,7 +124,7 @@ export default function StudentFoundersCommunity() {
     try {
       const payload = {
         fullName: form.fullName.trim(),
-        phone: form.phone.trim(),
+        phone: cleanPhone,
         email: form.email.trim(),
         collegeName: form.collegeName?.trim() || undefined,
         yearOfStudy: form.yearOfStudy || undefined,
@@ -134,7 +141,7 @@ export default function StudentFoundersCommunity() {
       };
 
       const res = await registerStudentFounder(payload);
-      if (res && (res.success || res.status === 'success' || res._id || res.data)) {
+      if (res && res.success === true) {
         setRegistered(true);
         toast.success('Registration confirmed! See you on 12 Sep 🎓');
       } else {
@@ -143,7 +150,7 @@ export default function StudentFoundersCommunity() {
       }
     } catch (err) {
       console.error('Registration error:', err);
-      toast.error('Unable to connect to server. Please try again later.');
+      toast.error(err?.message || 'Unable to connect to server. Please try again later.');
     } finally {
       setIsSubmitting(false);
     }
@@ -200,7 +207,7 @@ export default function StudentFoundersCommunity() {
   ];
 
   const venueAddress = 'Ayyapan Kovil Opposite, Naturals below, WeGrow B School, Sivakasi';
-  const helperPhone = '+91 9344037331';
+  const helperPhone = '+91 93443 37331';
 
   return (
     <div className="min-h-screen bg-[#FBF6EE] text-[#1B2140] font-sans antialiased selection:bg-[#F0791E] selection:text-white overflow-x-hidden">
