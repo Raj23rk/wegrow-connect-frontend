@@ -4,12 +4,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>WeGrow B School</title>
+    <meta name="description" content="WeGrow B-School - Transform your business, learn modern leadership and entrepreneurship strategies with practical workshops and expert mentorship." />
+    <meta name="theme-color" content="#16225E" />
     <link rel="icon" type="image/jpeg" href="/we_mascot.jpeg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,800;9..144,900&family=Caveat:wght@600;700&family=Inter:wght@400;600;700;800&family=Lilita+One&family=Outfit:wght@500;600;700;800;900&family=Permanent+Marker&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Shrikhand&family=Titan+One&display=swap" rel="stylesheet" />
-    <script defer src="https://checkout.razorpay.com/v1/checkout.js"></script>
-    <script defer src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,800;9..144,900&family=Caveat:wght@600;700&family=Inter:wght@400;600;700;800&family=Lilita+One&family=Outfit:wght@500;600;700;800;900&family=Permanent+Marker&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Shrikhand&family=Titan+One&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,800;9..144,900&family=Caveat:wght@600;700&family=Inter:wght@400;600;700;800&family=Lilita+One&family=Outfit:wght@500;600;700;800;900&family=Permanent+Marker&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Shrikhand&family=Titan+One&display=swap" media="print" onload="this.media='all'" />
+    <noscript>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,800;9..144,900&family=Caveat:wght@600;700&family=Inter:wght@400;600;700;800&family=Lilita+One&family=Outfit:wght@500;600;700;800;900&family=Permanent+Marker&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Shrikhand&family=Titan+One&display=swap" />
+    </noscript>
+    <script async defer src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script async defer src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
 
     <style>
       /* ── Splash Screen ── */
@@ -23,7 +29,7 @@
         justify-content: center;
         gap: 28px;
         background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-        transition: opacity 0.6s ease, visibility 0.6s ease;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
       }
       #splash.hide {
         opacity: 0;
@@ -205,16 +211,16 @@
           var root = document.getElementById('root');
           if (root && root.children.length > 0) {
             splash.classList.add('hide');
-            setTimeout(function () { splash.remove(); }, 650);
+            setTimeout(function () { splash.remove(); }, 320);
             observer.disconnect();
           }
         });
         observer.observe(document.getElementById('root'), { childList: true, subtree: true });
-        // Safety fallback — remove after 5 s regardless
+        // Safety fallback — remove after 3 s regardless
         setTimeout(function () {
           var s = document.getElementById('splash');
-          if (s) { s.classList.add('hide'); setTimeout(function(){ s.remove(); }, 650); }
-        }, 5000);
+          if (s) { s.classList.add('hide'); setTimeout(function(){ s.remove(); }, 320); }
+        }, 3000);
       })();
     </script>
   </body>
