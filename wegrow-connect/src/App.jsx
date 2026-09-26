@@ -20,26 +20,28 @@ import ContactSection from './components/ContactSection';
 import Footer from './components/Footer';
 import FloatingWhatsApp from './components/FloatingWhatsApp';
 import WeGrowChatbot from './components/WeGrowChatbot';
-import LoginScreen from './components/LoginScreen';
-import RegisterSelection from './components/RegisterSelection';
 import AuthLayout from './components/AuthLayout';
-import ProfilePage from './components/ProfilePage';
 import { workshopsData } from './data/workshopsData';
 import { theme } from './theme';
-import StudentRegister from './components/StudentRegister';
-import BusinessRegister from './components/BusinessRegister';
-import ForgotPasswordScreen from './components/ForgotPasswordScreen';
-import SetPasswordScreen from './components/SetPasswordScreen';
-import EventDetails from "./components/EventDetails";
-import WomensCommunity from './components/WomensCommunity';
-import StudentFoundersCommunity from './components/StudentFoundersCommunity';
-import BusinessFoundersCommunity from './components/BusinessFoundersCommunity';
-import WomensCommunityV1 from './components/WomensCommunityV1';
 import WhoCanJoinSection from './components/WhoCanJoinSection';
 import WhyWeGrowSection from './components/WhyWeGrowSection';
 import FinalCTASection from './components/FinalCTASection';
 
-// Lazy load Sing Along Page for ultra-fast initial paint
+// Lazy load Route Pages for fast initial paint & high PageSpeed score
+const LoginScreen = lazy(() => import('./components/LoginScreen'));
+const RegisterSelection = lazy(() => import('./components/RegisterSelection'));
+const ForgotPasswordScreen = lazy(() => import('./components/ForgotPasswordScreen'));
+const SetPasswordScreen = lazy(() => import('./components/SetPasswordScreen'));
+const StudentRegister = lazy(() => import('./components/StudentRegister'));
+const BusinessRegister = lazy(() => import('./components/BusinessRegister'));
+const ProfilePage = lazy(() => import('./components/ProfilePage'));
+const EventDetails = lazy(() => import('./components/EventDetails'));
+const WomensCommunity = lazy(() => import('./components/WomensCommunity'));
+const StudentFoundersCommunity = lazy(() => import('./components/StudentFoundersCommunity'));
+const BusinessFoundersCommunity = lazy(() => import('./components/BusinessFoundersCommunity'));
+const WomensCommunityV1 = lazy(() => import('./components/WomensCommunityV1'));
+const GalleryPage = lazy(() => import('./components/GalleryPage'));
+
 const SingAlongBooking = lazy(() => import('./components/SingAlongBooking'));
 const SingAlongSponsorBooking = lazy(() => import('./components/SingAlongSponsorBooking'));
 const BusinessDependencyTest = lazy(() => import('./components/BusinessDependencyTest'));
@@ -70,8 +72,6 @@ const BusinessWorkshops = lazy(() => import('./business/workshops/page'));
 const BusinessLegal = lazy(() => import('./business/legal/page'));
 const BusinessSubscriptions = lazy(() => import('./business/subscriptions/page'));
 const BusinessSettings = lazy(() => import('./business/settings/page'));
-
-import GalleryPage from './components/GalleryPage';
 
 // Admin Portal Sub-pages (Lazy Loaded)
 const AdminDashboard = lazy(() => import('./admin/page'));
