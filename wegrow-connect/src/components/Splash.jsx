@@ -23,7 +23,7 @@ export default function Splash() {
   }, [navigate]);
 
   return (
-    <div className="font-['Inter'] overflow-hidden h-screen w-screen relative bg-[#f2f4f8]">
+    <div className="font-['Inter'] overflow-x-hidden overflow-y-hidden h-screen w-full max-w-full relative bg-[#f2f4f8]">
       <style>{`
         @keyframes fadeInSplash {
           0% { opacity: 0; transform: scale(0.92); }

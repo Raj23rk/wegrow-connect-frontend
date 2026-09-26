@@ -37,7 +37,7 @@ export default function AuthLayout({ children }) {
 
   return (
     <div 
-      className="font-['Inter'] min-h-screen w-screen h-screen overflow-hidden flex items-center justify-center relative animate-fade-in"
+      className="font-['Inter'] min-h-screen w-full max-w-full h-screen overflow-x-hidden overflow-y-hidden flex items-center justify-center relative animate-fade-in"
       style={{ backgroundColor: theme.bgDark, color: theme.textMain }}
     >
       <style>{`

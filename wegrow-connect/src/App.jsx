@@ -614,7 +614,7 @@ function MainHomePage() {
 
   return (
     <div 
-      className="font-['Inter'] overflow-hidden h-screen w-screen relative transition-colors duration-500" 
+      className="font-['Inter'] overflow-x-hidden overflow-y-hidden h-screen w-full max-w-full relative transition-colors duration-500" 
       style={{ 
         backgroundColor: isDarkMode ? '#061325' : theme.bgDark, 
         color: isDarkMode ? '#f8fafc' : theme.textMain 
@@ -659,7 +659,7 @@ function MainHomePage() {
       <main 
         ref={scrollContainerRef} 
         onScroll={handleScroll} 
-        className="scroll-container relative z-20 w-full h-full overflow-y-auto pt-20 sm:pt-24 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+        className="scroll-container relative z-20 w-full max-w-full h-full overflow-y-auto overflow-x-hidden pt-20 sm:pt-24 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
       >
         {/* 1. HERO SECTION */}
         <Hero heroTransform={heroTransform} scrollToEvents={scrollToWhoCanJoin} />
