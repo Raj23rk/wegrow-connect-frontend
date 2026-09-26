@@ -335,7 +335,7 @@ export default function AdminSingAlong() {
         resData?.attendedCount ??
         resData?.checkedInCount;
 
-      const attendedFromList = listData.filter((b: any) => b.attended || b.status === 'ATTENDED').length;
+      const attendedFromList = listData.filter((b: any) => Boolean(b.attended)).length;
 
       const sponsorTickets =
         res?.sponsorTickets ??
@@ -679,7 +679,7 @@ export default function AdminSingAlong() {
               <div>
                 <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">Checked In</span>
                 <div className="text-xl font-black text-slate-900 leading-tight">
-                  {statsLoading && !stats ? '...' : (stats?.attendedCount ?? stats?.checkedInCount ?? bookings.filter((b: any) => b.attended || b.status === 'ATTENDED').length)}
+                  {statsLoading && !stats ? '...' : (stats?.attendedCount ?? stats?.checkedInCount ?? bookings.filter((b: any) => Boolean(b.attended)).length)}
                 </div>
                 <span className="text-[10px] text-purple-600 font-semibold">Verified at Gate</span>
               </div>
@@ -915,8 +915,9 @@ export default function AdminSingAlong() {
                     </tr>
                   ) : (
                     filteredBookings.map((item) => {
-                      const isAttended = item.attended || item.status === 'ATTENDED' || item.status === 'USED';
-                      const isConfirmed = item.status === 'CONFIRMED' || isAttended;
+                      const isAttended = Boolean(item.attended);
+                      const displayStatus = (!isAttended && item.status === 'ATTENDED') ? 'CONFIRMED' : (item.status || 'CONFIRMED');
+                      const isConfirmed = displayStatus === 'CONFIRMED' || isAttended || !item.status;
                       const bookingIdStr = item.bookingId || item.id || item._id;
                       const passInfo = getPassClassification(item);
 
@@ -1002,7 +1003,7 @@ export default function AdminSingAlong() {
                                 : 'bg-amber-50 text-amber-700 border border-amber-200'
                             }`}>
                               {isConfirmed ? <CheckCircle2 className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
-                              <span>{item.status || 'CONFIRMED'}</span>
+                              <span>{displayStatus}</span>
                             </span>
                           </td>
 
@@ -1159,12 +1160,14 @@ export default function AdminSingAlong() {
               </div>
               <div className="flex justify-between border-b border-slate-200 pb-2">
                 <span className="text-slate-500">Booking Status</span>
-                <span className="font-bold text-emerald-600">{viewingItem.status || 'CONFIRMED'}</span>
+                <span className="font-bold text-emerald-600">
+                  {(!Boolean(viewingItem.attended) && viewingItem.status === 'ATTENDED') ? 'CONFIRMED' : (viewingItem.status || 'CONFIRMED')}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-500">Gate Attendance</span>
-                <span className={`font-bold ${viewingItem.attended ? 'text-purple-600' : 'text-slate-600'}`}>
-                  {viewingItem.attended ? '● Present / Checked In' : '○ Not Yet Checked In'}
+                <span className={`font-bold ${Boolean(viewingItem.attended) ? 'text-purple-600' : 'text-slate-600'}`}>
+                  {Boolean(viewingItem.attended) ? '● Present / Checked In' : '○ Not Yet Checked In'}
                 </span>
               </div>
             </div>
@@ -1182,7 +1185,7 @@ export default function AdminSingAlong() {
             )}
 
             <div className="mt-5 flex justify-end gap-2">
-              {!viewingItem.attended && (
+              {!Boolean(viewingItem.attended) && (
                 <button
                   type="button"
                   onClick={() => { handleQuickCheckin(viewingItem); setViewingItem(null); }}
@@ -1275,13 +1278,13 @@ export default function AdminSingAlong() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-600">Current Status:</span>
-                  <span className={`font-bold ${(verifiedTicket?.booking?.attended || verifiedTicket?.attended) ? 'text-purple-700' : 'text-emerald-700'}`}>
-                    {(verifiedTicket?.booking?.attended || verifiedTicket?.attended) ? 'ALREADY CHECKED IN' : 'CONFIRMED (READY FOR ENTRY)'}
+                  <span className={`font-bold ${Boolean(verifiedTicket?.booking?.attended ?? verifiedTicket?.attended) ? 'text-purple-700' : 'text-emerald-700'}`}>
+                    {Boolean(verifiedTicket?.booking?.attended ?? verifiedTicket?.attended) ? 'ALREADY CHECKED IN' : 'CONFIRMED (READY FOR ENTRY)'}
                   </span>
                 </div>
 
                 <div className="pt-2">
-                  {(verifiedTicket?.booking?.attended || verifiedTicket?.attended) ? (
+                  {Boolean(verifiedTicket?.booking?.attended ?? verifiedTicket?.attended) ? (
                     <div className="p-2.5 rounded-xl bg-purple-100 text-purple-800 text-center font-bold text-xs">
                       Attendee is already checked in.
                     </div>

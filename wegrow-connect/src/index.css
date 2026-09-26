@@ -7,6 +7,9 @@ body {
   width: 100%;
   max-width: 100%;
   overflow-x: hidden !important;
+  overscroll-behavior-x: none !important;
+  overscroll-behavior-y: auto;
+  touch-action: pan-y;
   margin: 0;
   padding: 0;
 }
@@ -15,6 +18,12 @@ body {
   width: 100%;
   max-width: 100%;
   overflow-x: hidden !important;
+}
+
+.scroll-container {
+  overflow-x: hidden !important;
+  overscroll-behavior-x: none !important;
+  max-width: 100%;
 }
 
 :root {
