@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "name": "WeGrow B School",
+  "description": "WeGrow B-School - Transform your business, learn modern leadership and entrepreneurship strategies with practical workshops and expert mentorship.",
+  "url": "https://www.wegrowbschool.in",
+  "version": "1.0.0",
+  "provider": {
+    "name": "WeGrow B School",
+    "url": "https://www.wegrowbschool.in",
+    "contact": "wegrowskillcampus@gmail.com",
+    "phone": "+91 93443 37331"
+  },
+  "resources": [
+    {
+      "id": "business-founders",
+      "name": "Business Founders Community",
+      "description": "Business transformation meetups, founder networking, and growth workshops.",
+      "url": "https://www.wegrowbschool.in/business-founders",
+      "type": "program"
+    },
+    {
+      "id": "womens-community",
+      "name": "Women Entrepreneurs Community",
+      "description": "Empowering women entrepreneurs through structured guidance, mentorship, and business scaling workshops.",
+      "url": "https://www.wegrowbschool.in/womens-community",
+      "type": "program"
+    },
+    {
+      "id": "student-founders",
+      "name": "Student Founders Community",
+      "description": "Empowering college and school student innovators with business building fundamentals.",
+      "url": "https://www.wegrowbschool.in/student-founders",
+      "type": "program"
+    },
+    {
+      "id": "business-dependency-test",
+      "name": "Business Dependency Test",
+      "description": "Interactive diagnostic test to evaluate business autonomy and bottlenecks.",
+      "url": "https://www.wegrowbschool.in/business-dependency-test",
+      "type": "tool"
+    },
+    {
+      "id": "business-consultancy",
+      "name": "Business Consultancy",
+      "description": "Strategic advisory and growth consultancy for MSMEs and startups.",
+      "url": "https://www.wegrowbschool.in/consultancy",
+      "type": "service"
+    }
+  ]
+}
