@@ -118,16 +118,16 @@ const genBookingId = () => {
   return `${CONFIG.bookingPrefix}-${code}`;
 };
 
-// Cutoff Time: 02:00 PM IST on September 27, 2026
-const REGISTRATION_CLOSE_TIME = new Date('2026-09-27T14:00:00+05:30').getTime();
+// Cutoff Time: 03:30 PM IST on September 27, 2026
+const REGISTRATION_CLOSE_TIME = new Date('2026-09-27T15:30:00+05:30').getTime();
 
 export default function SingAlongBooking() {
-  // Check if online registration has closed (at or after 02:00 PM)
+  // Check if online registration has closed (at or after 03:30 PM)
   const [isClosed, setIsClosed] = useState(() => Date.now() >= REGISTRATION_CLOSE_TIME);
   const [lookupBookingId, setLookupBookingId] = useState('');
   const [isLookingUp, setIsLookingUp] = useState(false);
 
-  // Interval check to reactively update status when clock passes 02:00 PM
+  // Interval check to reactively update status when clock passes 03:30 PM
   useEffect(() => {
     const checkClosedStatus = () => {
       setIsClosed(Date.now() >= REGISTRATION_CLOSE_TIME);
@@ -1328,17 +1328,17 @@ export default function SingAlongBooking() {
             {/* Status Alert Pill */}
             <div className="inline-flex items-center gap-2.5 px-4 sm:px-5 py-2 rounded-full bg-red-500/15 border border-red-500/40 text-red-400 text-xs sm:text-sm font-black uppercase tracking-wider mb-6 shadow-lg shadow-red-500/10 animate-pulse">
               <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping" />
-              <span>Online Registration Closed at 02:00 PM</span>
+              <span>Online Registration Closed at 03:30 PM</span>
             </div>
 
             {/* Exact Requested Message Heading */}
-            <h1 className="font-display font-black text-2xl xs:text-3xl sm:text-4xl md:text-5xl text-white tracking-tight leading-snug mb-4 drop-shadow-2xl">
-              Thank you for visit now Regsiter close if ticket need please direct vist event venu 06:00 PM
+            <h1 className="font-display font-black text-2xl xs:text-3xl sm:text-4xl md:text-5xl text-white tracking-tight leading-snug mb-4 drop-shadow-2xl max-w-3xl mx-auto">
+              You can visit the event venue directly at 5.30 pm for on-spot tickets
             </h1>
 
             {/* Clear Subtitle */}
             <p className="text-slate-300 text-sm sm:text-base md:text-lg max-w-2xl mx-auto mb-8 font-medium leading-relaxed">
-              Online booking has concluded. For on-spot tickets and walk-in passes, please visit the event venue directly today by <span className="text-amber-400 font-bold">06:00 PM</span>.
+              Thank you for visiting! Online registration is now closed. You can visit the event venue directly at <span className="text-amber-400 font-bold">5:30 PM</span> for on-spot tickets.
             </p>
 
             {/* Event & Venue Information Card */}
@@ -1366,7 +1366,7 @@ export default function SingAlongBooking() {
                   <Clock className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
                   <div>
                     <span className="text-slate-400 block text-[11px] font-bold uppercase">Event &amp; Entry Time</span>
-                    <span className="text-white font-bold text-sm">06:00 PM (Gates open 05:30 PM)</span>
+                    <span className="text-white font-bold text-sm">05:30 PM Onwards (Showtime 06:00 PM)</span>
                   </div>
                 </div>
 
@@ -1394,7 +1394,7 @@ export default function SingAlongBooking() {
                 </a>
 
                 <a
-                  href="https://wa.me/919344037331?text=Hi%20WeGrow%2C%20I%20want%20to%20inquire%20about%20Sing%20Along%20tickets%20at%20Arasan%20Turf%20venue%20at%2006%3A00%20PM"
+                  href="https://wa.me/919344037331?text=Hi%20WeGrow%2C%20I%20want%20to%20inquire%20about%20on-spot%20Sing%20Along%20tickets%20at%20Arasan%20Turf%20venue%20at%205%3A30%20PM"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full sm:w-auto py-3.5 px-5 rounded-xl bg-[#25D366] hover:bg-[#20ba59] text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
