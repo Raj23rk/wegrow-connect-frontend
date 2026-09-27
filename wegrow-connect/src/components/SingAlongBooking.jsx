@@ -118,24 +118,12 @@ const genBookingId = () => {
   return `${CONFIG.bookingPrefix}-${code}`;
 };
 
-// Cutoff Time: 03:30 PM IST on September 27, 2026
-const REGISTRATION_CLOSE_TIME = new Date('2026-09-27T15:30:00+05:30').getTime();
-
+// Cutoff Time: Open
 export default function SingAlongBooking() {
-  // Check if online registration has closed (at or after 03:30 PM)
-  const [isClosed, setIsClosed] = useState(() => Date.now() >= REGISTRATION_CLOSE_TIME);
+  // Registration is open
+  const [isClosed, setIsClosed] = useState(false);
   const [lookupBookingId, setLookupBookingId] = useState('');
   const [isLookingUp, setIsLookingUp] = useState(false);
-
-  // Interval check to reactively update status when clock passes 03:30 PM
-  useEffect(() => {
-    const checkClosedStatus = () => {
-      setIsClosed(Date.now() >= REGISTRATION_CLOSE_TIME);
-    };
-    checkClosedStatus();
-    const interval = setInterval(checkClosedStatus, 3000);
-    return () => clearInterval(interval);
-  }, []);
 
   // Lookup existing ticket by Booking ID
   const handleLookupTicket = async (e) => {
