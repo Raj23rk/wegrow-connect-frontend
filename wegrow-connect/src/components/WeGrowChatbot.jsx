@@ -114,7 +114,7 @@ const KNOWLEDGE_BASE = [
     title: 'Events, Workshops & Cultural Meets',
     response: `🎉 **Events & Industry Workshops**:\n\n• **Sing Along Live Concert**: Mega music festival at Arasan Turf, Sivakasi (Sun, Sep 27, 2026) with VIP & Sponsor passes!\n• **Expert Masterclasses**: Hands-on weekend workshops covering Full Stack, AI Tools, Digital Ads, and Financial Planning.\n• **Founder Roundtables**: Monthly closed-door meetups for startup founders.`,
     quickActions: [
-      { label: 'Sponsor Passes Portal', link: '/sing-along/sponsors' },
+      { label: 'Event Teaser & Mystery', link: '/eventteaser' },
       { label: 'Chat on WhatsApp', whatsapp: true }
     ]
   }

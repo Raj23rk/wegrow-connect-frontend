@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import QRCode from 'qrcode';
 import {
@@ -132,9 +132,10 @@ const genBookingId = (code) => {
   return `${prefix}-${randomStr}`;
 };
 
-// Cutoff Time: Open
+// Cutoff Time: Closed & Redirected to Event Teaser
 export default function SingAlongSponsorBooking() {
-  // Registration is open
+  return <Navigate to="/eventteaser" replace />;
+  // Registration is closed
   const [isClosed, setIsClosed] = useState(false);
   const [lookupPassId, setLookupPassId] = useState('');
   const [isLookingUp, setIsLookingUp] = useState(false);

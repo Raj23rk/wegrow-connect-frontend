@@ -807,13 +807,13 @@ export default function App() {
             <Route path="/events/singalong" element={<SingAlongBooking />} />
             <Route path="/book-tickets" element={<SingAlongBooking />} />
 
-            {/* Sing Along Musical Night Event — Sponsors & VIP Passes */}
-            <Route path="/sing-along/sponsors" element={<SingAlongSponsorBooking />} />
-            <Route path="/singalong/sponsors" element={<SingAlongSponsorBooking />} />
-            <Route path="/events/sing-along/sponsors" element={<SingAlongSponsorBooking />} />
-            <Route path="/sing-along-sponsors" element={<SingAlongSponsorBooking />} />
-            <Route path="/singalong-sponsors" element={<SingAlongSponsorBooking />} />
-            <Route path="/sponsors" element={<SingAlongSponsorBooking />} />
+            {/* Sing Along Musical Night Event — Sponsors & VIP Passes (Closed -> Redirect to Event Teaser) */}
+            <Route path="/sing-along/sponsors" element={<Navigate to="/eventteaser" replace />} />
+            <Route path="/singalong/sponsors" element={<Navigate to="/eventteaser" replace />} />
+            <Route path="/events/sing-along/sponsors" element={<Navigate to="/eventteaser" replace />} />
+            <Route path="/sing-along-sponsors" element={<Navigate to="/eventteaser" replace />} />
+            <Route path="/singalong-sponsors" element={<Navigate to="/eventteaser" replace />} />
+            <Route path="/sponsors" element={<Navigate to="/eventteaser" replace />} />
 
             {/* WeGrow Business Dependency Test */}
             <Route path="/business-dependency-test" element={<BusinessDependencyTest />} />
