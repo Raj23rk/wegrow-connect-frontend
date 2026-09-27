@@ -118,7 +118,64 @@ const genBookingId = () => {
   return `${CONFIG.bookingPrefix}-${code}`;
 };
 
+// Cutoff Time: 02:00 PM IST on September 27, 2026
+const REGISTRATION_CLOSE_TIME = new Date('2026-09-27T14:00:00+05:30').getTime();
+
 export default function SingAlongBooking() {
+  // Check if online registration has closed (at or after 02:00 PM)
+  const [isClosed, setIsClosed] = useState(() => Date.now() >= REGISTRATION_CLOSE_TIME);
+  const [lookupBookingId, setLookupBookingId] = useState('');
+  const [isLookingUp, setIsLookingUp] = useState(false);
+
+  // Interval check to reactively update status when clock passes 02:00 PM
+  useEffect(() => {
+    const checkClosedStatus = () => {
+      setIsClosed(Date.now() >= REGISTRATION_CLOSE_TIME);
+    };
+    checkClosedStatus();
+    const interval = setInterval(checkClosedStatus, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Lookup existing ticket by Booking ID
+  const handleLookupTicket = async (e) => {
+    if (e) e.preventDefault();
+    const term = lookupBookingId.trim();
+    if (!term) {
+      toast.error("Please enter your Booking ID.");
+      return;
+    }
+    setIsLookingUp(true);
+    try {
+      const res = await singAlongApi.verifyTicket(term);
+      const booking = res?.ticket || res?.booking || res?.data || res;
+      if (booking && (booking.bookingId || booking.ticketId)) {
+        const foundBookingId = booking.bookingId || term;
+        setTicketData({
+          bookingId: foundBookingId,
+          ticketId: booking.ticketId || `TKT-${foundBookingId}`,
+          fullName: booking.fullName || 'Valued Attendee',
+          phone: booking.phone || '',
+          email: booking.email || '',
+          ticketQty: booking.ticketQty || 1,
+          amount: booking.totalAmount || booking.amount || 249,
+          paymentMethod: booking.paymentMethod || 'CONFIRMED',
+          paidAt: booking.paidAt || booking.createdAt || new Date().toISOString(),
+          verificationToken: booking.verificationToken || `SINGALONG-VERIFY:${foundBookingId}`
+        });
+        setScreen('success');
+        setShowTicketModal(true);
+        toast.success("Ticket pass retrieved successfully! 🎟️");
+      } else {
+        toast.error("No ticket found with this Booking ID. Please verify or contact support.");
+      }
+    } catch (err) {
+      toast.error(err.message || "Ticket not found. Please verify your Booking ID or contact support.");
+    } finally {
+      setIsLookingUp(false);
+    }
+  };
+
   // Screen views: 'intro' (First Screen: Before You Book) | 'booking' (Second Screen: Hero + Booking)
   const [pageView, setPageView] = useState('intro');
 
@@ -1226,8 +1283,181 @@ export default function SingAlongBooking() {
       `}</style>
 
       {/* =========================================================================
-          SCREEN 1: "BEFORE YOU BOOK" FULLSTAGE SCREEN (Exact design from index.html)
+          REGISTRATION CLOSED SCREEN (Triggered at/after 02:00 PM)
           ========================================================================= */}
+      {isClosed && screen !== 'success' && !ticketData ? (
+        <div className="min-h-screen w-full relative flex flex-col justify-between p-4 sm:p-6 py-8 sm:py-12 bg-[#070B14] text-white selection:bg-[#ff6a00] selection:text-white overflow-y-auto overflow-x-hidden">
+          {/* Concert Stage Visual Background & Lights */}
+          <div className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden z-0">
+            <img
+              src={POSTER_STAGE_BG}
+              alt="Concert Stage Background"
+              className="w-full h-full object-cover object-center filter brightness-[0.35] contrast-125"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#070B14] via-[#070B14]/85 to-[#070B14]/75" />
+            <div className="dj-laser-left-blinker opacity-40" />
+            <div className="dj-laser-right-blinker opacity-40" />
+            <div className="dj-stage-strobe-blinker opacity-35" />
+          </div>
+
+          {/* Top Brand Navbar */}
+          <header className="max-w-6xl mx-auto w-full flex items-center justify-between z-20 mb-8 sm:mb-12">
+            <Link to="/" className="flex items-center gap-3 group">
+              <img
+                src={WEGROW_LOGO_IMG}
+                alt="WeGrow Logo"
+                className="h-9 sm:h-11 w-auto object-contain rounded-lg bg-white p-1 shadow-md shadow-amber-500/10"
+                onError={(e) => { e.currentTarget.src = '/wegrow-logo.webp'; }}
+              />
+              <span className="hidden xs:inline-block font-display font-black text-sm sm:text-base tracking-wider text-amber-400">
+                SING ALONG 2026
+              </span>
+            </Link>
+
+            <Link
+              to="/"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 text-xs sm:text-sm font-bold text-white transition-all hover:scale-105"
+            >
+              <Home className="w-4 h-4" />
+              <span>Back to Home</span>
+            </Link>
+          </header>
+
+          {/* Main Closed Card Container */}
+          <main className="max-w-3xl mx-auto w-full z-10 flex-1 flex flex-col items-center justify-center text-center px-2">
+            {/* Status Alert Pill */}
+            <div className="inline-flex items-center gap-2.5 px-4 sm:px-5 py-2 rounded-full bg-red-500/15 border border-red-500/40 text-red-400 text-xs sm:text-sm font-black uppercase tracking-wider mb-6 shadow-lg shadow-red-500/10 animate-pulse">
+              <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping" />
+              <span>Online Registration Closed at 02:00 PM</span>
+            </div>
+
+            {/* Exact Requested Message Heading */}
+            <h1 className="font-display font-black text-2xl xs:text-3xl sm:text-4xl md:text-5xl text-white tracking-tight leading-snug mb-4 drop-shadow-2xl">
+              Thank you for visit now Regsiter close if ticket need please direct vist event venu 06:00 PM
+            </h1>
+
+            {/* Clear Subtitle */}
+            <p className="text-slate-300 text-sm sm:text-base md:text-lg max-w-2xl mx-auto mb-8 font-medium leading-relaxed">
+              Online booking has concluded. For on-spot tickets and walk-in passes, please visit the event venue directly today by <span className="text-amber-400 font-bold">06:00 PM</span>.
+            </p>
+
+            {/* Event & Venue Information Card */}
+            <div className="w-full bg-slate-900/90 backdrop-blur-xl border border-amber-500/30 rounded-2xl sm:rounded-3xl p-5 sm:p-7 mb-8 shadow-2xl shadow-black/80 text-left">
+              <div className="flex items-center gap-3 pb-4 mb-4 border-b border-white/10">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400">
+                  <Ticket className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="text-lg sm:text-xl font-black text-white">Event Venue &amp; Spot Pass Details</h2>
+                  <p className="text-xs sm:text-sm text-slate-400">SING ALONG Live Musical Concert 2026</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs sm:text-sm">
+                <div className="flex items-start gap-3 bg-white/5 rounded-xl p-3.5 border border-white/5">
+                  <Calendar className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="text-slate-400 block text-[11px] font-bold uppercase">Event Date</span>
+                    <span className="text-white font-bold text-sm">Sunday, 27 September 2026</span>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3 bg-white/5 rounded-xl p-3.5 border border-white/5">
+                  <Clock className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="text-slate-400 block text-[11px] font-bold uppercase">Event &amp; Entry Time</span>
+                    <span className="text-white font-bold text-sm">06:00 PM (Gates open 05:30 PM)</span>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3 bg-white/5 rounded-xl p-3.5 border border-white/5 sm:col-span-2">
+                  <MapPin className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="text-slate-400 block text-[11px] font-bold uppercase">Venue Location</span>
+                    <span className="text-white font-bold text-sm sm:text-base">Arasan Turf, Sivakasi, Tamil Nadu</span>
+                    <span className="text-slate-400 block text-xs mt-0.5">Tickets available directly at the venue entry counter from 05:30 PM</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="mt-6 flex flex-col sm:flex-row items-center gap-3">
+                <a
+                  href="https://maps.google.com/?q=Arasan+Turf+Sivakasi"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full sm:flex-1 py-3.5 px-4 rounded-xl bg-gradient-to-r from-[#ffb703] via-[#fb8500] to-[#ea580c] hover:brightness-110 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-orange-500/25 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  <MapPin className="w-4 h-4 text-slate-950" />
+                  <span>Get Venue Directions (Google Maps)</span>
+                  <ExternalLink className="w-3.5 h-3.5 text-slate-950" />
+                </a>
+
+                <a
+                  href="https://wa.me/919344037331?text=Hi%20WeGrow%2C%20I%20want%20to%20inquire%20about%20Sing%20Along%20tickets%20at%20Arasan%20Turf%20venue%20at%2006%3A00%20PM"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full sm:w-auto py-3.5 px-5 rounded-xl bg-[#25D366] hover:bg-[#20ba59] text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  <Phone className="w-4 h-4" />
+                  <span>WhatsApp Helpdesk</span>
+                </a>
+
+                <a
+                  href="tel:+919344037331"
+                  className="w-full sm:w-auto py-3.5 px-4 rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all"
+                >
+                  <Phone className="w-4 h-4 text-amber-400" />
+                  <span>+91 93440 37331</span>
+                </a>
+              </div>
+            </div>
+
+            {/* Already Booked Ticket Lookup Box */}
+            <div className="w-full max-w-xl bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-5 backdrop-blur-md text-left">
+              <h3 className="text-xs sm:text-sm font-bold text-amber-300 flex items-center gap-2 mb-2">
+                <Sparkles className="w-4 h-4 text-amber-400" />
+                Already booked your ticket online earlier?
+              </h3>
+              <p className="text-xs text-slate-400 mb-3">
+                Enter your Booking ID (e.g. SA26-XXXXXX) to view, print, or download your digital entry pass:
+              </p>
+              <form onSubmit={handleLookupTicket} className="flex flex-col sm:flex-row gap-2">
+                <input
+                  type="text"
+                  placeholder="Enter Booking ID (e.g. SA26-AB12CD)"
+                  value={lookupBookingId}
+                  onChange={(e) => setLookupBookingId(e.target.value.toUpperCase())}
+                  className="flex-1 px-4 py-2.5 rounded-xl bg-slate-950/80 border border-white/15 text-white placeholder-slate-500 text-xs sm:text-sm font-mono focus:outline-none focus:border-amber-400 uppercase"
+                />
+                <button
+                  type="submit"
+                  disabled={isLookingUp}
+                  className="py-2.5 px-5 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer"
+                >
+                  {isLookingUp ? (
+                    <span>Searching...</span>
+                  ) : (
+                    <>
+                      <span>Find Ticket</span>
+                      <ChevronRight className="w-4 h-4" />
+                    </>
+                  )}
+                </button>
+              </form>
+            </div>
+          </main>
+
+          {/* Footer Note */}
+          <footer className="max-w-6xl mx-auto w-full text-center text-xs text-slate-500 z-10 pt-8">
+            <p>Sing Along 2026 • Presented by WeGrow Skill Campus &amp; B-School • Arasan Turf, Sivakasi</p>
+          </footer>
+        </div>
+      ) : (
+        <>
+          {/* =========================================================================
+              SCREEN 1: "BEFORE YOU BOOK" FULLSTAGE SCREEN (Exact design from index.html)
+              ========================================================================= */}
       {pageView === 'intro' && (
         <div className="min-h-screen w-full relative flex items-center justify-center p-3 sm:p-6 py-8 sm:py-12 bg-black overflow-y-auto overflow-x-hidden selection:bg-[#ff6a00] selection:text-white">
           {/* Full Stage Visual Background */}
@@ -2906,6 +3136,8 @@ export default function SingAlongBooking() {
             </div>
           </div>
         </div>
+      )}
+        </>
       )}
     </div>
   );
