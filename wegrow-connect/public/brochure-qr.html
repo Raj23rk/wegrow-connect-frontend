@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WeGrow B School — 2026 Brochure QR Code</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <style>
+    :root {
+      --blue-900: #061B40;
+      --blue-800: #082B6A;
+      --blue-700: #0C3C8F;
+      --blue-600: #1A55C4;
+      --blue-100: #EAF1FB;
+      --orange-500: #F28C1B;
+      --orange-600: #E4760B;
+      --orange-100: #FFF3E5;
+      --ink: #1B2433;
+      --muted: #5F6B7E;
+      --bg: #0A1428;
+      --card-bg: #FFFFFF;
+      --border: #DCE4F0;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background:
+        radial-gradient(900px 500px at 20% -10%, #1A55C4 0%, transparent 60%),
+        radial-gradient(800px 500px at 90% 10%, #082B6A 0%, transparent 60%),
+        var(--bg);
+      color: #FFFFFF;
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 30px 16px 40px;
+    }
+
+    .container {
+      max-width: 480px;
+      width: 100%;
+    }
+
+    .poster-card {
+      background: var(--card-bg);
+      color: var(--ink);
+      border-radius: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 35px 70px -20px rgba(0, 0, 0, 0.65), 0 0 40px rgba(12, 60, 143, 0.25);
+      padding: 36px 30px 30px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .accent-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: linear-gradient(90deg, var(--orange-500), var(--blue-700));
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--orange-100);
+      color: var(--orange-600);
+      border: 1px solid #FCD4A4;
+      padding: 5px 14px;
+      border-radius: 9999px;
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    .logo-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .logo-img {
+      height: 38px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    .mascot-img {
+      width: 64px;
+      height: auto;
+      margin: 0 auto 10px;
+      display: block;
+      filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.12));
+    }
+
+    h1 {
+      font-family: 'Sora', sans-serif;
+      font-size: 23px;
+      font-weight: 800;
+      color: var(--blue-700);
+      line-height: 1.25;
+      margin-bottom: 6px;
+      letter-spacing: -0.5px;
+    }
+
+    h1 span {
+      color: var(--orange-500);
+    }
+
+    .subtitle {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    .qr-frame {
+      background: #FFFFFF;
+      padding: 16px;
+      border-radius: 20px;
+      display: inline-block;
+      box-shadow: 0 12px 30px rgba(12, 60, 143, 0.12);
+      border: 2px solid var(--border);
+      margin-bottom: 18px;
+      position: relative;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .qr-frame:hover {
+      transform: scale(1.02);
+      box-shadow: 0 18px 40px rgba(12, 60, 143, 0.18);
+    }
+
+    .qr-canvas {
+      width: 220px !important;
+      height: 220px !important;
+      display: block;
+      margin: 0 auto;
+      border-radius: 8px;
+    }
+
+    .url-box {
+      background: var(--blue-100);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 12px;
+      color: var(--blue-700);
+      font-weight: 600;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      text-align: left;
+    }
+
+    .url-text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-family: monospace;
+      font-size: 11.5px;
+    }
+
+    .copy-btn {
+      background: #FFFFFF;
+      border: 1px solid #BFD3F0;
+      color: var(--blue-700);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all 0.15s ease;
+    }
+
+    .copy-btn:hover {
+      background: var(--blue-700);
+      color: #FFFFFF;
+      border-color: var(--blue-700);
+    }
+
+    .toast {
+      display: none;
+      font-size: 11.5px;
+      color: #059669;
+      font-weight: 700;
+      margin-top: -12px;
+      margin-bottom: 14px;
+    }
+
+    /* Actions */
+    .btn-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .btn {
+      appearance: none;
+      border: none;
+      cursor: pointer;
+      font-family: 'Sora', sans-serif;
+      font-weight: 700;
+      font-size: 13.5px;
+      padding: 12px 18px;
+      border-radius: 12px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.15s ease;
+    }
+
+    .btn-primary {
+      background: var(--orange-500);
+      color: #FFFFFF;
+      box-shadow: 0 6px 16px rgba(242, 140, 27, 0.3);
+    }
+
+    .btn-primary:hover {
+      background: var(--orange-600);
+      box-shadow: 0 8px 20px rgba(242, 140, 27, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: var(--blue-100);
+      color: var(--blue-700);
+      border: 1.5px solid #BFD3F0;
+    }
+
+    .btn-secondary:hover {
+      background: #FFFFFF;
+      border-color: var(--blue-700);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--blue-700);
+      border: 1.5px solid var(--border);
+    }
+
+    .btn-outline:hover {
+      background: #FFFFFF;
+      border-color: var(--blue-700);
+    }
+
+    /* Custom options toolbar */
+    .options-bar {
+      margin-top: 18px;
+      padding-top: 14px;
+      border-top: 1px dashed var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 11.5px;
+      color: var(--muted);
+    }
+
+    .select-input {
+      font-size: 11px;
+      font-family: inherit;
+      padding: 4px 8px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: #F8FAFC;
+      color: var(--ink);
+      cursor: pointer;
+    }
+
+    .footer-nav {
+      margin-top: 20px;
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      font-size: 12.5px;
+    }
+
+    .footer-nav a {
+      color: #9DB0D4;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.15s;
+    }
+
+    .footer-nav a:hover {
+      color: var(--orange-500);
+      text-decoration: underline;
+    }
+
+    @media print {
+      body {
+        background: #FFFFFF;
+        color: #000000;
+        padding: 0;
+      }
+      .poster-card {
+        box-shadow: none;
+        border: 2px solid #0C3C8F;
+        max-width: 100%;
+        page-break-inside: avoid;
+      }
+      .btn, .options-bar, .footer-nav, .url-box button {
+        display: none !important;
+      }
+      .url-box {
+        background: #F4F7FC;
+        border: 1px solid #DCE4F0;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="poster-card" id="posterCard">
+      <div class="accent-bar"></div>
+
+      <div class="badge">Scan with Any Camera</div>
+
+      <img src="/mascot.webp" alt="WeGrow Mascot" class="mascot-img" onerror="this.src='/we_mascot.jpeg'">
+
+      <div class="logo-row">
+        <img src="/wegrow-logo.webp" alt="WeGrow B School Logo" class="logo-img" onerror="this.src='/logo.webp'">
+      </div>
+
+      <h1>WeGrow B School <span>Brochure 2026</span></h1>
+      <p class="subtitle">Scan this QR code on any smartphone to experience the interactive 3D flipbook brochure.</p>
+
+      <!-- Dynamic QR Box -->
+      <div class="qr-frame">
+        <canvas id="qrCanvas" class="qr-canvas"></canvas>
+      </div>
+
+      <!-- Scannable URL info & Copy -->
+      <div class="url-box">
+        <span class="url-text" id="targetUrlText">https://wegrow.in/wegrow-b-school-brochurer.html</span>
+        <button type="button" class="copy-btn" onclick="copyUrl()">Copy</button>
+      </div>
+      <div class="toast" id="copyToast">✓ Brochure link copied!</div>
+
+      <!-- Actions -->
+      <div class="btn-stack">
+        <button type="button" class="btn btn-primary" onclick="downloadPng()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Download High-Res PNG QR
+        </button>
+
+        <button type="button" class="btn btn-secondary" onclick="downloadSvg()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Download Vector SVG QR
+        </button>
+
+        <a href="/wegrow-b-school-brochurer.html" class="btn btn-outline" target="_blank">
+          Open 3D Flipbook Brochure →
+        </a>
+      </div>
+
+      <!-- URL Switcher -->
+      <div class="options-bar">
+        <span>Target URL:</span>
+        <select id="urlSelector" class="select-input" onchange="handleUrlChange()">
+          <option value="https://wegrow.in/wegrow-b-school-brochurer.html">Live wegrow.in Brochure</option>
+          <option value="https://www.wegrowbschool.in">WeGrow B-School Portal</option>
+          <option value="local">Local / Current Host</option>
+          <option value="custom">Custom URL...</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Footer Links -->
+    <div class="footer-nav">
+      <a href="/wegrow-b-school-brochurer.html">Flipbook Brochure</a>
+      <span>•</span>
+      <a href="javascript:window.print()">Print Poster</a>
+      <span>•</span>
+      <a href="/business-dependency-test.html">Dependency Test</a>
+    </div>
+  </div>
+
+  <script>
+    let currentUrl = "https://wegrow.in/wegrow-b-school-brochurer.html";
+    const canvas = document.getElementById("qrCanvas");
+    const targetUrlSpan = document.getElementById("targetUrlText");
+    const urlSelector = document.getElementById("urlSelector");
+
+    function renderQR(url) {
+      currentUrl = url;
+      targetUrlSpan.innerText = url;
+
+      if (window.QRCode) {
+        QRCode.toCanvas(canvas, url, {
+          width: 240,
+          margin: 1,
+          color: {
+            dark: '#0C3C8F',
+            light: '#FFFFFF'
+          },
+          errorCorrectionLevel: 'H'
+        }, function (error) {
+          if (error) console.error(error);
+        });
+      }
+    }
+
+    function handleUrlChange() {
+      const val = urlSelector.value;
+      if (val === 'local') {
+        renderQR(window.location.origin + '/wegrow-b-school-brochurer.html');
+      } else if (val === 'custom') {
+        const userUrl = prompt("Enter custom brochure URL to encode into QR:", currentUrl);
+        if (userUrl && userUrl.trim()) {
+          renderQR(userUrl.trim());
+        } else {
+          urlSelector.value = currentUrl;
+        }
+      } else {
+        renderQR(val);
+      }
+    }
+
+    function copyUrl() {
+      navigator.clipboard.writeText(currentUrl).then(() => {
+        const toast = document.getElementById("copyToast");
+        toast.style.display = "block";
+        setTimeout(() => { toast.style.display = "none"; }, 2500);
+      });
+    }
+
+    function downloadPng() {
+      if (window.QRCode) {
+        const offscreenCanvas = document.createElement("canvas");
+        QRCode.toCanvas(offscreenCanvas, currentUrl, {
+          width: 1024,
+          margin: 2,
+          color: {
+            dark: '#0C3C8F',
+            light: '#FFFFFF'
+          },
+          errorCorrectionLevel: 'H'
+        }, function () {
+          const a = document.createElement('a');
+          a.download = 'wegrow-b-school-brochure-qr-highres.png';
+          a.href = offscreenCanvas.toDataURL('image/png');
+          a.click();
+        });
+      } else {
+        const a = document.createElement('a');
+        a.download = 'wegrow-b-school-brochure-qr.png';
+        a.href = '/wegrow_brochure_qr.png';
+        a.click();
+      }
+    }
+
+    function downloadSvg() {
+      if (window.QRCode && window.QRCode.toString) {
+        QRCode.toString(currentUrl, {
+          type: 'svg',
+          errorCorrectionLevel: 'H',
+          margin: 2,
+          color: {
+            dark: '#0C3C8F',
+            light: '#FFFFFF'
+          }
+        }, function (err, svgString) {
+          if (err) return;
+          const blob = new Blob([svgString], { type: 'image/svg+xml' });
+          const a = document.createElement('a');
+          a.download = 'wegrow-b-school-brochure-qr.svg';
+          a.href = URL.createObjectURL(blob);
+          a.click();
+        });
+      } else {
+        const a = document.createElement('a');
+        a.download = 'wegrow-b-school-brochure-qr.svg';
+        a.href = '/wegrow_brochure_qr.svg';
+        a.click();
+      }
+    }
+
+    // Initialize
+    window.addEventListener('DOMContentLoaded', () => {
+      renderQR(currentUrl);
+    });
+  </script>
+</body>
+</html>
