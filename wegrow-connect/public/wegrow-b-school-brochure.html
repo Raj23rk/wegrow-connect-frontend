@@ -58,8 +58,6 @@ body{background:var(--bg);color:var(--bg-ink);font-family:var(--body);display:fl
 .hint{position:absolute;bottom:4px;left:0;right:0;text-align:center;font-size:12px;opacity:.6}
 @media (max-width:520px){.dots{display:none}.where{min-width:80px;font-size:13px}.btn{height:38px;padding:0 14px;font-size:13px}.bar{gap:10px;padding:8px 12px 14px}}
 @media (max-height:500px){.bar{padding:4px 12px 8px;gap:10px}.dots{display:none}.btn{height:34px}}
-.rotate{margin:0;padding:4px 16px 0;text-align:center;font-size:12px;opacity:.75}
-.rotate[hidden]{display:none}
 @media (prefers-reduced-motion: reduce){.leaf,.book{transition:none!important}}
 
 /* ---------- page design (fixed 440 x 622 canvas) ---------- */
@@ -256,10 +254,9 @@ body{background:var(--bg);color:var(--bg-ink);font-family:var(--body);display:fl
 .bk-cta{display:inline-block;background:#F28C1B;color:#fff;font:700 11px var(--heading);padding:6px 12px;border-radius:999px;margin-bottom:8px}
 .bk-card .row{display:flex;gap:10px;align-items:center;padding:8px 0;border-top:1px solid #E6ECF5}
 .bk-card .row:first-of-type{border-top:0}
-.bk-card svg{flex:none;width:28px;height:28px;padding:6px;border-radius:8px;background:#EAF1FB;stroke:#0C3C8F;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.bk-card small{display:block;font-size:9px;font-weight:700;color:#6B778A;letter-spacing:.3px}
-.bk-card a{font:700 13px var(--heading);color:#0C3C8F;text-decoration:none}
-.bk-card .ph{font-size:11.5px;color:#8A96A8;font-style:italic}
+.bk-card small{display:block;font-size:9px;font-weight:700;color:#6B778A;letter-spacing:.3px;margin-bottom:2px}
+.bk-card a, .bk-card .ph{font:700 12px var(--heading);color:#0C3C8F;text-decoration:none;display:block;font-style:normal;letter-spacing:-.1px}
+.bk-card a:hover{text-decoration:underline}
 .bk-mascot{position:absolute;right:-8px;bottom:44px;width:178px}
 .bk-foot{position:absolute;left:0;right:0;bottom:0;height:46px;background:#F28C1B;display:flex;align-items:center;justify-content:space-between;padding:0 30px;font-size:10px;color:#fff}
 .bk-foot b{font:800 12px var(--heading)}
@@ -269,7 +266,6 @@ body{background:var(--bg);color:var(--bg-ink);font-family:var(--body);display:fl
 <main class="viewer" id="viewer" aria-label="WeGrow B School brochure">
   <div class="stage" id="stage"><div class="scaler" id="scaler"><div class="book" id="book"></div></div></div>
 </main>
-<p class="rotate" id="rotate" hidden>Turn your phone sideways for a bigger view</p>
 <nav class="bar" aria-label="Page navigation">
   <button class="btn" id="prev" aria-label="Previous page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>Back</button>
   <div>
@@ -478,8 +474,8 @@ ${foot(11)}</div>`,
   <div class="bk-card">
     <span class="bk-cta">Book a diagnostic call</span>
     <div class="row"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18"/></svg><div><small>Website</small><a href="https://www.wegrowbschool.in" target="_blank" rel="noopener">www.wegrowbschool.in</a></div></div>
-    <div class="row"><svg viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2z"/></svg><div><small>Phone / WhatsApp</small><span class="ph">Add your official number here</span></div></div>
-    <div class="row"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg><div><small>Email</small><span class="ph">Add your official email here</span></div></div>
+    <div class="row"><svg viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2z"/></svg><div><small>Phone / WhatsApp</small><a href="tel:+919344037331" class="ph">+91 93440 37331</a></div></div>
+    <div class="row"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg><div><small>Email</small><a href="mailto:wegrowbschool3.0@gmail.com" class="ph" style="font-size:10.5px">wegrowbschool3.0@gmail.com</a></div></div>
   </div>
   <img class="bk-mascot" src="${IMG.mascot}" alt="WeGrow squirrel mascot">
   <div class="bk-foot"><span>People &nbsp;|&nbsp; Process &nbsp;|&nbsp; Technology &nbsp;|&nbsp; Growth</span><b>Learn · Apply · Grow</b></div>
@@ -604,8 +600,6 @@ function fit(){
   const padY = small ? 12 : 24;
   const maxScale = mode==='single' ? 1.4 : 1.55;
   const s = Math.min((vw - padX) / bw, (vh - padY) / PH, maxScale);
-  const rotateEl = document.getElementById('rotate');
-  if(rotateEl) rotateEl.hidden = !(small && vh > vw);
   scaler.style.transform = `scale(${s})`;
   stage.style.width = bw*s + 'px'; stage.style.height = PH*s + 'px';
 }
