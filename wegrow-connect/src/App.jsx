@@ -48,6 +48,9 @@ const BusinessDependencyTest = lazy(() => import('./components/BusinessDependenc
 const BusinessConsultancy = lazy(() => import('./components/BusinessConsultancy'));
 const WhoCanJoinPage = lazy(() => import('./components/WhoCanJoinPage'));
 const EventTeaser = lazy(() => import('./components/EventTeaser'));
+const FeedbackPage = lazy(() => import('./components/FeedbackPage'));
+const FeedbackQrPage = lazy(() => import('./components/FeedbackQrPage'));
+const AdminMeetupFeedbackPage = lazy(() => import('./admin/feedback/page'));
 
 // Auth Context, Theme Context and Guard
 import { AuthProvider, ProtectedRoute } from './context/AuthContext';
@@ -831,6 +834,14 @@ export default function App() {
             <Route path="/teaser" element={<EventTeaser />} />
             <Route path="/guess-event" element={<EventTeaser />} />
 
+            {/* Business Transformation Meetup Feedback & QR Standee */}
+            <Route path="/feedback" element={<FeedbackPage />} />
+            <Route path="/business-transformation-feedback" element={<FeedbackPage />} />
+            <Route path="/meetup-feedback" element={<FeedbackPage />} />
+            <Route path="/feedback-qr" element={<FeedbackQrPage />} />
+            <Route path="/feedback/qr" element={<FeedbackQrPage />} />
+            <Route path="/meetup-qr" element={<FeedbackQrPage />} />
+
             {/* Student Dashboard Routes (Protected) */}
             <Route path="/student/dashboard" element={<ProtectedRoute allowedRoles={['student']}><StudentDashboard /></ProtectedRoute>} />
             <Route path="/student/courses" element={<ProtectedRoute allowedRoles={['student']}><StudentCourses /></ProtectedRoute>} />
@@ -866,6 +877,8 @@ export default function App() {
             <Route path="/admin/event-teaser" element={<ProtectedRoute allowedRoles={['admin']}><AdminEventTeaser /></ProtectedRoute>} />
             <Route path="/admin/event-teasers" element={<ProtectedRoute allowedRoles={['admin']}><AdminEventTeaser /></ProtectedRoute>} />
             <Route path="/admin/teasers" element={<ProtectedRoute allowedRoles={['admin']}><AdminEventTeaser /></ProtectedRoute>} />
+            <Route path="/admin/feedback" element={<ProtectedRoute allowedRoles={['admin']}><AdminMeetupFeedbackPage /></ProtectedRoute>} />
+            <Route path="/admin/meetup-feedback" element={<ProtectedRoute allowedRoles={['admin']}><AdminMeetupFeedbackPage /></ProtectedRoute>} />
             <Route path="/admin/workshops" element={<ProtectedRoute allowedRoles={['admin']}><AdminWorkshops /></ProtectedRoute>} />
             <Route path="/admin/events" element={<ProtectedRoute allowedRoles={['admin']}><AdminEvents /></ProtectedRoute>} />
             <Route path="/admin/gallery" element={<ProtectedRoute allowedRoles={['admin']}><AdminGalleryPage /></ProtectedRoute>} />
