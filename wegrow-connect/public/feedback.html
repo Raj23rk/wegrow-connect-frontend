@@ -1397,10 +1397,16 @@
           }
         }
 
-        // Show thank you screen
-        form.classList.add('hidden');
-        thankYouSection.classList.remove('hidden');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (submittedSuccessfully) {
+          form.classList.add('hidden');
+          thankYouSection.classList.remove('hidden');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+          globalError.textContent = '⚠️ Unable to submit feedback to the server. Please check your internet connection or try again shortly.';
+          globalError.classList.remove('hidden');
+          globalError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          resetButton();
+        }
         isSending = false;
       });
 

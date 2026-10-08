@@ -274,28 +274,48 @@ export async function submitMeetupFeedback(data) {
     submittedAt: data.submittedAt || new Date().toISOString(),
   };
 
-  try {
-    const response = await fetch(`${API_BASE}/business-dependency/feedback`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-    return await parseResponse(response);
-  } catch (error) {
-    console.warn('submitMeetupFeedback backend offline, trying secondary route:', error);
-    // Fallback to /business-dependency/meetup-feedback
+  const endpoints = [
+    `${API_BASE}/business-dependency/feedback`,
+    `${API_BASE}/business-dependency/meetup-feedback`,
+    `${API_BASE}/business-dependency`,
+    `${API_BASE}/feedback`,
+    'https://wegrow-connect-backend-1.onrender.com/api/v1/business-dependency/feedback',
+    'https://wegrow-connect-backend-1.onrender.com/api/v1/business-dependency/meetup-feedback',
+    'https://wegrow-connect-backend-1.onrender.com/api/v1/business-dependency',
+    'http://localhost:4000/api/v1/business-dependency/feedback',
+    'http://localhost:4000/api/v1/business-dependency/meetup-feedback',
+    'http://localhost:5000/business-dependency/feedback',
+    '/api/v1/business-dependency/feedback',
+    '/business-dependency/feedback'
+  ];
+
+  const uniqueEndpoints = [...new Set(endpoints.filter(Boolean))];
+  let lastErrorMsg = 'API request failed';
+
+  for (const url of uniqueEndpoints) {
     try {
-      const fallbackRes = await fetch(`${API_BASE}/business-dependency/meetup-feedback`, {
+      const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-      return await parseResponse(fallbackRes);
-    } catch (err2) {
-      console.error('submitMeetupFeedback final error:', err2);
-      throw err2;
+
+      if (response.ok) {
+        return await parseResponse(response);
+      }
+
+      // If backend responded with explicit business validation error (400)
+      if (response.status === 400 || response.status === 422) {
+        return await parseResponse(response);
+      }
+
+      lastErrorMsg = `Server responded with status ${response.status} (${response.statusText || 'Not Found'})`;
+    } catch (err) {
+      lastErrorMsg = err.message || 'Network connection error';
     }
   }
+
+  throw new Error(`Failed to submit feedback: ${lastErrorMsg}`);
 }
 
 /**

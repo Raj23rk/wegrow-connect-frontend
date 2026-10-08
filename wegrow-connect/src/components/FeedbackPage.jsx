@@ -20,6 +20,7 @@ export default function FeedbackPage() {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState('');
   const [showQrModal, setShowQrModal] = useState(false);
 
   useEffect(() => {
@@ -30,6 +31,7 @@ export default function FeedbackPage() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    setSubmitError('');
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: '' }));
     }
@@ -37,6 +39,7 @@ export default function FeedbackPage() {
 
   const handleRadioChange = (name, value) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
+    setSubmitError('');
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: '' }));
     }
@@ -78,6 +81,7 @@ export default function FeedbackPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitError('');
 
     if (formData.honeypot) {
       setIsSubmitted(true);
@@ -116,11 +120,14 @@ export default function FeedbackPage() {
       setIsSubmitted(true);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err) {
-      console.warn('Backend offline or fallback:', err);
-      // Still show thank you for attendee peace of mind
-      toast.success('Feedback received! Thank you for participating.');
-      setIsSubmitted(true);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      console.error('Feedback submission error:', err);
+      const errMsg = err.message || 'Failed to submit feedback. Please check your internet connection and try again.';
+      setSubmitError(errMsg);
+      toast.error(errMsg);
+      const errBanner = document.getElementById('feedback-submit-error');
+      if (errBanner) {
+        errBanner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -539,8 +546,21 @@ export default function FeedbackPage() {
               </div>
             </div>
 
-            {/* Submit Button */}
-            <div className="pt-2">
+            {/* Submit Button & Error Alert */}
+            <div className="pt-2 space-y-3">
+              {submitError && (
+                <div
+                  id="feedback-submit-error"
+                  className="p-4 rounded-2xl bg-rose-500/15 border border-rose-500/30 text-rose-300 text-sm flex items-start gap-3 animate-fadeIn"
+                >
+                  <span className="text-xl leading-none">⚠️</span>
+                  <div className="flex-1">
+                    <p className="font-bold text-rose-200">Unable to Submit Feedback</p>
+                    <p className="text-xs text-rose-300/90 mt-0.5">{submitError}</p>
+                  </div>
+                </div>
+              )}
+
               <button
                 type="submit"
                 disabled={isSubmitting}
