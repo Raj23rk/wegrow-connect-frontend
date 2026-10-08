@@ -128,8 +128,8 @@ export default function FeedbackPage() {
 
   const experiences = [
     { value: 'Excellent', emoji: '🌟', label: 'Excellent', desc: 'Game-changing insights' },
-    { value: 'Good', emoji: '👍', label: 'Good', desc: 'Valuable session' },
-    { value: 'Average', emoji: '👌', label: 'Average', desc: 'Met expectations' },
+    { value: 'Good', emoji: '👌', label: 'Good', desc: 'Valuable session' },
+    { value: 'Average', emoji: '👍', label: 'Average', desc: 'Met expectations' },
     { value: 'Needs Improvement', emoji: '💡', label: 'Needs Improvement', desc: 'Can be enhanced' }
   ];
 
@@ -144,17 +144,31 @@ export default function FeedbackPage() {
         {/* Header Bar */}
         <header className="flex flex-col sm:flex-row items-center justify-between gap-4 pb-6 mb-8 border-b border-slate-700/60">
           <div className="flex items-center gap-3">
-            <a href="/home" className="flex items-center gap-2 group">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#F26A1B] to-[#1B2A6B] flex items-center justify-center font-black text-white text-xl shadow-lg shadow-orange-500/20 group-hover:scale-105 transition-transform">
-                W
+            <a href="/home" className="flex items-center gap-3 group">
+              {/* WeGrow & B School Logo */}
+              <div className="bg-white/95 px-3 py-1.5 rounded-2xl shadow-md border border-slate-200/30 group-hover:scale-105 transition-transform flex items-center">
+                <img
+                  src="/wegrow&Bschool.webp"
+                  alt="WeGrow Skill Campus & B School"
+                  className="h-8 sm:h-10 object-contain"
+                />
               </div>
-              <div>
-                <span className="text-xl font-bold tracking-tight text-white block leading-none">
-                  WeGrow <span className="text-[#F26A1B]">B School</span>
-                </span>
-                <span className="text-[11px] uppercase tracking-widest text-slate-400 font-semibold">
-                  Business Transformation Meetup
-                </span>
+
+              {/* WeGrow Mascot */}
+              <div className="flex items-center gap-2 pl-1">
+                <img
+                  src="/mascot.webp"
+                  alt="WeGrow Mascot"
+                  className="w-11 h-11 sm:w-14 sm:h-14 object-contain drop-shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all"
+                />
+                <div className="hidden md:block leading-tight">
+                  <span className="text-xs uppercase tracking-widest text-white font-extrabold block">
+                    Business Transformation
+                  </span>
+                  <span className="text-[10px] text-[#F26A1B] font-bold tracking-wider uppercase">
+                    Meetup 2026
+                  </span>
+                </div>
               </div>
             </a>
           </div>
@@ -254,20 +268,35 @@ export default function FeedbackPage() {
               autoComplete="off"
             />
 
-            {/* Banner Card */}
+            {/* Banner Card with Mascot */}
             <div className="bg-gradient-to-br from-[#1B2A6B]/90 via-slate-900 to-slate-900 border border-blue-500/20 rounded-3xl p-6 sm:p-8 shadow-xl backdrop-blur-md relative overflow-hidden">
               <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-orange-500/10 via-blue-500/5 to-transparent rounded-full blur-2xl pointer-events-none" />
               
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/15 border border-orange-500/30 text-orange-400 text-xs font-semibold mb-3">
-                <span className="w-2 h-2 rounded-full bg-[#F26A1B] animate-ping" />
-                Attendee Feedback Form
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-6 relative z-10">
+                <div className="flex-1 text-center sm:text-left">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/15 border border-orange-500/30 text-orange-400 text-xs font-semibold mb-3">
+                    <span className="w-2 h-2 rounded-full bg-[#F26A1B] animate-ping" />
+                    Attendee Feedback Form
+                  </div>
+                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight leading-tight mb-2">
+                    Business Transformation Meetup
+                  </h1>
+                  <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
+                    Thank you for participating! Your feedback helps us continually refine our curriculum, mentorship frameworks, and founder networking sessions.
+                  </p>
+                </div>
+
+                <div className="flex flex-col items-center flex-shrink-0 bg-slate-800/50 border border-slate-700/50 p-3.5 rounded-2xl shadow-lg">
+                  <img
+                    src="/mascot.webp"
+                    alt="WeGrow Mascot"
+                    className="w-20 h-20 sm:w-24 sm:h-24 object-contain drop-shadow-xl hover:scale-105 transition-transform"
+                  />
+                  <span className="text-[10px] font-bold text-orange-400 uppercase tracking-wider mt-1.5 bg-orange-500/10 px-2 py-0.5 rounded-full border border-orange-500/20">
+                    ★ WeGrow B School
+                  </span>
+                </div>
               </div>
-              <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight mb-2">
-                Business Transformation Meetup
-              </h1>
-              <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
-                Thank you for participating! Your feedback helps us continually refine our curriculum, mentorship frameworks, and founder networking sessions.
-              </p>
             </div>
 
             {/* Section 1: Personal Details */}
