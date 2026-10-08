@@ -752,12 +752,6 @@ export default function App() {
       <AuthProvider>
         <Toaster position="top-right" reverseOrder={false} toastOptions={{ duration: 4000 }} />
         <Router>
-          {/* Left-Side Floating WhatsApp Button */}
-          <FloatingWhatsApp />
-
-          {/* WeGrow Skill Campus & B-School Search & Answer Chatbot */}
-          <WeGrowChatbot />
-
           <Suspense fallback={<RouteLoader />}>
             <Routes>
             {/* Public Landing & Splash */}
