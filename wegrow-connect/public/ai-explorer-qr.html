@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WeGrow AI Explorer — Enrollment QR Code</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Nunito:wght@500;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy: #0f1f5c;
+      --orange: #ff7a1a;
+      --pink: #ff3d8b;
+      --purple: #7b4dff;
+      --cream: #FAF7F2;
+      --line: #e6dfcf;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: radial-gradient(circle at 10% 20%, #1e295d 0%, #0a1130 100%);
+      color: #1e293b;
+      font-family: 'Nunito', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px 40px;
+    }
+    .card {
+      background: var(--cream);
+      border-radius: 28px;
+      border: 2px solid var(--line);
+      box-shadow: 0 30px 70px rgba(0, 0, 0, 0.5);
+      max-width: 480px;
+      width: 100%;
+      padding: 32px 24px 28px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .accent-top {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 6px;
+      background: linear-gradient(90deg, var(--orange), var(--pink), var(--purple));
+    }
+    .logo-badge {
+      display: inline-block;
+      background: #fff;
+      padding: 8px 18px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      box-shadow: 0 4px 12px rgba(15, 31, 92, 0.06);
+      margin-bottom: 16px;
+    }
+    .logo-badge img {
+      height: 48px;
+      width: auto;
+      object-fit: contain;
+      display: block;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #fff;
+      color: var(--purple);
+      border: 1px solid #e3d5ff;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+    }
+    h1 {
+      font-family: 'Fredoka', sans-serif;
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--navy);
+      line-height: 1.2;
+      margin-bottom: 6px;
+    }
+    h1 span {
+      background: linear-gradient(90deg, var(--orange), var(--pink), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .subtitle {
+      font-size: 13px;
+      color: #64748b;
+      margin-bottom: 20px;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+    .qr-box {
+      background: #ffffff;
+      padding: 16px;
+      border-radius: 22px;
+      border: 2px solid var(--line);
+      display: inline-block;
+      box-shadow: 0 12px 28px rgba(15, 31, 92, 0.08);
+      margin-bottom: 16px;
+    }
+    .qr-box img {
+      width: 220px;
+      height: 220px;
+      display: block;
+      border-radius: 12px;
+    }
+    .scan-hint {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 900;
+      color: var(--navy);
+      margin-bottom: 18px;
+    }
+    .scan-hint span.dot {
+      width: 8px;
+      height: 8px;
+      background: #10b981;
+      border-radius: 50%;
+      display: inline-block;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+    }
+    .url-pill {
+      background: #ffffff;
+      border: 1px solid var(--line);
+      padding: 8px 14px;
+      border-radius: 12px;
+      font-size: 11px;
+      color: #475569;
+      word-break: break-all;
+      margin-bottom: 20px;
+      font-family: monospace;
+      font-weight: 700;
+    }
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn {
+      flex: 1;
+      min-width: 130px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 11px 16px;
+      font-size: 13px;
+      font-weight: 900;
+      border-radius: 14px;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-primary {
+      background: linear-gradient(90deg, var(--orange), var(--pink));
+      color: #ffffff;
+      box-shadow: 0 8px 18px rgba(255, 61, 139, 0.3);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 22px rgba(255, 61, 139, 0.4);
+    }
+    .btn-secondary {
+      background: #ffffff;
+      color: var(--navy);
+      border: 1px solid var(--line);
+    }
+    .btn-secondary:hover {
+      background: #f1f5f9;
+    }
+    @media print {
+      body {
+        background: #ffffff;
+        padding: 0;
+      }
+      .card {
+        box-shadow: none;
+        border: 1px solid #ccc;
+        max-width: 100%;
+      }
+      .btn-group {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <div class="accent-top"></div>
+
+    <!-- Header Logo -->
+    <div class="logo-badge">
+      <img src="/wegrow&Bschool.webp" alt="WeGrow B-School & Skill Campus" onerror="this.src='/logo.webp'">
+    </div>
+
+    <div>
+      <span class="badge">🚀 Grade 5 – 12 Enrollment</span>
+    </div>
+
+    <h1>AI Explorer <span>Enrollment</span></h1>
+    <p class="subtitle">Scan this QR code with any camera or UPI scanner to enroll directly in the AI Explorer Program.</p>
+
+    <!-- QR Code Box -->
+    <div class="qr-box">
+      <img src="/ai_explorer_enroll_qr.png" alt="WeGrow AI Explorer Enrollment QR Code">
+    </div>
+
+    <div class="scan-hint">
+      <span class="dot"></span>
+      <span>Official Registration Portal</span>
+    </div>
+
+    <div class="url-pill">
+      https://www.wegrowbschool.in/ai-explorer/enroll
+    </div>
+
+    <!-- Actions -->
+    <div class="btn-group">
+      <a href="/ai_explorer_enroll_qr.png" download="wegrow_ai_explorer_enroll_qr.png" class="btn btn-primary">
+        ⬇ Download QR PNG
+      </a>
+      <a href="/ai_explorer_enroll_qr.svg" download="wegrow_ai_explorer_enroll_qr.svg" class="btn btn-secondary">
+        ⬇ SVG Format
+      </a>
+      <button onclick="window.print()" class="btn btn-secondary">
+        🖨 Print Flyer
+      </button>
+    </div>
+  </div>
+
+</body>
+</html>

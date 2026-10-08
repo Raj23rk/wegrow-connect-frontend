@@ -301,6 +301,30 @@ export default function AiExplorerEnrollment() {
 
   return (
     <div className="min-h-screen bg-[#FAF7F2] text-[#16204a] font-sans antialiased selection:bg-purple-200">
+      {/* Top Query / Doubt Helpline Strip (Included on All Pages) */}
+      <div className="bg-gradient-to-r from-[#0f1f5c] via-[#1b2a6e] to-[#7b4dff] text-white py-2 px-3 sm:px-6 text-center text-xs font-bold shadow-xs flex items-center justify-center gap-2 sm:gap-3 flex-wrap">
+        <span className="inline-block bg-amber-400 text-slate-900 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
+          Helpline
+        </span>
+        <span className="text-[11px] sm:text-xs">If any doubts or queries? Contact us:</span>
+        <a
+          href="tel:+919344337331"
+          className="inline-flex items-center gap-1 text-amber-300 hover:text-white font-black underline underline-offset-2"
+        >
+          <Phone className="w-3.5 h-3.5" />
+          <span>+91 93443 37331</span>
+        </a>
+        <span className="text-white/40 hidden sm:inline">•</span>
+        <a
+          href="https://wa.me/919344337331?text=Hi%20WeGrow,%20I%20have%20a%20query%20regarding%20AI%20Explorer%20enrollment"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 bg-emerald-500/20 text-emerald-300 hover:text-white px-2 py-0.5 rounded-md font-black border border-emerald-500/30 text-[11px]"
+        >
+          <span>💬 WhatsApp</span>
+        </a>
+      </div>
+
       {/* Warm Ambient Floating Background Glows */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
         <div className="absolute top-[-80px] left-[-80px] w-80 sm:w-96 h-80 sm:h-96 rounded-full bg-[#ffedd5]/60 blur-3xl" />
@@ -362,6 +386,13 @@ export default function AiExplorerEnrollment() {
 
           {/* Right Action Buttons */}
           <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+            <a
+              href="tel:+919344337331"
+              className="hidden md:inline-flex items-center gap-1.5 text-xs font-black text-purple-900 bg-purple-50 hover:bg-purple-100 px-3 py-2 rounded-xl border border-purple-200 transition-all shadow-2xs"
+            >
+              <Phone className="w-3.5 h-3.5 text-purple-600" />
+              <span>+91 93443 37331</span>
+            </a>
             <Link
               to="/admin/ai-explorer"
               className="hidden sm:inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 bg-white hover:bg-[#f3ede3] px-3.5 py-2 rounded-xl border border-[#ded5c4] shadow-2xs transition-all"
@@ -1014,7 +1045,7 @@ export default function AiExplorerEnrollment() {
           </section>
         )}
 
-        {/* STEP 4: DIGITAL ENROLLMENT PASS & CONFIRMATION */}
+        {/* STEP 4: DIGITAL ENROLLMENT CONFIRMATION (NO QR - STUDENT & PARENT DETAILS + THANK YOU MESSAGE) */}
         {step === 4 && completedEnrollment && (
           <section className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-8 md:p-10 border-2 border-emerald-300 shadow-xl transition-all">
             <div className="text-center max-w-xl mx-auto mb-6 sm:mb-8">
@@ -1032,74 +1063,137 @@ export default function AiExplorerEnrollment() {
               </p>
             </div>
 
-            {/* Sing Along Style Digital Pass / Certificate Card */}
-            <div className="max-w-md mx-auto bg-gradient-to-b from-white to-[#faf8f5] rounded-2xl sm:rounded-3xl border-2 border-purple-300 shadow-lg overflow-hidden mb-6 relative">
+            {/* Official Confirmation Card */}
+            <div className="max-w-2xl mx-auto bg-gradient-to-b from-white to-[#faf8f5] rounded-2xl sm:rounded-3xl border-2 border-purple-300 shadow-lg overflow-hidden mb-6 relative">
               {/* Pass Header */}
               <div
                 style={{ background: 'linear-gradient(135deg, #0f1f5c 0%, #1846c4 60%, #7b4dff 100%)' }}
-                className="text-white p-4 sm:p-5 text-center relative"
+                className="text-white p-4 sm:p-6 text-center relative"
               >
                 <div className="text-[10px] sm:text-xs font-black tracking-widest text-amber-300 uppercase">
-                  OFFICIAL ENROLLMENT PASS
+                  OFFICIAL ENROLLMENT CONFIRMATION
                 </div>
-                <div className="text-xl sm:text-2xl font-black tracking-wide mt-0.5">
+                <div className="text-xl sm:text-3xl font-black tracking-wide mt-1">
                   AI Explorer Course
                 </div>
-                <div className="text-[10px] sm:text-[11px] font-bold text-white/80">WeGrow Skill Campus &amp; B School</div>
+                <div className="text-xs sm:text-sm font-bold text-white/90 mt-0.5">
+                  WeGrow Skill Campus &amp; B School
+                </div>
               </div>
 
               {/* Pass Body */}
-              <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
-                {/* QR Code */}
-                {qrCodeUrl && (
-                  <div className="flex flex-col items-center justify-center p-3 bg-white rounded-xl sm:rounded-2xl border-2 border-dashed border-purple-200">
-                    <img src={qrCodeUrl} alt="Enrollment Verification QR" className="w-32 sm:w-40 h-32 sm:h-40 object-contain" />
-                    <span className="text-[9px] sm:text-[10px] font-black text-purple-700 tracking-wider mt-1 uppercase">
-                      Scan to Verify Enrollment
-                    </span>
+              <div className="p-4 sm:p-6 space-y-4">
+                {/* Thank You Message Box */}
+                <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-50 via-pink-50 to-amber-50 border-2 border-purple-200 text-center space-y-1.5 shadow-2xs">
+                  <div className="text-sm sm:text-base font-black text-purple-900 flex items-center justify-center gap-1.5">
+                    <span>✨</span>
+                    <span>Thank you for creating your enrollment!</span>
+                    <span>✨</span>
                   </div>
-                )}
+                  <p className="text-xs sm:text-sm text-slate-700 font-semibold leading-relaxed">
+                    We are thrilled to welcome <strong className="text-[#0f1f5c]">{completedEnrollment.studentName}</strong> to the AI Explorer Program. Our academic team will connect with you on <strong className="text-purple-700">{completedEnrollment.fatherPhone || completedEnrollment.motherPhone}</strong> regarding batch schedule, curriculum, and practical lab access.
+                  </p>
+                </div>
 
                 {/* Enrollment ID */}
-                <div className="p-2.5 sm:p-3 bg-purple-50 rounded-xl border border-purple-200 flex items-center justify-between">
+                <div className="p-3 sm:p-3.5 bg-purple-50 rounded-2xl border border-purple-200 flex items-center justify-between">
                   <div>
-                    <div className="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase">Enrollment ID</div>
-                    <div className="font-mono font-black text-purple-900 text-sm sm:text-base">
+                    <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Enrollment ID</div>
+                    <div className="font-mono font-black text-purple-900 text-base sm:text-lg">
                       {completedEnrollment.id}
                     </div>
                   </div>
                   <button
                     onClick={() => copyId(completedEnrollment.id)}
-                    className="p-1.5 sm:p-2 rounded-lg bg-white hover:bg-purple-100 text-purple-700 transition-all cursor-pointer shadow-2xs"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-purple-100 text-purple-700 font-bold text-xs transition-all cursor-pointer shadow-2xs border border-purple-200"
                   >
-                    {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+                    {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>{copied ? 'Copied' : 'Copy ID'}</span>
                   </button>
                 </div>
 
-                {/* Details Table */}
-                <div className="space-y-2 text-xs">
-                  <div className="flex justify-between py-1 border-b border-slate-100">
-                    <span className="text-slate-500 font-bold">Student:</span>
-                    <span className="font-black text-[#0f1f5c]">{completedEnrollment.studentName}</span>
+                {/* Complete Student & Parent Details Grid */}
+                <div className="p-4 sm:p-5 rounded-2xl bg-white border-2 border-slate-200 space-y-3">
+                  <h3 className="text-xs font-black text-[#0f1f5c] uppercase tracking-wider border-b border-slate-100 pb-2">
+                    Student &amp; Parent Details
+                  </h3>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                    {/* Student Info */}
+                    <div className="space-y-1.5">
+                      <div className="flex justify-between sm:justify-start sm:gap-2">
+                        <span className="text-slate-500 font-bold min-w-[100px]">Student Name:</span>
+                        <span className="font-black text-[#0f1f5c]">{completedEnrollment.studentName}</span>
+                      </div>
+                      <div className="flex justify-between sm:justify-start sm:gap-2">
+                        <span className="text-slate-500 font-bold min-w-[100px]">Email ID:</span>
+                        <span className="font-bold text-[#0f1f5c]">{completedEnrollment.mailId || completedEnrollment.email || '—'}</span>
+                      </div>
+                      <div className="flex justify-between sm:justify-start sm:gap-2">
+                        <span className="text-slate-500 font-bold min-w-[100px]">Standard:</span>
+                        <span className="font-black text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md border border-purple-200">
+                          {completedEnrollment.standard}
+                        </span>
+                      </div>
+                      <div className="flex justify-between sm:justify-start sm:gap-2">
+                        <span className="text-slate-500 font-bold min-w-[100px]">School:</span>
+                        <span className="font-bold text-[#0f1f5c]">{completedEnrollment.school}</span>
+                      </div>
+                    </div>
+
+                    {/* Parents Info */}
+                    <div className="space-y-1.5">
+                      <div className="flex justify-between sm:justify-start sm:gap-2">
+                        <span className="text-slate-500 font-bold min-w-[100px]">Father's Name:</span>
+                        <span className="font-bold text-[#0f1f5c]">
+                          {completedEnrollment.fatherName} ({completedEnrollment.fatherPhone})
+                        </span>
+                      </div>
+                      <div className="flex justify-between sm:justify-start sm:gap-2">
+                        <span className="text-slate-500 font-bold min-w-[100px]">Mother's Name:</span>
+                        <span className="font-bold text-[#0f1f5c]">
+                          {completedEnrollment.motherName} ({completedEnrollment.motherPhone})
+                        </span>
+                      </div>
+                      <div className="flex justify-between sm:justify-start sm:gap-2">
+                        <span className="text-slate-500 font-bold min-w-[100px]">Fee Plan:</span>
+                        <span className="font-black text-[#0f1f5c]">
+                          {completedEnrollment.planName || completedEnrollment.plan || 'Full Payment'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between sm:justify-start sm:gap-2">
+                        <span className="text-slate-500 font-bold min-w-[100px]">Payment Status:</span>
+                        <span className="font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-300">
+                          CONFIRMED (₹{Number(completedEnrollment.amount).toLocaleString('en-IN')})
+                        </span>
+                      </div>
+                    </div>
+
+                    {completedEnrollment.address && (
+                      <div className="sm:col-span-2 pt-2 border-t border-slate-100 flex items-start gap-2">
+                        <span className="text-slate-500 font-bold min-w-[100px]">Address:</span>
+                        <span className="font-semibold text-slate-700">{completedEnrollment.address}</span>
+                      </div>
+                    )}
                   </div>
-                  <div className="flex justify-between py-1 border-b border-slate-100">
-                    <span className="text-slate-500 font-bold">Email:</span>
-                    <span className="font-black text-[#0f1f5c]">{completedEnrollment.mailId}</span>
+                </div>
+
+                {/* Support Helpline Box */}
+                <div className="p-3.5 sm:p-4 rounded-2xl bg-amber-50/80 border border-amber-200 flex flex-col sm:flex-row items-center justify-between gap-2.5 text-xs">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">💬</span>
+                    <div>
+                      <div className="font-black text-slate-900">If any doubts or queries?</div>
+                      <div className="text-slate-600 font-semibold">Our admission team is here to assist you.</div>
+                    </div>
                   </div>
-                  <div className="flex justify-between py-1 border-b border-slate-100">
-                    <span className="text-slate-500 font-bold">Standard:</span>
-                    <span className="font-black text-[#0f1f5c]">{completedEnrollment.standard}</span>
-                  </div>
-                  <div className="flex justify-between py-1 border-b border-slate-100">
-                    <span className="text-slate-500 font-bold">School:</span>
-                    <span className="font-black text-[#0f1f5c]">{completedEnrollment.school}</span>
-                  </div>
-                  <div className="flex justify-between py-1 border-b border-slate-100">
-                    <span className="text-slate-500 font-bold">Fee Status:</span>
-                    <span className="font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
-                      PAID (₹{Number(completedEnrollment.amount).toLocaleString('en-IN')})
-                    </span>
-                  </div>
+                  <a
+                    href="tel:+919344337331"
+                    className="inline-flex items-center gap-1.5 bg-[#0f1f5c] hover:bg-purple-900 text-white font-black px-4 py-2 rounded-xl transition-all shadow-2xs whitespace-nowrap"
+                  >
+                    <Phone className="w-3.5 h-3.5 text-amber-300" />
+                    <span>+91 93443 37331</span>
+                  </a>
                 </div>
               </div>
             </div>
@@ -1108,16 +1202,23 @@ export default function AiExplorerEnrollment() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 sm:gap-3">
               <button
                 onClick={() => window.print()}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs px-5 py-3 rounded-xl transition-all cursor-pointer shadow-xs"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs px-6 py-3.5 rounded-xl transition-all cursor-pointer shadow-xs"
               >
                 <Printer className="w-4 h-4" />
-                <span>Print Pass / Receipt</span>
+                <span>Print Receipt</span>
               </button>
+
+              <a
+                href="tel:+919344337331"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs px-6 py-3.5 rounded-xl transition-all cursor-pointer shadow-xs text-center"
+              >
+                <Phone className="w-4 h-4" />
+                <span>Contact Admissions (+91 93443 37331)</span>
+              </a>
 
               <Link
                 to="/"
-                style={{ background: 'linear-gradient(90deg, #7b4dff, #1846c4)' }}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 text-white font-bold text-xs px-5 py-3 rounded-xl transition-all cursor-pointer shadow-xs text-center"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs px-6 py-3.5 rounded-xl transition-all cursor-pointer shadow-xs text-center"
               >
                 <span>Back to Home</span>
               </Link>
@@ -1126,9 +1227,17 @@ export default function AiExplorerEnrollment() {
         )}
       </main>
 
-      {/* Footer */}
-      <footer className="text-center py-6 sm:py-8 text-xs font-bold text-[#5f6a8a] border-t border-[#e8dfcf] bg-white/70">
-        Made with 💜 by <strong>WeGrow Skill Campus &amp; B School</strong> • Empowering young innovators
+      {/* Footer with Helpline on all pages */}
+      <footer className="text-center py-6 sm:py-8 px-4 text-xs font-bold text-[#5f6a8a] border-t border-[#e8dfcf] bg-white/70 space-y-2">
+        <div>
+          If any doubts or queries? Contact:{' '}
+          <a href="tel:+919344337331" className="text-purple-700 font-black underline underline-offset-2">
+            +91 93443 37331
+          </a>
+        </div>
+        <div>
+          Made with 💜 by <strong>WeGrow Skill Campus &amp; B School</strong> • Empowering young innovators
+        </div>
       </footer>
     </div>
   );
