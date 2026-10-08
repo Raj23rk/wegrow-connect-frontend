@@ -347,7 +347,11 @@ footer{text-align:center;color:var(--muted);font-size:13px;font-weight:800;paddi
 
 <script>
 let student={}, selectedPlan="", amount=0, method="Cashfree";
-const plans={full:{name:"Full Payment",amount:43000,label:"₹43,000"},half:{name:"Half-Yearly",amount:22500,label:"₹22,500"},term:{name:"Term Wise Payment",amount:45000,label:"₹45,000"}};
+const plans={
+  full:{name:"Full Payment",amount:43000,total:43000,label:"₹43,000",payLabel:"₹43,000",tag:"Full Payment"},
+  half:{name:"Half-Yearly",amount:22500,total:45000,label:"₹45,000",payLabel:"1st Half ₹22,500",tag:"1st Installment"},
+  term:{name:"Term Wise Payment",amount:15000,total:45000,label:"₹45,000",payLabel:"Term I ₹15,000",tag:"Term I Fee"}
+};
 const esc=s=>String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 
 function setProgress(n){document.querySelectorAll(".pstep").forEach((d,i)=>d.classList.toggle("active",i<n));}

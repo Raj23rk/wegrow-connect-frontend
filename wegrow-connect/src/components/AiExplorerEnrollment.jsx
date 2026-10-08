@@ -30,33 +30,39 @@ const PLANS = {
   full: {
     id: 'full',
     name: 'Full Payment',
+    totalFee: 43000,
     amount: 43000,
     label: '₹43,000',
+    payNowLabel: '₹43,000',
     tag: 'BEST VALUE',
     desc: 'One-time payment covering full annual curriculum, practical labs & AI kit.',
-    cycles: '1 Full Payment',
+    cycles: '1 Full Payment • Save ₹2,000',
     color: 'from-emerald-500 to-teal-600',
     badgeBg: '#10b981',
   },
   half: {
     id: 'half',
     name: 'Half-Yearly',
+    totalFee: 45000,
     amount: 22500,
-    label: '₹22,500',
+    label: '₹45,000',
+    payNowLabel: '₹22,500 (1st Half)',
     tag: 'FLEXIBLE',
-    desc: '2 convenient bi-annual installments (₹22,500 × 2 installments).',
-    cycles: '2 Payment Cycles',
+    desc: '2 convenient installments of ₹22,500 (Pay 1st Half ₹22,500 now).',
+    cycles: '2 Installments • Pay 1st Half ₹22,500 now',
     color: 'from-purple-500 to-indigo-600',
     badgeBg: '#8b5cf6',
   },
   term: {
     id: 'term',
     name: 'Term Wise Payment',
-    amount: 45000,
+    totalFee: 45000,
+    amount: 15000,
     label: '₹45,000',
+    payNowLabel: '₹15,000 (Term I)',
     tag: 'EASY TERMS',
     desc: '3 equal term payments (Term I: ₹15k, Term II: ₹15k, Term III: ₹15k).',
-    cycles: '3 Terms (₹15,000 each)',
+    cycles: '3 Terms • Pay 1st Term ₹15,000 now',
     color: 'from-blue-500 to-cyan-600',
     badgeBg: '#3b82f6',
   },
@@ -969,9 +975,22 @@ export default function AiExplorerEnrollment() {
                     <span className="text-slate-500 font-bold">Course</span>
                     <span className="font-extrabold text-purple-700">AI Explorer</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500 font-bold">Chosen Plan</span>
+                  <div className="flex justify-between pb-2 border-b border-slate-200">
+                    <span className="text-slate-500 font-bold">Selected Plan</span>
                     <span className="font-extrabold text-emerald-700">{PLANS[selectedPlan]?.name}</span>
+                  </div>
+                  <div className="flex justify-between pb-2 border-b border-slate-200">
+                    <span className="text-slate-500 font-bold">Total Annual Fee</span>
+                    <span className="font-bold text-[#0f1f5c]">{PLANS[selectedPlan]?.label}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500 font-bold">Now Payable</span>
+                    <span className="font-black text-purple-700">
+                      ₹{PLANS[selectedPlan]?.amount?.toLocaleString('en-IN')}{' '}
+                      <span className="text-[10px] text-slate-500 font-semibold">
+                        ({selectedPlan === 'term' ? 'Term I Fee' : selectedPlan === 'half' ? '1st Installment' : 'Full Payment'})
+                      </span>
+                    </span>
                   </div>
                 </div>
               </div>
@@ -1002,13 +1021,21 @@ export default function AiExplorerEnrollment() {
                   className="p-4 sm:p-5 rounded-2xl text-white shadow-md"
                 >
                   <div className="text-[11px] sm:text-xs font-bold text-white/80 uppercase tracking-wider">
-                    Total Amount Due
+                    {selectedPlan === 'term'
+                      ? 'First Term Payment Due (Term I)'
+                      : selectedPlan === 'half'
+                      ? 'First Installment Due (1st Half)'
+                      : 'Total Amount Due'}
                   </div>
                   <div className="text-2xl sm:text-4xl font-black mt-1">
-                    {PLANS[selectedPlan]?.label}
+                    ₹{PLANS[selectedPlan]?.amount?.toLocaleString('en-IN')}
                   </div>
                   <div className="text-[10px] sm:text-[11px] text-white/70 font-semibold mt-1">
-                    100% Secure Transaction via WeGrow Connect
+                    {selectedPlan === 'term'
+                      ? 'Total Annual Fee: ₹45,000 (Term II & III payable in subsequent terms)'
+                      : selectedPlan === 'half'
+                      ? 'Total Annual Fee: ₹45,000 (2nd installment payable bi-annually)'
+                      : '100% Secure Transaction via WeGrow Connect'}
                   </div>
                 </div>
 
@@ -1026,7 +1053,9 @@ export default function AiExplorerEnrollment() {
                       <span>Processing...</span>
                     </div>
                   ) : (
-                    <span>Pay {PLANS[selectedPlan]?.label} &amp; Complete Enrollment 🎉</span>
+                    <span>
+                      Pay {selectedPlan === 'term' ? 'Term I ₹15,000' : selectedPlan === 'half' ? '1st Half ₹22,500' : '₹43,000'} &amp; Complete Enrollment 🎉
+                    </span>
                   )}
                 </button>
 
