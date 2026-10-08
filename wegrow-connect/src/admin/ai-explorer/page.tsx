@@ -42,40 +42,52 @@ export default function AdminAiExplorerPage() {
   const [modalQrUrl, setModalQrUrl] = useState('');
   const [copiedId, setCopiedId] = useState(false);
 
-  // Load Data
+  // Helpers for status classification
+  const isPaidStatus = (s?: string) =>
+    ['PAID', 'COMPLETED', 'ENROLLED', 'SUCCESS'].includes((s || '').toUpperCase());
+
+  // Load Data (without extra /admin/stats API call)
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [enrollRes, statsRes] = await Promise.all([
-        aiExplorerApi.getEnrollments({
-          search: search.trim() || undefined,
-          standard: standardFilter,
-          plan: planFilter,
-          paymentStatus: statusFilter,
-        }),
-        aiExplorerApi.getStats(),
-      ]);
+      const enrollRes = await aiExplorerApi.getEnrollments({
+        search: search.trim() || undefined,
+        standard: standardFilter,
+        plan: planFilter,
+        paymentStatus: statusFilter,
+      });
 
       let list: any[] = [];
-      if (Array.isArray(enrollRes?.data)) {
+      if (Array.isArray(enrollRes?.data?.data)) {
+        list = enrollRes.data.data;
+      } else if (Array.isArray(enrollRes?.data)) {
         list = enrollRes.data;
-      } else if (Array.isArray(enrollRes?.data?.enrollments)) {
-        list = enrollRes.data.enrollments;
       } else if (Array.isArray(enrollRes?.enrollments)) {
         list = enrollRes.enrollments;
-      } else if (Array.isArray(enrollRes?.data?.docs)) {
-        list = enrollRes.data.docs;
-      } else if (Array.isArray(enrollRes?.data?.items)) {
-        list = enrollRes.data.items;
       } else if (Array.isArray(enrollRes)) {
         list = enrollRes;
       }
+
       setEnrollments(list);
 
-      if (statsRes?.success && statsRes.data) {
-        setStats(statsRes.data);
-      }
+      // Compute stats directly from list
+      const totalCount = enrollRes?.total || list.length;
+      const paidCount = list.filter((e) => isPaidStatus(e.paymentStatus) || isPaidStatus(e.status)).length;
+      const totalFee = list
+        .filter((e) => isPaidStatus(e.paymentStatus) || isPaidStatus(e.status))
+        .reduce((sum, e) => sum + Number(e.amount || 0), 0);
+      const pendingCount = list.filter(
+        (e) => !isPaidStatus(e.paymentStatus) && !isPaidStatus(e.status)
+      ).length;
+
+      setStats({
+        totalEnrollments: totalCount,
+        paidEnrollments: paidCount,
+        totalRevenue: totalFee,
+        pendingEnrollments: pendingCount,
+      });
     } catch (err: any) {
+      console.error('Failed to load AI Explorer enrollments:', err);
       toast.error('Failed to load AI Explorer enrollments.');
     } finally {
       setLoading(false);
@@ -249,7 +261,8 @@ export default function AdminAiExplorerPage() {
                   Confirmed (Paid)
                 </div>
                 <div className="text-2xl sm:text-3xl font-black text-emerald-600 mt-1 font-heading">
-                  {stats?.paidEnrollments ?? safeEnrollments.filter((e) => e.paymentStatus === 'PAID').length}
+                  {stats?.paidEnrollments ??
+                    safeEnrollments.filter((e) => isPaidStatus(e.paymentStatus) || isPaidStatus(e.status)).length}
                 </div>
                 <div className="text-[11px] text-emerald-600 font-bold mt-0.5">Seats confirmed</div>
               </div>
@@ -265,7 +278,12 @@ export default function AdminAiExplorerPage() {
                   Fee Collected
                 </div>
                 <div className="text-2xl sm:text-3xl font-black text-blue-700 mt-1 font-heading">
-                  {rupee(stats?.totalRevenue ?? 0)}
+                  {rupee(
+                    stats?.totalRevenue ??
+                      safeEnrollments
+                        .filter((e) => isPaidStatus(e.paymentStatus) || isPaidStatus(e.status))
+                        .reduce((s, e) => s + Number(e.amount || 0), 0)
+                  )}
                 </div>
                 <div className="text-[11px] text-blue-600 font-bold mt-0.5">Processed revenue</div>
               </div>
@@ -282,7 +300,9 @@ export default function AdminAiExplorerPage() {
                 </div>
                 <div className="text-2xl sm:text-3xl font-black text-amber-600 mt-1 font-heading">
                   {stats?.pendingEnrollments ??
-                    safeEnrollments.filter((e) => e.paymentStatus === 'PENDING').length}
+                    safeEnrollments.filter(
+                      (e) => !isPaidStatus(e.paymentStatus) && !isPaidStatus(e.status)
+                    ).length}
                 </div>
                 <div className="text-[11px] text-amber-600 font-bold mt-0.5">Verification pending</div>
               </div>
@@ -388,12 +408,14 @@ export default function AdminAiExplorerPage() {
                     </tr>
                   ) : (
                     safeEnrollments.map((student) => {
-                      const isPaid = student.paymentStatus === 'PAID';
+                      const isPaid = isPaidStatus(student.paymentStatus) || isPaidStatus(student.status);
+                      const displayId = student.enrollmentId || student.id || student._id;
+                      const displayMail = student.email || student.mailId || '—';
                       return (
-                        <tr key={student.id} className="hover:bg-purple-50/40 transition-colors">
+                        <tr key={displayId} className="hover:bg-purple-50/40 transition-colors">
                           {/* ID */}
                           <td className="py-3.5 px-4">
-                            <div className="font-mono font-black text-purple-900">{student.id}</div>
+                            <div className="font-mono font-black text-purple-900">{displayId}</div>
                             <div className="text-[10px] text-slate-400 font-normal">
                               {student.createdAt
                                 ? new Date(student.createdAt).toLocaleDateString('en-IN')
@@ -406,7 +428,7 @@ export default function AdminAiExplorerPage() {
                             <div className="font-black text-slate-900 text-sm">{student.studentName}</div>
                             <div className="text-[11px] text-slate-500 flex items-center gap-1 font-semibold">
                               <Mail className="w-3 h-3 text-slate-400" />
-                              <span>{student.mailId || '—'}</span>
+                              <span>{displayMail}</span>
                             </div>
                           </td>
 
@@ -435,7 +457,7 @@ export default function AdminAiExplorerPage() {
                           {/* Fee Plan */}
                           <td className="py-3.5 px-4">
                             <div className="font-black text-slate-900">{rupee(student.amount)}</div>
-                            <div className="text-[10px] text-slate-500">{student.planName || student.plan}</div>
+                            <div className="text-[10px] text-slate-500">{student.planName || student.plan || student.feePlan}</div>
                           </td>
 
                           {/* Status */}
@@ -452,7 +474,7 @@ export default function AdminAiExplorerPage() {
                               ) : (
                                 <Clock className="w-3 h-3" />
                               )}
-                              <span>{student.paymentStatus}</span>
+                              <span>{student.paymentStatus || student.status || 'PENDING'}</span>
                             </span>
                           </td>
 
@@ -470,8 +492,8 @@ export default function AdminAiExplorerPage() {
                               <button
                                 onClick={() =>
                                   handleStatusChange(
-                                    student.id,
-                                    student.paymentStatus === 'PAID' ? 'PENDING' : 'PAID'
+                                    student.id || student._id,
+                                    isPaid ? 'PENDING' : 'PAID'
                                   )
                                 }
                                 className="p-2 rounded-lg bg-slate-100 hover:bg-emerald-100 text-emerald-700 transition-all cursor-pointer"
@@ -481,7 +503,7 @@ export default function AdminAiExplorerPage() {
                               </button>
 
                               <button
-                                onClick={() => handleResendEmail(student.id, student.email || student.mailId)}
+                                onClick={() => handleResendEmail(student.id || student._id, student.email || student.mailId)}
                                 className="p-2 rounded-lg bg-slate-100 hover:bg-blue-100 text-blue-700 transition-all cursor-pointer"
                                 title="Resend Confirmation Email"
                               >
@@ -489,7 +511,7 @@ export default function AdminAiExplorerPage() {
                               </button>
 
                               <button
-                                onClick={() => handleDelete(student.id)}
+                                onClick={() => handleDelete(student.id || student._id)}
                                 className="p-2 rounded-lg bg-slate-100 hover:bg-pink-100 text-pink-700 transition-all cursor-pointer"
                                 title="Delete Enrollment"
                               >
@@ -588,12 +610,12 @@ export default function AdminAiExplorerPage() {
                 <span className="text-slate-500">Payment Status:</span>
                 <span
                   className={`font-black px-2 py-0.5 rounded-md text-[10px] ${
-                    selectedStudent.paymentStatus === 'PAID'
+                    isPaidStatus(selectedStudent.paymentStatus) || isPaidStatus(selectedStudent.status)
                       ? 'bg-emerald-100 text-emerald-800'
                       : 'bg-amber-100 text-amber-800'
                   }`}
                 >
-                  {selectedStudent.paymentStatus} ({selectedStudent.paymentMethod || 'Online'})
+                  {selectedStudent.paymentStatus || selectedStudent.status || 'PENDING'} ({selectedStudent.paymentMethod || 'Online'})
                 </span>
               </div>
             </div>
@@ -609,7 +631,7 @@ export default function AdminAiExplorerPage() {
               </button>
 
               <button
-                onClick={() => handleResendEmail(selectedStudent.id, selectedStudent.email || selectedStudent.mailId)}
+                onClick={() => handleResendEmail(selectedStudent.id || selectedStudent._id, selectedStudent.email || selectedStudent.mailId)}
                 className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-3.5 py-2.5 rounded-xl transition-all cursor-pointer shadow-xs"
               >
                 <Send className="w-3.5 h-3.5" />
@@ -619,14 +641,21 @@ export default function AdminAiExplorerPage() {
               <button
                 onClick={() =>
                   handleStatusChange(
-                    selectedStudent.id,
-                    selectedStudent.paymentStatus === 'PAID' ? 'PENDING' : 'PAID'
+                    selectedStudent.id || selectedStudent._id,
+                    isPaidStatus(selectedStudent.paymentStatus) || isPaidStatus(selectedStudent.status)
+                      ? 'PENDING'
+                      : 'PAID'
                   )
                 }
                 className="inline-flex items-center gap-1.5 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs px-3.5 py-2.5 rounded-xl transition-all cursor-pointer shadow-xs"
               >
                 <CheckCircle2 className="w-3.5 h-3.5" />
-                <span>Mark as {selectedStudent.paymentStatus === 'PAID' ? 'PENDING' : 'PAID'}</span>
+                <span>
+                  Mark as{' '}
+                  {isPaidStatus(selectedStudent.paymentStatus) || isPaidStatus(selectedStudent.status)
+                    ? 'PENDING'
+                    : 'PAID'}
+                </span>
               </button>
             </div>
           </div>

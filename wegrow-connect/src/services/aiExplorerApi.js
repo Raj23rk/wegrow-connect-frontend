@@ -312,10 +312,12 @@ export const aiExplorerApi = {
       if (res.ok) {
         const parsed = await parseResponse(res);
         let list = [];
-        if (Array.isArray(parsed)) {
-          list = parsed;
+        if (Array.isArray(parsed?.data?.data)) {
+          list = parsed.data.data;
         } else if (Array.isArray(parsed?.data)) {
           list = parsed.data;
+        } else if (Array.isArray(parsed)) {
+          list = parsed;
         } else if (Array.isArray(parsed?.data?.enrollments)) {
           list = parsed.data.enrollments;
         } else if (Array.isArray(parsed?.enrollments)) {
@@ -330,10 +332,42 @@ export const aiExplorerApi = {
           list = parsed.items;
         }
 
+        const normalizedList = list.map((item) => {
+          const displayId = item.enrollmentId || item.id || item._id || '';
+          const planLabel =
+            item.planName ||
+            (item.feePlan === 'half'
+              ? 'Half-Yearly'
+              : item.feePlan === 'term'
+              ? 'Term Wise'
+              : 'Full Payment');
+
+          return {
+            ...item,
+            id: displayId,
+            enrollmentId: item.enrollmentId || displayId,
+            studentName: item.studentName || item.name || '',
+            email: item.email || item.mailId || '',
+            mailId: item.email || item.mailId || '',
+            planName: planLabel,
+            feePlan: item.feePlan || item.plan || 'full',
+            amount: Number(item.amount || 0),
+            paymentStatus: item.paymentStatus || item.status || 'PENDING',
+          };
+        });
+
+        const totalCount =
+          parsed?.data?.meta?.total ??
+          parsed?.meta?.total ??
+          parsed?.total ??
+          parsed?.data?.total ??
+          normalizedList.length;
+
         return {
           success: true,
-          data: list,
-          total: parsed?.total || parsed?.data?.total || list.length,
+          data: normalizedList,
+          total: totalCount,
+          meta: parsed?.data?.meta || parsed?.meta,
           raw: parsed,
         };
       }
