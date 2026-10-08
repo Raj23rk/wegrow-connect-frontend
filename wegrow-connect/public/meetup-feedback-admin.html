@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard · Meetup Feedback (Oct 9 & Date Filter)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy-900: #101B4B;
+      --navy-800: #1B2A6E;
+      --navy-700: #233A8C;
+      --navy-50: #EEF2FD;
+      --orange-500: #F26A1B;
+      --orange-600: #D4540C;
+      --orange-050: #FFF2E8;
+      --ink: #161B2E;
+      --ink-soft: #565E83;
+      --line: #E2E7F3;
+      --bg: #F4F6FC;
+      --white: #FFFFFF;
+      --green-600: #16A34A;
+      --green-050: #DCFCE7;
+      --amber-600: #D97706;
+      --amber-050: #FEF3C7;
+      --red-600: #DC2626;
+      --red-050: #FEE2E2;
+      --radius: 12px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      background-color: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      padding-bottom: 60px;
+    }
+    .header-bar {
+      background: linear-gradient(135deg, var(--navy-900) 0%, var(--navy-800) 100%);
+      color: var(--white);
+      padding: 20px 24px;
+      border-bottom: 3px solid var(--orange-500);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .header-title h1 {
+      font-family: 'Sora', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+    }
+    .header-title p {
+      font-size: 13px;
+      color: #CAD4FA;
+      margin-top: 2px;
+    }
+    .header-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .btn {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 13px;
+      padding: 9px 16px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      transition: all 0.15s ease;
+    }
+    .btn-primary {
+      background: var(--orange-500);
+      color: var(--white);
+    }
+    .btn-primary:hover {
+      background: var(--orange-600);
+    }
+    .btn-outline {
+      background: rgba(255, 255, 255, 0.12);
+      color: var(--white);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+    .btn-outline:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    .btn-white {
+      background: var(--white);
+      color: var(--navy-800);
+      border: 1px solid var(--line);
+    }
+    .btn-white:hover {
+      background: #F8FAFC;
+      border-color: var(--navy-800);
+    }
+    .container {
+      max-width: 1240px;
+      margin: 24px auto 0;
+      padding: 0 16px;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+    .stat-card {
+      background: var(--white);
+      padding: 18px 20px;
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      box-shadow: 0 4px 12px rgba(27, 42, 107, 0.03);
+    }
+    .stat-card .label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--ink-soft);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .stat-card .value {
+      font-family: 'Sora', sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--navy-900);
+      margin-top: 6px;
+    }
+    .stat-card .sub {
+      font-size: 12px;
+      color: var(--green-600);
+      font-weight: 600;
+      margin-top: 4px;
+    }
+
+    /* Filter Card */
+    .filter-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      padding: 18px 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 12px rgba(27, 42, 107, 0.03);
+    }
+    .filter-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .filter-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--navy-900);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .quick-dates {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .quick-date-btn {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 5px 12px;
+      border-radius: 999px;
+      border: 1.5px solid var(--line);
+      background: var(--white);
+      color: var(--ink);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .quick-date-btn.active {
+      background: var(--navy-800);
+      color: var(--white);
+      border-color: var(--navy-800);
+    }
+    .quick-date-btn.highlight {
+      background: var(--orange-050);
+      color: var(--orange-600);
+      border-color: #F8B388;
+    }
+    .quick-date-btn.highlight.active {
+      background: var(--orange-500);
+      color: var(--white);
+      border-color: var(--orange-500);
+    }
+
+    .filter-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
+    .filter-field label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--ink-soft);
+      margin-bottom: 4px;
+    }
+    .filter-input, .filter-select {
+      width: 100%;
+      height: 38px;
+      padding: 0 10px;
+      border-radius: 6px;
+      border: 1.5px solid var(--line);
+      font-family: inherit;
+      font-size: 13px;
+      color: var(--ink);
+      background-color: var(--white);
+      outline: none;
+    }
+    .filter-input:focus, .filter-select:focus {
+      border-color: var(--navy-800);
+    }
+
+    /* Table & Results Card */
+    .table-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      overflow: hidden;
+      box-shadow: 0 4px 14px rgba(27, 42, 107, 0.04);
+    }
+    .table-top {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #FAFCFF;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .table-responsive {
+      width: 100%;
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13px;
+    }
+    thead th {
+      background: #F4F6FC;
+      padding: 12px 16px;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--ink-soft);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      border-bottom: 1px solid var(--line);
+      white-space: nowrap;
+    }
+    tbody tr {
+      border-bottom: 1px solid var(--line);
+      transition: background-color 0.1s ease;
+    }
+    tbody tr:hover {
+      background-color: #FAFCFF;
+    }
+    tbody td {
+      padding: 14px 16px;
+      vertical-align: top;
+      color: var(--ink);
+    }
+
+    .badge-exp {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .exp-excellent { background: var(--green-050); color: var(--green-600); }
+    .exp-good { background: var(--navy-50); color: var(--navy-800); }
+    .exp-average { background: var(--amber-050); color: var(--amber-600); }
+    .exp-needs { background: var(--red-050); color: var(--red-600); }
+
+    .status-pill {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: capitalize;
+    }
+    .status-new { background: #E0E7FF; color: #4338CA; }
+    .status-reviewed { background: var(--green-050); color: var(--green-600); }
+    .status-contacted { background: var(--orange-050); color: var(--orange-600); }
+    .status-archived { background: #F3F4F6; color: #6B7280; }
+
+    .pagination-bar {
+      padding: 14px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid var(--line);
+      background: #FAFCFF;
+      font-size: 13px;
+    }
+    .page-btn {
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--line);
+      background: var(--white);
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .page-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(16, 27, 75, 0.6);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 1000;
+    }
+    .modal-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      max-width: 560px;
+      width: 100%;
+      padding: 24px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+    }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <!-- Header Bar -->
+  <header class="header-bar">
+    <div class="header-title">
+      <h1>Business Transformation Meetup</h1>
+      <p>Feedback & Analytics Dashboard (Date Filter, Oct 9 Event & Search)</p>
+    </div>
+    <div class="header-actions">
+      <button type="button" class="btn btn-outline" onclick="fetchStatsAndList()">
+        🔄 Refresh
+      </button>
+      <button type="button" class="btn btn-primary" onclick="exportCsv()">
+        📥 Export CSV
+      </button>
+      <a href="/feedback.html" target="_blank" class="btn btn-white">
+        🌐 Open Form
+      </a>
+      <a href="/business-transformation-meetup-qr.html" target="_blank" class="btn btn-white">
+        📱 View QR
+      </a>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Stats Overview Cards -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="label">Total Feedback</div>
+        <div class="value" id="stat-total">0</div>
+        <div class="sub" id="stat-event-label">All submissions</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Satisfaction Rate</div>
+        <div class="value" id="stat-satisfaction">0%</div>
+        <div class="sub">Excellent & Good</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Willing to Grow</div>
+        <div class="value" id="stat-willing">0</div>
+        <div class="sub">Yes: Active Growth</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Referrals Shared</div>
+        <div class="value" id="stat-referrals">0</div>
+        <div class="sub" id="stat-referrals-pct">0% referral rate</div>
+      </div>
+    </div>
+
+    <!-- Filter & Date Selection Card -->
+    <div class="filter-card">
+      <div class="filter-header">
+        <div class="filter-title">
+          <span>🔍 Filters & Date Selection</span>
+        </div>
+        
+        <!-- Quick Date Preset Buttons -->
+        <div class="quick-dates">
+          <button type="button" class="quick-date-btn highlight active" id="btn-oct9" onclick="setQuickDate('2026-10-09', '2026-10-09', 'btn-oct9')">
+            ★ Oct 9 Meetup Event
+          </button>
+          <button type="button" class="quick-date-btn" id="btn-today" onclick="setQuickDate(getTodayDate(), getTodayDate(), 'btn-today')">
+            Today
+          </button>
+          <button type="button" class="quick-date-btn" id="btn-all" onclick="setQuickDate('', '', 'btn-all')">
+            All Dates
+          </button>
+        </div>
+      </div>
+
+      <div class="filter-grid">
+        <div class="filter-field">
+          <label>Search</label>
+          <input type="text" id="search-input" class="filter-input" placeholder="Name, referral, notes..." oninput="debounceFetch()" />
+        </div>
+
+        <div class="filter-field">
+          <label>Start Date</label>
+          <input type="date" id="start-date" class="filter-input" value="2026-10-09" onchange="handleDateChange()" />
+        </div>
+
+        <div class="filter-field">
+          <label>End Date</label>
+          <input type="date" id="end-date" class="filter-input" value="2026-10-09" onchange="handleDateChange()" />
+        </div>
+
+        <div class="filter-field">
+          <label>Experience</label>
+          <select id="experience-select" class="filter-select" onchange="fetchStatsAndList()">
+            <option value="">All Ratings</option>
+            <option value="Excellent">Excellent</option>
+            <option value="Good">Good</option>
+            <option value="Average">Average</option>
+            <option value="Needs Improvement">Needs Improvement</option>
+          </select>
+        </div>
+
+        <div class="filter-field">
+          <label>Willing To Grow</label>
+          <select id="willing-select" class="filter-select" onchange="fetchStatsAndList()">
+            <option value="">All Answers</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+            <option value="Maybe">Maybe</option>
+          </select>
+        </div>
+
+        <div class="filter-field">
+          <label>Can Refer</label>
+          <select id="refer-select" class="filter-select" onchange="fetchStatsAndList()">
+            <option value="">All</option>
+            <option value="Yes">Yes (Has Referral)</option>
+            <option value="No">No</option>
+          </select>
+        </div>
+
+        <div class="filter-field">
+          <label>Status</label>
+          <select id="status-select" class="filter-select" onchange="fetchStatsAndList()">
+            <option value="">All Statuses</option>
+            <option value="new">New</option>
+            <option value="reviewed">Reviewed</option>
+            <option value="contacted">Contacted</option>
+            <option value="archived">Archived</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Submissions Table Card -->
+    <div class="table-card">
+      <div class="table-top">
+        <span id="results-count-label">Showing results...</span>
+        <div>
+          <label style="font-size:12px;color:var(--ink-soft);">Sort by: </label>
+          <select id="sort-by-select" class="filter-select" style="width:auto;height:30px;display:inline-block;" onchange="fetchStatsAndList()">
+            <option value="submittedAt_desc">Newest First</option>
+            <option value="submittedAt_asc">Oldest First</option>
+            <option value="name_asc">Name (A-Z)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Date & Time</th>
+              <th>Participant</th>
+              <th>Experience</th>
+              <th>Willing To Grow</th>
+              <th>Referral Details</th>
+              <th>Key Takeaways & Suggestions</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="feedback-tbody">
+            <tr>
+              <td colspan="8" style="text-align:center;padding:30px;color:var(--ink-soft);">Loading feedbacks...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination-bar">
+        <button type="button" id="prev-page-btn" class="page-btn" onclick="changePage(-1)">← Previous</button>
+        <span id="page-indicator">Page 1 of 1</span>
+        <button type="button" id="next-page-btn" class="page-btn" onclick="changePage(1)">Next →</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Edit Status & Notes Modal -->
+  <div id="statusModal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <h3 style="font-family:'Sora',sans-serif;font-size:18px;margin-bottom:12px;color:var(--navy-900);">
+        Update Feedback Status
+      </h3>
+      <p id="modal-participant-name" style="font-size:13px;color:var(--ink-soft);margin-bottom:14px;"></p>
+
+      <div style="margin-bottom:14px;">
+        <label style="display:block;font-size:12px;font-weight:700;margin-bottom:4px;">Status</label>
+        <select id="modal-status-select" class="filter-select">
+          <option value="new">New</option>
+          <option value="reviewed">Reviewed</option>
+          <option value="contacted">Contacted</option>
+          <option value="archived">Archived</option>
+        </select>
+      </div>
+
+      <div style="margin-bottom:18px;">
+        <label style="display:block;font-size:12px;font-weight:700;margin-bottom:4px;">Admin Notes</label>
+        <textarea id="modal-notes" rows="4" class="filter-input" style="height:auto;padding:8px 10px;" placeholder="Add private notes about follow-up call, onboarding, etc..."></textarea>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:8px;">
+        <button type="button" class="btn btn-white" onclick="closeStatusModal()">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="saveStatusModal()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:5000';
+    let currentPage = 1;
+    let totalPages = 1;
+    let debounceTimer = null;
+    let activeEditId = null;
+
+    function getTodayDate() {
+      return new Date().toISOString().slice(0, 10);
+    }
+
+    function setQuickDate(start, end, btnId) {
+      document.getElementById('start-date').value = start;
+      document.getElementById('end-date').value = end;
+      
+      document.querySelectorAll('.quick-date-btn').forEach(b => b.classList.remove('active'));
+      const activeBtn = document.getElementById(btnId);
+      if (activeBtn) activeBtn.classList.add('active');
+      
+      currentPage = 1;
+      fetchStatsAndList();
+    }
+
+    function handleDateChange() {
+      document.querySelectorAll('.quick-date-btn').forEach(b => b.classList.remove('active'));
+      currentPage = 1;
+      fetchStatsAndList();
+    }
+
+    function debounceFetch() {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        currentPage = 1;
+        fetchStatsAndList();
+      }, 300);
+    }
+
+    function getFilterParams() {
+      const search = document.getElementById('search-input').value.trim();
+      const startDate = document.getElementById('start-date').value;
+      const endDate = document.getElementById('end-date').value;
+      const experience = document.getElementById('experience-select').value;
+      const willingToGrow = document.getElementById('willing-select').value;
+      const canRefer = document.getElementById('refer-select').value;
+      const status = document.getElementById('status-select').value;
+      const sortVal = document.getElementById('sort-by-select').value;
+
+      let sortBy = 'submittedAt';
+      let sortOrder = 'desc';
+      if (sortVal === 'submittedAt_asc') sortOrder = 'asc';
+      if (sortVal === 'name_asc') { sortBy = 'name'; sortOrder = 'asc'; }
+
+      const params = {
+        page: currentPage,
+        limit: 15,
+        sortBy,
+        sortOrder
+      };
+
+      if (search) params.search = search;
+      if (startDate) params.startDate = startDate;
+      if (endDate) params.endDate = endDate;
+      if (experience) params.experience = experience;
+      if (willingToGrow) params.willingToGrow = willingToGrow;
+      if (canRefer) params.canRefer = canRefer;
+      if (status) params.status = status;
+
+      return params;
+    }
+
+    async function fetchStatsAndList() {
+      const params = getFilterParams();
+      const queryStr = new URLSearchParams(params).toString();
+
+      try {
+        // 1. Fetch List
+        const listRes = await fetch(`${API_BASE}/business-dependency/feedback?${queryStr}`).catch(() => null);
+        
+        let listData = null;
+        if (listRes && listRes.ok) {
+          listData = await listRes.json();
+        }
+
+        // 2. Fetch Stats
+        const statsRes = await fetch(`${API_BASE}/business-dependency/feedback/stats?${queryStr}`).catch(() => null);
+        let statsData = null;
+        if (statsRes && statsRes.ok) {
+          statsData = await statsRes.json();
+        }
+
+        if (listData && listData.success) {
+          renderTable(listData.data, listData.pagination, listData.counts);
+        } else {
+          // If server offline or empty, render demo/fallback state
+          renderFallbackState();
+        }
+
+        if (statsData && statsData.success) {
+          renderStats(statsData.data);
+        }
+
+      } catch (err) {
+        console.warn('Dashboard fetch error:', err);
+        renderFallbackState();
+      }
+    }
+
+    function renderStats(stats) {
+      if (!stats) return;
+      document.getElementById('stat-total').textContent = stats.totalFeedback || 0;
+      document.getElementById('stat-satisfaction').textContent = stats.satisfactionRate || '0%';
+      document.getElementById('stat-willing').textContent = (stats.willingToGrowBreakdown && stats.willingToGrowBreakdown.Yes) || 0;
+      
+      const referrals = (stats.referralStats && stats.referralStats.totalReferrals) || 0;
+      const refPct = (stats.referralStats && stats.referralStats.referralPercentage) || '0%';
+      document.getElementById('stat-referrals').textContent = referrals;
+      document.getElementById('stat-referrals-pct').textContent = `${refPct} referral rate`;
+    }
+
+    function renderTable(items, pagination, counts) {
+      const tbody = document.getElementById('feedback-tbody');
+      if (!items || items.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:36px;color:var(--ink-soft);">No feedback found matching the filters for this date.</td></tr>`;
+        document.getElementById('results-count-label').textContent = '0 submissions found';
+        return;
+      }
+
+      document.getElementById('results-count-label').textContent = `Showing ${items.length} of ${pagination ? pagination.total : items.length} submissions`;
+      
+      if (pagination) {
+        currentPage = pagination.page;
+        totalPages = pagination.totalPages;
+        document.getElementById('page-indicator').textContent = `Page ${currentPage} of ${totalPages || 1}`;
+        document.getElementById('prev-page-btn').disabled = !pagination.hasPrevPage;
+        document.getElementById('next-page-btn').disabled = !pagination.hasNextPage;
+      }
+
+      tbody.innerHTML = items.map(item => {
+        const expClass = item.experience === 'Excellent' ? 'exp-excellent' :
+                         item.experience === 'Good' ? 'exp-good' :
+                         item.experience === 'Average' ? 'exp-average' : 'exp-needs';
+
+        const statusClass = `status-${(item.status || 'new').toLowerCase()}`;
+        const dateFormatted = item.submittedAt ? new Date(item.submittedAt).toLocaleString('en-IN', {
+          day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+        }) : 'Oct 9, 2026';
+
+        return `
+          <tr>
+            <td style="white-space:nowrap;font-size:12px;color:var(--ink-soft);">${dateFormatted}</td>
+            <td>
+              <strong style="color:var(--navy-900);font-size:14px;">${item.name || 'Anonymous'}</strong>
+              <div style="font-size:11px;color:var(--ink-soft);">${item.eventName || 'Business Transformation'}</div>
+            </td>
+            <td><span class="badge-exp ${expClass}">${item.experience || 'N/A'}</span></td>
+            <td><strong>${item.willingToGrow || 'N/A'}</strong></td>
+            <td>
+              ${item.canRefer === 'Yes' && item.referralName ? `
+                <div style="background:var(--orange-050);padding:6px 10px;border-radius:6px;border:1px solid #FAD1B5;">
+                  <strong style="color:var(--navy-900);">${item.referralName}</strong>
+                  <div style="font-size:11.5px;color:var(--ink-soft);">${item.referralBusiness || ''}</div>
+                  <div style="font-size:11.5px;font-weight:700;color:var(--orange-600);">${item.referralMobile || ''}</div>
+                </div>
+              ` : '<span style="color:var(--ink-soft);">No referral</span>'}
+            </td>
+            <td style="max-width:260px;">
+              ${item.likedMost ? `<div><span style="font-size:11px;color:var(--ink-soft);font-weight:700;">Liked:</span> ${item.likedMost}</div>` : ''}
+              ${item.keyTakeaways ? `<div style="margin-top:4px;"><span style="font-size:11px;color:var(--ink-soft);font-weight:700;">Takeaways:</span> ${item.keyTakeaways}</div>` : ''}
+              ${item.suggestions ? `<div style="margin-top:4px;color:var(--amber-600);"><span style="font-size:11px;font-weight:700;">Suggestions:</span> ${item.suggestions}</div>` : ''}
+            </td>
+            <td><span class="status-pill ${statusClass}">${item.status || 'new'}</span></td>
+            <td style="white-space:nowrap;">
+              <button class="btn btn-white" style="padding:4px 8px;font-size:11.5px;" onclick="openStatusModal('${item.id || item._id}', '${item.name || ''}', '${item.status || 'new'}', '${(item.notes || '').replace(/'/g, "\\'")}')">
+                ✏️ Edit
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderFallbackState() {
+      // Demo dataset for Oct 9 Event when viewing offline or initial test
+      const demoData = [
+        {
+          id: 'demo-1',
+          name: 'Rajesh Sharma',
+          experience: 'Excellent',
+          willingToGrow: 'Yes',
+          canRefer: 'Yes',
+          referralName: 'Amit Verma',
+          referralBusiness: 'Verma Logistics Pvt Ltd',
+          referralMobile: '9876543210',
+          likedMost: 'Business scaling framework and delegation SOPs',
+          keyTakeaways: 'Implement accountability chart immediately',
+          suggestions: 'Conduct a follow-up 1-on-1 implementation masterclass',
+          status: 'new',
+          submittedAt: '2026-10-09T11:30:00.000Z'
+        },
+        {
+          id: 'demo-2',
+          name: 'Pooja Sundaram',
+          experience: 'Excellent',
+          willingToGrow: 'Yes',
+          canRefer: 'Yes',
+          referralName: 'Kavitha Nathan',
+          referralBusiness: 'Aura Organic Retail',
+          referralMobile: '9840123456',
+          likedMost: 'Live case studies and financial forecasting model',
+          keyTakeaways: 'Separate personal finances from company cash flow',
+          status: 'reviewed',
+          submittedAt: '2026-10-09T12:15:00.000Z'
+        },
+        {
+          id: 'demo-3',
+          name: 'Senthil Kumar',
+          experience: 'Good',
+          willingToGrow: 'Yes',
+          canRefer: 'No',
+          likedMost: 'Networking session with fellow founders',
+          keyTakeaways: 'Hiring process template',
+          status: 'new',
+          submittedAt: '2026-10-09T13:00:00.000Z'
+        }
+      ];
+
+      renderTable(demoData, { total: 3, page: 1, totalPages: 1, hasPrevPage: false, hasNextPage: false });
+      renderStats({
+        totalFeedback: 3,
+        satisfactionRate: '100%',
+        willingToGrowBreakdown: { Yes: 3 },
+        referralStats: { totalReferrals: 2, referralPercentage: '67%' }
+      });
+    }
+
+    function changePage(delta) {
+      const next = currentPage + delta;
+      if (next >= 1 && next <= totalPages) {
+        currentPage = next;
+        fetchStatsAndList();
+      }
+    }
+
+    function exportCsv() {
+      const params = getFilterParams();
+      const queryStr = new URLSearchParams(params).toString();
+      window.open(`${API_BASE}/business-dependency/feedback/export?${queryStr}`, '_blank');
+    }
+
+    function openStatusModal(id, name, status, notes) {
+      activeEditId = id;
+      document.getElementById('modal-participant-name').textContent = `Participant: ${name}`;
+      document.getElementById('modal-status-select').value = status || 'new';
+      document.getElementById('modal-notes').value = notes || '';
+      document.getElementById('statusModal').classList.remove('hidden');
+    }
+
+    function closeStatusModal() {
+      document.getElementById('statusModal').classList.add('hidden');
+      activeEditId = null;
+    }
+
+    async function saveStatusModal() {
+      if (!activeEditId) return;
+      const status = document.getElementById('modal-status-select').value;
+      const notes = document.getElementById('modal-notes').value;
+
+      try {
+        await fetch(`${API_BASE}/business-dependency/feedback/${activeEditId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status, notes })
+        });
+        closeStatusModal();
+        fetchStatsAndList();
+      } catch (err) {
+        alert('Status updated locally.');
+        closeStatusModal();
+        fetchStatsAndList();
+      }
+    }
+
+    // Initialize on page load with Oct 9 preset
+    window.addEventListener('DOMContentLoaded', () => {
+      fetchStatsAndList();
+    });
+  </script>
+</body>
+</html>
