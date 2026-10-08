@@ -19,8 +19,6 @@ import {
   Check,
   ShieldCheck,
   GraduationCap,
-  Maximize2,
-  Minimize2,
   X
 } from 'lucide-react';
 import { aiExplorerApi } from '../services/aiExplorerApi';
@@ -94,38 +92,6 @@ export default function AiExplorerEnrollment() {
   const [copied, setCopied] = useState(false);
 
   const formTopRef = useRef(null);
-  const videoRef = useRef(null);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-
-  // Monitor Fullscreen changes
-  useEffect(() => {
-    const handleFsChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-    document.addEventListener('fullscreenchange', handleFsChange);
-    document.addEventListener('webkitfullscreenchange', handleFsChange);
-    return () => {
-      document.removeEventListener('fullscreenchange', handleFsChange);
-      document.removeEventListener('webkitfullscreenchange', handleFsChange);
-    };
-  }, []);
-
-  const toggleFullscreen = () => {
-    if (!videoRef.current) return;
-    if (!document.fullscreenElement) {
-      if (videoRef.current.requestFullscreen) {
-        videoRef.current.requestFullscreen();
-      } else if (videoRef.current.webkitRequestFullscreen) {
-        videoRef.current.webkitRequestFullscreen();
-      }
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      } else if (document.webkitExitFullscreen) {
-        document.webkitExitFullscreen();
-      }
-    }
-  };
 
   // Generate QR Code upon successful enrollment
   useEffect(() => {
@@ -439,34 +405,17 @@ export default function AiExplorerEnrollment() {
         </div>
       </header>
 
-      {/* FULL SCREEN / EDGE-TO-EDGE HERO ANIMATED VIDEO */}
+      {/* HERO ANIMATED BANNER VIDEO */}
       <section className="w-full relative bg-black overflow-hidden shadow-md border-b border-[#e7decb]">
-        <div className="w-full relative max-h-[85vh] flex items-center justify-center bg-black">
+        <div className="w-full relative flex items-center justify-center bg-black">
           <video
-            ref={videoRef}
             src="/Animate_website_background_natural_20261008182800.mp4"
             autoPlay
             loop
             muted
             playsInline
-            className="w-full h-auto max-h-[85vh] object-cover block"
+            className="w-full h-auto object-contain block mx-auto"
           />
-
-          {/* Fullscreen Mode Button */}
-          <button
-            onClick={toggleFullscreen}
-            className="absolute bottom-4 right-4 sm:bottom-6 sm:right-8 bg-black/60 hover:bg-black/80 text-white p-2.5 sm:p-3 rounded-full backdrop-blur-md border border-white/20 transition-all hover:scale-105 shadow-xl cursor-pointer flex items-center gap-2 text-xs font-bold"
-            title={isFullscreen ? 'Exit Full Screen' : 'Full Screen Mode'}
-          >
-            {isFullscreen ? (
-              <Minimize2 className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400" />
-            ) : (
-              <Maximize2 className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-            )}
-            <span className="hidden sm:inline font-black">
-              {isFullscreen ? 'Exit Full Screen' : 'Full Screen Mode'}
-            </span>
-          </button>
         </div>
       </section>
 
