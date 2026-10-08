@@ -23,7 +23,8 @@ import {
   User,
   Activity,
   Calendar,
-  Sparkles
+  Sparkles,
+  MessageSquare
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import {
@@ -406,6 +407,14 @@ export default function AdminBusinessDependencyTest() {
           </div>
 
           <div className="flex items-center gap-2.5 flex-wrap">
+            <Link
+              to="/admin/feedback"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-orange-50 hover:bg-orange-100 text-[#F26A1B] font-bold text-xs transition-all border border-orange-200 shadow-xs"
+            >
+              <MessageSquare className="w-3.5 h-3.5" />
+              <span>Meetup Feedback (Oct 9)</span>
+            </Link>
+
             <Link
               to="/business-dependency-test"
               target="_blank"

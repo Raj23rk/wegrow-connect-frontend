@@ -24,7 +24,8 @@ import {
   FileText,
   Music,
   ClipboardCheck,
-  HelpCircle
+  HelpCircle,
+  MessageSquare
 } from "lucide-react";
 
 export default function Sidebar() {
@@ -40,6 +41,7 @@ export default function Sidebar() {
     { name: "Event Teasers", href: "/admin/event-teaser", icon: HelpCircle },
     { name: "Sing Along Tickets", href: "/admin/sing-along", icon: Music },
     { name: "Business Dependency", href: "/admin/business-dependency-test", icon: ClipboardCheck },
+    { name: "Meetup Feedback", href: "/admin/feedback", icon: MessageSquare },
     { name: "Women Entrepreneurs", href: "/admin/women-entrepreneurs", icon: Sparkles },
     { name: "Student Founders", href: "/admin/student-founders", icon: GraduationCap },
     { name: "Business Founders", href: "/admin/business-founders", icon: Briefcase },

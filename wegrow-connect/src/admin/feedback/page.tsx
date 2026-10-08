@@ -65,8 +65,26 @@ export default function AdminMeetupFeedbackPage() {
       if (search.trim()) params.search = search.trim();
 
       const res = await getMeetupFeedbacks(params);
-      const list = res?.data?.feedbacks || res?.data || (Array.isArray(res) ? res : []);
-      setFeedbacks(list);
+      const rawList = res?.data?.feedbacks || res?.data || (Array.isArray(res) ? res : []);
+      const normalizedList: MeetupFeedbackItem[] = (Array.isArray(rawList) ? rawList : (rawList ? [rawList] : [])).map((item: any, idx: number) => ({
+        id: item._id || item.id || `fb_${idx}`,
+        name: item.name || item.fullName || 'Anonymous',
+        experience: item.experience || 'Good',
+        willingToGrow: item.willingToGrow || item.willing_to_grow || 'Yes',
+        canRefer: item.canRefer || item.can_refer || 'No',
+        referralName: item.referralName || item.referral_name || '',
+        referralBusiness: item.referralBusiness || item.referral_business || '',
+        referralMobile: item.referralMobile || item.referral_mobile || '',
+        likedMost: item.likedMost || item.liked_most || '',
+        suggestions: item.suggestions || '',
+        keyTakeaways: item.keyTakeaways || item.key_takeaways || '',
+        eventName: item.eventName || item.eventTitle || 'Business Transformation Meetup',
+        eventDate: item.eventDate || item.event_date || (item.submittedAt ? item.submittedAt.slice(0, 10) : '2026-10-09'),
+        submittedAt: item.submittedAt || item.createdAt || new Date().toISOString(),
+        status: item.status || 'new',
+        notes: item.notes || ''
+      }));
+      setFeedbacks(normalizedList);
     } catch (err) {
       console.warn('Could not fetch from backend:', err);
       toast.error('Failed to load feedback from server');
