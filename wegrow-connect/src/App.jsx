@@ -52,6 +52,10 @@ const FeedbackPage = lazy(() => import('./components/FeedbackPage'));
 const FeedbackQrPage = lazy(() => import('./components/FeedbackQrPage'));
 const AdminMeetupFeedbackPage = lazy(() => import('./admin/feedback/page'));
 
+// AI Explorer School Student Enrollment (Lazy Loaded)
+const AiExplorerEnrollment = lazy(() => import('./components/AiExplorerEnrollment'));
+const AdminAiExplorerPage = lazy(() => import('./admin/ai-explorer/page'));
+
 // Auth Context, Theme Context and Guard
 import { AuthProvider, ProtectedRoute } from './context/AuthContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
@@ -834,6 +838,12 @@ export default function App() {
             <Route path="/teaser" element={<EventTeaser />} />
             <Route path="/guess-event" element={<EventTeaser />} />
 
+            {/* WeGrow AI Explorer — School Student Enrollment */}
+            <Route path="/ai-explorer" element={<AiExplorerEnrollment />} />
+            <Route path="/ai-explorer/enroll" element={<AiExplorerEnrollment />} />
+            <Route path="/ai-explorer-enrollment" element={<AiExplorerEnrollment />} />
+            <Route path="/explorer" element={<AiExplorerEnrollment />} />
+
             {/* Business Transformation Meetup Feedback & QR Standee */}
             <Route path="/feedback" element={<FeedbackPage />} />
             <Route path="/business-transformation-feedback" element={<FeedbackPage />} />
@@ -866,6 +876,8 @@ export default function App() {
             <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/users" element={<ProtectedRoute allowedRoles={['admin']}><AdminUsers /></ProtectedRoute>} />
             <Route path="/admin/roles" element={<ProtectedRoute allowedRoles={['admin']}><AdminRoles /></ProtectedRoute>} />
+            <Route path="/admin/ai-explorer" element={<ProtectedRoute allowedRoles={['admin']}><AdminAiExplorerPage /></ProtectedRoute>} />
+            <Route path="/admin/ai-explorer-students" element={<ProtectedRoute allowedRoles={['admin']}><AdminAiExplorerPage /></ProtectedRoute>} />
             <Route path="/admin/women-entrepreneurs" element={<ProtectedRoute allowedRoles={['admin']}><AdminWomenEntrepreneurs /></ProtectedRoute>} />
             <Route path="/admin/student-founders" element={<ProtectedRoute allowedRoles={['admin']}><AdminStudentFounders /></ProtectedRoute>} />
             <Route path="/admin/business-founders" element={<ProtectedRoute allowedRoles={['admin']}><AdminBusinessFounders /></ProtectedRoute>} />

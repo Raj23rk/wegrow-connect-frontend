@@ -25,7 +25,8 @@ import {
   Music,
   ClipboardCheck,
   HelpCircle,
-  MessageSquare
+  MessageSquare,
+  Bot
 } from "lucide-react";
 
 export default function Sidebar() {
@@ -38,6 +39,7 @@ export default function Sidebar() {
     { name: "My Profile", href: "/home/profile", icon: User },
     { name: "Users", href: "/admin/users", icon: Users },
     { name: "Roles & Permissions", href: "/admin/roles", icon: ShieldCheck },
+    { name: "AI Explorer Students", href: "/admin/ai-explorer", icon: Bot },
     { name: "Event Teasers", href: "/admin/event-teaser", icon: HelpCircle },
     { name: "Business Dependency", href: "/admin/business-dependency-test", icon: ClipboardCheck },
     { name: "Meetup Feedback", href: "/admin/feedback", icon: MessageSquare },
