@@ -274,27 +274,31 @@ export default function AiExplorerEnrollment() {
   return (
     <div className="min-h-screen bg-[#FAF7F2] text-[#16204a] font-sans antialiased selection:bg-purple-200">
       {/* Top Query / Doubt Helpline Strip (Included on All Pages) */}
-      <div className="bg-gradient-to-r from-[#0f1f5c] via-[#1b2a6e] to-[#7b4dff] text-white py-2 px-3 sm:px-6 text-center text-xs font-bold shadow-xs flex items-center justify-center gap-2 sm:gap-3 flex-wrap">
-        <span className="inline-block bg-amber-400 text-slate-900 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
-          Helpline
-        </span>
-        <span className="text-[11px] sm:text-xs">If any doubts or queries? Contact us:</span>
-        <a
-          href="tel:+919344337331"
-          className="inline-flex items-center gap-1 text-amber-300 hover:text-white font-black underline underline-offset-2"
-        >
-          <Phone className="w-3.5 h-3.5" />
-          <span>+91 93443 37331</span>
-        </a>
-        <span className="text-white/40 hidden sm:inline">•</span>
-        <a
-          href="https://wa.me/919344337331?text=Hi%20WeGrow,%20I%20have%20a%20query%20regarding%20AI%20Explorer%20enrollment"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 bg-emerald-500/20 text-emerald-300 hover:text-white px-2 py-0.5 rounded-md font-black border border-emerald-500/30 text-[11px]"
-        >
-          <span>💬 WhatsApp</span>
-        </a>
+      <div className="bg-gradient-to-r from-[#0f1f5c] via-[#1b2a6e] to-[#7b4dff] text-white py-1.5 sm:py-2 px-3 sm:px-6 shadow-xs">
+        <div className="max-w-7xl mx-auto flex items-center justify-center gap-2 sm:gap-3 flex-wrap text-center text-xs font-bold">
+          <div className="flex items-center gap-1.5 flex-wrap justify-center">
+            <span className="bg-amber-400 text-slate-900 text-[9px] sm:text-[10px] font-black px-1.5 sm:px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0">
+              Helpline
+            </span>
+            <span className="text-[11px] sm:text-xs">Any doubts or queries?</span>
+            <a
+              href="tel:+919344337331"
+              className="inline-flex items-center gap-1 text-amber-300 hover:text-white font-black underline underline-offset-2 text-[11px] sm:text-xs whitespace-nowrap"
+            >
+              <Phone className="w-3 h-3 text-amber-300 shrink-0" />
+              <span>+91 93443 37331</span>
+            </a>
+            <span className="text-white/40 hidden sm:inline">•</span>
+            <a
+              href="https://wa.me/919344337331?text=Hi%20WeGrow,%20I%20have%20a%20query%20regarding%20AI%20Explorer%20enrollment"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 bg-emerald-500/25 hover:bg-emerald-500/40 text-emerald-300 hover:text-white px-2 py-0.5 rounded-md font-black border border-emerald-500/40 text-[10px] sm:text-[11px] whitespace-nowrap"
+            >
+              <span>💬 WhatsApp</span>
+            </a>
+          </div>
+        </div>
       </div>
 
       {/* Warm Ambient Floating Background Glows */}
@@ -305,15 +309,15 @@ export default function AiExplorerEnrollment() {
       </div>
 
       {/* Top Navbar */}
-      <header className="sticky top-0 z-40 bg-[#FAF7F2]/90 backdrop-blur-md border-b border-[#e9e2d5] shadow-xs">
+      <header className="sticky top-0 z-40 bg-[#FAF7F2]/95 backdrop-blur-md border-b border-[#e9e2d5] shadow-xs">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-2">
           {/* Logo & Brand */}
           <Link to="/" className="flex items-center group shrink-0">
-            <div className="bg-white px-3 py-1.5 rounded-2xl shadow-xs border border-[#e5ded0] flex items-center justify-center hover:scale-102 transition-transform">
+            <div className="bg-white px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl sm:rounded-2xl shadow-xs border border-[#e5ded0] flex items-center justify-center hover:scale-102 transition-transform">
               <img
                 src="/wegrow&Bschool.webp"
                 alt="WeGrow B School"
-                className="h-9 sm:h-12 w-auto object-contain"
+                className="h-8 sm:h-12 w-auto object-contain"
                 onError={(e) => {
                   e.target.onerror = null;
                   e.target.src = '/logo.webp';
@@ -378,21 +382,21 @@ export default function AiExplorerEnrollment() {
                 scrollToSection();
               }}
               style={{ background: 'linear-gradient(90deg, #ff7a1a, #ff3d8b)' }}
-              className="inline-flex items-center gap-1.5 text-white font-black text-xs sm:text-sm px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-full shadow-md hover:shadow-lg hover:scale-105 transition-all cursor-pointer whitespace-nowrap"
+              className="inline-flex items-center justify-center gap-1.5 text-white font-black text-xs sm:text-sm px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-full shadow-md hover:shadow-lg hover:scale-105 transition-all cursor-pointer whitespace-nowrap shrink-0"
             >
-              <GraduationCap className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              <span>🎓 Enroll Now</span>
+              <GraduationCap className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+              <span>Enroll Now</span>
             </button>
           </div>
         </div>
 
         {/* Mobile Progress Bar */}
-        <div className="lg:hidden flex items-center justify-between px-4 py-2 bg-white/70 border-t border-[#ede6d8] text-[11px] font-black text-slate-700">
-          <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>Step {step} of 3: {step === 1 ? 'Student Details' : step === 2 ? 'Fee Plan' : 'Payment'}</span>
+        <div className="lg:hidden flex items-center justify-between px-3 sm:px-4 py-2 bg-white/80 border-t border-[#ede6d8] text-[11px] font-black text-slate-700">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+            <span className="truncate">Step {step} of 3: {step === 1 ? 'Student Details' : step === 2 ? 'Fee Plan' : 'Payment'}</span>
           </div>
-          <div className="flex gap-1">
+          <div className="flex gap-1 shrink-0 ml-2">
             {[1, 2, 3].map((i) => (
               <span
                 key={i}
