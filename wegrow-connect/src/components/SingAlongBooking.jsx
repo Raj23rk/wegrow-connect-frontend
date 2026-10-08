@@ -120,8 +120,8 @@ const genBookingId = () => {
 
 // Cutoff Time: Open
 export default function SingAlongBooking() {
-  // Registration is open
-  const [isClosed, setIsClosed] = useState(false);
+  // Registration is closed
+  const [isClosed, setIsClosed] = useState(true);
   const [lookupBookingId, setLookupBookingId] = useState('');
   const [isLookingUp, setIsLookingUp] = useState(false);
 

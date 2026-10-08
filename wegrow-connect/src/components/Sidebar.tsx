@@ -39,7 +39,6 @@ export default function Sidebar() {
     { name: "Users", href: "/admin/users", icon: Users },
     { name: "Roles & Permissions", href: "/admin/roles", icon: ShieldCheck },
     { name: "Event Teasers", href: "/admin/event-teaser", icon: HelpCircle },
-    { name: "Sing Along Tickets", href: "/admin/sing-along", icon: Music },
     { name: "Business Dependency", href: "/admin/business-dependency-test", icon: ClipboardCheck },
     { name: "Meetup Feedback", href: "/admin/feedback", icon: MessageSquare },
     { name: "Women Entrepreneurs", href: "/admin/women-entrepreneurs", icon: Sparkles },

@@ -132,11 +132,10 @@ const genBookingId = (code) => {
   return `${prefix}-${randomStr}`;
 };
 
-// Cutoff Time: Closed & Redirected to Event Teaser
+// Cutoff Time: Closed
 export default function SingAlongSponsorBooking() {
-  return <Navigate to="/eventteaser" replace />;
   // Registration is closed
-  const [isClosed, setIsClosed] = useState(false);
+  const [isClosed, setIsClosed] = useState(true);
   const [lookupPassId, setLookupPassId] = useState('');
   const [isLookingUp, setIsLookingUp] = useState(false);
 
