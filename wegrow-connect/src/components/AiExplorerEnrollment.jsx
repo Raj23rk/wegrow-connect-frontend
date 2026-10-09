@@ -207,12 +207,28 @@ export default function AiExplorerEnrollment() {
     const { name, value } = e.target;
     if (name === 'fatherPhone' || name === 'motherPhone') {
       const clean = value.replace(/\D/g, '').slice(0, 10);
-      setParent((prev) => ({ ...prev, [name]: clean }));
+      setParent((prev) => {
+        const updated = { ...prev, [name]: clean };
+        if (
+          updated.fatherPhone &&
+          updated.motherPhone &&
+          updated.fatherPhone === updated.motherPhone &&
+          updated.fatherPhone.length === 10
+        ) {
+          setErrors((errs) => ({
+            ...errs,
+            motherPhone: "Father's phone number and Mother's phone number cannot be the same. Please provide an alternate contact number.",
+          }));
+        } else if (errors.motherPhone?.includes('cannot be the same')) {
+          setErrors((errs) => ({ ...errs, motherPhone: '' }));
+        }
+        return updated;
+      });
     } else {
       setParent((prev) => ({ ...prev, [name]: value }));
     }
 
-    if (errors[name]) {
+    if (errors[name] && !errors[name]?.includes('cannot be the same')) {
       setErrors((prev) => ({ ...prev, [name]: '' }));
     }
   };
@@ -299,6 +315,14 @@ export default function AiExplorerEnrollment() {
       errs.motherPhone = 'Enter a valid 10-digit mobile number';
     }
 
+    if (
+      parent.fatherPhone.trim() &&
+      parent.motherPhone.trim() &&
+      parent.fatherPhone.trim() === parent.motherPhone.trim()
+    ) {
+      errs.motherPhone = "Father's phone number and Mother's phone number cannot be the same. Please provide an alternate contact number.";
+    }
+
     if (!parent.address.trim()) errs.address = 'Residential address is required';
 
     setErrors(errs);
@@ -333,15 +357,94 @@ export default function AiExplorerEnrollment() {
     }
   };
 
-  // Process Final Payment & Enrollment
-  const handlePaymentAndEnroll = async () => {
-    setIsProcessing(true);
+  const [pendingOrder, setPendingOrder] = useState(null);
+  const [isVerifyingPayment, setIsVerifyingPayment] = useState(false);
+  const checkedUrlParamRef = useRef(false);
+
+  // Check URL query parameters for return from 3DS redirect
+  useEffect(() => {
+    if (checkedUrlParamRef.current) return;
+    const params = new URLSearchParams(window.location.search);
+    const orderIdParam = params.get('order_id') || params.get('orderId') || params.get('txnid');
+
+    if (orderIdParam) {
+      checkedUrlParamRef.current = true;
+      setIsVerifyingPayment(true);
+      toast.loading('Checking payment confirmation...', { id: 'url-verify' });
+      singAlongApi
+        .checkPaymentStatus(orderIdParam)
+        .then(async (res) => {
+          const isSuccess =
+            res?.isPaid === true ||
+            res?.status === 'SUCCESS' ||
+            res?.data?.isPaid === true ||
+            res?.data?.status === 'SUCCESS' ||
+            (res?.success && (res?.data?.isPaid || res?.data?.status === 'SUCCESS'));
+
+          if (isSuccess) {
+            const payDetails = getActivePayDetails();
+            const studentNames = students.map((s) => s.name.trim()).join(', ');
+            const enrollmentPayload = {
+              studentName: studentNames,
+              students: students.map((s) => ({
+                name: s.name.trim(),
+                standard: s.standard,
+                school: s.school.trim(),
+              })),
+              totalStudents: students.length,
+              studentCount: students.length,
+              email: parent.email.trim(),
+              mailId: parent.email.trim(),
+              standard: students.map((s) => s.standard).join(', '),
+              school: students.map((s) => s.school.trim()).join(', '),
+              fatherName: parent.fatherName.trim(),
+              motherName: parent.motherName.trim(),
+              fatherPhone: parent.fatherPhone.trim(),
+              motherPhone: parent.motherPhone.trim(),
+              address: parent.address.trim(),
+              course: 'AI Explorer',
+              courseName: 'AI Explorer',
+              plan: selectedPlan,
+              feePlan: selectedPlan,
+              planName: payDetails.planName,
+              selectedTerm: selectedPlan === 'term' ? payDetails.subLabel : undefined,
+              selectedHalf: selectedPlan === 'half' ? payDetails.subLabel : undefined,
+              amount: payDetails.amount,
+              totalFee: payDetails.totalFee,
+              paymentMethod: 'Cashfree',
+              transactionId: orderIdParam,
+              paymentStatus: 'PAID',
+            };
+            const submitRes = await aiExplorerApi.submitEnrollment(enrollmentPayload);
+            if (submitRes?.success) {
+              setCompletedEnrollment(submitRes.data);
+              setStep(4);
+              toast.success('🎉 Payment verified! Enrollment confirmed.', { id: 'url-verify' });
+              try {
+                window.history.replaceState({}, document.title, window.location.pathname);
+              } catch (_) {}
+            }
+          } else {
+            toast.error(`Payment status: ${res?.status || 'PENDING'}. Please complete payment.`, { id: 'url-verify' });
+          }
+        })
+        .catch(() => {
+          toast.dismiss('url-verify');
+        })
+        .finally(() => {
+          setIsVerifyingPayment(false);
+        });
+    }
+  }, []);
+
+  // Build Payload Helper
+  const buildEnrollmentPayload = (orderId = '') => {
     const payDetails = getActivePayDetails();
     const studentNames = students.map((s) => s.name.trim()).join(', ');
     const studentStandards = students.map((s) => s.standard).join(', ');
     const studentSchools = students.map((s) => s.school.trim()).join(', ');
 
-    const enrollmentPayload = {
+    return {
       studentName: studentNames,
       students: students.map((s) => ({
         name: s.name.trim(),
@@ -369,51 +472,126 @@ export default function AiExplorerEnrollment() {
       amount: payDetails.amount,
       totalFee: payDetails.totalFee,
       paymentMethod,
-      transactionId: utrNumber.trim() || `ORD_${Date.now().toString().slice(-8)}`,
+      transactionId: orderId || utrNumber.trim() || `ORD_${Date.now().toString().slice(-8)}`,
       paymentStatus: 'PAID',
     };
+  };
+
+  // Verify payment status with backend gateway before submitting
+  const verifyAndSubmitEnrollment = async (orderId, basePayload) => {
+    setIsVerifyingPayment(true);
+    try {
+      const statusRes = await singAlongApi.checkPaymentStatus(orderId).catch(() => null);
+      const isSuccess =
+        statusRes?.isPaid === true ||
+        statusRes?.status === 'SUCCESS' ||
+        statusRes?.data?.isPaid === true ||
+        statusRes?.data?.status === 'SUCCESS' ||
+        (statusRes?.success && (statusRes?.data?.isPaid || statusRes?.data?.status === 'SUCCESS'));
+
+      if (isSuccess) {
+        const payloadToSubmit = {
+          ...(basePayload || buildEnrollmentPayload(orderId)),
+          transactionId: orderId,
+          paymentStatus: 'PAID',
+          paymentMethod: 'Cashfree',
+        };
+
+        const response = await aiExplorerApi.submitEnrollment(payloadToSubmit);
+        if (response?.success) {
+          setCompletedEnrollment(response.data);
+          setPendingOrder(null);
+          setStep(4);
+          toast.success(`🎉 Payment verified! Enrollment confirmed for ${students.length} student${students.length > 1 ? 's' : ''}!`, { id: 'payment-act' });
+          scrollToSection();
+          return true;
+        } else {
+          throw new Error(response?.message || 'Failed to save enrollment details in database.');
+        }
+      } else {
+        const rawStatus = statusRes?.status || statusRes?.data?.status || 'PENDING';
+        setPendingOrder({
+          orderId,
+          status: rawStatus,
+          message: `Payment status is ${rawStatus}. If money was debited from your account, click "Verify Payment Status".`,
+        });
+        toast.error(`⚠️ Payment status: ${rawStatus}. Payment was not completed or is pending.`, { id: 'payment-act' });
+        return false;
+      }
+    } catch (err) {
+      toast.error(err.message || 'Payment verification failed.', { id: 'payment-act' });
+      return false;
+    } finally {
+      setIsVerifyingPayment(false);
+    }
+  };
+
+  // Process Final Payment & Enrollment
+  const handlePaymentAndEnroll = async () => {
+    setIsProcessing(true);
+    const payDetails = getActivePayDetails();
+    const studentNames = students.map((s) => s.name.trim()).join(', ');
+    const enrollmentPayload = buildEnrollmentPayload();
 
     try {
-      // 1. If Cashfree chosen and SDK available, trigger checkout
       if (paymentMethod === 'Cashfree') {
-        try {
-          const cashfreePayload = {
-            orderAmount: payDetails.amount,
-            customerName: students[0]?.name?.trim() || parent.fatherName.trim(),
-            customerEmail: parent.email.trim(),
-            customerPhone: parent.fatherPhone.trim(),
-            orderNote: `AI Explorer Enrollment (${payDetails.planName} • ${students.length} Student${students.length > 1 ? 's' : ''}) - ${studentNames}`,
-          };
+        const cashfreePayload = {
+          orderAmount: payDetails.amount,
+          customerName: students[0]?.name?.trim() || parent.fatherName.trim() || 'Parent',
+          customerEmail: parent.email.trim(),
+          customerPhone: parent.fatherPhone.trim(),
+          orderNote: `AI Explorer Enrollment (${payDetails.planName} • ${students.length} Student${students.length > 1 ? 's' : ''}) - ${studentNames}`,
+        };
 
-          const cfRes = await singAlongApi.createOnlineOrder(cashfreePayload).catch(() => null);
+        const cfRes = await singAlongApi.createOnlineOrder(cashfreePayload);
+        if (!cfRes?.success || !cfRes?.data?.paymentSessionId) {
+          throw new Error(cfRes?.message || 'Could not initiate payment session with Cashfree.');
+        }
 
-          if (cfRes?.success && cfRes?.data?.paymentSessionId && window.Cashfree) {
-            toast.success('Opening Cashfree Checkout...');
-            const cashfree = window.Cashfree({
-              mode: cfRes.data.environment === 'sandbox' ? 'sandbox' : 'production',
-            });
-            await cashfree.checkout({
-              paymentSessionId: cfRes.data.paymentSessionId,
-              redirectTarget: '_modal',
-            });
-          }
-        } catch (cfErr) {
-          console.warn('Cashfree online checkout fallback handled gracefully:', cfErr);
+        const orderData = cfRes.data;
+        const targetOrderId = orderData.orderId || orderData.order_id || `ORD_${Date.now()}`;
+        setPendingOrder({
+          orderId: targetOrderId,
+          paymentSessionId: orderData.paymentSessionId,
+          status: 'INITIATED',
+        });
+
+        if (typeof window !== 'undefined' && window.Cashfree) {
+          toast.success('Opening Cashfree Checkout...');
+          const cashfree = window.Cashfree({
+            mode: (orderData.environment?.toLowerCase() === 'sandbox' || orderData.environment?.toLowerCase() === 'test')
+              ? 'sandbox'
+              : 'production',
+          });
+
+          await cashfree.checkout({
+            paymentSessionId: orderData.paymentSessionId,
+            redirectTarget: '_modal',
+          });
+
+          // After modal closes or finishes, verify with backend gateway
+          toast.loading('Verifying payment with gateway...', { id: 'payment-act' });
+          await new Promise((r) => setTimeout(r, 1200));
+          await verifyAndSubmitEnrollment(targetOrderId, enrollmentPayload);
+        } else if (orderData.paymentLink) {
+          window.location.href = orderData.paymentLink;
+        } else {
+          throw new Error('Cashfree checkout modal could not be loaded.');
+        }
+      } else {
+        // Direct / Offline payment mode
+        const response = await aiExplorerApi.submitEnrollment(enrollmentPayload);
+        if (response?.success) {
+          setCompletedEnrollment(response.data);
+          setStep(4);
+          toast.success(`🎉 Enrollment registered successfully!`);
+          scrollToSection();
+        } else {
+          throw new Error(response?.message || 'Enrollment registration failed.');
         }
       }
-
-      // 2. Submit Enrollment to DB / Storage
-      const response = await aiExplorerApi.submitEnrollment(enrollmentPayload);
-      if (response?.success) {
-        setCompletedEnrollment(response.data);
-        setStep(4);
-        toast.success(`🎉 Enrollment successful for ${students.length} student${students.length > 1 ? 's' : ''}!`);
-        scrollToSection();
-      } else {
-        throw new Error(response?.message || 'Enrollment could not be processed.');
-      }
     } catch (error) {
-      toast.error(error.message || 'Payment processing failed. Please try again.');
+      toast.error(error.message || 'Payment processing failed. Please try again.', { id: 'payment-act' });
     } finally {
       setIsProcessing(false);
     }
@@ -1492,18 +1670,58 @@ export default function AiExplorerEnrollment() {
                   </div>
                 </div>
 
+                {/* Pending / Incomplete Payment Status Banner */}
+                {pendingOrder && (
+                  <div className="p-4 rounded-2xl bg-amber-50 border-2 border-amber-300 space-y-2.5 shadow-2xs">
+                    <div className="flex items-center gap-2 text-amber-950 font-black text-xs sm:text-sm">
+                      <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                      <span>Payment Status: {pendingOrder.status || 'PENDING'}</span>
+                    </div>
+                    <p className="text-[11px] sm:text-xs font-bold text-amber-800 leading-relaxed">
+                      {pendingOrder.message || `Order #${pendingOrder.orderId} was initiated. If amount was debited from your bank, please click Verify below.`}
+                    </p>
+                    <div className="flex flex-wrap items-center gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => verifyAndSubmitEnrollment(pendingOrder.orderId)}
+                        disabled={isVerifyingPayment}
+                        className="inline-flex items-center gap-1.5 bg-[#0f1f5c] hover:bg-purple-900 text-white text-xs font-black px-3.5 py-2 rounded-xl transition-all cursor-pointer shadow-xs disabled:opacity-50"
+                      >
+                        {isVerifyingPayment ? (
+                          <>
+                            <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            <span>Verifying...</span>
+                          </>
+                        ) : (
+                          <>
+                            <span>🔄 Check / Verify Payment</span>
+                          </>
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handlePaymentAndEnroll}
+                        disabled={isProcessing}
+                        className="inline-flex items-center gap-1.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-black px-3.5 py-2 rounded-xl transition-all cursor-pointer shadow-xs"
+                      >
+                        <span>⚡ Retry Payment</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 {/* Pay Button */}
                 <button
                   type="button"
                   onClick={handlePaymentAndEnroll}
-                  disabled={isProcessing}
+                  disabled={isProcessing || isVerifyingPayment}
                   style={{ background: 'linear-gradient(90deg, #ff7a1a, #ff3d8b, #7b4dff)' }}
                   className="w-full h-12 sm:h-14 rounded-2xl text-white font-black text-sm sm:text-base shadow-lg hover:shadow-xl hover:scale-101 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                 >
-                  {isProcessing ? (
+                  {isProcessing || isVerifyingPayment ? (
                     <div className="flex items-center gap-2">
                       <div className="w-4 h-4 sm:w-5 sm:h-5 border-3 border-white border-t-transparent rounded-full animate-spin" />
-                      <span>Processing Payment...</span>
+                      <span>{isVerifyingPayment ? 'Verifying Payment Confirmation...' : 'Connecting to Gateway...'}</span>
                     </div>
                   ) : (
                     <span>

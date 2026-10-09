@@ -161,7 +161,10 @@ export const aiExplorerApi = {
       });
       return await parseResponse(res);
     } catch (e) {
-      console.warn('Backend /ai-explorer/enroll error, using fallback:', e);
+      if (e.message && !e.message.includes('Failed to fetch') && !e.message.includes('NetworkError') && !e.message.includes('Load failed')) {
+        throw e;
+      }
+      console.warn('Backend /ai-explorer/enroll network error, using fallback:', e);
     }
 
     // Local storage fallback

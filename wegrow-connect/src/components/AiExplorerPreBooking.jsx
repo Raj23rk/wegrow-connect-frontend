@@ -100,12 +100,28 @@ export default function AiExplorerPreBooking() {
     const { name, value } = e.target;
     if (name === 'fatherPhone' || name === 'motherPhone') {
       const clean = value.replace(/\D/g, '').slice(0, 10);
-      setParent((prev) => ({ ...prev, [name]: clean }));
+      setParent((prev) => {
+        const updated = { ...prev, [name]: clean };
+        if (
+          updated.fatherPhone &&
+          updated.motherPhone &&
+          updated.fatherPhone === updated.motherPhone &&
+          updated.fatherPhone.length === 10
+        ) {
+          setErrors((errs) => ({
+            ...errs,
+            motherPhone: "Father's phone number and Mother's phone number cannot be the same. Please provide an alternate contact number.",
+          }));
+        } else if (errors.motherPhone?.includes('cannot be the same')) {
+          setErrors((errs) => ({ ...errs, motherPhone: '' }));
+        }
+        return updated;
+      });
     } else {
       setParent((prev) => ({ ...prev, [name]: value }));
     }
 
-    if (errors[name]) {
+    if (errors[name] && !errors[name]?.includes('cannot be the same')) {
       setErrors((prev) => ({ ...prev, [name]: '' }));
     }
   };
@@ -166,12 +182,21 @@ export default function AiExplorerPreBooking() {
       errs.fatherPhone = 'Enter a valid 10-digit mobile number';
     }
 
-    if (!parent.motherName.trim()) errs.motherName = "Mother's name is required";
     if (!parent.motherPhone.trim()) {
       errs.motherPhone = "Mother's phone number is required";
     } else if (!/^[6-9]\d{9}$/.test(parent.motherPhone.trim())) {
       errs.motherPhone = 'Enter a valid 10-digit mobile number';
     }
+
+    if (
+      parent.fatherPhone.trim() &&
+      parent.motherPhone.trim() &&
+      parent.fatherPhone.trim() === parent.motherPhone.trim()
+    ) {
+      errs.motherPhone = "Father's phone number and Mother's phone number cannot be the same. Please provide an alternate contact number.";
+    }
+
+    if (!parent.motherName.trim()) errs.motherName = "Mother's name is required";
 
     if (!parent.email.trim()) {
       errs.email = 'Family Email ID is required';
@@ -217,15 +242,20 @@ export default function AiExplorerPreBooking() {
   };
 
   // Process Final Payment & Pre-Booking
-  const handlePaymentAndPreBook = async () => {
-    setIsProcessing(true);
-    const preBookingPayload = {
+  const [pendingOrder, setPendingOrder] = useState(null);
+  const [isVerifyingPayment, setIsVerifyingPayment] = useState(false);
+
+  // Build Payload Helper
+  const buildPreBookingPayload = (orderId = '') => {
+    return {
       students: students.map((s) => ({
         studentName: s.name.trim(),
         standard: s.standard,
         school: s.school.trim(),
         preferredBatch: s.preferredBatch,
       })),
+      studentCount: students.length,
+      totalStudents: students.length,
       fatherName: parent.fatherName.trim(),
       motherName: parent.motherName.trim(),
       fatherPhone: parent.fatherPhone.trim(),
@@ -234,46 +264,116 @@ export default function AiExplorerPreBooking() {
       mailId: parent.email.trim(),
       address: parent.address.trim(),
       paymentMethod,
+      amount: totalAmount,
+      transactionId: orderId || `ORD_${Date.now().toString().slice(-8)}`,
+      paymentStatus: 'PAID',
     };
+  };
+
+  // Verify Payment Status with Backend Gateway
+  const verifyAndSubmitPreBooking = async (orderId, basePayload) => {
+    setIsVerifyingPayment(true);
+    try {
+      const statusRes = await singAlongApi.checkPaymentStatus(orderId).catch(() => null);
+      const isSuccess =
+        statusRes?.isPaid === true ||
+        statusRes?.status === 'SUCCESS' ||
+        statusRes?.data?.isPaid === true ||
+        statusRes?.data?.status === 'SUCCESS' ||
+        (statusRes?.success && (statusRes?.data?.isPaid || statusRes?.data?.status === 'SUCCESS'));
+
+      if (isSuccess) {
+        const payloadToSubmit = {
+          ...(basePayload || buildPreBookingPayload(orderId)),
+          transactionId: orderId,
+          paymentStatus: 'PAID',
+          paymentMethod: 'Cashfree',
+        };
+
+        const response = await aiExplorerApi.enrollPreBooking(payloadToSubmit);
+        if (response?.success) {
+          setCompletedPreBooking(response.data);
+          setPendingOrder(null);
+          setStep(4);
+          toast.success(`🎉 Payment verified! Pre-booking confirmed for ${students.length} student${students.length > 1 ? 's' : ''}!`, { id: 'prebook-pay' });
+          scrollToSection();
+          return true;
+        } else {
+          throw new Error(response?.message || 'Failed to save pre-booking details in database.');
+        }
+      } else {
+        const rawStatus = statusRes?.status || statusRes?.data?.status || 'PENDING';
+        setPendingOrder({
+          orderId,
+          status: rawStatus,
+          message: `Payment status is ${rawStatus}. If amount was deducted from your account, click "Verify Payment Status".`,
+        });
+        toast.error(`⚠️ Payment status: ${rawStatus}. Payment was not completed or is pending.`, { id: 'prebook-pay' });
+        return false;
+      }
+    } catch (err) {
+      toast.error(err.message || 'Payment verification failed.', { id: 'prebook-pay' });
+      return false;
+    } finally {
+      setIsVerifyingPayment(false);
+    }
+  };
+
+  // Process Final Payment & Pre-Booking
+  const handlePaymentAndPreBook = async () => {
+    setIsProcessing(true);
+    const preBookingPayload = buildPreBookingPayload();
 
     try {
-      // 1. Cashfree PG Order Creation via backend
       if (paymentMethod === 'Cashfree') {
-        try {
-          const pgRes = await aiExplorerApi.createPreBookingOrder(preBookingPayload).catch(() => null);
+        const pgRes = await aiExplorerApi.createPreBookingOrder(preBookingPayload);
+        if (!pgRes?.success || !pgRes?.data?.paymentSessionId) {
+          throw new Error(pgRes?.message || 'Could not initiate payment session with Cashfree.');
+        }
 
-          if (pgRes?.success && pgRes?.data?.paymentSessionId && window.Cashfree) {
-            toast.success('Opening Cashfree Checkout...');
-            const cashfree = window.Cashfree({
-              mode: pgRes.data.environment === 'sandbox' ? 'sandbox' : 'production',
-            });
-            await cashfree.checkout({
-              paymentSessionId: pgRes.data.paymentSessionId,
-              redirectTarget: '_modal',
-            });
-          }
-        } catch (cfErr) {
-          console.warn('Cashfree checkout modal handled/fallback:', cfErr);
+        const orderData = pgRes.data;
+        const targetOrderId = orderData.orderId || orderData.order_id || `ORD_${Date.now()}`;
+        setPendingOrder({
+          orderId: targetOrderId,
+          paymentSessionId: orderData.paymentSessionId,
+          status: 'INITIATED',
+        });
+
+        if (typeof window !== 'undefined' && window.Cashfree) {
+          toast.success('Opening Cashfree Checkout...');
+          const cashfree = window.Cashfree({
+            mode: (orderData.environment?.toLowerCase() === 'sandbox' || orderData.environment?.toLowerCase() === 'test')
+              ? 'sandbox'
+              : 'production',
+          });
+
+          await cashfree.checkout({
+            paymentSessionId: orderData.paymentSessionId,
+            redirectTarget: '_modal',
+          });
+
+          // After modal closes, verify with backend gateway
+          toast.loading('Verifying payment with gateway...', { id: 'prebook-pay' });
+          await new Promise((r) => setTimeout(r, 1200));
+          await verifyAndSubmitPreBooking(targetOrderId, preBookingPayload);
+        } else if (orderData.paymentLink) {
+          window.location.href = orderData.paymentLink;
+        } else {
+          throw new Error('Cashfree checkout modal could not be loaded.');
+        }
+      } else {
+        const response = await aiExplorerApi.enrollPreBooking(preBookingPayload);
+        if (response?.success) {
+          setCompletedPreBooking(response.data);
+          setStep(4);
+          toast.success(`🎉 Pre-booking registered successfully!`);
+          scrollToSection();
+        } else {
+          throw new Error(response?.message || 'Pre-booking registration failed.');
         }
       }
-
-      // 2. Submit Final Pre-Booking Registration
-      const response = await aiExplorerApi.enrollPreBooking({
-        ...preBookingPayload,
-        amount: totalAmount,
-        paymentStatus: 'PAID',
-      });
-
-      if (response?.success) {
-        setCompletedPreBooking(response.data);
-        setStep(4);
-        toast.success(`🎉 Pre-booking confirmed for ${students.length} student${students.length > 1 ? 's' : ''}!`);
-        scrollToSection();
-      } else {
-        throw new Error(response?.message || 'Pre-booking could not be processed.');
-      }
     } catch (error) {
-      toast.error(error.message || 'Payment processing failed. Please try again.');
+      toast.error(error.message || 'Payment processing failed. Please try again.', { id: 'prebook-pay' });
     } finally {
       setIsProcessing(false);
     }
@@ -1091,18 +1191,58 @@ export default function AiExplorerPreBooking() {
                   </div>
                 </div>
 
+                {/* Pending / Incomplete Payment Status Banner */}
+                {pendingOrder && (
+                  <div className="p-4 rounded-2xl bg-amber-50 border-2 border-amber-300 space-y-2.5 shadow-2xs">
+                    <div className="flex items-center gap-2 text-amber-950 font-black text-xs sm:text-sm">
+                      <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                      <span>Payment Status: {pendingOrder.status || 'PENDING'}</span>
+                    </div>
+                    <p className="text-[11px] sm:text-xs font-bold text-amber-800 leading-relaxed">
+                      {pendingOrder.message || `Pre-booking Order #${pendingOrder.orderId} was initiated. If amount was debited from your bank, please click Verify below.`}
+                    </p>
+                    <div className="flex flex-wrap items-center gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => verifyAndSubmitPreBooking(pendingOrder.orderId)}
+                        disabled={isVerifyingPayment}
+                        className="inline-flex items-center gap-1.5 bg-[#0f1f5c] hover:bg-purple-900 text-white text-xs font-black px-3.5 py-2 rounded-xl transition-all cursor-pointer shadow-xs disabled:opacity-50"
+                      >
+                        {isVerifyingPayment ? (
+                          <>
+                            <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            <span>Verifying...</span>
+                          </>
+                        ) : (
+                          <>
+                            <span>🔄 Check / Verify Payment</span>
+                          </>
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handlePaymentAndPreBook}
+                        disabled={isProcessing}
+                        className="inline-flex items-center gap-1.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-black px-3.5 py-2 rounded-xl transition-all cursor-pointer shadow-xs"
+                      >
+                        <span>⚡ Retry Payment</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 {/* Pay Button */}
                 <button
                   type="button"
                   onClick={handlePaymentAndPreBook}
-                  disabled={isProcessing}
+                  disabled={isProcessing || isVerifyingPayment}
                   style={{ background: 'linear-gradient(90deg, #ff7a1a, #ff3d8b, #7b4dff)' }}
                   className="w-full h-12 sm:h-14 rounded-2xl text-white font-black text-sm sm:text-base shadow-lg hover:shadow-xl hover:scale-101 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                 >
-                  {isProcessing ? (
+                  {isProcessing || isVerifyingPayment ? (
                     <div className="flex items-center gap-2">
                       <div className="w-4 h-4 sm:w-5 sm:h-5 border-3 border-white border-t-transparent rounded-full animate-spin" />
-                      <span>Processing Payment...</span>
+                      <span>{isVerifyingPayment ? 'Verifying Payment Confirmation...' : 'Connecting to Gateway...'}</span>
                     </div>
                   ) : (
                     <span>
