@@ -824,10 +824,10 @@ export default function AiExplorerEnrollment() {
         {/* STATS STRIP */}
         <div className="print:hidden grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4 mb-8 sm:mb-10">
           {[
-            { icon: '🎓', title: 'Future-Ready Skills', desc: 'Grades 5 – 12', border: 'border-[#ffedd5]', bg: 'bg-[#fff7ed]' },
-            { icon: '👨‍👩‍👧‍👦', title: 'Learn Together', desc: 'Parent & student', border: 'border-[#ede9fe]', bg: 'bg-[#faf5ff]' },
-            { icon: '🚀', title: 'Hands-On Learning', desc: 'Real AI tools', border: 'border-[#e0f2fe]', bg: 'bg-[#f0f9ff]' },
-            { icon: '💻', title: 'Build Real Projects', desc: 'Build & showcase', border: 'border-[#dcfce7]', bg: 'bg-[#f0fdf4]' },
+            { icon: '🎓', title: 'Future-Ready Skills', border: 'border-[#ffedd5]', bg: 'bg-[#fff7ed]' },
+            { icon: '👨‍👩‍👧‍👦', title: 'Learn Together', border: 'border-[#ede9fe]', bg: 'bg-[#faf5ff]' },
+            { icon: '🚀', title: 'Hands-On Learning', border: 'border-[#e0f2fe]', bg: 'bg-[#f0f9ff]' },
+            { icon: '💻', title: 'Build Real Projects', border: 'border-[#dcfce7]', bg: 'bg-[#f0fdf4]' },
           ].map((stat) => (
             <div
               key={stat.title}
@@ -836,9 +836,8 @@ export default function AiExplorerEnrollment() {
               <div className={`w-9 sm:w-11 h-9 sm:h-11 rounded-xl ${stat.bg} flex items-center justify-center text-lg sm:text-xl shrink-0`}>
                 {stat.icon}
               </div>
-              <div>
-                <div className="font-black text-xs sm:text-sm text-[#0f1f5c]">{stat.title}</div>
-                <div className="text-[10px] sm:text-[11px] font-bold text-slate-500">{stat.desc}</div>
+              <div className="min-w-0">
+                <div className="font-black text-xs sm:text-sm text-[#0f1f5c] leading-snug">{stat.title}</div>
               </div>
             </div>
           ))}
