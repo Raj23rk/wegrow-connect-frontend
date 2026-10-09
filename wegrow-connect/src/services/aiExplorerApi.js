@@ -168,19 +168,31 @@ export const aiExplorerApi = {
       feePlan: data.feePlan || data.plan || 'full',
       plan: data.feePlan || data.plan || 'full',
       planName: data.planName,
-      selectedTerm: data.selectedTerm,
-      selectedHalf: data.selectedHalf,
+      selectedTerm: data.selectedTerm || '',
       orderNote:
         data.orderNote ||
         `AI Explorer Enrollment (${data.planName || ''} • ${studentsArr.length} Students) - ${studentNames}`,
     };
 
-    const res = await fetch(`${API_BASE}/ai-explorer/create-order`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-    return await parseResponse(res);
+    try {
+      const res = await fetch(`${API_BASE}/ai-explorer/create-order`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      return await parseResponse(res);
+    } catch (e) {
+      if (e.message && !e.message.includes('Failed to fetch') && !e.message.includes('NetworkError') && !e.message.includes('Load failed')) {
+        throw e;
+      }
+      console.warn('Fallback to payment order gateway:', e);
+      const fallbackRes = await fetch(`${API_BASE}/sing-payment/create-order`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      return await parseResponse(fallbackRes);
+    }
   },
 
   // 2. Check Enrollment Payment Status (GET /ai-explorer/status/:orderId)
@@ -226,8 +238,7 @@ export const aiExplorerApi = {
       courseName: data.courseName || data.course || 'AI Explorer',
       feePlan: data.feePlan || data.plan || 'full',
       planName: data.planName,
-      selectedTerm: data.selectedTerm,
-      selectedHalf: data.selectedHalf,
+      selectedTerm: data.selectedTerm || '',
       amount: Number(data.amount || 0),
       totalFee: Number(data.totalFee || data.amount || 0),
       paymentMethod: data.paymentMethod || 'Cashfree',

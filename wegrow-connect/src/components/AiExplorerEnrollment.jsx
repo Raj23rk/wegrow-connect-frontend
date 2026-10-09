@@ -70,14 +70,14 @@ const BASE_PLANS = {
 };
 
 const BASE_TERM_OPTIONS = [
-  { id: 'term1', label: 'Term I', baseAmount: 15000, desc: 'Pay 1st Term Now' },
-  { id: 'term2', label: 'Term II', baseAmount: 15000, desc: 'Pay 2nd Term' },
-  { id: 'term3', label: 'Term III', baseAmount: 15000, desc: 'Pay 3rd Term' },
+  { id: 'term1', label: 'Term I', baseAmount: 15000, desc: 'Pay 1st Term Now', enabled: true },
+  { id: 'term2', label: 'Term II', baseAmount: 15000, desc: 'Payable in 2nd Term', enabled: false, disabledReason: 'Upcoming' },
+  { id: 'term3', label: 'Term III', baseAmount: 15000, desc: 'Payable in 3rd Term', enabled: false, disabledReason: 'Upcoming' },
 ];
 
 const BASE_HALF_OPTIONS = [
-  { id: 'half1', label: '1st Half', baseAmount: 22500, desc: 'Pay 1st Installment Now' },
-  { id: 'half2', label: '2nd Half', baseAmount: 22500, desc: 'Pay 2nd Installment' },
+  { id: 'half1', label: '1st Half', baseAmount: 22500, desc: 'Pay 1st Installment Now', enabled: true },
+  { id: 'half2', label: '2nd Half', baseAmount: 22500, desc: 'Payable in 2nd Installment', enabled: false, disabledReason: 'Upcoming' },
 ];
 
 export default function AiExplorerEnrollment() {
@@ -406,8 +406,7 @@ export default function AiExplorerEnrollment() {
               plan: selectedPlan,
               feePlan: selectedPlan,
               planName: payDetails.planName,
-              selectedTerm: selectedPlan === 'term' ? payDetails.subLabel : undefined,
-              selectedHalf: selectedPlan === 'half' ? payDetails.subLabel : undefined,
+              selectedTerm: selectedPlan === 'term' ? payDetails.subLabel : '',
               amount: payDetails.amount,
               totalFee: payDetails.totalFee,
               paymentMethod: 'Cashfree',
@@ -466,8 +465,7 @@ export default function AiExplorerEnrollment() {
       plan: selectedPlan,
       feePlan: selectedPlan,
       planName: payDetails.planName,
-      selectedTerm: selectedPlan === 'term' ? payDetails.subLabel : undefined,
-      selectedHalf: selectedPlan === 'half' ? payDetails.subLabel : undefined,
+      selectedTerm: selectedPlan === 'term' ? payDetails.subLabel : '',
       amount: payDetails.amount,
       totalFee: payDetails.totalFee,
       paymentMethod,
@@ -550,8 +548,7 @@ export default function AiExplorerEnrollment() {
           feePlan: selectedPlan,
           plan: selectedPlan,
           planName: payDetails.planName,
-          selectedTerm: selectedPlan === 'term' ? payDetails.subLabel : undefined,
-          selectedHalf: selectedPlan === 'half' ? payDetails.subLabel : undefined,
+          selectedTerm: selectedPlan === 'term' ? payDetails.subLabel : '',
           totalFee: payDetails.totalFee,
           orderNote: `AI Explorer Enrollment (${payDetails.planName} • ${students.length} Student${students.length > 1 ? 's' : ''}) - ${studentNames}`,
           students: students.map((s) => ({
@@ -1403,51 +1400,74 @@ export default function AiExplorerEnrollment() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-3">
                   <div className="text-xs font-black text-purple-950 flex items-center gap-1.5 uppercase tracking-wide">
                     <span className="w-2 h-2 rounded-full bg-purple-600 animate-pulse" />
-                    <span>Choose Installment to Pay Now ({students.length} Student{students.length > 1 ? 's' : ''}):</span>
+                    <span>Half-Yearly Payment Schedule ({students.length} Student{students.length > 1 ? 's' : ''}):</span>
                   </div>
                   <div className="text-[11px] font-bold text-purple-700">
-                    Click to choose 1st Half or 2nd Half
+                    1st Half is currently active for admission
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
                   {BASE_HALF_OPTIONS.map((halfItem) => {
+                    const isEnabled = halfItem.enabled !== false;
                     const isHalfSelected = selectedHalf === halfItem.id;
                     const halfTotal = halfItem.baseAmount * students.length;
                     return (
                       <button
                         type="button"
                         key={halfItem.id}
-                        onClick={() => setSelectedHalf(halfItem.id)}
-                        className={`relative p-3.5 sm:p-4 rounded-xl text-left border-2 transition-all cursor-pointer flex items-center justify-between ${
-                          isHalfSelected
-                            ? 'bg-white border-purple-600 shadow-md ring-2 ring-purple-300 scale-101'
-                            : 'bg-white/80 hover:bg-white border-purple-200 hover:border-purple-300 opacity-85 hover:opacity-100'
+                        disabled={!isEnabled}
+                        onClick={() => {
+                          if (isEnabled) setSelectedHalf(halfItem.id);
+                        }}
+                        className={`relative p-3.5 sm:p-4 rounded-xl text-left border-2 transition-all flex items-center justify-between ${
+                          !isEnabled
+                            ? 'bg-slate-50 border-slate-200 opacity-60 cursor-not-allowed select-none'
+                            : isHalfSelected
+                            ? 'bg-white border-purple-600 shadow-md ring-2 ring-purple-300 scale-101 cursor-pointer'
+                            : 'bg-white/80 hover:bg-white border-purple-200 hover:border-purple-300 opacity-85 hover:opacity-100 cursor-pointer'
                         }`}
                       >
                         <div className="flex items-center gap-3">
                           <div
                             className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                              isHalfSelected ? 'border-purple-600 bg-purple-600 text-white' : 'border-slate-300 bg-white'
+                              !isEnabled
+                                ? 'border-slate-300 bg-slate-100 text-slate-400'
+                                : isHalfSelected
+                                ? 'border-purple-600 bg-purple-600 text-white'
+                                : 'border-slate-300 bg-white'
                             }`}
                           >
                             {isHalfSelected && <div className="w-2 h-2 rounded-full bg-white" />}
                           </div>
                           <div>
-                            <div className="text-xs sm:text-sm font-black text-[#0f1f5c]">{halfItem.label}</div>
+                            <div className="text-xs sm:text-sm font-black text-[#0f1f5c] flex items-center gap-1.5">
+                              <span>{halfItem.label}</span>
+                              {!isEnabled && (
+                                <span className="text-[10px] text-slate-400 font-bold">(Locked)</span>
+                              )}
+                            </div>
                             <div className="text-[10px] sm:text-[11px] font-bold text-slate-500">
-                              {halfItem.desc} • ₹{halfItem.baseAmount.toLocaleString('en-IN')} × {students.length}
+                              {!isEnabled
+                                ? halfItem.desc
+                                : `₹${halfItem.baseAmount.toLocaleString('en-IN')} × ${students.length} student${students.length > 1 ? 's' : ''}`}
                             </div>
                           </div>
                         </div>
                         <div className="text-right">
-                          <div className="text-sm sm:text-base font-black text-purple-700">
+                          <div className={`text-sm sm:text-base font-black ${!isEnabled ? 'text-slate-400' : 'text-purple-700'}`}>
                             ₹{halfTotal.toLocaleString('en-IN')}
                           </div>
-                          {isHalfSelected && (
-                            <span className="text-[9px] font-black uppercase text-purple-600 bg-purple-100 px-2 py-0.5 rounded-full">
-                              Selected
-                            </span>
-                          )}
+                          <span
+                            className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${
+                              !isEnabled
+                                ? 'bg-slate-200 text-slate-500'
+                                : isHalfSelected
+                                ? 'text-purple-600 bg-purple-100'
+                                : 'bg-slate-100 text-slate-500'
+                            }`}
+                          >
+                            {!isEnabled ? '🔒 Upcoming' : isHalfSelected ? 'Active Now' : 'Half'}
+                          </span>
                         </div>
                       </button>
                     );
@@ -1462,52 +1482,71 @@ export default function AiExplorerEnrollment() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-3">
                   <div className="text-xs font-black text-blue-950 flex items-center gap-1.5 uppercase tracking-wide">
                     <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
-                    <span>Choose Term to Pay Now ({students.length} Student{students.length > 1 ? 's' : ''}):</span>
+                    <span>Term Payment Schedule ({students.length} Student{students.length > 1 ? 's' : ''}):</span>
                   </div>
                   <div className="text-[11px] font-bold text-blue-700">
-                    Click an option below (Term I, II, or III)
+                    Term I is currently active for admission
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3">
                   {BASE_TERM_OPTIONS.map((termItem) => {
+                    const isEnabled = termItem.enabled !== false;
                     const isTermSelected = selectedTerm === termItem.id;
                     const termTotal = termItem.baseAmount * students.length;
                     return (
                       <button
                         type="button"
                         key={termItem.id}
-                        onClick={() => setSelectedTerm(termItem.id)}
-                        className={`relative p-3.5 sm:p-4 rounded-xl text-left border-2 transition-all cursor-pointer flex flex-col justify-between ${
-                          isTermSelected
-                            ? 'bg-white border-blue-600 shadow-md ring-2 ring-blue-300 scale-101'
-                            : 'bg-white/80 hover:bg-white border-blue-200 hover:border-blue-300 opacity-85 hover:opacity-100'
+                        disabled={!isEnabled}
+                        onClick={() => {
+                          if (isEnabled) setSelectedTerm(termItem.id);
+                        }}
+                        className={`relative p-3.5 sm:p-4 rounded-xl text-left border-2 transition-all flex flex-col justify-between ${
+                          !isEnabled
+                            ? 'bg-slate-50 border-slate-200 opacity-60 cursor-not-allowed select-none'
+                            : isTermSelected
+                            ? 'bg-white border-blue-600 shadow-md ring-2 ring-blue-300 scale-101 cursor-pointer'
+                            : 'bg-white/80 hover:bg-white border-blue-200 hover:border-blue-300 opacity-85 hover:opacity-100 cursor-pointer'
                         }`}
                       >
                         <div className="flex items-center justify-between w-full mb-2">
                           <div
                             className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                              isTermSelected ? 'border-blue-600 bg-blue-600 text-white' : 'border-slate-300 bg-white'
+                              !isEnabled
+                                ? 'border-slate-300 bg-slate-100 text-slate-400'
+                                : isTermSelected
+                                ? 'border-blue-600 bg-blue-600 text-white'
+                                : 'border-slate-300 bg-white'
                             }`}
                           >
                             {isTermSelected && <div className="w-2 h-2 rounded-full bg-white" />}
                           </div>
                           <span
                             className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${
-                              isTermSelected
+                              !isEnabled
+                                ? 'bg-slate-200 text-slate-500 font-bold'
+                                : isTermSelected
                                 ? 'bg-blue-600 text-white shadow-2xs'
                                 : 'bg-slate-100 text-slate-500'
                             }`}
                           >
-                            {isTermSelected ? 'Selected' : 'Term'}
+                            {!isEnabled ? '🔒 Upcoming' : isTermSelected ? 'Active Now' : 'Term'}
                           </span>
                         </div>
                         <div>
-                          <div className="text-xs sm:text-sm font-black text-[#0f1f5c]">{termItem.label}</div>
-                          <div className="text-base sm:text-lg font-black text-blue-700 mt-0.5">
+                          <div className="text-xs sm:text-sm font-black text-[#0f1f5c] flex items-center gap-1.5">
+                            <span>{termItem.label}</span>
+                            {!isEnabled && (
+                              <span className="text-[10px] text-slate-400 font-bold">(Locked)</span>
+                            )}
+                          </div>
+                          <div className={`text-base sm:text-lg font-black mt-0.5 ${!isEnabled ? 'text-slate-400' : 'text-blue-700'}`}>
                             ₹{termTotal.toLocaleString('en-IN')}
                           </div>
                           <div className="text-[10px] sm:text-[11px] font-bold text-slate-500 mt-0.5">
-                            ₹{termItem.baseAmount.toLocaleString('en-IN')} × {students.length} student{students.length > 1 ? 's' : ''}
+                            {!isEnabled
+                              ? termItem.desc
+                              : `₹${termItem.baseAmount.toLocaleString('en-IN')} × ${students.length} student${students.length > 1 ? 's' : ''}`}
                           </div>
                         </div>
                       </button>
