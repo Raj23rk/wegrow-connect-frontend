@@ -54,6 +54,7 @@ const AdminMeetupFeedbackPage = lazy(() => import('./admin/feedback/page'));
 
 // AI Explorer School Student Enrollment (Lazy Loaded)
 const AiExplorerEnrollment = lazy(() => import('./components/AiExplorerEnrollment'));
+const AiExplorerPreBooking = lazy(() => import('./components/AiExplorerPreBooking'));
 const AdminAiExplorerPage = lazy(() => import('./admin/ai-explorer/page'));
 
 // Auth Context, Theme Context and Guard
@@ -832,11 +833,16 @@ export default function App() {
             <Route path="/teaser" element={<EventTeaser />} />
             <Route path="/guess-event" element={<EventTeaser />} />
 
-            {/* WeGrow AI Explorer — School Student Enrollment */}
+            {/* WeGrow AI Explorer — School Student Enrollment & Pre-Booking */}
             <Route path="/ai-explorer" element={<AiExplorerEnrollment />} />
             <Route path="/ai-explorer/enroll" element={<AiExplorerEnrollment />} />
             <Route path="/ai-explorer-enrollment" element={<AiExplorerEnrollment />} />
             <Route path="/explorer" element={<AiExplorerEnrollment />} />
+            <Route path="/ai-explorer/pre-booking" element={<AiExplorerPreBooking />} />
+            <Route path="/ai-explorer/prebooking" element={<AiExplorerPreBooking />} />
+            <Route path="/ai-explorer-prebooking" element={<AiExplorerPreBooking />} />
+            <Route path="/prebook-ai-explorer" element={<AiExplorerPreBooking />} />
+            <Route path="/prebooking" element={<AiExplorerPreBooking />} />
 
             {/* Business Transformation Meetup Feedback & QR Standee */}
             <Route path="/feedback" element={<FeedbackPage />} />

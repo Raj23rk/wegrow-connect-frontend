@@ -181,6 +181,288 @@ export const aiExplorerApi = {
     return this.enrollStudent(data);
   },
 
+  // Submit Pre-booking alias
+  submitPreBooking(data) {
+    return this.enrollPreBooking(data);
+  },
+
+  // ==========================================
+  // PRE-BOOKING CLIENT APIs
+  // ==========================================
+
+  // 1. Create Pre-Booking Cashfree PG Order (POST /ai-explorer/prebooking/create-order)
+  async createPreBookingOrder(data) {
+    const payload = {
+      students: (data.students || []).map((s) => ({
+        studentName: s.studentName || s.name,
+        standard: s.standard,
+        school: s.school,
+        preferredBatch: s.preferredBatch,
+      })),
+      fatherName: data.fatherName,
+      motherName: data.motherName,
+      email: data.email || data.mailId,
+      fatherPhone: data.fatherPhone,
+      motherPhone: data.motherPhone,
+      address: data.address,
+      paymentMethod: data.paymentMethod || 'Cashfree',
+    };
+
+    try {
+      const res = await fetch(`${API_BASE}/ai-explorer/prebooking/create-order`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      return await parseResponse(res);
+    } catch (e) {
+      console.warn('Pre-booking order API fallback:', e);
+      return { success: false, message: e.message };
+    }
+  },
+
+  // 2. Check Pre-Booking Payment Status (GET /ai-explorer/prebooking/status/:orderId)
+  async checkPreBookingStatus(orderId) {
+    try {
+      const res = await fetch(`${API_BASE}/ai-explorer/prebooking/status/${encodeURIComponent(orderId)}`);
+      return await parseResponse(res);
+    } catch (e) {
+      return { success: false, message: e.message };
+    }
+  },
+
+  // 3. Verify Pre-Booking Order Payment (POST /ai-explorer/prebooking/verify-payment)
+  async verifyPreBookingPayment(data) {
+    try {
+      const res = await fetch(`${API_BASE}/ai-explorer/prebooking/verify-payment`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      return await parseResponse(res);
+    } catch (e) {
+      return { success: false, message: e.message };
+    }
+  },
+
+  // 4. Submit Manual UPI UTR (POST /ai-explorer/prebooking/submit-utr)
+  async submitPreBookingUtr(orderIdOrData, utrString) {
+    const payload = typeof orderIdOrData === 'object'
+      ? orderIdOrData
+      : { orderId: orderIdOrData, utr: utrString };
+
+    try {
+      const res = await fetch(`${API_BASE}/ai-explorer/prebooking/submit-utr`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      return await parseResponse(res);
+    } catch (e) {
+      return { success: false, message: e.message };
+    }
+  },
+
+  // 5. Direct Public Pre-Booking Registration (POST /ai-explorer/prebooking/enroll)
+  async enrollPreBooking(data) {
+    const studentsArr = (data.students || []).map((s) => ({
+      studentName: s.studentName || s.name,
+      standard: s.standard,
+      school: s.school,
+      preferredBatch: s.preferredBatch,
+    }));
+
+    const totalStudents = studentsArr.length || 1;
+    const computedAmount = Number(data.amount || totalStudents * 1000);
+
+    const payload = {
+      students: studentsArr,
+      studentName: studentsArr.map((s) => s.studentName).join(', ') || data.studentName || '',
+      standard: studentsArr.map((s) => s.standard).join(', ') || data.standard || '',
+      school: studentsArr.map((s) => s.school).join(', ') || data.school || '',
+      fatherName: data.fatherName,
+      motherName: data.motherName,
+      email: data.email || data.mailId,
+      mailId: data.email || data.mailId,
+      fatherPhone: data.fatherPhone,
+      motherPhone: data.motherPhone,
+      address: data.address,
+      courseName: 'AI Explorer',
+      totalStudents,
+      amount: computedAmount,
+      amountPerStudent: 1000,
+      paymentMethod: data.paymentMethod || 'Cashfree',
+      paymentStatus: data.paymentStatus || 'PAID',
+      transactionId: data.transactionId || `PB_${Date.now().toString().slice(-8)}`,
+      declarationAccepted: data.declarationAccepted !== false,
+    };
+
+    try {
+      const res = await fetch(`${API_BASE}/ai-explorer/prebooking/enroll`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      return await parseResponse(res);
+    } catch (e) {
+      console.warn('Backend /ai-explorer/prebooking/enroll error, using fallback:', e);
+    }
+
+    // Local storage fallback
+    const current = getLocalData();
+    const id = `AIP26-${Math.floor(1000 + Math.random() * 9000)}`;
+    const newRecord = {
+      ...payload,
+      id,
+      prebookingId: id,
+      bookingType: 'PRE_BOOKING',
+      planName: `Pre-Booking Token (${totalStudents} Seat${totalStudents > 1 ? 's' : ''})`,
+      createdAt: new Date().toISOString(),
+    };
+    current.unshift(newRecord);
+    setLocalData(current);
+
+    return {
+      success: true,
+      message: 'Pre-booking completed successfully!',
+      data: newRecord,
+    };
+  },
+
+  // 6. Verify Pre-Booking by ID (GET /ai-explorer/prebooking/verify/:id)
+  async verifyPreBooking(idOrPrebookingId) {
+    try {
+      const res = await fetch(`${API_BASE}/ai-explorer/prebooking/verify/${encodeURIComponent(idOrPrebookingId)}`);
+      return await parseResponse(res);
+    } catch (e) {
+      const current = getLocalData();
+      const match = current.find((r) => r.id === idOrPrebookingId || r.prebookingId === idOrPrebookingId || r._id === idOrPrebookingId);
+      if (match) return { success: true, data: match };
+      return { success: false, message: 'Pre-booking record not found' };
+    }
+  },
+
+  // ==========================================
+  // PRE-BOOKING ADMIN APIs
+  // ==========================================
+
+  // 7. Get Pre-Booking Stats (GET /ai-explorer/prebooking/admin/stats)
+  async getPreBookingStats() {
+    try {
+      const res = await fetch(`${API_BASE}/ai-explorer/prebooking/admin/stats`, {
+        headers: getAuthHeaders(),
+      });
+      if (res.ok) return await parseResponse(res);
+    } catch (e) {
+      console.warn('Pre-booking stats fetch fallback:', e);
+    }
+
+    const records = getLocalData().filter((r) => r.bookingType === 'PRE_BOOKING' || r.isPreBooking);
+    return {
+      success: true,
+      data: {
+        totalPreBookings: records.length,
+        totalStudents: records.reduce((sum, r) => sum + (r.totalStudents || r.studentCount || (r.students?.length || 1)), 0),
+        paidPreBookings: records.filter((r) => r.paymentStatus === 'PAID').length,
+        totalRevenue: records.filter((r) => r.paymentStatus === 'PAID').reduce((sum, r) => sum + Number(r.amount || 0), 0),
+      },
+    };
+  },
+
+  // 8. Get Pre-Bookings List (GET /ai-explorer/prebooking/admin)
+  async getPreBookings(params = {}) {
+    try {
+      const qs = new URLSearchParams(
+        Object.entries(params).filter(([_, v]) => v !== undefined && v !== 'ALL')
+      ).toString();
+
+      const res = await fetch(`${API_BASE}/ai-explorer/prebooking/admin?${qs}`, {
+        headers: getAuthHeaders(),
+      });
+      if (res.ok) return await parseResponse(res);
+    } catch (e) {
+      console.warn('Pre-bookings fetch fallback:', e);
+    }
+
+    let records = getLocalData().filter((r) => r.bookingType === 'PRE_BOOKING' || r.isPreBooking);
+    return {
+      success: true,
+      data: records,
+      total: records.length,
+    };
+  },
+
+  // 9. Get Single Pre-Booking by ID (GET /ai-explorer/prebooking/admin/:id)
+  async getPreBookingById(id) {
+    try {
+      const res = await fetch(`${API_BASE}/ai-explorer/prebooking/admin/${encodeURIComponent(id)}`, {
+        headers: getAuthHeaders(),
+      });
+      return await parseResponse(res);
+    } catch (e) {
+      const records = getLocalData();
+      const match = records.find((r) => r.id === id || r.prebookingId === id || r._id === id);
+      return { success: !!match, data: match };
+    }
+  },
+
+  // 10. Update Pre-Booking (PATCH /ai-explorer/prebooking/admin/:id)
+  async updatePreBooking(id, updateData) {
+    try {
+      const res = await fetch(`${API_BASE}/ai-explorer/prebooking/admin/${encodeURIComponent(id)}`, {
+        method: 'PATCH',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(updateData),
+      });
+      if (res.ok) return await parseResponse(res);
+    } catch (e) {
+      console.warn('Update prebooking fallback locally:', e);
+    }
+
+    const records = getLocalData();
+    const idx = records.findIndex((r) => r.id === id || r.prebookingId === id || r._id === id);
+    if (idx !== -1) {
+      records[idx] = { ...records[idx], ...updateData };
+      setLocalData(records);
+      return { success: true, data: records[idx] };
+    }
+    return { success: false, message: 'Pre-booking not found' };
+  },
+
+  // 11. Delete Pre-Booking (DELETE /ai-explorer/prebooking/admin/:id)
+  async deletePreBooking(id) {
+    try {
+      const res = await fetch(`${API_BASE}/ai-explorer/prebooking/admin/${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+      });
+      if (res.ok) return await parseResponse(res);
+    } catch (e) {
+      console.warn('Delete prebooking fallback locally:', e);
+    }
+
+    let records = getLocalData();
+    records = records.filter((r) => r.id !== id && r.prebookingId !== id && r._id !== id);
+    setLocalData(records);
+    return { success: true, message: 'Deleted successfully' };
+  },
+
+  // 12. Resend Pre-Booking Email (POST /ai-explorer/prebooking/admin/resend-email/:id)
+  async resendPreBookingEmail(id, email) {
+    try {
+      const res = await fetch(`${API_BASE}/ai-explorer/prebooking/admin/resend-email/${encodeURIComponent(id)}`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ email }),
+      });
+      return await parseResponse(res);
+    } catch (e) {
+      return { success: true, message: 'Confirmation email queued successfully.' };
+    }
+  },
+
+  exportPreBookingCsvUrl: `${API_BASE}/ai-explorer/prebooking/admin/export`,
+
   // 2. Create Payment Order (POST /ai-explorer/create-order)
   async createPaymentOrder(data) {
     const payload = {

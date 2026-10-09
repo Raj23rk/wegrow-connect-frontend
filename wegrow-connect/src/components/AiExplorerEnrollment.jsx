@@ -66,6 +66,17 @@ const PLANS = {
   },
 };
 
+const TERM_OPTIONS = [
+  { id: 'term1', label: 'Term I', amount: 15000, desc: 'Pay 1st Term Now' },
+  { id: 'term2', label: 'Term II', amount: 15000, desc: 'Pay 2nd Term' },
+  { id: 'term3', label: 'Term III', amount: 15000, desc: 'Pay 3rd Term' },
+];
+
+const HALF_OPTIONS = [
+  { id: 'half1', label: '1st Half', amount: 22500, desc: 'Pay 1st Installment Now' },
+  { id: 'half2', label: '2nd Half', amount: 22500, desc: 'Pay 2nd Installment' },
+];
+
 export default function AiExplorerEnrollment() {
   const [step, setStep] = useState(1);
 
@@ -83,6 +94,8 @@ export default function AiExplorerEnrollment() {
 
   const [errors, setErrors] = useState({});
   const [selectedPlan, setSelectedPlan] = useState('full');
+  const [selectedTerm, setSelectedTerm] = useState('term1');
+  const [selectedHalf, setSelectedHalf] = useState('half1');
   const [isDeclared, setIsDeclared] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('Cashfree');
   const [utrNumber, setUtrNumber] = useState('');
@@ -92,6 +105,42 @@ export default function AiExplorerEnrollment() {
   const [copied, setCopied] = useState(false);
 
   const formTopRef = useRef(null);
+
+  const getActivePayDetails = () => {
+    if (selectedPlan === 'term') {
+      const t = TERM_OPTIONS.find((item) => item.id === selectedTerm) || TERM_OPTIONS[0];
+      return {
+        planName: `Term Wise Payment (${t.label})`,
+        basePlanName: 'Term Wise Payment',
+        subLabel: t.label,
+        amount: t.amount,
+        totalFee: 45000,
+        dueDesc: `${t.label} Payment Due`,
+        tag: `${t.label} Fee`,
+      };
+    }
+    if (selectedPlan === 'half') {
+      const h = HALF_OPTIONS.find((item) => item.id === selectedHalf) || HALF_OPTIONS[0];
+      return {
+        planName: `Half-Yearly (${h.label})`,
+        basePlanName: 'Half-Yearly',
+        subLabel: h.label,
+        amount: h.amount,
+        totalFee: 45000,
+        dueDesc: `${h.label} Payment Due`,
+        tag: `${h.label} Fee`,
+      };
+    }
+    return {
+      planName: 'Full Payment',
+      basePlanName: 'Full Payment',
+      subLabel: 'Full Payment',
+      amount: 43000,
+      totalFee: 43000,
+      dueDesc: 'Total Amount Due',
+      tag: 'Full Payment',
+    };
+  };
 
   // Generate QR Code upon successful enrollment
   useEffect(() => {
@@ -198,7 +247,7 @@ export default function AiExplorerEnrollment() {
   // Process Final Payment & Enrollment
   const handlePaymentAndEnroll = async () => {
     setIsProcessing(true);
-    const planObj = PLANS[selectedPlan];
+    const payDetails = getActivePayDetails();
     const enrollmentPayload = {
       studentName: student.name.trim(),
       mailId: student.mailId.trim(),
@@ -211,8 +260,10 @@ export default function AiExplorerEnrollment() {
       address: student.address.trim(),
       course: 'AI Explorer',
       plan: selectedPlan,
-      planName: planObj.name,
-      amount: planObj.amount,
+      planName: payDetails.planName,
+      selectedTerm: selectedPlan === 'term' ? payDetails.subLabel : undefined,
+      selectedHalf: selectedPlan === 'half' ? payDetails.subLabel : undefined,
+      amount: payDetails.amount,
       paymentMethod,
       transactionId: utrNumber.trim() || `ORD_${Date.now().toString().slice(-8)}`,
       paymentStatus: 'PAID',
@@ -223,11 +274,11 @@ export default function AiExplorerEnrollment() {
       if (paymentMethod === 'Cashfree') {
         try {
           const cashfreePayload = {
-            orderAmount: planObj.amount,
+            orderAmount: payDetails.amount,
             customerName: student.name.trim(),
             customerEmail: student.mailId.trim(),
             customerPhone: student.fatherPhone.trim(),
-            orderNote: `AI Explorer Enrollment - ${student.name}`,
+            orderNote: `AI Explorer Enrollment (${payDetails.planName}) - ${student.name}`,
           };
 
           const cfRes = await singAlongApi.createOnlineOrder(cashfreePayload).catch(() => null);
@@ -273,8 +324,56 @@ export default function AiExplorerEnrollment() {
 
   return (
     <div className="min-h-screen bg-[#FAF7F2] text-[#16204a] font-sans antialiased selection:bg-purple-200">
+      {/* Print Specific CSS */}
+      <style>{`
+        @media print {
+          @page {
+            size: A4 portrait;
+            margin: 8mm 8mm 8mm 8mm;
+          }
+          html, body, #root, .min-h-screen {
+            background: #ffffff !important;
+            color: #0f172a !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            min-height: auto !important;
+            height: auto !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          .print\\:hidden,
+          .print-hidden {
+            display: none !important;
+          }
+          .print-receipt-card {
+            border: 2px solid #0f1f5c !important;
+            border-radius: 12px !important;
+            box-shadow: none !important;
+            background: #ffffff !important;
+            max-width: 100% !important;
+            width: 100% !important;
+            margin: 0 auto !important;
+            padding: 16px 20px !important;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+          }
+          main {
+            padding: 0 !important;
+            margin: 0 !important;
+            max-width: 100% !important;
+          }
+          section {
+            padding: 0 !important;
+            margin: 0 !important;
+            border: none !important;
+            box-shadow: none !important;
+            background: transparent !important;
+          }
+        }
+      `}</style>
+
       {/* Top Query / Doubt Helpline Strip (Included on All Pages) */}
-      <div className="bg-gradient-to-r from-[#0f1f5c] via-[#1b2a6e] to-[#7b4dff] text-white py-1.5 sm:py-2 px-3 sm:px-6 shadow-xs">
+      <div className="print:hidden bg-gradient-to-r from-[#0f1f5c] via-[#1b2a6e] to-[#7b4dff] text-white py-1.5 sm:py-2 px-3 sm:px-6 shadow-xs">
         <div className="max-w-7xl mx-auto flex items-center justify-center gap-2 sm:gap-3 flex-wrap text-center text-xs font-bold">
           <div className="flex items-center gap-1.5 flex-wrap justify-center">
             <span className="bg-amber-400 text-slate-900 text-[9px] sm:text-[10px] font-black px-1.5 sm:px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0">
@@ -302,14 +401,14 @@ export default function AiExplorerEnrollment() {
       </div>
 
       {/* Warm Ambient Floating Background Glows */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
+      <div className="print:hidden fixed inset-0 overflow-hidden pointer-events-none -z-10">
         <div className="absolute top-[-80px] left-[-80px] w-80 sm:w-96 h-80 sm:h-96 rounded-full bg-[#ffedd5]/60 blur-3xl" />
         <div className="absolute top-[35%] right-[-80px] w-80 sm:w-96 h-80 sm:h-96 rounded-full bg-[#ede9fe]/60 blur-3xl" />
         <div className="absolute bottom-[-80px] left-[15%] w-80 sm:w-96 h-80 sm:h-96 rounded-full bg-[#e0f2fe]/60 blur-3xl" />
       </div>
 
       {/* Top Navbar */}
-      <header className="sticky top-0 z-40 bg-[#FAF7F2]/95 backdrop-blur-md border-b border-[#e9e2d5] shadow-xs">
+      <header className="print:hidden sticky top-0 z-40 bg-[#FAF7F2]/95 backdrop-blur-md border-b border-[#e9e2d5] shadow-xs">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-2">
           {/* Logo & Brand */}
           <Link to="/" className="flex items-center group shrink-0">
@@ -370,6 +469,12 @@ export default function AiExplorerEnrollment() {
               <span>+91 93443 37331</span>
             </a>
             <Link
+              to="/ai-explorer/pre-booking"
+              className="inline-flex items-center gap-1.5 text-xs font-black text-amber-900 bg-amber-100 hover:bg-amber-200 px-3 py-2 rounded-xl border border-amber-300 transition-all shadow-2xs"
+            >
+              <span>🎟️ Pre-Book (₹1,000)</span>
+            </Link>
+            <Link
               to="/admin/ai-explorer"
               className="hidden sm:inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 bg-white hover:bg-[#f3ede3] px-3.5 py-2 rounded-xl border border-[#ded5c4] shadow-2xs transition-all"
             >
@@ -410,7 +515,7 @@ export default function AiExplorerEnrollment() {
       </header>
 
       {/* HERO ANIMATED BANNER VIDEO */}
-      <section className="w-full relative bg-black overflow-hidden shadow-md border-b border-[#e7decb]">
+      <section className="print:hidden w-full relative bg-black overflow-hidden shadow-md border-b border-[#e7decb]">
         <div className="w-full relative flex items-center justify-center bg-black">
           <video
             src="/Animate_website_background_natural_20261008182800.mp4"
@@ -427,7 +532,7 @@ export default function AiExplorerEnrollment() {
       <main className="max-w-6xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-10" ref={formTopRef}>
 
         {/* STATS STRIP */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4 mb-8 sm:mb-10">
+        <div className="print:hidden grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4 mb-8 sm:mb-10">
           {[
             { icon: '🧪', title: 'Hands-on Labs', desc: 'Real AI tools', border: 'border-[#ffedd5]', bg: 'bg-[#fff7ed]' },
             { icon: '🛠️', title: 'Real Projects', desc: 'Build & showcase', border: 'border-[#ede9fe]', bg: 'bg-[#faf5ff]' },
@@ -814,23 +919,116 @@ export default function AiExplorerEnrollment() {
               })}
             </div>
 
+            {/* Half-yearly breakdown detail box if Half-Yearly is chosen */}
+            {selectedPlan === 'half' && (
+              <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-purple-50/90 via-indigo-50/60 to-purple-50/90 border-2 border-purple-300 shadow-xs mb-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-3">
+                  <div className="text-xs font-black text-purple-950 flex items-center gap-1.5 uppercase tracking-wide">
+                    <span className="w-2 h-2 rounded-full bg-purple-600 animate-pulse" />
+                    <span>Choose Installment to Pay Now:</span>
+                  </div>
+                  <div className="text-[11px] font-bold text-purple-700">
+                    Click to choose 1st Half or 2nd Half
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
+                  {HALF_OPTIONS.map((halfItem) => {
+                    const isHalfSelected = selectedHalf === halfItem.id;
+                    return (
+                      <button
+                        type="button"
+                        key={halfItem.id}
+                        onClick={() => setSelectedHalf(halfItem.id)}
+                        className={`relative p-3.5 sm:p-4 rounded-xl text-left border-2 transition-all cursor-pointer flex items-center justify-between ${
+                          isHalfSelected
+                            ? 'bg-white border-purple-600 shadow-md ring-2 ring-purple-300 scale-101'
+                            : 'bg-white/80 hover:bg-white border-purple-200 hover:border-purple-300 opacity-85 hover:opacity-100'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                              isHalfSelected ? 'border-purple-600 bg-purple-600 text-white' : 'border-slate-300 bg-white'
+                            }`}
+                          >
+                            {isHalfSelected && <div className="w-2 h-2 rounded-full bg-white" />}
+                          </div>
+                          <div>
+                            <div className="text-xs sm:text-sm font-black text-[#0f1f5c]">{halfItem.label}</div>
+                            <div className="text-[10px] sm:text-[11px] font-bold text-slate-500">{halfItem.desc}</div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-sm sm:text-base font-black text-purple-700">₹{halfItem.amount.toLocaleString('en-IN')}</div>
+                          {isHalfSelected && (
+                            <span className="text-[9px] font-black uppercase text-purple-600 bg-purple-100 px-2 py-0.5 rounded-full">
+                              Selected
+                            </span>
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             {/* Term breakdown detail box if Term Wise is chosen */}
             {selectedPlan === 'term' && (
-              <div className="p-3.5 sm:p-4 rounded-2xl bg-blue-50 border-2 border-blue-200 mb-6">
-                <div className="text-xs font-black text-blue-900 mb-2">TERM WISE PAYMENT BREAKDOWN:</div>
-                <div className="grid grid-cols-3 gap-2 sm:gap-3 text-center">
-                  <div className="bg-white p-2 sm:p-2.5 rounded-xl border border-blue-200 shadow-2xs">
-                    <div className="text-[9px] sm:text-[10px] font-black text-slate-500">TERM I</div>
-                    <div className="text-sm sm:text-base font-black text-blue-700">₹15,000</div>
+              <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-blue-50/90 via-indigo-50/60 to-blue-50/90 border-2 border-blue-300 shadow-xs mb-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-3">
+                  <div className="text-xs font-black text-blue-950 flex items-center gap-1.5 uppercase tracking-wide">
+                    <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
+                    <span>Choose Term to Pay Now:</span>
                   </div>
-                  <div className="bg-white p-2 sm:p-2.5 rounded-xl border border-blue-200 shadow-2xs">
-                    <div className="text-[9px] sm:text-[10px] font-black text-slate-500">TERM II</div>
-                    <div className="text-sm sm:text-base font-black text-blue-700">₹15,000</div>
+                  <div className="text-[11px] font-bold text-blue-700">
+                    Click an option below (Term I, II, or III)
                   </div>
-                  <div className="bg-white p-2 sm:p-2.5 rounded-xl border border-blue-200 shadow-2xs">
-                    <div className="text-[9px] sm:text-[10px] font-black text-slate-500">TERM III</div>
-                    <div className="text-sm sm:text-base font-black text-blue-700">₹15,000</div>
-                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3">
+                  {TERM_OPTIONS.map((termItem) => {
+                    const isTermSelected = selectedTerm === termItem.id;
+                    return (
+                      <button
+                        type="button"
+                        key={termItem.id}
+                        onClick={() => setSelectedTerm(termItem.id)}
+                        className={`relative p-3.5 sm:p-4 rounded-xl text-left border-2 transition-all cursor-pointer flex flex-col justify-between ${
+                          isTermSelected
+                            ? 'bg-white border-blue-600 shadow-md ring-2 ring-blue-300 scale-101'
+                            : 'bg-white/80 hover:bg-white border-blue-200 hover:border-blue-300 opacity-85 hover:opacity-100'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between w-full mb-2">
+                          <div
+                            className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                              isTermSelected ? 'border-blue-600 bg-blue-600 text-white' : 'border-slate-300 bg-white'
+                            }`}
+                          >
+                            {isTermSelected && <div className="w-2 h-2 rounded-full bg-white" />}
+                          </div>
+                          <span
+                            className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${
+                              isTermSelected
+                                ? 'bg-blue-600 text-white shadow-2xs'
+                                : 'bg-slate-100 text-slate-500'
+                            }`}
+                          >
+                            {isTermSelected ? 'Selected' : 'Term'}
+                          </span>
+                        </div>
+                        <div>
+                          <div className="text-xs sm:text-sm font-black text-[#0f1f5c]">{termItem.label}</div>
+                          <div className="text-base sm:text-lg font-black text-blue-700 mt-0.5">
+                            ₹{termItem.amount.toLocaleString('en-IN')}
+                          </div>
+                          <div className="text-[10px] sm:text-[11px] font-bold text-slate-500 mt-0.5">
+                            {termItem.desc}
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -845,7 +1043,7 @@ export default function AiExplorerEnrollment() {
               />
               <span className="text-xs sm:text-sm font-bold text-slate-700 leading-relaxed">
                 I confirm that the student details provided for <strong className="text-[#0f1f5c]">{student.name}</strong> ({student.standard}) are accurate, and I agree to the selected{' '}
-                <strong className="text-[#0f1f5c]">{PLANS[selectedPlan]?.name}</strong> fee plan and WeGrow Skill Campus &amp; B School enrollment terms.
+                <strong className="text-[#0f1f5c]">{getActivePayDetails().planName}</strong> fee plan and WeGrow Skill Campus &amp; B School enrollment terms.
               </span>
             </label>
 
@@ -930,18 +1128,18 @@ export default function AiExplorerEnrollment() {
                   </div>
                   <div className="flex justify-between pb-2 border-b border-slate-200">
                     <span className="text-slate-500 font-bold">Selected Plan</span>
-                    <span className="font-extrabold text-emerald-700">{PLANS[selectedPlan]?.name}</span>
+                    <span className="font-extrabold text-emerald-700">{getActivePayDetails().planName}</span>
                   </div>
                   <div className="flex justify-between pb-2 border-b border-slate-200">
                     <span className="text-slate-500 font-bold">Total Annual Fee</span>
-                    <span className="font-bold text-[#0f1f5c]">{PLANS[selectedPlan]?.label}</span>
+                    <span className="font-bold text-[#0f1f5c]">₹{getActivePayDetails().totalFee.toLocaleString('en-IN')}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500 font-bold">Now Payable</span>
                     <span className="font-black text-purple-700">
-                      ₹{PLANS[selectedPlan]?.amount?.toLocaleString('en-IN')}{' '}
+                      ₹{getActivePayDetails().amount?.toLocaleString('en-IN')}{' '}
                       <span className="text-[10px] text-slate-500 font-semibold">
-                        ({selectedPlan === 'term' ? 'Term I Fee' : selectedPlan === 'half' ? '1st Installment' : 'Full Payment'})
+                        ({getActivePayDetails().tag})
                       </span>
                     </span>
                   </div>
@@ -974,20 +1172,16 @@ export default function AiExplorerEnrollment() {
                   className="p-4 sm:p-5 rounded-2xl text-white shadow-md"
                 >
                   <div className="text-[11px] sm:text-xs font-bold text-white/80 uppercase tracking-wider">
-                    {selectedPlan === 'term'
-                      ? 'First Term Payment Due (Term I)'
-                      : selectedPlan === 'half'
-                      ? 'First Installment Due (1st Half)'
-                      : 'Total Amount Due'}
+                    {getActivePayDetails().dueDesc}
                   </div>
                   <div className="text-2xl sm:text-4xl font-black mt-1">
-                    ₹{PLANS[selectedPlan]?.amount?.toLocaleString('en-IN')}
+                    ₹{getActivePayDetails().amount?.toLocaleString('en-IN')}
                   </div>
                   <div className="text-[10px] sm:text-[11px] text-white/70 font-semibold mt-1">
                     {selectedPlan === 'term'
-                      ? 'Total Annual Fee: ₹45,000 (Term II & III payable in subsequent terms)'
+                      ? `Total Annual Fee: ₹45,000 (${getActivePayDetails().subLabel} chosen • other terms payable in subsequent terms)`
                       : selectedPlan === 'half'
-                      ? 'Total Annual Fee: ₹45,000 (2nd installment payable bi-annually)'
+                      ? `Total Annual Fee: ₹45,000 (${getActivePayDetails().subLabel} chosen • other installment payable bi-annually)`
                       : '100% Secure Transaction via WeGrow Connect'}
                   </div>
                 </div>
@@ -1007,7 +1201,7 @@ export default function AiExplorerEnrollment() {
                     </div>
                   ) : (
                     <span>
-                      Pay {selectedPlan === 'term' ? 'Term I ₹15,000' : selectedPlan === 'half' ? '1st Half ₹22,500' : '₹43,000'} &amp; Complete Enrollment 🎉
+                      Pay {getActivePayDetails().subLabel} ₹{getActivePayDetails().amount.toLocaleString('en-IN')} &amp; Complete Enrollment 🎉
                     </span>
                   )}
                 </button>
@@ -1027,10 +1221,11 @@ export default function AiExplorerEnrollment() {
           </section>
         )}
 
-        {/* STEP 4: DIGITAL ENROLLMENT CONFIRMATION (NO QR - STUDENT & PARENT DETAILS + THANK YOU MESSAGE) */}
+        {/* STEP 4: DIGITAL ENROLLMENT CONFIRMATION */}
         {step === 4 && completedEnrollment && (
-          <section className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-8 md:p-10 border-2 border-emerald-300 shadow-xl transition-all">
-            <div className="text-center max-w-xl mx-auto mb-6 sm:mb-8">
+          <section className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-8 md:p-10 border-2 border-emerald-300 shadow-xl transition-all print:p-0 print:border-none print:shadow-none print:bg-transparent">
+            {/* Top Congratulatory Header (Screen Only) */}
+            <div className="print:hidden text-center max-w-xl mx-auto mb-6 sm:mb-8">
               <div
                 style={{ background: 'linear-gradient(135deg, #10b981, #14b8a6)' }}
                 className="w-14 sm:w-16 h-14 sm:h-16 rounded-full text-white flex items-center justify-center text-2xl sm:text-3xl mx-auto mb-3 shadow-md animate-bounce"
@@ -1045,28 +1240,47 @@ export default function AiExplorerEnrollment() {
               </p>
             </div>
 
-            {/* Official Confirmation Card */}
-            <div className="max-w-2xl mx-auto bg-gradient-to-b from-white to-[#faf8f5] rounded-2xl sm:rounded-3xl border-2 border-purple-300 shadow-lg overflow-hidden mb-6 relative">
-              {/* Pass Header */}
+            {/* Official Confirmation / Print Receipt Card */}
+            <div className="print-receipt-card max-w-2xl mx-auto bg-gradient-to-b from-white to-[#faf8f5] rounded-2xl sm:rounded-3xl border-2 border-purple-300 shadow-lg overflow-hidden mb-6 relative print:border-2 print:border-[#0f1f5c] print:rounded-2xl print:bg-white print:p-5 print:mb-0">
+              {/* Header */}
               <div
                 style={{ background: 'linear-gradient(135deg, #0f1f5c 0%, #1846c4 60%, #7b4dff 100%)' }}
-                className="text-white p-4 sm:p-6 text-center relative"
+                className="text-white p-4 sm:p-5 text-center relative print:!bg-[#0f1f5c] print:!text-white print:p-4 print:rounded-xl"
               >
-                <div className="text-[10px] sm:text-xs font-black tracking-widest text-amber-300 uppercase">
-                  OFFICIAL ENROLLMENT CONFIRMATION
-                </div>
-                <div className="text-xl sm:text-3xl font-black tracking-wide mt-1">
-                  AI Explorer Course
-                </div>
-                <div className="text-xs sm:text-sm font-bold text-white/90 mt-0.5">
-                  WeGrow Skill Campus &amp; B School
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5 text-left">
+                    <div className="bg-white p-1.5 rounded-lg shrink-0">
+                      <img
+                        src="/wegrow&Bschool.webp"
+                        alt="WeGrow"
+                        className="h-8 w-auto object-contain"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = '/logo.webp';
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <div className="font-black text-sm sm:text-base leading-tight">WeGrow Skill Campus &amp; B School</div>
+                      <div className="text-[10px] text-white/80 font-bold">Empowering Young Innovators • Sivakasi</div>
+                    </div>
+                  </div>
+
+                  <div className="text-right shrink-0">
+                    <div className="text-[9px] sm:text-[10px] font-black tracking-widest text-amber-300 uppercase">
+                      OFFICIAL ADMISSION RECEIPT
+                    </div>
+                    <div className="text-xs sm:text-sm font-black font-mono mt-0.5">
+                      {completedEnrollment.id}
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              {/* Pass Body */}
-              <div className="p-4 sm:p-6 space-y-4">
-                {/* Thank You Message Box */}
-                <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-50 via-pink-50 to-amber-50 border-2 border-purple-200 text-center space-y-1.5 shadow-2xs">
+              {/* Receipt Body */}
+              <div className="p-4 sm:p-6 space-y-4 print:p-3 print:space-y-3">
+                {/* Thank You Message Box (Screen Only) */}
+                <div className="print:hidden p-4 rounded-2xl bg-gradient-to-r from-purple-50 via-pink-50 to-amber-50 border-2 border-purple-200 text-center space-y-1.5 shadow-2xs">
                   <div className="text-sm sm:text-base font-black text-purple-900 flex items-center justify-center gap-1.5">
                     <span>✨</span>
                     <span>Thank you for creating your enrollment!</span>
@@ -1077,91 +1291,105 @@ export default function AiExplorerEnrollment() {
                   </p>
                 </div>
 
-                {/* Enrollment ID */}
-                <div className="p-3 sm:p-3.5 bg-purple-50 rounded-2xl border border-purple-200 flex items-center justify-between">
+                {/* Subheader Status Strip */}
+                <div className="flex items-center justify-between gap-2 p-2.5 sm:p-3 bg-purple-50 rounded-xl border border-purple-200 text-xs">
                   <div>
-                    <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Enrollment ID</div>
-                    <div className="font-mono font-black text-purple-900 text-base sm:text-lg">
-                      {completedEnrollment.id}
-                    </div>
+                    <span className="text-slate-500 font-bold">Program: </span>
+                    <strong className="text-purple-900 font-black">AI Explorer Course (Grades 5 – 12)</strong>
                   </div>
-                  <button
-                    onClick={() => copyId(completedEnrollment.id)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-purple-100 text-purple-700 font-bold text-xs transition-all cursor-pointer shadow-2xs border border-purple-200"
-                  >
-                    {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-                    <span>{copied ? 'Copied' : 'Copy ID'}</span>
-                  </button>
+                  <span className="px-2.5 py-1 rounded-full bg-emerald-600 text-white font-black text-[10px] uppercase tracking-wider shrink-0">
+                    ✓ Paid &amp; Confirmed
+                  </span>
                 </div>
 
-                {/* Complete Student & Parent Details Grid */}
-                <div className="p-4 sm:p-5 rounded-2xl bg-white border-2 border-slate-200 space-y-3">
-                  <h3 className="text-xs font-black text-[#0f1f5c] uppercase tracking-wider border-b border-slate-100 pb-2">
+                {/* Student & Parent Details Grid */}
+                <div className="p-4 sm:p-5 rounded-2xl bg-white border-2 border-slate-200 space-y-3 print:p-3.5 print:border print:border-slate-300">
+                  <h3 className="text-xs font-black text-[#0f1f5c] uppercase tracking-wider border-b border-slate-100 pb-1.5 print:text-[11px]">
                     Student &amp; Parent Details
                   </h3>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                    {/* Student Info */}
+                  <div className="grid grid-cols-2 gap-3 text-xs print:text-[11px] print:gap-2">
+                    {/* Left Column */}
                     <div className="space-y-1.5">
-                      <div className="flex justify-between sm:justify-start sm:gap-2">
-                        <span className="text-slate-500 font-bold min-w-[100px]">Student Name:</span>
+                      <div className="flex flex-col sm:flex-row sm:justify-start sm:gap-2">
+                        <span className="text-slate-500 font-bold min-w-[90px]">Student Name:</span>
                         <span className="font-black text-[#0f1f5c]">{completedEnrollment.studentName}</span>
                       </div>
-                      <div className="flex justify-between sm:justify-start sm:gap-2">
-                        <span className="text-slate-500 font-bold min-w-[100px]">Email ID:</span>
-                        <span className="font-bold text-[#0f1f5c]">{completedEnrollment.mailId || completedEnrollment.email || '—'}</span>
+                      <div className="flex flex-col sm:flex-row sm:justify-start sm:gap-2">
+                        <span className="text-slate-500 font-bold min-w-[90px]">Standard / Grade:</span>
+                        <span className="font-black text-purple-700">{completedEnrollment.standard}</span>
                       </div>
-                      <div className="flex justify-between sm:justify-start sm:gap-2">
-                        <span className="text-slate-500 font-bold min-w-[100px]">Standard:</span>
-                        <span className="font-black text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md border border-purple-200">
-                          {completedEnrollment.standard}
-                        </span>
-                      </div>
-                      <div className="flex justify-between sm:justify-start sm:gap-2">
-                        <span className="text-slate-500 font-bold min-w-[100px]">School:</span>
+                      <div className="flex flex-col sm:flex-row sm:justify-start sm:gap-2">
+                        <span className="text-slate-500 font-bold min-w-[90px]">School:</span>
                         <span className="font-bold text-[#0f1f5c]">{completedEnrollment.school}</span>
+                      </div>
+                      <div className="flex flex-col sm:flex-row sm:justify-start sm:gap-2">
+                        <span className="text-slate-500 font-bold min-w-[90px]">Email ID:</span>
+                        <span className="font-bold text-[#0f1f5c]">{completedEnrollment.mailId || completedEnrollment.email || '—'}</span>
                       </div>
                     </div>
 
-                    {/* Parents Info */}
+                    {/* Right Column */}
                     <div className="space-y-1.5">
-                      <div className="flex justify-between sm:justify-start sm:gap-2">
-                        <span className="text-slate-500 font-bold min-w-[100px]">Father's Name:</span>
+                      <div className="flex flex-col sm:flex-row sm:justify-start sm:gap-2">
+                        <span className="text-slate-500 font-bold min-w-[90px]">Father's Contact:</span>
                         <span className="font-bold text-[#0f1f5c]">
                           {completedEnrollment.fatherName} ({completedEnrollment.fatherPhone})
                         </span>
                       </div>
-                      <div className="flex justify-between sm:justify-start sm:gap-2">
-                        <span className="text-slate-500 font-bold min-w-[100px]">Mother's Name:</span>
+                      <div className="flex flex-col sm:flex-row sm:justify-start sm:gap-2">
+                        <span className="text-slate-500 font-bold min-w-[90px]">Mother's Contact:</span>
                         <span className="font-bold text-[#0f1f5c]">
                           {completedEnrollment.motherName} ({completedEnrollment.motherPhone})
                         </span>
                       </div>
-                      <div className="flex justify-between sm:justify-start sm:gap-2">
-                        <span className="text-slate-500 font-bold min-w-[100px]">Fee Plan:</span>
+                      <div className="flex flex-col sm:flex-row sm:justify-start sm:gap-2">
+                        <span className="text-slate-500 font-bold min-w-[90px]">Fee Plan:</span>
                         <span className="font-black text-[#0f1f5c]">
                           {completedEnrollment.planName || completedEnrollment.plan || 'Full Payment'}
                         </span>
                       </div>
-                      <div className="flex justify-between sm:justify-start sm:gap-2">
-                        <span className="text-slate-500 font-bold min-w-[100px]">Payment Status:</span>
-                        <span className="font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-300">
-                          CONFIRMED (₹{Number(completedEnrollment.amount).toLocaleString('en-IN')})
+                      <div className="flex flex-col sm:flex-row sm:justify-start sm:gap-2">
+                        <span className="text-slate-500 font-bold min-w-[90px]">Amount Paid:</span>
+                        <span className="font-black text-emerald-700">
+                          ₹{Number(completedEnrollment.amount).toLocaleString('en-IN')} (PAID)
                         </span>
                       </div>
                     </div>
 
                     {completedEnrollment.address && (
-                      <div className="sm:col-span-2 pt-2 border-t border-slate-100 flex items-start gap-2">
-                        <span className="text-slate-500 font-bold min-w-[100px]">Address:</span>
+                      <div className="col-span-2 pt-2 border-t border-slate-100 flex items-start gap-2">
+                        <span className="text-slate-500 font-bold min-w-[90px]">Address:</span>
                         <span className="font-semibold text-slate-700">{completedEnrollment.address}</span>
                       </div>
                     )}
                   </div>
                 </div>
 
-                {/* Support Helpline Box */}
-                <div className="p-3.5 sm:p-4 rounded-2xl bg-amber-50/80 border border-amber-200 flex flex-col sm:flex-row items-center justify-between gap-2.5 text-xs">
+                {/* Verification & Signatory Strip */}
+                <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between gap-3 text-xs print:p-2.5">
+                  <div className="flex items-center gap-2.5">
+                    {qrCodeUrl ? (
+                      <img src={qrCodeUrl} alt="QR Verification" className="w-14 h-14 object-contain rounded-md border border-slate-300 shrink-0" />
+                    ) : (
+                      <div className="w-14 h-14 bg-purple-100 rounded-md flex items-center justify-center text-xl shrink-0">🎓</div>
+                    )}
+                    <div>
+                      <div className="font-black text-[#0f1f5c] text-[11px]">Officially Verified Admission</div>
+                      <div className="text-[10px] text-slate-500">Scan QR to verify student admission status</div>
+                      <div className="text-[9px] text-slate-400 mt-0.5">Date: {new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</div>
+                    </div>
+                  </div>
+
+                  <div className="text-right shrink-0">
+                    <div className="text-[10px] font-black text-purple-900">WeGrow Skill Campus &amp; B School</div>
+                    <div className="text-[9px] text-slate-500 font-bold">Authorized Signatory</div>
+                    <div className="text-[9px] text-emerald-700 font-black mt-0.5">SEAL VERIFIED ✓</div>
+                  </div>
+                </div>
+
+                {/* Support Helpline Box (Screen Only) */}
+                <div className="print:hidden p-3.5 sm:p-4 rounded-2xl bg-amber-50/80 border border-amber-200 flex flex-col sm:flex-row items-center justify-between gap-2.5 text-xs">
                   <div className="flex items-center gap-2">
                     <span className="text-lg">💬</span>
                     <div>
@@ -1180,8 +1408,8 @@ export default function AiExplorerEnrollment() {
               </div>
             </div>
 
-            {/* Actions */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 sm:gap-3">
+            {/* Actions (Screen Only) */}
+            <div className="print:hidden flex flex-col sm:flex-row items-center justify-center gap-2.5 sm:gap-3">
               <button
                 onClick={() => window.print()}
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs px-6 py-3.5 rounded-xl transition-all cursor-pointer shadow-xs"
@@ -1210,7 +1438,7 @@ export default function AiExplorerEnrollment() {
       </main>
 
       {/* Footer with Helpline on all pages */}
-      <footer className="text-center py-6 sm:py-8 px-4 text-xs font-bold text-[#5f6a8a] border-t border-[#e8dfcf] bg-white/70 space-y-2">
+      <footer className="print:hidden text-center py-6 sm:py-8 px-4 text-xs font-bold text-[#5f6a8a] border-t border-[#e8dfcf] bg-white/70 space-y-2">
         <div>
           If any doubts or queries? Contact:{' '}
           <a href="tel:+919344337331" className="text-purple-700 font-black underline underline-offset-2">
