@@ -28,7 +28,6 @@ import {
   Sparkle
 } from 'lucide-react';
 import { aiExplorerApi } from '../services/aiExplorerApi';
-import { singAlongApi } from '../services/singAlongApi';
 
 const PREBOOKING_TOKEN_AMOUNT = 1000;
 
@@ -274,7 +273,7 @@ export default function AiExplorerPreBooking() {
   const verifyAndSubmitPreBooking = async (orderId, basePayload) => {
     setIsVerifyingPayment(true);
     try {
-      const statusRes = await singAlongApi.checkPaymentStatus(orderId).catch(() => null);
+      const statusRes = await aiExplorerApi.checkPreBookingStatus(orderId).catch(() => null);
       const isSuccess =
         statusRes?.isPaid === true ||
         statusRes?.status === 'SUCCESS' ||

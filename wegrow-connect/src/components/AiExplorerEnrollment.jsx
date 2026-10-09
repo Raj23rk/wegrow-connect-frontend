@@ -29,7 +29,6 @@ import {
   X
 } from 'lucide-react';
 import { aiExplorerApi } from '../services/aiExplorerApi';
-import { singAlongApi } from '../services/singAlongApi';
 
 const BASE_PLANS = {
   full: {
@@ -371,8 +370,8 @@ export default function AiExplorerEnrollment() {
       checkedUrlParamRef.current = true;
       setIsVerifyingPayment(true);
       toast.loading('Checking payment confirmation...', { id: 'url-verify' });
-      singAlongApi
-        .checkPaymentStatus(orderIdParam)
+      aiExplorerApi
+        .checkEnrollmentStatus(orderIdParam)
         .then(async (res) => {
           const isSuccess =
             res?.isPaid === true ||
@@ -481,7 +480,7 @@ export default function AiExplorerEnrollment() {
   const verifyAndSubmitEnrollment = async (orderId, basePayload) => {
     setIsVerifyingPayment(true);
     try {
-      const statusRes = await singAlongApi.checkPaymentStatus(orderId).catch(() => null);
+      const statusRes = await aiExplorerApi.checkEnrollmentStatus(orderId).catch(() => null);
       const isSuccess =
         statusRes?.isPaid === true ||
         statusRes?.status === 'SUCCESS' ||
@@ -536,14 +535,33 @@ export default function AiExplorerEnrollment() {
     try {
       if (paymentMethod === 'Cashfree') {
         const cashfreePayload = {
+          amount: payDetails.amount,
           orderAmount: payDetails.amount,
           customerName: students[0]?.name?.trim() || parent.fatherName.trim() || 'Parent',
+          studentName: studentNames,
+          email: parent.email.trim(),
           customerEmail: parent.email.trim(),
+          fatherPhone: parent.fatherPhone.trim(),
           customerPhone: parent.fatherPhone.trim(),
+          motherPhone: parent.motherPhone.trim(),
+          fatherName: parent.fatherName.trim(),
+          motherName: parent.motherName.trim(),
+          address: parent.address.trim(),
+          feePlan: selectedPlan,
+          plan: selectedPlan,
+          planName: payDetails.planName,
+          selectedTerm: selectedPlan === 'term' ? payDetails.subLabel : undefined,
+          selectedHalf: selectedPlan === 'half' ? payDetails.subLabel : undefined,
+          totalFee: payDetails.totalFee,
           orderNote: `AI Explorer Enrollment (${payDetails.planName} • ${students.length} Student${students.length > 1 ? 's' : ''}) - ${studentNames}`,
+          students: students.map((s) => ({
+            name: s.name.trim(),
+            standard: s.standard,
+            school: s.school.trim(),
+          })),
         };
 
-        const cfRes = await singAlongApi.createOnlineOrder(cashfreePayload);
+        const cfRes = await aiExplorerApi.createEnrollmentOrder(cashfreePayload);
         if (!cfRes?.success || !cfRes?.data?.paymentSessionId) {
           throw new Error(cfRes?.message || 'Could not initiate payment session with Cashfree.');
         }
@@ -596,7 +614,6 @@ export default function AiExplorerEnrollment() {
       setIsProcessing(false);
     }
   };
-
   const copyId = (id) => {
     navigator.clipboard.writeText(id);
     setCopied(true);

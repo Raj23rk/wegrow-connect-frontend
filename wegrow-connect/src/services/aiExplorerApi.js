@@ -121,10 +121,93 @@ async function parseResponse(response) {
 
 export const aiExplorerApi = {
   // ==========================================
-  // PUBLIC CLIENT APIs
+  // ENROLLMENT CLIENT APIs
   // ==========================================
 
-  // 1. Submit Student Enrollment (POST /ai-explorer/enroll)
+  // 1. Create AI Explorer Course Enrollment Order (POST /ai-explorer/create-order)
+  async createEnrollmentOrder(data) {
+    const studentsArr = (data.students || []).map((s) => ({
+      name: s.name || s.studentName,
+      studentName: s.name || s.studentName,
+      standard: s.standard,
+      school: s.school,
+    }));
+
+    const studentNames =
+      studentsArr.map((s) => s.name).filter(Boolean).join(', ') ||
+      data.studentName ||
+      data.customerName ||
+      '';
+    const studentStandards =
+      studentsArr.map((s) => s.standard).filter(Boolean).join(', ') || data.standard || '';
+    const studentSchools =
+      studentsArr.map((s) => s.school).filter(Boolean).join(', ') || data.school || '';
+
+    const payload = {
+      amount: Number(data.amount || data.orderAmount || 0),
+      orderAmount: Number(data.amount || data.orderAmount || 0),
+      totalFee: Number(data.totalFee || data.amount || 0),
+      customerName: data.customerName || studentsArr[0]?.name || data.fatherName || 'Parent',
+      studentName: studentNames,
+      students: studentsArr,
+      studentCount: studentsArr.length || data.studentCount || 1,
+      totalStudents: studentsArr.length || data.totalStudents || 1,
+      email: data.email || data.customerEmail || data.mailId,
+      customerEmail: data.email || data.customerEmail || data.mailId,
+      mailId: data.email || data.customerEmail || data.mailId,
+      fatherPhone: data.fatherPhone || data.customerPhone,
+      customerPhone: data.customerPhone || data.fatherPhone,
+      motherPhone: data.motherPhone,
+      fatherName: data.fatherName,
+      motherName: data.motherName,
+      address: data.address,
+      standard: studentStandards,
+      school: studentSchools,
+      course: data.course || 'AI Explorer',
+      courseName: data.courseName || 'AI Explorer',
+      feePlan: data.feePlan || data.plan || 'full',
+      plan: data.feePlan || data.plan || 'full',
+      planName: data.planName,
+      selectedTerm: data.selectedTerm,
+      selectedHalf: data.selectedHalf,
+      orderNote:
+        data.orderNote ||
+        `AI Explorer Enrollment (${data.planName || ''} • ${studentsArr.length} Students) - ${studentNames}`,
+    };
+
+    const res = await fetch(`${API_BASE}/ai-explorer/create-order`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    return await parseResponse(res);
+  },
+
+  // 2. Check Enrollment Payment Status (GET /ai-explorer/status/:orderId)
+  async checkEnrollmentStatus(orderId) {
+    try {
+      const res = await fetch(`${API_BASE}/ai-explorer/status/${encodeURIComponent(orderId)}`);
+      return await parseResponse(res);
+    } catch (e) {
+      return { success: false, message: e.message };
+    }
+  },
+
+  // 3. Verify Enrollment Payment (POST /ai-explorer/verify-payment)
+  async verifyEnrollmentPayment(data) {
+    try {
+      const res = await fetch(`${API_BASE}/ai-explorer/verify-payment`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      return await parseResponse(res);
+    } catch (e) {
+      return { success: false, message: e.message };
+    }
+  },
+
+  // 4. Submit Student Enrollment Direct / Offline (POST /ai-explorer/enroll)
   async enrollStudent(data) {
     const payload = {
       studentName: data.studentName || data.name || (Array.isArray(data.students) ? data.students.map(s => s.name).join(', ') : ''),
