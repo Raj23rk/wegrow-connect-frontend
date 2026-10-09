@@ -483,12 +483,88 @@ export const aiExplorerApi = {
       const res = await fetch(`${API_BASE}/ai-explorer/prebooking/admin?${qs}`, {
         headers: getAuthHeaders(),
       });
-      if (res.ok) return await parseResponse(res);
+      if (res.ok) {
+        const parsed = await parseResponse(res);
+        let list = [];
+        if (Array.isArray(parsed?.data?.data)) list = parsed.data.data;
+        else if (Array.isArray(parsed?.data)) list = parsed.data;
+        else if (Array.isArray(parsed)) list = parsed;
+        else if (Array.isArray(parsed?.data?.preBookings)) list = parsed.data.preBookings;
+        else if (Array.isArray(parsed?.preBookings)) list = parsed.preBookings;
+        else if (Array.isArray(parsed?.data?.items)) list = parsed.data.items;
+
+        const normalizedList = list.map((item) => {
+          const displayId = item.prebookingId || item.id || item._id || '';
+          const studentsList = Array.isArray(item.students) ? item.students : [];
+          const totalKids = item.totalStudents || item.studentCount || (studentsList.length > 0 ? studentsList.length : 1);
+          
+          const studentNames =
+            item.studentName ||
+            item.name ||
+            (studentsList.length > 0 ? studentsList.map((s) => s.studentName || s.name).filter(Boolean).join(', ') : '') ||
+            '—';
+
+          const studentStandards =
+            item.standard ||
+            (studentsList.length > 0 ? studentsList.map((s) => s.standard).filter(Boolean).join(', ') : '') ||
+            '—';
+
+          const studentSchools =
+            item.school ||
+            (studentsList.length > 0 ? studentsList.map((s) => s.school).filter(Boolean).join(', ') : '') ||
+            '—';
+
+          const batchInfo =
+            item.preferredBatch ||
+            (studentsList.length > 0 ? studentsList.map((s) => s.preferredBatch).filter(Boolean).join(', ') : '') ||
+            '';
+
+          return {
+            ...item,
+            id: displayId,
+            prebookingId: item.prebookingId || displayId,
+            studentName: studentNames,
+            students: studentsList,
+            email: item.email || item.mailId || '',
+            mailId: item.email || item.mailId || '',
+            fatherName: item.fatherName || item.parentName || item.customerName || item.father || '—',
+            motherName: item.motherName || item.mother || '—',
+            fatherPhone: item.fatherPhone || item.phone || item.mobile || item.customerPhone || '—',
+            motherPhone: item.motherPhone || '—',
+            address: item.address || item.residentialAddress || item.parentAddress || item.city || '',
+            standard: studentStandards,
+            school: studentSchools,
+            preferredBatch: batchInfo,
+            totalStudents: totalKids,
+            studentCount: totalKids,
+            planName: `Advance Token (${totalKids} Seat${totalKids > 1 ? 's' : ''})`,
+            feePlan: 'prebooking',
+            amount: Number(item.totalAmount || item.amount || totalKids * 1000),
+            paymentStatus: item.paymentStatus || item.status || 'PENDING',
+          };
+        });
+
+        const totalCount =
+          parsed?.data?.pagination?.total ??
+          parsed?.pagination?.total ??
+          parsed?.data?.meta?.total ??
+          parsed?.meta?.total ??
+          parsed?.total ??
+          parsed?.data?.total ??
+          normalizedList.length;
+
+        return {
+          success: true,
+          data: normalizedList,
+          total: totalCount,
+          meta: parsed?.data?.pagination || parsed?.data?.meta || parsed?.meta,
+        };
+      }
     } catch (e) {
       console.warn('Pre-bookings fetch fallback:', e);
     }
 
-    let records = getLocalData().filter((r) => r.bookingType === 'PRE_BOOKING' || r.isPreBooking);
+    let records = getLocalData().filter((r) => r.bookingType === 'PRE_BOOKING' || r.isPreBooking || r.prebookingId);
     return {
       success: true,
       data: records,
@@ -566,6 +642,31 @@ export const aiExplorerApi = {
   },
 
   exportPreBookingCsvUrl: `${API_BASE}/ai-explorer/prebooking/admin/export`,
+
+  async exportPreBookingCsv() {
+    try {
+      const res = await fetch(`${API_BASE}/ai-explorer/prebooking/admin/export`, {
+        headers: getAuthHeaders(),
+      });
+      if (res.ok) return await res.text();
+    } catch (e) {
+      console.warn('Pre-booking CSV export fallback:', e);
+    }
+    const records = getLocalData().filter((r) => r.bookingType === 'PRE_BOOKING' || r.isPreBooking || r.prebookingId);
+    const headers = ['ID', 'Student Name', 'Standard', 'School', 'Parent Phone', 'Seats', 'Amount', 'Status', 'Date'];
+    const rows = records.map((r) => [
+      r.id || r.prebookingId || '',
+      `"${r.studentName || ''}"`,
+      `"${r.standard || ''}"`,
+      `"${r.school || ''}"`,
+      r.fatherPhone || r.motherPhone || '',
+      r.totalStudents || 1,
+      r.amount || 1000,
+      r.paymentStatus || 'PENDING',
+      r.createdAt ? new Date(r.createdAt).toISOString() : '',
+    ]);
+    return [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+  },
 
   // 2. Create Payment Order (POST /ai-explorer/create-order)
   async createPaymentOrder(data) {

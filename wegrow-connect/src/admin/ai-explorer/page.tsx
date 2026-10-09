@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import {
   GraduationCap,
@@ -22,7 +23,9 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
-  Users
+  Users,
+  Ticket,
+  Sparkles
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import QRCode from 'qrcode';
@@ -34,6 +37,31 @@ const rupee = (n: number | string) => {
 };
 
 export default function AdminAiExplorerPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabParam = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState<'enrollments' | 'prebooking'>(
+    tabParam === 'prebooking' ? 'prebooking' : 'enrollments'
+  );
+
+  useEffect(() => {
+    if (tabParam === 'prebooking' && activeTab !== 'prebooking') {
+      setActiveTab('prebooking');
+      setPage(1);
+    } else if (tabParam !== 'prebooking' && tabParam && activeTab !== 'enrollments') {
+      setActiveTab('enrollments');
+      setPage(1);
+    }
+  }, [tabParam, activeTab]);
+
+  const handleTabChange = (tab: 'enrollments' | 'prebooking') => {
+    setActiveTab(tab);
+    setPage(1);
+    if (tab === 'prebooking') {
+      setSearchParams({ tab: 'prebooking' });
+    } else {
+      setSearchParams({});
+    }
+  };
   const [enrollments, setEnrollments] = useState<any[]>([]);
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -56,63 +84,103 @@ export default function AdminAiExplorerPage() {
   const isPaidStatus = (s?: string) =>
     ['PAID', 'COMPLETED', 'ENROLLED', 'SUCCESS'].includes((s || '').toUpperCase());
 
-  // Load Data with pagination support
+  // Load Data with tab and pagination support
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const enrollRes = await aiExplorerApi.getEnrollments({
-        page,
-        limit,
-        search: search.trim() || undefined,
-        standard: standardFilter,
-        plan: planFilter,
-        paymentStatus: statusFilter,
-      });
+      if (activeTab === 'prebooking') {
+        const preRes = await aiExplorerApi.getPreBookings({
+          page,
+          limit,
+          search: search.trim() || undefined,
+          standard: standardFilter,
+          paymentStatus: statusFilter,
+        });
 
-      let list: any[] = [];
-      if (Array.isArray(enrollRes?.data?.data)) {
-        list = enrollRes.data.data;
-      } else if (Array.isArray(enrollRes?.data)) {
-        list = enrollRes.data;
-      } else if (Array.isArray(enrollRes?.enrollments)) {
-        list = enrollRes.enrollments;
-      } else if (Array.isArray(enrollRes)) {
-        list = enrollRes;
+        let list: any[] = [];
+        if (Array.isArray(preRes?.data?.data)) list = preRes.data.data;
+        else if (Array.isArray(preRes?.data)) list = preRes.data;
+        else if (Array.isArray(preRes)) list = preRes;
+
+        setEnrollments(list);
+
+        const serverTotal =
+          preRes?.total ??
+          preRes?.meta?.total ??
+          preRes?.data?.total ??
+          preRes?.data?.meta?.total ??
+          list.length;
+
+        setTotalCount(serverTotal);
+
+        const totalKids = list.reduce(
+          (sum, e) => sum + (e.totalStudents || e.studentCount || (e.students?.length || 1)),
+          0
+        );
+        const paidCount = list.filter((e) => isPaidStatus(e.paymentStatus) || isPaidStatus(e.status)).length;
+        const totalFee = list
+          .filter((e) => isPaidStatus(e.paymentStatus) || isPaidStatus(e.status))
+          .reduce((sum, e) => sum + Number(e.amount || 0), 0);
+        const pendingCount = list.filter(
+          (e) => !isPaidStatus(e.paymentStatus) && !isPaidStatus(e.status)
+        ).length;
+
+        setStats({
+          totalEnrollments: serverTotal,
+          totalKids: totalKids || serverTotal,
+          paidEnrollments: paidCount,
+          totalRevenue: totalFee,
+          pendingEnrollments: pendingCount,
+        });
+      } else {
+        const enrollRes = await aiExplorerApi.getEnrollments({
+          page,
+          limit,
+          search: search.trim() || undefined,
+          standard: standardFilter,
+          plan: planFilter,
+          paymentStatus: statusFilter,
+        });
+
+        let list: any[] = [];
+        if (Array.isArray(enrollRes?.data?.data)) list = enrollRes.data.data;
+        else if (Array.isArray(enrollRes?.data)) list = enrollRes.data;
+        else if (Array.isArray(enrollRes?.enrollments)) list = enrollRes.enrollments;
+        else if (Array.isArray(enrollRes)) list = enrollRes;
+
+        setEnrollments(list);
+
+        const serverTotal =
+          enrollRes?.total ??
+          enrollRes?.meta?.total ??
+          enrollRes?.data?.total ??
+          enrollRes?.data?.meta?.total ??
+          list.length;
+
+        setTotalCount(serverTotal);
+
+        const paidCount = list.filter((e) => isPaidStatus(e.paymentStatus) || isPaidStatus(e.status)).length;
+        const totalFee = list
+          .filter((e) => isPaidStatus(e.paymentStatus) || isPaidStatus(e.status))
+          .reduce((sum, e) => sum + Number(e.amount || 0), 0);
+        const pendingCount = list.filter(
+          (e) => !isPaidStatus(e.paymentStatus) && !isPaidStatus(e.status)
+        ).length;
+
+        setStats({
+          totalEnrollments: serverTotal,
+          paidEnrollments: paidCount,
+          totalRevenue: totalFee,
+          pendingEnrollments: pendingCount,
+        });
       }
-
-      setEnrollments(list);
-
-      const serverTotal =
-        enrollRes?.total ??
-        enrollRes?.meta?.total ??
-        enrollRes?.data?.total ??
-        enrollRes?.data?.meta?.total ??
-        list.length;
-
-      setTotalCount(serverTotal);
-
-      // Compute stats
-      const paidCount = list.filter((e) => isPaidStatus(e.paymentStatus) || isPaidStatus(e.status)).length;
-      const totalFee = list
-        .filter((e) => isPaidStatus(e.paymentStatus) || isPaidStatus(e.status))
-        .reduce((sum, e) => sum + Number(e.amount || 0), 0);
-      const pendingCount = list.filter(
-        (e) => !isPaidStatus(e.paymentStatus) && !isPaidStatus(e.status)
-      ).length;
-
-      setStats({
-        totalEnrollments: serverTotal,
-        paidEnrollments: paidCount,
-        totalRevenue: totalFee,
-        pendingEnrollments: pendingCount,
-      });
     } catch (err: any) {
-      console.error('Failed to load AI Explorer enrollments:', err);
-      toast.error('Failed to load AI Explorer enrollments.');
+      console.error('Failed to load AI Explorer data:', err);
+      toast.error('Failed to load AI Explorer data.');
     } finally {
       setLoading(false);
     }
-  }, [page, limit, search, standardFilter, planFilter, statusFilter]);
+  }, [activeTab, page, limit, search, standardFilter, planFilter, statusFilter]);
 
   useEffect(() => {
     loadData();
@@ -142,17 +210,31 @@ export default function AdminAiExplorerPage() {
   // Export CSV
   const handleExportCsv = async () => {
     try {
-      toast.loading('Exporting enrollments CSV...', { id: 'csv' });
-      const csv = await aiExplorerApi.exportCsv();
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `ai_explorer_students_${new Date().toISOString().slice(0, 10)}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      toast.success('CSV downloaded successfully!', { id: 'csv' });
+      if (activeTab === 'prebooking') {
+        toast.loading('Exporting pre-bookings CSV...', { id: 'csv' });
+        const csv = await aiExplorerApi.exportPreBookingCsv();
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `ai_explorer_prebookings_${new Date().toISOString().slice(0, 10)}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        toast.success('Pre-bookings CSV downloaded!', { id: 'csv' });
+      } else {
+        toast.loading('Exporting enrollments CSV...', { id: 'csv' });
+        const csv = await aiExplorerApi.exportCsv();
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `ai_explorer_students_${new Date().toISOString().slice(0, 10)}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        toast.success('CSV downloaded successfully!', { id: 'csv' });
+      }
     } catch {
       toast.error('Failed to export CSV.', { id: 'csv' });
     }
@@ -161,11 +243,15 @@ export default function AdminAiExplorerPage() {
   // Update Status
   const handleStatusChange = async (id: string, newStatus: string) => {
     try {
-      const res = await aiExplorerApi.updateStatus(id, newStatus);
+      const res =
+        activeTab === 'prebooking'
+          ? await aiExplorerApi.updatePreBooking(id, { paymentStatus: newStatus })
+          : await aiExplorerApi.updateStatus(id, newStatus);
+
       if (res?.success) {
         toast.success(`Status updated to ${newStatus}`);
         loadData();
-        if (selectedStudent && selectedStudent.id === id) {
+        if (selectedStudent && (selectedStudent.id === id || selectedStudent.prebookingId === id)) {
           setSelectedStudent({ ...selectedStudent, paymentStatus: newStatus });
         }
       }
@@ -176,16 +262,20 @@ export default function AdminAiExplorerPage() {
 
   // Delete Record
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to remove this enrollment record?')) return;
+    if (!window.confirm('Are you sure you want to remove this record?')) return;
     try {
-      const res = await aiExplorerApi.deleteEnrollment(id);
+      const res =
+        activeTab === 'prebooking'
+          ? await aiExplorerApi.deletePreBooking(id)
+          : await aiExplorerApi.deleteEnrollment(id);
+
       if (res?.success) {
-        toast.success('Enrollment deleted.');
-        if (selectedStudent?.id === id) setSelectedStudent(null);
+        toast.success('Record deleted.');
+        if (selectedStudent?.id === id || selectedStudent?.prebookingId === id) setSelectedStudent(null);
         loadData();
       }
     } catch {
-      toast.error('Failed to delete enrollment.');
+      toast.error('Failed to delete record.');
     }
   };
 
@@ -193,7 +283,11 @@ export default function AdminAiExplorerPage() {
   const handleResendEmail = async (id: string, email?: string) => {
     try {
       toast.loading('Sending confirmation email...', { id: 'email' });
-      const res = await aiExplorerApi.resendEmail(id, email);
+      const res =
+        activeTab === 'prebooking'
+          ? await aiExplorerApi.resendPreBookingEmail(id, email)
+          : await aiExplorerApi.resendEmail(id, email);
+
       if (res?.success !== false) {
         toast.success('Confirmation email sent successfully!', { id: 'email' });
       } else {
@@ -257,7 +351,7 @@ export default function AdminAiExplorerPage() {
               <span>WeGrow School Campus • AI Explorer</span>
             </div>
             <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-              <span>Student Enrollment Hub</span>
+              <span>{activeTab === 'prebooking' ? 'AI Explorer Pre-Bookings Hub' : 'Student Enrollment Hub'}</span>
               <span className="text-xs bg-purple-100 text-purple-800 font-bold px-2.5 py-0.5 rounded-full border border-purple-200">
                 Grades 5 – 12
               </span>
@@ -270,7 +364,7 @@ export default function AdminAiExplorerPage() {
               className="inline-flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs px-3.5 py-2 rounded-xl border border-slate-300 shadow-2xs transition-all cursor-pointer"
             >
               <Download className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Export CSV</span>
+              <span>Export {activeTab === 'prebooking' ? 'Pre-Bookings' : 'CSV'}</span>
             </button>
 
             <button
@@ -285,35 +379,80 @@ export default function AdminAiExplorerPage() {
 
         {/* Dashboard Body */}
         <main className="p-6 space-y-6 max-w-7xl">
+          {/* Segment Tabs Switcher */}
+          <div className="flex flex-wrap items-center gap-2.5 p-1.5 bg-slate-200/70 rounded-2xl border border-slate-300/80 w-fit shadow-2xs">
+            <button
+              type="button"
+              onClick={() => handleTabChange('enrollments')}
+              className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-black text-xs transition-all cursor-pointer ${
+                activeTab === 'enrollments'
+                  ? 'bg-white text-purple-900 shadow-sm border border-slate-200 ring-2 ring-purple-400/20'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+              }`}
+            >
+              <GraduationCap className="w-4 h-4 text-purple-600" />
+              <span>Full Course Enrollments</span>
+              {activeTab === 'enrollments' && (
+                <span className="bg-purple-100 text-purple-900 font-black px-2 py-0.5 rounded-full text-[10px]">
+                  {totalCount}
+                </span>
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleTabChange('prebooking')}
+              className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-black text-xs transition-all cursor-pointer ${
+                activeTab === 'prebooking'
+                  ? 'bg-white text-amber-900 shadow-sm border border-slate-200 ring-2 ring-amber-400/20'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+              }`}
+            >
+              <Ticket className="w-4 h-4 text-amber-600" />
+              <span>Advance Pre-Bookings (₹1,000 / seat)</span>
+              {activeTab === 'prebooking' && (
+                <span className="bg-amber-100 text-amber-900 font-black px-2 py-0.5 rounded-full text-[10px]">
+                  {totalCount}
+                </span>
+              )}
+            </button>
+          </div>
+
           {/* KPI Stat Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Total Enrollments */}
+            {/* Total Records */}
             <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs flex items-center justify-between">
               <div>
                 <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  Total Enrollments
+                  {activeTab === 'prebooking' ? 'Total Pre-Bookings' : 'Total Enrollments'}
                 </div>
                 <div className="text-2xl sm:text-3xl font-black text-slate-900 mt-1 font-heading">
                   {stats?.totalEnrollments ?? totalCount}
                 </div>
-                <div className="text-[11px] text-purple-600 font-bold mt-0.5">Students registered</div>
+                <div className="text-[11px] text-purple-600 font-bold mt-0.5">
+                  {activeTab === 'prebooking' ? 'Families reserved' : 'Students registered'}
+                </div>
               </div>
               <div className="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl">
-                🧑‍🚀
+                {activeTab === 'prebooking' ? '🎟️' : '🧑‍🚀'}
               </div>
             </div>
 
-            {/* Paid Enrollments */}
+            {/* Confirmed / Reserved Seats */}
             <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs flex items-center justify-between">
               <div>
                 <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  Confirmed (Paid)
+                  {activeTab === 'prebooking' ? 'Reserved Seats' : 'Confirmed (Paid)'}
                 </div>
                 <div className="text-2xl sm:text-3xl font-black text-emerald-600 mt-1 font-heading">
-                  {stats?.paidEnrollments ??
-                    safeEnrollments.filter((e) => isPaidStatus(e.paymentStatus) || isPaidStatus(e.status)).length}
+                  {activeTab === 'prebooking'
+                    ? (stats?.totalKids ?? safeEnrollments.reduce((sum, e) => sum + (e.totalStudents || 1), 0))
+                    : (stats?.paidEnrollments ??
+                        safeEnrollments.filter((e) => isPaidStatus(e.paymentStatus) || isPaidStatus(e.status)).length)}
                 </div>
-                <div className="text-[11px] text-emerald-600 font-bold mt-0.5">Seats confirmed</div>
+                <div className="text-[11px] text-emerald-600 font-bold mt-0.5">
+                  {activeTab === 'prebooking' ? 'Students seats held' : 'Seats confirmed'}
+                </div>
               </div>
               <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
                 ✓
@@ -324,7 +463,7 @@ export default function AdminAiExplorerPage() {
             <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs flex items-center justify-between">
               <div>
                 <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  Fee Collected
+                  {activeTab === 'prebooking' ? 'Advance Tokens' : 'Fee Collected'}
                 </div>
                 <div className="text-2xl sm:text-3xl font-black text-blue-700 mt-1 font-heading">
                   {rupee(
@@ -334,7 +473,9 @@ export default function AdminAiExplorerPage() {
                         .reduce((s, e) => s + Number(e.amount || 0), 0)
                   )}
                 </div>
-                <div className="text-[11px] text-blue-600 font-bold mt-0.5">Processed revenue</div>
+                <div className="text-[11px] text-blue-600 font-bold mt-0.5">
+                  {activeTab === 'prebooking' ? '₹1,000 / seat advance' : 'Processed revenue'}
+                </div>
               </div>
               <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl">
                 💎
@@ -345,7 +486,7 @@ export default function AdminAiExplorerPage() {
             <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs flex items-center justify-between">
               <div>
                 <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  Pending Status
+                  Pending Verification
                 </div>
                 <div className="text-2xl sm:text-3xl font-black text-amber-600 mt-1 font-heading">
                   {stats?.pendingEnrollments ??
@@ -353,7 +494,7 @@ export default function AdminAiExplorerPage() {
                       (e) => !isPaidStatus(e.paymentStatus) && !isPaidStatus(e.status)
                     ).length}
                 </div>
-                <div className="text-[11px] text-amber-600 font-bold mt-0.5">Verification pending</div>
+                <div className="text-[11px] text-amber-600 font-bold mt-0.5">Awaiting confirmation</div>
               </div>
               <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl">
                 ⏳
@@ -373,7 +514,7 @@ export default function AdminAiExplorerPage() {
                   setSearch(e.target.value);
                   setPage(1);
                 }}
-                placeholder="Search student, phone, email, school, enrollment ID..."
+                placeholder="Search student, phone, email, school, ID..."
                 className="w-full h-10 pl-10 pr-4 rounded-xl border border-slate-200 bg-slate-50 text-xs font-bold focus:bg-white focus:border-purple-600 outline-none"
               />
             </div>
@@ -401,23 +542,25 @@ export default function AdminAiExplorerPage() {
               </select>
             </div>
 
-            {/* Plan Filter */}
-            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600">
-              <Layers className="w-4 h-4 text-indigo-600 shrink-0" />
-              <select
-                value={planFilter}
-                onChange={(e) => {
-                  setPlanFilter(e.target.value);
-                  setPage(1);
-                }}
-                className="h-10 px-3 rounded-xl border border-slate-200 bg-slate-50 font-bold text-xs outline-none cursor-pointer"
-              >
-                <option value="ALL">All Fee Plans</option>
-                <option value="full">Full Payment (₹43k)</option>
-                <option value="half">Half-Yearly (₹22.5k)</option>
-                <option value="term">Term Wise (₹45k)</option>
-              </select>
-            </div>
+            {/* Plan Filter (only for Course Enrollments) */}
+            {activeTab === 'enrollments' && (
+              <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600">
+                <Layers className="w-4 h-4 text-indigo-600 shrink-0" />
+                <select
+                  value={planFilter}
+                  onChange={(e) => {
+                    setPlanFilter(e.target.value);
+                    setPage(1);
+                  }}
+                  className="h-10 px-3 rounded-xl border border-slate-200 bg-slate-50 font-bold text-xs outline-none cursor-pointer"
+                >
+                  <option value="ALL">All Fee Plans</option>
+                  <option value="full">Full Payment (₹43k)</option>
+                  <option value="half">Half-Yearly (₹22.5k)</option>
+                  <option value="term">Term Wise (₹45k)</option>
+                </select>
+              </div>
+            )}
 
             {/* Payment Status Filter */}
             <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600">
@@ -444,11 +587,11 @@ export default function AdminAiExplorerPage() {
               <table className="w-full text-left text-xs">
                 <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 uppercase font-black tracking-wider text-[11px]">
                   <tr>
-                    <th className="py-3.5 px-4">Enrollment ID</th>
+                    <th className="py-3.5 px-4">{activeTab === 'prebooking' ? 'Pre-Booking ID' : 'Enrollment ID'}</th>
                     <th className="py-3.5 px-4">Student Name</th>
                     <th className="py-3.5 px-4">Standard &amp; School</th>
                     <th className="py-3.5 px-4">Parent Contacts</th>
-                    <th className="py-3.5 px-4">Fee Plan &amp; Amount</th>
+                    <th className="py-3.5 px-4">{activeTab === 'prebooking' ? 'Seats & Advance' : 'Fee Plan & Amount'}</th>
                     <th className="py-3.5 px-4">Payment Status</th>
                     <th className="py-3.5 px-4 text-right">Actions</th>
                   </tr>
@@ -458,20 +601,21 @@ export default function AdminAiExplorerPage() {
                     <tr>
                       <td colSpan={7} className="py-12 text-center text-slate-400 font-bold">
                         <div className="inline-block w-6 h-6 border-2 border-purple-600 border-t-transparent rounded-full animate-spin mb-2" />
-                        <div>Loading AI Explorer registrations...</div>
+                        <div>Loading {activeTab === 'prebooking' ? 'pre-bookings' : 'AI Explorer registrations'}...</div>
                       </td>
                     </tr>
                   ) : displayedEnrollments.length === 0 ? (
                     <tr>
                       <td colSpan={7} className="py-12 text-center text-slate-400 font-bold">
-                        No student enrollments found matching the criteria.
+                        No {activeTab === 'prebooking' ? 'pre-bookings' : 'student enrollments'} found matching the criteria.
                       </td>
                     </tr>
                   ) : (
                     displayedEnrollments.map((student) => {
                       const isPaid = isPaidStatus(student.paymentStatus) || isPaidStatus(student.status);
-                      const displayId = student.enrollmentId || student.id || student._id;
+                      const displayId = student.prebookingId || student.enrollmentId || student.id || student._id;
                       const displayMail = student.email || student.mailId || '—';
+                      const kidsCount = student.totalStudents || student.studentCount || (student.students?.length || 1);
                       return (
                         <tr key={displayId} className="hover:bg-purple-50/40 transition-colors">
                           {/* ID */}
@@ -486,7 +630,14 @@ export default function AdminAiExplorerPage() {
 
                           {/* Student Name */}
                           <td className="py-3.5 px-4">
-                            <div className="font-black text-slate-900 text-sm">{student.studentName}</div>
+                            <div className="font-black text-slate-900 text-sm flex items-center gap-1.5">
+                              <span>{student.studentName}</span>
+                              {kidsCount > 1 && (
+                                <span className="bg-purple-100 text-purple-800 text-[10px] font-black px-1.5 py-0.2 rounded-md shrink-0">
+                                  {kidsCount} Kids
+                                </span>
+                              )}
+                            </div>
                             <div className="text-[11px] text-slate-500 flex items-center gap-1 font-semibold">
                               <Mail className="w-3 h-3 text-slate-400" />
                               <span>{displayMail}</span>
@@ -496,29 +647,35 @@ export default function AdminAiExplorerPage() {
                           {/* Standard & School */}
                           <td className="py-3.5 px-4">
                             <span className="inline-block bg-purple-100 text-purple-800 font-black text-[10px] px-2 py-0.5 rounded-md mb-0.5">
-                              {student.standard}
+                              {student.standard || 'Grade 5 – 12'}
                             </span>
                             <div className="text-slate-600 text-[11px] max-w-[200px] truncate">
-                              {student.school}
+                              {student.school || '—'}
                             </div>
                           </td>
 
                           {/* Parent Contacts */}
                           <td className="py-3.5 px-4">
                             <div className="text-[11px] font-bold text-slate-800">
-                              👨 {student.fatherName}:{' '}
-                              <span className="text-blue-700">{student.fatherPhone}</span>
+                              👨 {student.fatherName || 'Parent'}:{' '}
+                              <span className="text-blue-700">{student.fatherPhone || '—'}</span>
                             </div>
-                            <div className="text-[11px] font-bold text-slate-600 mt-0.5">
-                              👩 {student.motherName}:{' '}
-                              <span className="text-pink-700">{student.motherPhone}</span>
-                            </div>
+                            {student.motherPhone && (
+                              <div className="text-[11px] font-bold text-slate-600 mt-0.5">
+                                👩 {student.motherName || 'Mother'}:{' '}
+                                <span className="text-pink-700">{student.motherPhone}</span>
+                              </div>
+                            )}
                           </td>
 
-                          {/* Fee Plan */}
+                          {/* Fee Plan / Pre-booking Token */}
                           <td className="py-3.5 px-4">
                             <div className="font-black text-slate-900">{rupee(student.amount)}</div>
-                            <div className="text-[10px] text-slate-500">{student.planName || student.plan || student.feePlan}</div>
+                            <div className="text-[10px] text-slate-500">
+                              {activeTab === 'prebooking'
+                                ? `₹1,000 × ${kidsCount} Seat${kidsCount > 1 ? 's' : ''} Token`
+                                : student.planName || student.plan || student.feePlan}
+                            </div>
                           </td>
 
                           {/* Status */}
@@ -526,7 +683,7 @@ export default function AdminAiExplorerPage() {
                             <span
                               className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase ${
                                 isPaid
-                                    ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                                  ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
                                   : 'bg-amber-100 text-amber-800 border border-amber-300'
                               }`}
                             >
@@ -553,7 +710,7 @@ export default function AdminAiExplorerPage() {
                               <button
                                 onClick={() =>
                                   handleStatusChange(
-                                    student.id || student._id,
+                                    student.prebookingId || student.id || student._id,
                                     isPaid ? 'PENDING' : 'PAID'
                                   )
                                 }
@@ -564,7 +721,12 @@ export default function AdminAiExplorerPage() {
                               </button>
 
                               <button
-                                onClick={() => handleResendEmail(student.id || student._id, student.email || student.mailId)}
+                                onClick={() =>
+                                  handleResendEmail(
+                                    student.prebookingId || student.id || student._id,
+                                    student.email || student.mailId
+                                  )
+                                }
                                 className="p-2 rounded-lg bg-slate-100 hover:bg-blue-100 text-blue-700 transition-all cursor-pointer"
                                 title="Resend Confirmation Email"
                               >
@@ -572,9 +734,11 @@ export default function AdminAiExplorerPage() {
                               </button>
 
                               <button
-                                onClick={() => handleDelete(student.id || student._id)}
+                                onClick={() =>
+                                  handleDelete(student.prebookingId || student.id || student._id)
+                                }
                                 className="p-2 rounded-lg bg-slate-100 hover:bg-pink-100 text-pink-700 transition-all cursor-pointer"
-                                title="Delete Enrollment"
+                                title="Delete Record"
                               >
                                 <Trash2 className="w-4 h-4" />
                               </button>

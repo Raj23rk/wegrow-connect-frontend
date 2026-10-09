@@ -26,13 +26,15 @@ import {
   ClipboardCheck,
   HelpCircle,
   MessageSquare,
-  Bot
+  Bot,
+  Ticket
 } from "lucide-react";
 
 export default function Sidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const pathname = location.pathname;
+  const search = location.search;
 
   const menuItems = [
     { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
@@ -40,6 +42,7 @@ export default function Sidebar() {
     { name: "Users", href: "/admin/users", icon: Users },
     { name: "Roles & Permissions", href: "/admin/roles", icon: ShieldCheck },
     { name: "AI Explorer Students", href: "/admin/ai-explorer", icon: Bot },
+    { name: "AI Pre-Bookings", href: "/admin/ai-explorer?tab=prebooking", icon: Ticket },
     { name: "Event Teasers", href: "/admin/event-teaser", icon: HelpCircle },
     { name: "Business Dependency", href: "/admin/business-dependency-test", icon: ClipboardCheck },
     { name: "Meetup Feedback", href: "/admin/feedback", icon: MessageSquare },
@@ -102,7 +105,10 @@ export default function Sidebar() {
         <nav className="px-3 py-2 space-y-1">
           {menuItems.map((item) => {
             const Icon = item.icon;
-            const isActive = pathname === item.href;
+            const currentFull = pathname + (search || '');
+            const isActive = item.href.includes('?')
+              ? currentFull === item.href
+              : pathname === item.href && (!search || !search.includes('tab='));
             return (
               <Link
                 key={item.name}
