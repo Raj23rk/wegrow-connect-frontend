@@ -127,11 +127,14 @@ export const aiExplorerApi = {
   // 1. Submit Student Enrollment (POST /ai-explorer/enroll)
   async enrollStudent(data) {
     const payload = {
-      studentName: data.studentName || data.name,
+      studentName: data.studentName || data.name || (Array.isArray(data.students) ? data.students.map(s => s.name).join(', ') : ''),
+      students: Array.isArray(data.students) ? data.students : undefined,
+      studentCount: data.studentCount || (Array.isArray(data.students) ? data.students.length : 1),
+      totalStudents: data.totalStudents || (Array.isArray(data.students) ? data.students.length : 1),
       email: data.email || data.mailId,
       mailId: data.email || data.mailId,
-      standard: data.standard,
-      school: data.school,
+      standard: data.standard || (Array.isArray(data.students) ? data.students.map(s => s.standard).join(', ') : ''),
+      school: data.school || (Array.isArray(data.students) ? data.students.map(s => s.school).join(', ') : ''),
       fatherName: data.fatherName,
       motherName: data.motherName,
       fatherPhone: data.fatherPhone,
@@ -139,7 +142,11 @@ export const aiExplorerApi = {
       address: data.address,
       courseName: data.courseName || data.course || 'AI Explorer',
       feePlan: data.feePlan || data.plan || 'full',
+      planName: data.planName,
+      selectedTerm: data.selectedTerm,
+      selectedHalf: data.selectedHalf,
       amount: Number(data.amount || 0),
+      totalFee: Number(data.totalFee || data.amount || 0),
       paymentMethod: data.paymentMethod || 'Cashfree',
       paymentStatus: data.paymentStatus || 'PAID',
       transactionId: data.transactionId || '',
@@ -163,7 +170,7 @@ export const aiExplorerApi = {
     const newRecord = {
       ...payload,
       id,
-      planName: payload.feePlan === 'half' ? 'Half-Yearly' : payload.feePlan === 'term' ? 'Term Wise Payment' : 'Full Payment',
+      planName: payload.planName || (payload.feePlan === 'half' ? 'Half-Yearly' : payload.feePlan === 'term' ? 'Term Wise Payment' : 'Full Payment'),
       createdAt: new Date().toISOString(),
     };
     current.unshift(newRecord);

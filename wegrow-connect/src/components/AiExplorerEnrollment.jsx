@@ -19,78 +19,90 @@ import {
   Check,
   ShieldCheck,
   GraduationCap,
+  Plus,
+  Trash2,
+  Users,
+  Calendar,
+  Ticket,
+  Clock,
+  Sparkle,
   X
 } from 'lucide-react';
 import { aiExplorerApi } from '../services/aiExplorerApi';
 import { singAlongApi } from '../services/singAlongApi';
 
-const PLANS = {
+const BASE_PLANS = {
   full: {
     id: 'full',
     name: 'Full Payment',
-    totalFee: 43000,
-    amount: 43000,
-    label: '₹43,000',
-    payNowLabel: '₹43,000',
+    baseTotalFee: 43000,
+    baseAmount: 43000,
+    baseSavings: 2000,
     tag: 'BEST VALUE',
     desc: 'One-time payment covering full annual curriculum, practical labs & AI kit.',
-    cycles: '1 Full Payment • Save ₹2,000',
+    cycles: '1 Full Payment',
     color: 'from-emerald-500 to-teal-600',
     badgeBg: '#10b981',
   },
   half: {
     id: 'half',
     name: 'Half-Yearly',
-    totalFee: 45000,
-    amount: 22500,
-    label: '₹45,000',
-    payNowLabel: '₹22,500 (1st Half)',
+    baseTotalFee: 45000,
+    baseAmount: 22500,
+    baseSavings: 0,
     tag: 'FLEXIBLE',
-    desc: '2 convenient installments of ₹22,500 (Pay 1st Half ₹22,500 now).',
-    cycles: '2 Installments • Pay 1st Half ₹22,500 now',
+    desc: '2 convenient installments of ₹22,500 per student (Pay 1st Half now).',
+    cycles: '2 Installments',
     color: 'from-purple-500 to-indigo-600',
     badgeBg: '#8b5cf6',
   },
   term: {
     id: 'term',
     name: 'Term Wise Payment',
-    totalFee: 45000,
-    amount: 15000,
-    label: '₹45,000',
-    payNowLabel: '₹15,000 (Term I)',
+    baseTotalFee: 45000,
+    baseAmount: 15000,
+    baseSavings: 0,
     tag: 'EASY TERMS',
-    desc: '3 equal term payments (Term I: ₹15k, Term II: ₹15k, Term III: ₹15k).',
-    cycles: '3 Terms • Pay 1st Term ₹15,000 now',
+    desc: '3 equal term payments (₹15,000 per term per student).',
+    cycles: '3 Terms',
     color: 'from-blue-500 to-cyan-600',
     badgeBg: '#3b82f6',
   },
 };
 
-const TERM_OPTIONS = [
-  { id: 'term1', label: 'Term I', amount: 15000, desc: 'Pay 1st Term Now' },
-  { id: 'term2', label: 'Term II', amount: 15000, desc: 'Pay 2nd Term' },
-  { id: 'term3', label: 'Term III', amount: 15000, desc: 'Pay 3rd Term' },
+const BASE_TERM_OPTIONS = [
+  { id: 'term1', label: 'Term I', baseAmount: 15000, desc: 'Pay 1st Term Now' },
+  { id: 'term2', label: 'Term II', baseAmount: 15000, desc: 'Pay 2nd Term' },
+  { id: 'term3', label: 'Term III', baseAmount: 15000, desc: 'Pay 3rd Term' },
 ];
 
-const HALF_OPTIONS = [
-  { id: 'half1', label: '1st Half', amount: 22500, desc: 'Pay 1st Installment Now' },
-  { id: 'half2', label: '2nd Half', amount: 22500, desc: 'Pay 2nd Installment' },
+const BASE_HALF_OPTIONS = [
+  { id: 'half1', label: '1st Half', baseAmount: 22500, desc: 'Pay 1st Installment Now' },
+  { id: 'half2', label: '2nd Half', baseAmount: 22500, desc: 'Pay 2nd Installment' },
 ];
 
 export default function AiExplorerEnrollment() {
   const [step, setStep] = useState(1);
 
-  const [student, setStudent] = useState({
-    name: '',
-    mailId: '',
-    standard: '',
-    school: '',
+  // Common Parent Details
+  const [parent, setParent] = useState({
     fatherName: '',
     motherName: '',
     fatherPhone: '',
     motherPhone: '',
+    email: '',
     address: '',
   });
+
+  // Dynamic Array of Students (Family Children)
+  const [students, setStudents] = useState([
+    {
+      id: 1,
+      name: '',
+      standard: '',
+      school: '',
+    },
+  ]);
 
   const [errors, setErrors] = useState({});
   const [selectedPlan, setSelectedPlan] = useState('full');
@@ -106,39 +118,58 @@ export default function AiExplorerEnrollment() {
 
   const formTopRef = useRef(null);
 
+  const studentCount = students.length;
+
   const getActivePayDetails = () => {
+    const count = students.length || 1;
     if (selectedPlan === 'term') {
-      const t = TERM_OPTIONS.find((item) => item.id === selectedTerm) || TERM_OPTIONS[0];
+      const t = BASE_TERM_OPTIONS.find((item) => item.id === selectedTerm) || BASE_TERM_OPTIONS[0];
+      const perTermAmount = t.baseAmount * count;
+      const totalAnnualFee = 45000 * count;
       return {
         planName: `Term Wise Payment (${t.label})`,
         basePlanName: 'Term Wise Payment',
         subLabel: t.label,
-        amount: t.amount,
-        totalFee: 45000,
-        dueDesc: `${t.label} Payment Due`,
-        tag: `${t.label} Fee`,
+        studentCount: count,
+        basePerStudent: t.baseAmount,
+        amount: perTermAmount,
+        totalFee: totalAnnualFee,
+        savings: 0,
+        dueDesc: `${t.label} Payment Due (${count} ${count > 1 ? 'Students' : 'Student'})`,
+        tag: `${t.label} Fee (₹${t.baseAmount.toLocaleString('en-IN')} × ${count})`,
       };
     }
     if (selectedPlan === 'half') {
-      const h = HALF_OPTIONS.find((item) => item.id === selectedHalf) || HALF_OPTIONS[0];
+      const h = BASE_HALF_OPTIONS.find((item) => item.id === selectedHalf) || BASE_HALF_OPTIONS[0];
+      const perHalfAmount = h.baseAmount * count;
+      const totalAnnualFee = 45000 * count;
       return {
         planName: `Half-Yearly (${h.label})`,
         basePlanName: 'Half-Yearly',
         subLabel: h.label,
-        amount: h.amount,
-        totalFee: 45000,
-        dueDesc: `${h.label} Payment Due`,
-        tag: `${h.label} Fee`,
+        studentCount: count,
+        basePerStudent: h.baseAmount,
+        amount: perHalfAmount,
+        totalFee: totalAnnualFee,
+        savings: 0,
+        dueDesc: `${h.label} Payment Due (${count} ${count > 1 ? 'Students' : 'Student'})`,
+        tag: `${h.label} Fee (₹${h.baseAmount.toLocaleString('en-IN')} × ${count})`,
       };
     }
+    const fullAmount = 43000 * count;
+    const totalAnnualFee = 43000 * count;
+    const savings = 2000 * count;
     return {
       planName: 'Full Payment',
       basePlanName: 'Full Payment',
       subLabel: 'Full Payment',
-      amount: 43000,
-      totalFee: 43000,
-      dueDesc: 'Total Amount Due',
-      tag: 'Full Payment',
+      studentCount: count,
+      basePerStudent: 43000,
+      amount: fullAmount,
+      totalFee: totalAnnualFee,
+      savings: savings,
+      dueDesc: `Total Amount Due (${count} ${count > 1 ? 'Students' : 'Student'})`,
+      tag: `Full Payment (₹43,000 × ${count})`,
     };
   };
 
@@ -147,11 +178,13 @@ export default function AiExplorerEnrollment() {
     if (completedEnrollment) {
       const qrPayload = JSON.stringify({
         id: completedEnrollment.id,
+        bookingType: 'AI_EXPLORER_ENROLLMENT',
+        studentCount: completedEnrollment.studentCount || completedEnrollment.students?.length || 1,
         student: completedEnrollment.studentName,
         standard: completedEnrollment.standard,
-        school: completedEnrollment.school,
-        parentPhone: completedEnrollment.fatherPhone,
+        parentPhone: completedEnrollment.fatherPhone || completedEnrollment.motherPhone,
         plan: completedEnrollment.planName,
+        amount: completedEnrollment.amount,
         status: completedEnrollment.paymentStatus,
         verifiedBy: 'WeGrow Skill Campus & B-School',
       });
@@ -169,14 +202,14 @@ export default function AiExplorerEnrollment() {
     }
   }, [completedEnrollment]);
 
-  // Handle Form Change
-  const handleChange = (e) => {
+  // Handle Parent Input Change
+  const handleParentChange = (e) => {
     const { name, value } = e.target;
     if (name === 'fatherPhone' || name === 'motherPhone') {
       const clean = value.replace(/\D/g, '').slice(0, 10);
-      setStudent((prev) => ({ ...prev, [name]: clean }));
+      setParent((prev) => ({ ...prev, [name]: clean }));
     } else {
-      setStudent((prev) => ({ ...prev, [name]: value }));
+      setParent((prev) => ({ ...prev, [name]: value }));
     }
 
     if (errors[name]) {
@@ -184,33 +217,89 @@ export default function AiExplorerEnrollment() {
     }
   };
 
+  // Handle Student Input Change
+  const handleStudentChange = (index, field, value) => {
+    setStudents((prev) => {
+      const copy = [...prev];
+      copy[index] = { ...copy[index], [field]: value };
+      return copy;
+    });
+
+    const errorKey = `student_${index}_${field}`;
+    if (errors[errorKey]) {
+      setErrors((prev) => ({ ...prev, [errorKey]: '' }));
+    }
+  };
+
+  // Add Another Student / Child
+  const handleAddStudent = () => {
+    if (students.length >= 6) {
+      toast.error('Maximum 6 students can be enrolled in a single transaction.');
+      return;
+    }
+    const newId = Date.now();
+    setStudents((prev) => [
+      ...prev,
+      {
+        id: newId,
+        name: '',
+        standard: '',
+        school: '',
+      },
+    ]);
+    toast.success(`Child #${students.length + 1} added! Fees updated dynamically.`);
+  };
+
+  // Remove Student
+  const handleRemoveStudent = (idToRemove) => {
+    if (students.length <= 1) {
+      toast.error('At least 1 student is required.');
+      return;
+    }
+    setStudents((prev) => prev.filter((s) => s.id !== idToRemove));
+    toast.success('Student removed. Total fees adjusted.');
+  };
+
   // Validate Step 1
   const validateStep1 = () => {
     const errs = {};
-    if (!student.name.trim()) errs.name = 'Student name is required';
-    if (!student.mailId.trim()) {
-      errs.mailId = 'Email ID is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(student.mailId.trim())) {
-      errs.mailId = 'Enter a valid email address';
-    }
-    if (!student.standard) errs.standard = 'Please select student standard';
-    if (!student.school.trim()) errs.school = 'School name is required';
-    if (!student.fatherName.trim()) errs.fatherName = "Father's name is required";
-    if (!student.motherName.trim()) errs.motherName = "Mother's name is required";
 
-    if (!student.fatherPhone.trim()) {
+    // Validate Each Student
+    students.forEach((s, idx) => {
+      if (!s.name.trim()) {
+        errs[`student_${idx}_name`] = `Student #${idx + 1} name is required`;
+      }
+      if (!s.standard) {
+        errs[`student_${idx}_standard`] = `Select standard for Student #${idx + 1}`;
+      }
+      if (!s.school.trim()) {
+        errs[`student_${idx}_school`] = `School name for Student #${idx + 1} is required`;
+      }
+    });
+
+    // Validate Parent & Contact Details
+    if (!parent.email.trim()) {
+      errs.email = 'Email ID is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(parent.email.trim())) {
+      errs.email = 'Enter a valid email address';
+    }
+
+    if (!parent.fatherName.trim()) errs.fatherName = "Father's name is required";
+    if (!parent.motherName.trim()) errs.motherName = "Mother's name is required";
+
+    if (!parent.fatherPhone.trim()) {
       errs.fatherPhone = "Father's phone number is required";
-    } else if (!/^[6-9]\d{9}$/.test(student.fatherPhone.trim())) {
+    } else if (!/^[6-9]\d{9}$/.test(parent.fatherPhone.trim())) {
       errs.fatherPhone = 'Enter a valid 10-digit mobile number';
     }
 
-    if (!student.motherPhone.trim()) {
+    if (!parent.motherPhone.trim()) {
       errs.motherPhone = "Mother's phone number is required";
-    } else if (!/^[6-9]\d{9}$/.test(student.motherPhone.trim())) {
+    } else if (!/^[6-9]\d{9}$/.test(parent.motherPhone.trim())) {
       errs.motherPhone = 'Enter a valid 10-digit mobile number';
     }
 
-    if (!student.address.trim()) errs.address = 'Residential address is required';
+    if (!parent.address.trim()) errs.address = 'Residential address is required';
 
     setErrors(errs);
     return Object.keys(errs).length === 0;
@@ -248,22 +337,37 @@ export default function AiExplorerEnrollment() {
   const handlePaymentAndEnroll = async () => {
     setIsProcessing(true);
     const payDetails = getActivePayDetails();
+    const studentNames = students.map((s) => s.name.trim()).join(', ');
+    const studentStandards = students.map((s) => s.standard).join(', ');
+    const studentSchools = students.map((s) => s.school.trim()).join(', ');
+
     const enrollmentPayload = {
-      studentName: student.name.trim(),
-      mailId: student.mailId.trim(),
-      standard: student.standard,
-      school: student.school.trim(),
-      fatherName: student.fatherName.trim(),
-      motherName: student.motherName.trim(),
-      fatherPhone: student.fatherPhone.trim(),
-      motherPhone: student.motherPhone.trim(),
-      address: student.address.trim(),
+      studentName: studentNames,
+      students: students.map((s) => ({
+        name: s.name.trim(),
+        standard: s.standard,
+        school: s.school.trim(),
+      })),
+      totalStudents: students.length,
+      studentCount: students.length,
+      email: parent.email.trim(),
+      mailId: parent.email.trim(),
+      standard: studentStandards,
+      school: studentSchools,
+      fatherName: parent.fatherName.trim(),
+      motherName: parent.motherName.trim(),
+      fatherPhone: parent.fatherPhone.trim(),
+      motherPhone: parent.motherPhone.trim(),
+      address: parent.address.trim(),
       course: 'AI Explorer',
+      courseName: 'AI Explorer',
       plan: selectedPlan,
+      feePlan: selectedPlan,
       planName: payDetails.planName,
       selectedTerm: selectedPlan === 'term' ? payDetails.subLabel : undefined,
       selectedHalf: selectedPlan === 'half' ? payDetails.subLabel : undefined,
       amount: payDetails.amount,
+      totalFee: payDetails.totalFee,
       paymentMethod,
       transactionId: utrNumber.trim() || `ORD_${Date.now().toString().slice(-8)}`,
       paymentStatus: 'PAID',
@@ -275,10 +379,10 @@ export default function AiExplorerEnrollment() {
         try {
           const cashfreePayload = {
             orderAmount: payDetails.amount,
-            customerName: student.name.trim(),
-            customerEmail: student.mailId.trim(),
-            customerPhone: student.fatherPhone.trim(),
-            orderNote: `AI Explorer Enrollment (${payDetails.planName}) - ${student.name}`,
+            customerName: students[0]?.name?.trim() || parent.fatherName.trim(),
+            customerEmail: parent.email.trim(),
+            customerPhone: parent.fatherPhone.trim(),
+            orderNote: `AI Explorer Enrollment (${payDetails.planName} • ${students.length} Student${students.length > 1 ? 's' : ''}) - ${studentNames}`,
           };
 
           const cfRes = await singAlongApi.createOnlineOrder(cashfreePayload).catch(() => null);
@@ -303,7 +407,7 @@ export default function AiExplorerEnrollment() {
       if (response?.success) {
         setCompletedEnrollment(response.data);
         setStep(4);
-        toast.success('🎉 Student enrollment successful!');
+        toast.success(`🎉 Enrollment successful for ${students.length} student${students.length > 1 ? 's' : ''}!`);
         scrollToSection();
       } else {
         throw new Error(response?.message || 'Enrollment could not be processed.');
@@ -321,6 +425,8 @@ export default function AiExplorerEnrollment() {
     toast.success('Enrollment ID copied!');
     setTimeout(() => setCopied(false), 2000);
   };
+
+  const payDetails = getActivePayDetails();
 
   return (
     <div className="min-h-screen bg-[#FAF7F2] text-[#16204a] font-sans antialiased selection:bg-purple-200">
@@ -472,7 +578,7 @@ export default function AiExplorerEnrollment() {
               to="/ai-explorer/pre-booking"
               className="inline-flex items-center gap-1.5 text-xs font-black text-amber-900 bg-amber-100 hover:bg-amber-200 px-3 py-2 rounded-xl border border-amber-300 transition-all shadow-2xs"
             >
-              <span>🎟️ Pre-Book (₹1,000)</span>
+              <span>🎟️ Pre-Book (₹1k/Child)</span>
             </Link>
             <Link
               to="/admin/ai-explorer"
@@ -564,11 +670,17 @@ export default function AiExplorerEnrollment() {
                   <span>Student Enrollment Details</span>
                 </div>
                 <p className="text-slate-500 text-xs sm:text-sm font-semibold mt-1">
-                  Step 01 of 03 — Provide student, parent and contact details.
+                  Step 01 of 03 — Provide child details and parent contact information.
                 </p>
               </div>
-              <div className="px-3 py-1 rounded-xl bg-[#0f1f5c] text-white font-mono text-xs font-bold shrink-0">
-                01 / 03
+              <div className="flex items-center gap-2">
+                <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-purple-100 text-purple-900 font-black text-xs">
+                  <Users className="w-3.5 h-3.5 text-purple-700" />
+                  <span>{students.length} Child{students.length > 1 ? 'ren' : ''}</span>
+                </span>
+                <div className="px-3 py-1 rounded-xl bg-[#0f1f5c] text-white font-mono text-xs font-bold shrink-0">
+                  01 / 03
+                </div>
               </div>
             </div>
 
@@ -577,224 +689,342 @@ export default function AiExplorerEnrollment() {
                 e.preventDefault();
                 handleNextToStep2();
               }}
-              className="space-y-4 sm:space-y-5"
+              className="space-y-6 sm:space-y-8"
             >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
-                {/* Student Name */}
-                <div>
-                  <label className="block text-xs font-black text-[#0f1f5c] mb-1.5 uppercase tracking-wide">
-                    Student Full Name <span className="text-pink-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
-                    <input
-                      type="text"
-                      name="name"
-                      value={student.name}
-                      onChange={handleChange}
-                      placeholder="e.g. Aarav Sharma"
-                      className={`w-full h-11 sm:h-12 pl-10 pr-4 rounded-xl border-2 text-sm font-bold transition-all outline-none ${
-                        errors.name
-                          ? 'border-pink-500 bg-pink-50/50'
-                          : 'border-slate-200 bg-slate-50/70 focus:border-purple-600 focus:bg-white'
-                      }`}
-                    />
+              {/* DYNAMIC STUDENTS SECTION */}
+              <div className="space-y-5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="w-8 h-8 rounded-xl bg-purple-100 text-purple-900 flex items-center justify-center font-black text-sm">
+                      1
+                    </span>
+                    <div>
+                      <h3 className="text-base sm:text-lg font-black text-[#0f1f5c]">
+                        Child &amp; Student Information
+                      </h3>
+                      <p className="text-xs text-slate-500 font-bold">
+                        Enrolling multiple children? Click "+ Add Another Student" below to calculate combined fees.
+                      </p>
+                    </div>
                   </div>
-                  {errors.name && <p className="text-pink-600 text-xs font-bold mt-1">{errors.name}</p>}
+
+                  <button
+                    type="button"
+                    onClick={handleAddStudent}
+                    className="inline-flex items-center gap-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-xs font-black px-4 py-2 rounded-xl shadow-xs transition-all cursor-pointer self-start sm:self-auto"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>+ Add Another Student / Child</span>
+                  </button>
                 </div>
 
-                {/* Email / mailId */}
-                <div>
-                  <label className="block text-xs font-black text-[#0f1f5c] mb-1.5 uppercase tracking-wide">
-                    Student / Parent Email ID <span className="text-pink-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
-                    <input
-                      type="email"
-                      name="mailId"
-                      value={student.mailId}
-                      onChange={handleChange}
-                      placeholder="e.g. parent.name@gmail.com"
-                      className={`w-full h-11 sm:h-12 pl-10 pr-4 rounded-xl border-2 text-sm font-bold transition-all outline-none ${
-                        errors.mailId
-                          ? 'border-pink-500 bg-pink-50/50'
-                          : 'border-slate-200 bg-slate-50/70 focus:border-purple-600 focus:bg-white'
-                      }`}
-                    />
-                  </div>
-                  {errors.mailId && <p className="text-pink-600 text-xs font-bold mt-1">{errors.mailId}</p>}
-                </div>
-
-                {/* Standard Dropdown */}
-                <div>
-                  <label className="block text-xs font-black text-[#0f1f5c] mb-1.5 uppercase tracking-wide">
-                    Standard / Grade <span className="text-pink-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <BookOpen className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
-                    <select
-                      name="standard"
-                      value={student.standard}
-                      onChange={handleChange}
-                      className={`w-full h-11 sm:h-12 pl-10 pr-4 rounded-xl border-2 text-sm font-bold transition-all outline-none cursor-pointer ${
-                        errors.standard
-                          ? 'border-pink-500 bg-pink-50/50'
-                          : 'border-slate-200 bg-slate-50/70 focus:border-purple-600 focus:bg-white'
-                      }`}
+                {/* Student Cards List */}
+                <div className="space-y-4">
+                  {students.map((stud, idx) => (
+                    <div
+                      key={stud.id}
+                      className="p-4 sm:p-6 rounded-2xl bg-gradient-to-b from-white to-[#faf8f5] border-2 border-purple-200 shadow-2xs relative transition-all"
                     >
-                      <option value="">Select Standard (5th to 12th)</option>
-                      <option value="5th Standard">5th Standard</option>
-                      <option value="6th Standard">6th Standard</option>
-                      <option value="7th Standard">7th Standard</option>
-                      <option value="8th Standard">8th Standard</option>
-                      <option value="9th Standard">9th Standard</option>
-                      <option value="10th Standard">10th Standard</option>
-                      <option value="11th Standard">11th Standard</option>
-                      <option value="12th Standard">12th Standard</option>
-                    </select>
-                  </div>
-                  {errors.standard && <p className="text-pink-600 text-xs font-bold mt-1">{errors.standard}</p>}
+                      {/* Card Top Strip */}
+                      <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-200">
+                        <div className="flex items-center gap-2.5">
+                          <span className="w-7 h-7 rounded-lg bg-[#0f1f5c] text-white flex items-center justify-center text-xs font-black">
+                            #{idx + 1}
+                          </span>
+                          <span className="text-sm sm:text-base font-black text-[#0f1f5c]">
+                            Child / Student #{idx + 1} Details
+                          </span>
+                          {idx === 0 && (
+                            <span className="text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-md">
+                              Primary Student
+                            </span>
+                          )}
+                        </div>
+
+                        {students.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveStudent(stud.id)}
+                            className="inline-flex items-center gap-1 text-pink-600 hover:text-pink-700 bg-pink-50 hover:bg-pink-100 px-2.5 py-1 rounded-lg text-xs font-bold border border-pink-200 transition-all cursor-pointer"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            <span>Remove Child</span>
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Student Input Fields */}
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-4">
+                        {/* Student Name */}
+                        <div>
+                          <label className="block text-xs font-black text-[#0f1f5c] mb-1.5 uppercase tracking-wide">
+                            Student Full Name <span className="text-pink-500">*</span>
+                          </label>
+                          <div className="relative">
+                            <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                            <input
+                              type="text"
+                              value={stud.name}
+                              onChange={(e) => handleStudentChange(idx, 'name', e.target.value)}
+                              placeholder={`e.g. ${idx === 0 ? 'Aarav Sharma' : 'Ananya Sharma'}`}
+                              className={`w-full h-11 sm:h-12 pl-10 pr-4 rounded-xl border-2 text-sm font-bold transition-all outline-none ${
+                                errors[`student_${idx}_name`]
+                                  ? 'border-pink-500 bg-pink-50/50'
+                                  : 'border-slate-200 bg-slate-50/70 focus:border-purple-600 focus:bg-white'
+                              }`}
+                            />
+                          </div>
+                          {errors[`student_${idx}_name`] && (
+                            <p className="text-pink-600 text-xs font-bold mt-1">
+                              {errors[`student_${idx}_name`]}
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Standard Dropdown */}
+                        <div>
+                          <label className="block text-xs font-black text-[#0f1f5c] mb-1.5 uppercase tracking-wide">
+                            Standard / Grade <span className="text-pink-500">*</span>
+                          </label>
+                          <div className="relative">
+                            <BookOpen className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                            <select
+                              value={stud.standard}
+                              onChange={(e) => handleStudentChange(idx, 'standard', e.target.value)}
+                              className={`w-full h-11 sm:h-12 pl-10 pr-4 rounded-xl border-2 text-sm font-bold transition-all outline-none cursor-pointer ${
+                                errors[`student_${idx}_standard`]
+                                  ? 'border-pink-500 bg-pink-50/50'
+                                  : 'border-slate-200 bg-slate-50/70 focus:border-purple-600 focus:bg-white'
+                              }`}
+                            >
+                              <option value="">Select Standard (5th to 12th)</option>
+                              <option value="5th Standard">5th Standard</option>
+                              <option value="6th Standard">6th Standard</option>
+                              <option value="7th Standard">7th Standard</option>
+                              <option value="8th Standard">8th Standard</option>
+                              <option value="9th Standard">9th Standard</option>
+                              <option value="10th Standard">10th Standard</option>
+                              <option value="11th Standard">11th Standard</option>
+                              <option value="12th Standard">12th Standard</option>
+                            </select>
+                          </div>
+                          {errors[`student_${idx}_standard`] && (
+                            <p className="text-pink-600 text-xs font-bold mt-1">
+                              {errors[`student_${idx}_standard`]}
+                            </p>
+                          )}
+                        </div>
+
+                        {/* School Name */}
+                        <div>
+                          <label className="block text-xs font-black text-[#0f1f5c] mb-1.5 uppercase tracking-wide">
+                            School Name <span className="text-pink-500">*</span>
+                          </label>
+                          <div className="relative">
+                            <School className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                            <input
+                              type="text"
+                              value={stud.school}
+                              onChange={(e) => handleStudentChange(idx, 'school', e.target.value)}
+                              placeholder="e.g. KVS Matric Higher Secondary School"
+                              className={`w-full h-11 sm:h-12 pl-10 pr-4 rounded-xl border-2 text-sm font-bold transition-all outline-none ${
+                                errors[`student_${idx}_school`]
+                                  ? 'border-pink-500 bg-pink-50/50'
+                                  : 'border-slate-200 bg-slate-50/70 focus:border-purple-600 focus:bg-white'
+                              }`}
+                            />
+                          </div>
+                          {errors[`student_${idx}_school`] && (
+                            <p className="text-pink-600 text-xs font-bold mt-1">
+                              {errors[`student_${idx}_school`]}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
 
-                {/* School Name */}
-                <div>
-                  <label className="block text-xs font-black text-[#0f1f5c] mb-1.5 uppercase tracking-wide">
-                    School Name <span className="text-pink-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <School className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
-                    <input
-                      type="text"
-                      name="school"
-                      value={student.school}
-                      onChange={handleChange}
-                      placeholder="e.g. KVS Matric Higher Secondary School"
-                      className={`w-full h-11 sm:h-12 pl-10 pr-4 rounded-xl border-2 text-sm font-bold transition-all outline-none ${
-                        errors.school
-                          ? 'border-pink-500 bg-pink-50/50'
-                          : 'border-slate-200 bg-slate-50/70 focus:border-purple-600 focus:bg-white'
-                      }`}
-                    />
+                {/* Multi-student Add More Banner */}
+                <div className="p-3 sm:p-4 rounded-2xl bg-purple-50/80 border-2 border-dashed border-purple-300 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-xl">👨‍👩‍👧‍👦</span>
+                    <div>
+                      <span className="font-black text-[#0f1f5c]">
+                        Have another child or sibling to enroll?
+                      </span>
+                      <span className="text-slate-600 font-bold block sm:inline sm:ml-1">
+                        Enroll together in one step to streamline batch scheduling &amp; fees.
+                      </span>
+                    </div>
                   </div>
-                  {errors.school && <p className="text-pink-600 text-xs font-bold mt-1">{errors.school}</p>}
+                  <button
+                    type="button"
+                    onClick={handleAddStudent}
+                    className="inline-flex items-center gap-1.5 bg-[#0f1f5c] hover:bg-purple-900 text-white font-black px-4 py-2 rounded-xl text-xs shadow-2xs transition-all cursor-pointer shrink-0"
+                  >
+                    <Plus className="w-3.5 h-3.5 text-amber-300" />
+                    <span>+ Add Another Child ({students.length + 1})</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* COMMON PARENT / GUARDIAN CONTACT SECTION */}
+              <div className="pt-4 border-t-2 border-slate-100 space-y-4">
+                <div className="flex items-center gap-2">
+                  <span className="w-8 h-8 rounded-xl bg-purple-100 text-purple-900 flex items-center justify-center font-black text-sm">
+                    2
+                  </span>
+                  <div>
+                    <h3 className="text-base sm:text-lg font-black text-[#0f1f5c]">
+                      Parent / Guardian &amp; Contact Details
+                    </h3>
+                    <p className="text-xs text-slate-500 font-bold">
+                      Common communications and official receipts will be sent here.
+                    </p>
+                  </div>
                 </div>
 
-                {/* Father's Name */}
-                <div>
-                  <label className="block text-xs font-black text-[#0f1f5c] mb-1.5 uppercase tracking-wide">
-                    Father's Name <span className="text-pink-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
-                    <input
-                      type="text"
-                      name="fatherName"
-                      value={student.fatherName}
-                      onChange={handleChange}
-                      placeholder="Father's full name"
-                      className={`w-full h-11 sm:h-12 pl-10 pr-4 rounded-xl border-2 text-sm font-bold transition-all outline-none ${
-                        errors.fatherName
-                          ? 'border-pink-500 bg-pink-50/50'
-                          : 'border-slate-200 bg-slate-50/70 focus:border-purple-600 focus:bg-white'
-                      }`}
-                    />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+                  {/* Email ID */}
+                  <div className="md:col-span-2">
+                    <label className="block text-xs font-black text-[#0f1f5c] mb-1.5 uppercase tracking-wide">
+                      Student / Parent Email ID <span className="text-pink-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                      <input
+                        type="email"
+                        name="email"
+                        value={parent.email}
+                        onChange={handleParentChange}
+                        placeholder="e.g. parent.name@gmail.com"
+                        className={`w-full h-11 sm:h-12 pl-10 pr-4 rounded-xl border-2 text-sm font-bold transition-all outline-none ${
+                          errors.email
+                            ? 'border-pink-500 bg-pink-50/50'
+                            : 'border-slate-200 bg-slate-50/70 focus:border-purple-600 focus:bg-white'
+                        }`}
+                      />
+                    </div>
+                    {errors.email && <p className="text-pink-600 text-xs font-bold mt-1">{errors.email}</p>}
                   </div>
-                  {errors.fatherName && <p className="text-pink-600 text-xs font-bold mt-1">{errors.fatherName}</p>}
-                </div>
 
-                {/* Mother's Name */}
-                <div>
-                  <label className="block text-xs font-black text-[#0f1f5c] mb-1.5 uppercase tracking-wide">
-                    Mother's Name <span className="text-pink-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
-                    <input
-                      type="text"
-                      name="motherName"
-                      value={student.motherName}
-                      onChange={handleChange}
-                      placeholder="Mother's full name"
-                      className={`w-full h-11 sm:h-12 pl-10 pr-4 rounded-xl border-2 text-sm font-bold transition-all outline-none ${
-                        errors.motherName
-                          ? 'border-pink-500 bg-pink-50/50'
-                          : 'border-slate-200 bg-slate-50/70 focus:border-purple-600 focus:bg-white'
-                      }`}
-                    />
+                  {/* Father's Name */}
+                  <div>
+                    <label className="block text-xs font-black text-[#0f1f5c] mb-1.5 uppercase tracking-wide">
+                      Father's Name <span className="text-pink-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                      <input
+                        type="text"
+                        name="fatherName"
+                        value={parent.fatherName}
+                        onChange={handleParentChange}
+                        placeholder="Father's full name"
+                        className={`w-full h-11 sm:h-12 pl-10 pr-4 rounded-xl border-2 text-sm font-bold transition-all outline-none ${
+                          errors.fatherName
+                            ? 'border-pink-500 bg-pink-50/50'
+                            : 'border-slate-200 bg-slate-50/70 focus:border-purple-600 focus:bg-white'
+                        }`}
+                      />
+                    </div>
+                    {errors.fatherName && <p className="text-pink-600 text-xs font-bold mt-1">{errors.fatherName}</p>}
                   </div>
-                  {errors.motherName && <p className="text-pink-600 text-xs font-bold mt-1">{errors.motherName}</p>}
-                </div>
 
-                {/* Father's Phone */}
-                <div>
-                  <label className="block text-xs font-black text-[#0f1f5c] mb-1.5 uppercase tracking-wide">
-                    Father's Mobile Number <span className="text-pink-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
-                    <input
-                      type="tel"
-                      name="fatherPhone"
-                      value={student.fatherPhone}
-                      onChange={handleChange}
-                      maxLength={10}
-                      placeholder="10-digit mobile number"
-                      className={`w-full h-11 sm:h-12 pl-10 pr-4 rounded-xl border-2 text-sm font-bold transition-all outline-none ${
-                        errors.fatherPhone
-                          ? 'border-pink-500 bg-pink-50/50'
-                          : 'border-slate-200 bg-slate-50/70 focus:border-purple-600 focus:bg-white'
-                      }`}
-                    />
+                  {/* Mother's Name */}
+                  <div>
+                    <label className="block text-xs font-black text-[#0f1f5c] mb-1.5 uppercase tracking-wide">
+                      Mother's Name <span className="text-pink-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                      <input
+                        type="text"
+                        name="motherName"
+                        value={parent.motherName}
+                        onChange={handleParentChange}
+                        placeholder="Mother's full name"
+                        className={`w-full h-11 sm:h-12 pl-10 pr-4 rounded-xl border-2 text-sm font-bold transition-all outline-none ${
+                          errors.motherName
+                            ? 'border-pink-500 bg-pink-50/50'
+                            : 'border-slate-200 bg-slate-50/70 focus:border-purple-600 focus:bg-white'
+                        }`}
+                      />
+                    </div>
+                    {errors.motherName && <p className="text-pink-600 text-xs font-bold mt-1">{errors.motherName}</p>}
                   </div>
-                  {errors.fatherPhone && <p className="text-pink-600 text-xs font-bold mt-1">{errors.fatherPhone}</p>}
-                </div>
 
-                {/* Mother's Phone */}
-                <div>
-                  <label className="block text-xs font-black text-[#0f1f5c] mb-1.5 uppercase tracking-wide">
-                    Mother's Mobile Number <span className="text-pink-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
-                    <input
-                      type="tel"
-                      name="motherPhone"
-                      value={student.motherPhone}
-                      onChange={handleChange}
-                      maxLength={10}
-                      placeholder="10-digit mobile number"
-                      className={`w-full h-11 sm:h-12 pl-10 pr-4 rounded-xl border-2 text-sm font-bold transition-all outline-none ${
-                        errors.motherPhone
-                          ? 'border-pink-500 bg-pink-50/50'
-                          : 'border-slate-200 bg-slate-50/70 focus:border-purple-600 focus:bg-white'
-                      }`}
-                    />
+                  {/* Father's Phone */}
+                  <div>
+                    <label className="block text-xs font-black text-[#0f1f5c] mb-1.5 uppercase tracking-wide">
+                      Father's Mobile Number <span className="text-pink-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                      <input
+                        type="tel"
+                        name="fatherPhone"
+                        value={parent.fatherPhone}
+                        onChange={handleParentChange}
+                        maxLength={10}
+                        placeholder="10-digit mobile number"
+                        className={`w-full h-11 sm:h-12 pl-10 pr-4 rounded-xl border-2 text-sm font-bold transition-all outline-none ${
+                          errors.fatherPhone
+                            ? 'border-pink-500 bg-pink-50/50'
+                            : 'border-slate-200 bg-slate-50/70 focus:border-purple-600 focus:bg-white'
+                        }`}
+                      />
+                    </div>
+                    {errors.fatherPhone && <p className="text-pink-600 text-xs font-bold mt-1">{errors.fatherPhone}</p>}
                   </div>
-                  {errors.motherPhone && <p className="text-pink-600 text-xs font-bold mt-1">{errors.motherPhone}</p>}
-                </div>
 
-                {/* Residential Address */}
-                <div className="md:col-span-2">
-                  <label className="block text-xs font-black text-[#0f1f5c] mb-1.5 uppercase tracking-wide">
-                    Residential Address <span className="text-pink-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <MapPin className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
-                    <input
-                      type="text"
-                      name="address"
-                      value={student.address}
-                      onChange={handleChange}
-                      placeholder="Door no, Street name, Area, City, Pincode"
-                      className={`w-full h-11 sm:h-12 pl-10 pr-4 rounded-xl border-2 text-sm font-bold transition-all outline-none ${
-                        errors.address
-                          ? 'border-pink-500 bg-pink-50/50'
-                          : 'border-slate-200 bg-slate-50/70 focus:border-purple-600 focus:bg-white'
-                      }`}
-                    />
+                  {/* Mother's Phone */}
+                  <div>
+                    <label className="block text-xs font-black text-[#0f1f5c] mb-1.5 uppercase tracking-wide">
+                      Mother's Mobile Number <span className="text-pink-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                      <input
+                        type="tel"
+                        name="motherPhone"
+                        value={parent.motherPhone}
+                        onChange={handleParentChange}
+                        maxLength={10}
+                        placeholder="10-digit mobile number"
+                        className={`w-full h-11 sm:h-12 pl-10 pr-4 rounded-xl border-2 text-sm font-bold transition-all outline-none ${
+                          errors.motherPhone
+                            ? 'border-pink-500 bg-pink-50/50'
+                            : 'border-slate-200 bg-slate-50/70 focus:border-purple-600 focus:bg-white'
+                        }`}
+                      />
+                    </div>
+                    {errors.motherPhone && <p className="text-pink-600 text-xs font-bold mt-1">{errors.motherPhone}</p>}
                   </div>
-                  {errors.address && <p className="text-pink-600 text-xs font-bold mt-1">{errors.address}</p>}
+
+                  {/* Residential Address */}
+                  <div className="md:col-span-2">
+                    <label className="block text-xs font-black text-[#0f1f5c] mb-1.5 uppercase tracking-wide">
+                      Residential Address <span className="text-pink-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <MapPin className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                      <input
+                        type="text"
+                        name="address"
+                        value={parent.address}
+                        onChange={handleParentChange}
+                        placeholder="Door no, Street name, Area, City, Pincode"
+                        className={`w-full h-11 sm:h-12 pl-10 pr-4 rounded-xl border-2 text-sm font-bold transition-all outline-none ${
+                          errors.address
+                            ? 'border-pink-500 bg-pink-50/50'
+                            : 'border-slate-200 bg-slate-50/70 focus:border-purple-600 focus:bg-white'
+                        }`}
+                      />
+                    </div>
+                    {errors.address && <p className="text-pink-600 text-xs font-bold mt-1">{errors.address}</p>}
+                  </div>
                 </div>
               </div>
 
@@ -811,7 +1041,7 @@ export default function AiExplorerEnrollment() {
                   style={{ background: 'linear-gradient(90deg, #ff7a1a, #ff3d8b, #7b4dff)' }}
                   className="w-full sm:w-auto inline-flex items-center justify-center gap-2 text-white font-black text-sm px-8 py-3.5 rounded-2xl shadow-lg hover:shadow-xl hover:scale-102 transition-all cursor-pointer"
                 >
-                  <span>Next — Choose Fee Plan</span>
+                  <span>Next — Choose Fee Plan ({students.length} Student{students.length > 1 ? 's' : ''})</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
@@ -829,11 +1059,17 @@ export default function AiExplorerEnrollment() {
                   <span>AI Explorer Fee Plan</span>
                 </div>
                 <p className="text-slate-500 text-xs sm:text-sm font-semibold mt-1">
-                  Step 02 of 03 — Select your preferred tuition payment schedule.
+                  Step 02 of 03 — Select tuition payment schedule for {students.length} enrolled student{students.length > 1 ? 's' : ''}.
                 </p>
               </div>
-              <div className="px-3 py-1 rounded-xl bg-[#0f1f5c] text-white font-mono text-xs font-bold shrink-0">
-                02 / 03
+              <div className="flex items-center gap-2">
+                <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-purple-100 text-purple-900 font-black text-xs">
+                  <Users className="w-3.5 h-3.5 text-purple-700" />
+                  <span>{students.length} Child{students.length > 1 ? 'ren' : ''}</span>
+                </span>
+                <div className="px-3 py-1 rounded-xl bg-[#0f1f5c] text-white font-mono text-xs font-bold shrink-0">
+                  02 / 03
+                </div>
               </div>
             </div>
 
@@ -869,15 +1105,39 @@ export default function AiExplorerEnrollment() {
                   </div>
                 </div>
                 <div className="bg-amber-400 text-slate-900 font-black text-xs px-3.5 py-1.5 rounded-xl text-center self-start md:self-auto shadow-sm">
-                  Active Batch
+                  {students.length} Student{students.length > 1 ? 's' : ''} Enrolled
                 </div>
               </div>
             </div>
 
-            {/* Plan Selector Grid */}
+            {/* Enrolled Students Quick Badges */}
+            <div className="p-3 sm:p-4 rounded-2xl bg-purple-50/70 border border-purple-200 mb-6 flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs font-black text-[#0f1f5c]">Enrolled Children:</span>
+                {students.map((s, i) => (
+                  <span
+                    key={s.id || i}
+                    className="inline-flex items-center gap-1 bg-white px-2.5 py-1 rounded-lg border border-purple-200 text-xs font-bold text-purple-900 shadow-2xs"
+                  >
+                    <span>🧑‍🎓</span>
+                    <span>{s.name || `Student #${i + 1}`}</span>
+                    <span className="text-slate-400 text-[10px]">({s.standard || 'Grade'})</span>
+                  </span>
+                ))}
+              </div>
+              <span className="text-xs font-extrabold text-purple-700">
+                Total Multiplier: ×{students.length}
+              </span>
+            </div>
+
+            {/* Dynamic Plan Selector Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5 mb-6">
-              {Object.values(PLANS).map((p) => {
+              {Object.values(BASE_PLANS).map((p) => {
                 const isSelected = selectedPlan === p.id;
+                const calcTotalFee = p.baseTotalFee * students.length;
+                const calcSavings = p.baseSavings * students.length;
+                const calcPayNow = p.baseAmount * students.length;
+
                 return (
                   <div
                     key={p.id}
@@ -905,14 +1165,37 @@ export default function AiExplorerEnrollment() {
 
                     <div>
                       <h3 className="text-base sm:text-lg font-black text-[#0f1f5c]">{p.name}</h3>
-                      <p className="text-slate-500 text-xs font-bold mt-1 leading-relaxed">{p.desc}</p>
+                      <p className="text-slate-500 text-xs font-bold mt-1 leading-relaxed">
+                        {p.desc}
+                      </p>
                     </div>
 
                     <div className="pt-4 border-t border-slate-100 mt-4">
                       <div className="text-2xl sm:text-3xl font-black text-[#0f1f5c]">
-                        {p.label}
+                        ₹{calcTotalFee.toLocaleString('en-IN')}
                       </div>
-                      <div className="text-[10px] sm:text-[11px] font-extrabold text-slate-500 mt-0.5">{p.cycles}</div>
+                      <div className="text-[10px] sm:text-[11px] font-extrabold text-slate-500 mt-0.5">
+                        {p.id === 'full' && (
+                          <span className="text-emerald-700 font-black">
+                            1 Full Payment • Save ₹{calcSavings.toLocaleString('en-IN')} ({students.length} student{students.length > 1 ? 's' : ''})
+                          </span>
+                        )}
+                        {p.id === 'half' && (
+                          <span>
+                            2 Installments • Pay ₹{calcPayNow.toLocaleString('en-IN')} (1st Half)
+                          </span>
+                        )}
+                        {p.id === 'term' && (
+                          <span>
+                            3 Terms • Pay ₹{calcPayNow.toLocaleString('en-IN')} (Term I)
+                          </span>
+                        )}
+                      </div>
+                      {students.length > 1 && (
+                        <div className="text-[10px] font-bold text-purple-700 mt-1">
+                          Calculated for {students.length} students (₹{p.baseTotalFee.toLocaleString('en-IN')} / student)
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
@@ -925,15 +1208,16 @@ export default function AiExplorerEnrollment() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-3">
                   <div className="text-xs font-black text-purple-950 flex items-center gap-1.5 uppercase tracking-wide">
                     <span className="w-2 h-2 rounded-full bg-purple-600 animate-pulse" />
-                    <span>Choose Installment to Pay Now:</span>
+                    <span>Choose Installment to Pay Now ({students.length} Student{students.length > 1 ? 's' : ''}):</span>
                   </div>
                   <div className="text-[11px] font-bold text-purple-700">
                     Click to choose 1st Half or 2nd Half
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
-                  {HALF_OPTIONS.map((halfItem) => {
+                  {BASE_HALF_OPTIONS.map((halfItem) => {
                     const isHalfSelected = selectedHalf === halfItem.id;
+                    const halfTotal = halfItem.baseAmount * students.length;
                     return (
                       <button
                         type="button"
@@ -955,11 +1239,15 @@ export default function AiExplorerEnrollment() {
                           </div>
                           <div>
                             <div className="text-xs sm:text-sm font-black text-[#0f1f5c]">{halfItem.label}</div>
-                            <div className="text-[10px] sm:text-[11px] font-bold text-slate-500">{halfItem.desc}</div>
+                            <div className="text-[10px] sm:text-[11px] font-bold text-slate-500">
+                              {halfItem.desc} • ₹{halfItem.baseAmount.toLocaleString('en-IN')} × {students.length}
+                            </div>
                           </div>
                         </div>
                         <div className="text-right">
-                          <div className="text-sm sm:text-base font-black text-purple-700">₹{halfItem.amount.toLocaleString('en-IN')}</div>
+                          <div className="text-sm sm:text-base font-black text-purple-700">
+                            ₹{halfTotal.toLocaleString('en-IN')}
+                          </div>
                           {isHalfSelected && (
                             <span className="text-[9px] font-black uppercase text-purple-600 bg-purple-100 px-2 py-0.5 rounded-full">
                               Selected
@@ -979,15 +1267,16 @@ export default function AiExplorerEnrollment() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-3">
                   <div className="text-xs font-black text-blue-950 flex items-center gap-1.5 uppercase tracking-wide">
                     <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
-                    <span>Choose Term to Pay Now:</span>
+                    <span>Choose Term to Pay Now ({students.length} Student{students.length > 1 ? 's' : ''}):</span>
                   </div>
                   <div className="text-[11px] font-bold text-blue-700">
                     Click an option below (Term I, II, or III)
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3">
-                  {TERM_OPTIONS.map((termItem) => {
+                  {BASE_TERM_OPTIONS.map((termItem) => {
                     const isTermSelected = selectedTerm === termItem.id;
+                    const termTotal = termItem.baseAmount * students.length;
                     return (
                       <button
                         type="button"
@@ -1020,10 +1309,10 @@ export default function AiExplorerEnrollment() {
                         <div>
                           <div className="text-xs sm:text-sm font-black text-[#0f1f5c]">{termItem.label}</div>
                           <div className="text-base sm:text-lg font-black text-blue-700 mt-0.5">
-                            ₹{termItem.amount.toLocaleString('en-IN')}
+                            ₹{termTotal.toLocaleString('en-IN')}
                           </div>
                           <div className="text-[10px] sm:text-[11px] font-bold text-slate-500 mt-0.5">
-                            {termItem.desc}
+                            ₹{termItem.baseAmount.toLocaleString('en-IN')} × {students.length} student{students.length > 1 ? 's' : ''}
                           </div>
                         </div>
                       </button>
@@ -1042,8 +1331,12 @@ export default function AiExplorerEnrollment() {
                 className="w-5 h-5 rounded-md accent-purple-600 mt-0.5 cursor-pointer shrink-0"
               />
               <span className="text-xs sm:text-sm font-bold text-slate-700 leading-relaxed">
-                I confirm that the student details provided for <strong className="text-[#0f1f5c]">{student.name}</strong> ({student.standard}) are accurate, and I agree to the selected{' '}
-                <strong className="text-[#0f1f5c]">{getActivePayDetails().planName}</strong> fee plan and WeGrow Skill Campus &amp; B School enrollment terms.
+                I confirm that the details provided for{' '}
+                <strong className="text-[#0f1f5c]">
+                  {students.map((s) => s.name).filter(Boolean).join(', ') || `${students.length} students`}
+                </strong>{' '}
+                are accurate, and I agree to the selected{' '}
+                <strong className="text-[#0f1f5c]">{getActivePayDetails().planName}</strong> fee plan (₹{getActivePayDetails().amount.toLocaleString('en-IN')} payable now for {students.length} student{students.length > 1 ? 's' : ''}) and WeGrow Skill Campus &amp; B School enrollment terms.
               </span>
             </label>
 
@@ -1055,7 +1348,7 @@ export default function AiExplorerEnrollment() {
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm px-6 py-3.5 rounded-2xl transition-all cursor-pointer"
               >
                 <ArrowLeft className="w-4 h-4" />
-                <span>Back</span>
+                <span>Back to Student Details</span>
               </button>
 
               <button
@@ -1065,7 +1358,7 @@ export default function AiExplorerEnrollment() {
                 style={{ background: isDeclared ? 'linear-gradient(90deg, #ff7a1a, #ff3d8b, #7b4dff)' : '#94a3b8' }}
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2 text-white font-black text-sm px-8 py-3.5 rounded-2xl shadow-lg hover:shadow-xl hover:scale-102 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <span>Continue to Payment</span>
+                <span>Continue to Payment (₹{getActivePayDetails().amount.toLocaleString('en-IN')})</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
@@ -1082,11 +1375,17 @@ export default function AiExplorerEnrollment() {
                   <span>Review &amp; Secure Payment</span>
                 </div>
                 <p className="text-slate-500 text-xs sm:text-sm font-semibold mt-1">
-                  Step 03 of 03 — Final step to confirm student seat in AI Explorer.
+                  Step 03 of 03 — Final step to confirm student seats for {students.length} child{students.length > 1 ? 'ren' : ''} in AI Explorer.
                 </p>
               </div>
-              <div className="px-3 py-1 rounded-xl bg-[#0f1f5c] text-white font-mono text-xs font-bold shrink-0">
-                03 / 03
+              <div className="flex items-center gap-2">
+                <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-purple-100 text-purple-900 font-black text-xs">
+                  <Users className="w-3.5 h-3.5 text-purple-700" />
+                  <span>{students.length} Child{students.length > 1 ? 'ren' : ''}</span>
+                </span>
+                <div className="px-3 py-1 rounded-xl bg-[#0f1f5c] text-white font-mono text-xs font-bold shrink-0">
+                  03 / 03
+                </div>
               </div>
             </div>
 
@@ -1094,32 +1393,39 @@ export default function AiExplorerEnrollment() {
               {/* Left Column: Summary */}
               <div className="lg:col-span-6 space-y-4">
                 <h3 className="text-xs sm:text-sm font-black text-[#0f1f5c] uppercase tracking-wider">
-                  Enrollment Summary
+                  Enrollment Summary ({students.length} Student{students.length > 1 ? 's' : ''})
                 </h3>
 
-                <div className="p-4 sm:p-5 rounded-2xl bg-[#faf8f5] border-2 border-[#e8dfcf] space-y-2.5 sm:space-y-3 text-xs sm:text-sm">
-                  <div className="flex justify-between pb-2 border-b border-slate-200">
-                    <span className="text-slate-500 font-bold">Student Name</span>
-                    <span className="font-extrabold text-[#0f1f5c]">{student.name}</span>
+                <div className="p-4 sm:p-5 rounded-2xl bg-[#faf8f5] border-2 border-[#e8dfcf] space-y-3 text-xs sm:text-sm">
+                  {/* Students Roster */}
+                  <div className="space-y-2 pb-2 border-b border-slate-200">
+                    <span className="text-slate-500 font-bold block">Enrolled Students:</span>
+                    {students.map((s, idx) => (
+                      <div key={s.id || idx} className="p-2.5 rounded-xl bg-white border border-slate-200 flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <span className="w-5 h-5 rounded-full bg-purple-100 text-purple-800 flex items-center justify-center text-[10px] font-black shrink-0">
+                            {idx + 1}
+                          </span>
+                          <div>
+                            <span className="font-extrabold text-[#0f1f5c] block">{s.name}</span>
+                            <span className="text-[10px] text-slate-500 font-bold">{s.school}</span>
+                          </div>
+                        </div>
+                        <span className="text-[10px] font-black uppercase text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md shrink-0">
+                          {s.standard}
+                        </span>
+                      </div>
+                    ))}
                   </div>
+
                   <div className="flex justify-between pb-2 border-b border-slate-200">
                     <span className="text-slate-500 font-bold">Email ID</span>
-                    <span className="font-extrabold text-[#0f1f5c]">{student.mailId}</span>
-                  </div>
-                  <div className="flex justify-between pb-2 border-b border-slate-200">
-                    <span className="text-slate-500 font-bold">Standard</span>
-                    <span className="font-extrabold text-[#0f1f5c]">{student.standard}</span>
-                  </div>
-                  <div className="flex justify-between pb-2 border-b border-slate-200">
-                    <span className="text-slate-500 font-bold">School</span>
-                    <span className="font-extrabold text-[#0f1f5c] text-right max-w-[180px] sm:max-w-[200px] truncate">
-                      {student.school}
-                    </span>
+                    <span className="font-extrabold text-[#0f1f5c]">{parent.email}</span>
                   </div>
                   <div className="flex justify-between pb-2 border-b border-slate-200">
                     <span className="text-slate-500 font-bold">Father's Contact</span>
                     <span className="font-extrabold text-[#0f1f5c]">
-                      {student.fatherName} ({student.fatherPhone})
+                      {parent.fatherName} ({parent.fatherPhone})
                     </span>
                   </div>
                   <div className="flex justify-between pb-2 border-b border-slate-200">
@@ -1128,18 +1434,18 @@ export default function AiExplorerEnrollment() {
                   </div>
                   <div className="flex justify-between pb-2 border-b border-slate-200">
                     <span className="text-slate-500 font-bold">Selected Plan</span>
-                    <span className="font-extrabold text-emerald-700">{getActivePayDetails().planName}</span>
+                    <span className="font-extrabold text-emerald-700">{payDetails.planName}</span>
                   </div>
                   <div className="flex justify-between pb-2 border-b border-slate-200">
-                    <span className="text-slate-500 font-bold">Total Annual Fee</span>
-                    <span className="font-bold text-[#0f1f5c]">₹{getActivePayDetails().totalFee.toLocaleString('en-IN')}</span>
+                    <span className="text-slate-500 font-bold">Total Combined Annual Fee</span>
+                    <span className="font-bold text-[#0f1f5c]">₹{payDetails.totalFee.toLocaleString('en-IN')}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500 font-bold">Now Payable</span>
                     <span className="font-black text-purple-700">
-                      ₹{getActivePayDetails().amount?.toLocaleString('en-IN')}{' '}
+                      ₹{payDetails.amount?.toLocaleString('en-IN')}{' '}
                       <span className="text-[10px] text-slate-500 font-semibold">
-                        ({getActivePayDetails().tag})
+                        ({payDetails.tag})
                       </span>
                     </span>
                   </div>
@@ -1172,17 +1478,17 @@ export default function AiExplorerEnrollment() {
                   className="p-4 sm:p-5 rounded-2xl text-white shadow-md"
                 >
                   <div className="text-[11px] sm:text-xs font-bold text-white/80 uppercase tracking-wider">
-                    {getActivePayDetails().dueDesc}
+                    {payDetails.dueDesc}
                   </div>
                   <div className="text-2xl sm:text-4xl font-black mt-1">
-                    ₹{getActivePayDetails().amount?.toLocaleString('en-IN')}
+                    ₹{payDetails.amount?.toLocaleString('en-IN')}
                   </div>
                   <div className="text-[10px] sm:text-[11px] text-white/70 font-semibold mt-1">
                     {selectedPlan === 'term'
-                      ? `Total Annual Fee: ₹45,000 (${getActivePayDetails().subLabel} chosen • other terms payable in subsequent terms)`
+                      ? `Total Fee for ${students.length} students: ₹${payDetails.totalFee.toLocaleString('en-IN')} (${payDetails.subLabel} chosen • other terms payable in subsequent terms)`
                       : selectedPlan === 'half'
-                      ? `Total Annual Fee: ₹45,000 (${getActivePayDetails().subLabel} chosen • other installment payable bi-annually)`
-                      : '100% Secure Transaction via WeGrow Connect'}
+                      ? `Total Fee for ${students.length} students: ₹${payDetails.totalFee.toLocaleString('en-IN')} (${payDetails.subLabel} chosen • other installment payable bi-annually)`
+                      : `100% Secure Transaction via WeGrow Connect (${students.length} student${students.length > 1 ? 's' : ''})`}
                   </div>
                 </div>
 
@@ -1197,11 +1503,11 @@ export default function AiExplorerEnrollment() {
                   {isProcessing ? (
                     <div className="flex items-center gap-2">
                       <div className="w-4 h-4 sm:w-5 sm:h-5 border-3 border-white border-t-transparent rounded-full animate-spin" />
-                      <span>Processing...</span>
+                      <span>Processing Payment...</span>
                     </div>
                   ) : (
                     <span>
-                      Pay {getActivePayDetails().subLabel} ₹{getActivePayDetails().amount.toLocaleString('en-IN')} &amp; Complete Enrollment 🎉
+                      Pay {payDetails.subLabel} ₹{payDetails.amount.toLocaleString('en-IN')} &amp; Complete Enrollment 🎉
                     </span>
                   )}
                 </button>
@@ -1236,7 +1542,11 @@ export default function AiExplorerEnrollment() {
                 Enrollment Successful! 🎉
               </h2>
               <p className="text-slate-600 text-xs sm:text-sm font-semibold mt-1">
-                Welcome aboard, future AI Explorer! Your student seat is confirmed with WeGrow Skill Campus &amp; B School.
+                Welcome aboard, future AI Explorers! Confirmed admission for{' '}
+                <strong className="text-[#0f1f5c]">
+                  {completedEnrollment.studentCount || (completedEnrollment.students ? completedEnrollment.students.length : 1)} Student{(completedEnrollment.studentCount || (completedEnrollment.students ? completedEnrollment.students.length : 1)) > 1 ? 's' : ''}
+                </strong>{' '}
+                with WeGrow Skill Campus &amp; B School.
               </p>
             </div>
 
@@ -1283,11 +1593,13 @@ export default function AiExplorerEnrollment() {
                 <div className="print:hidden p-4 rounded-2xl bg-gradient-to-r from-purple-50 via-pink-50 to-amber-50 border-2 border-purple-200 text-center space-y-1.5 shadow-2xs">
                   <div className="text-sm sm:text-base font-black text-purple-900 flex items-center justify-center gap-1.5">
                     <span>✨</span>
-                    <span>Thank you for creating your enrollment!</span>
+                    <span>Thank you for completing your enrollment!</span>
                     <span>✨</span>
                   </div>
                   <p className="text-xs sm:text-sm text-slate-700 font-semibold leading-relaxed">
-                    We are thrilled to welcome <strong className="text-[#0f1f5c]">{completedEnrollment.studentName}</strong> to the AI Explorer Program. Our academic team will connect with you on <strong className="text-purple-700">{completedEnrollment.fatherPhone || completedEnrollment.motherPhone}</strong> regarding batch schedule, curriculum, and practical lab access.
+                    We are thrilled to welcome{' '}
+                    <strong className="text-[#0f1f5c]">{completedEnrollment.studentName}</strong> to the AI Explorer Program. Our academic team will connect with you on{' '}
+                    <strong className="text-purple-700">{completedEnrollment.fatherPhone || completedEnrollment.motherPhone}</strong> regarding batch schedule, curriculum, and practical lab access.
                   </p>
                 </div>
 
@@ -1298,39 +1610,61 @@ export default function AiExplorerEnrollment() {
                     <strong className="text-purple-900 font-black">AI Explorer Course (Grades 5 – 12)</strong>
                   </div>
                   <span className="px-2.5 py-1 rounded-full bg-emerald-600 text-white font-black text-[10px] uppercase tracking-wider shrink-0">
-                    ✓ Paid &amp; Confirmed
+                    ✓ Paid &amp; Confirmed ({completedEnrollment.studentCount || (completedEnrollment.students ? completedEnrollment.students.length : 1)} Seat{(completedEnrollment.studentCount || (completedEnrollment.students ? completedEnrollment.students.length : 1)) > 1 ? 's' : ''})
                   </span>
                 </div>
 
-                {/* Student & Parent Details Grid */}
+                {/* Enrolled Students Table Card */}
                 <div className="p-4 sm:p-5 rounded-2xl bg-white border-2 border-slate-200 space-y-3 print:p-3.5 print:border print:border-slate-300">
-                  <h3 className="text-xs font-black text-[#0f1f5c] uppercase tracking-wider border-b border-slate-100 pb-1.5 print:text-[11px]">
-                    Student &amp; Parent Details
-                  </h3>
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-1.5">
+                    <h3 className="text-xs font-black text-[#0f1f5c] uppercase tracking-wider print:text-[11px]">
+                      Enrolled Student(s) Roster
+                    </h3>
+                    <span className="text-[10px] font-black text-purple-700">
+                      Total: {completedEnrollment.studentCount || (completedEnrollment.students ? completedEnrollment.students.length : 1)} Student{(completedEnrollment.studentCount || (completedEnrollment.students ? completedEnrollment.students.length : 1)) > 1 ? 's' : ''}
+                    </span>
+                  </div>
 
-                  <div className="grid grid-cols-2 gap-3 text-xs print:text-[11px] print:gap-2">
-                    {/* Left Column */}
+                  {completedEnrollment.students && completedEnrollment.students.length > 0 ? (
+                    <div className="space-y-2">
+                      {completedEnrollment.students.map((st, i) => (
+                        <div key={i} className="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-200 text-xs print:text-[10px]">
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-slate-500">#{i + 1}</span>
+                            <strong className="text-[#0f1f5c] font-black">{st.name}</strong>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-purple-700 font-bold">{st.standard}</span>
+                            <span className="text-slate-400">•</span>
+                            <span className="text-slate-600 max-w-[150px] truncate">{st.school}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-2 text-xs print:text-[11px]">
+                      <div>
+                        <span className="text-slate-500 font-bold">Student Name: </span>
+                        <strong className="text-[#0f1f5c]">{completedEnrollment.studentName}</strong>
+                      </div>
+                      <div>
+                        <span className="text-slate-500 font-bold">Standard: </span>
+                        <strong className="text-purple-700">{completedEnrollment.standard}</strong>
+                      </div>
+                      <div className="col-span-2">
+                        <span className="text-slate-500 font-bold">School: </span>
+                        <span className="text-slate-800">{completedEnrollment.school}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Parent & Payment Details Subgrid */}
+                  <div className="grid grid-cols-2 gap-3 text-xs pt-3 border-t border-slate-100 print:text-[11px] print:gap-2">
                     <div className="space-y-1.5">
-                      <div className="flex flex-col sm:flex-row sm:justify-start sm:gap-2">
-                        <span className="text-slate-500 font-bold min-w-[90px]">Student Name:</span>
-                        <span className="font-black text-[#0f1f5c]">{completedEnrollment.studentName}</span>
-                      </div>
-                      <div className="flex flex-col sm:flex-row sm:justify-start sm:gap-2">
-                        <span className="text-slate-500 font-bold min-w-[90px]">Standard / Grade:</span>
-                        <span className="font-black text-purple-700">{completedEnrollment.standard}</span>
-                      </div>
-                      <div className="flex flex-col sm:flex-row sm:justify-start sm:gap-2">
-                        <span className="text-slate-500 font-bold min-w-[90px]">School:</span>
-                        <span className="font-bold text-[#0f1f5c]">{completedEnrollment.school}</span>
-                      </div>
                       <div className="flex flex-col sm:flex-row sm:justify-start sm:gap-2">
                         <span className="text-slate-500 font-bold min-w-[90px]">Email ID:</span>
                         <span className="font-bold text-[#0f1f5c]">{completedEnrollment.mailId || completedEnrollment.email || '—'}</span>
                       </div>
-                    </div>
-
-                    {/* Right Column */}
-                    <div className="space-y-1.5">
                       <div className="flex flex-col sm:flex-row sm:justify-start sm:gap-2">
                         <span className="text-slate-500 font-bold min-w-[90px]">Father's Contact:</span>
                         <span className="font-bold text-[#0f1f5c]">
@@ -1343,6 +1677,9 @@ export default function AiExplorerEnrollment() {
                           {completedEnrollment.motherName} ({completedEnrollment.motherPhone})
                         </span>
                       </div>
+                    </div>
+
+                    <div className="space-y-1.5">
                       <div className="flex flex-col sm:flex-row sm:justify-start sm:gap-2">
                         <span className="text-slate-500 font-bold min-w-[90px]">Fee Plan:</span>
                         <span className="font-black text-[#0f1f5c]">
@@ -1353,6 +1690,12 @@ export default function AiExplorerEnrollment() {
                         <span className="text-slate-500 font-bold min-w-[90px]">Amount Paid:</span>
                         <span className="font-black text-emerald-700">
                           ₹{Number(completedEnrollment.amount).toLocaleString('en-IN')} (PAID)
+                        </span>
+                      </div>
+                      <div className="flex flex-col sm:flex-row sm:justify-start sm:gap-2">
+                        <span className="text-slate-500 font-bold min-w-[90px]">Payment ID:</span>
+                        <span className="font-mono text-slate-700">
+                          {completedEnrollment.transactionId || completedEnrollment.id}
                         </span>
                       </div>
                     </div>
@@ -1415,7 +1758,7 @@ export default function AiExplorerEnrollment() {
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs px-6 py-3.5 rounded-xl transition-all cursor-pointer shadow-xs"
               >
                 <Printer className="w-4 h-4" />
-                <span>Print Receipt</span>
+                <span>Print Official Receipt</span>
               </button>
 
               <a
