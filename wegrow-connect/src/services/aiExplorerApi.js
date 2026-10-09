@@ -735,6 +735,20 @@ export const aiExplorerApi = {
             studentName: item.studentName || item.name || '',
             email: item.email || item.mailId || '',
             mailId: item.email || item.mailId || '',
+            fatherName: item.fatherName || item.parentName || item.customerName || item.father || '—',
+            motherName: item.motherName || item.mother || '—',
+            fatherPhone: item.fatherPhone || item.phone || item.mobile || item.customerPhone || '—',
+            motherPhone: item.motherPhone || '—',
+            address:
+              item.address ||
+              item.residentialAddress ||
+              item.parentAddress ||
+              item.location ||
+              item.city ||
+              item.parent?.address ||
+              '',
+            standard: item.standard || '',
+            school: item.school || '',
             planName: planLabel,
             feePlan: item.feePlan || item.plan || 'full',
             amount: Number(item.amount || 0),

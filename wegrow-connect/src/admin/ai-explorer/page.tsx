@@ -17,7 +17,12 @@ import {
   BookOpen,
   Trash2,
   Printer,
-  Send
+  Send,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+  Users
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import QRCode from 'qrcode';
@@ -37,6 +42,11 @@ export default function AdminAiExplorerPage() {
   const [planFilter, setPlanFilter] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState('ALL');
 
+  // Pagination State
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [totalCount, setTotalCount] = useState(0);
+
   // Modal State
   const [selectedStudent, setSelectedStudent] = useState<any | null>(null);
   const [modalQrUrl, setModalQrUrl] = useState('');
@@ -46,11 +56,13 @@ export default function AdminAiExplorerPage() {
   const isPaidStatus = (s?: string) =>
     ['PAID', 'COMPLETED', 'ENROLLED', 'SUCCESS'].includes((s || '').toUpperCase());
 
-  // Load Data (without extra /admin/stats API call)
+  // Load Data with pagination support
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
       const enrollRes = await aiExplorerApi.getEnrollments({
+        page,
+        limit,
         search: search.trim() || undefined,
         standard: standardFilter,
         plan: planFilter,
@@ -70,8 +82,16 @@ export default function AdminAiExplorerPage() {
 
       setEnrollments(list);
 
-      // Compute stats directly from list
-      const totalCount = enrollRes?.total || list.length;
+      const serverTotal =
+        enrollRes?.total ??
+        enrollRes?.meta?.total ??
+        enrollRes?.data?.total ??
+        enrollRes?.data?.meta?.total ??
+        list.length;
+
+      setTotalCount(serverTotal);
+
+      // Compute stats
       const paidCount = list.filter((e) => isPaidStatus(e.paymentStatus) || isPaidStatus(e.status)).length;
       const totalFee = list
         .filter((e) => isPaidStatus(e.paymentStatus) || isPaidStatus(e.status))
@@ -81,7 +101,7 @@ export default function AdminAiExplorerPage() {
       ).length;
 
       setStats({
-        totalEnrollments: totalCount,
+        totalEnrollments: serverTotal,
         paidEnrollments: paidCount,
         totalRevenue: totalFee,
         pendingEnrollments: pendingCount,
@@ -92,7 +112,7 @@ export default function AdminAiExplorerPage() {
     } finally {
       setLoading(false);
     }
-  }, [search, standardFilter, planFilter, statusFilter]);
+  }, [page, limit, search, standardFilter, planFilter, statusFilter]);
 
   useEffect(() => {
     loadData();
@@ -193,6 +213,35 @@ export default function AdminAiExplorerPage() {
 
   const safeEnrollments = Array.isArray(enrollments) ? enrollments : [];
 
+  // Pagination calculations
+  const totalPages = Math.max(1, Math.ceil(totalCount / limit));
+  const validPage = Math.min(Math.max(1, page), totalPages);
+
+  // If backend returns all records at once, slice locally for smooth UI pagination
+  const displayedEnrollments =
+    safeEnrollments.length > limit && totalCount === safeEnrollments.length
+      ? safeEnrollments.slice((validPage - 1) * limit, validPage * limit)
+      : safeEnrollments;
+
+  const startItem = totalCount === 0 ? 0 : (validPage - 1) * limit + 1;
+  const endItem = Math.min(validPage * limit, totalCount);
+
+  const getPageNumbers = () => {
+    const pages: (number | string)[] = [];
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      if (validPage <= 4) {
+        pages.push(1, 2, 3, 4, 5, '...', totalPages);
+      } else if (validPage >= totalPages - 3) {
+        pages.push(1, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+      } else {
+        pages.push(1, '...', validPage - 1, validPage, validPage + 1, '...', totalPages);
+      }
+    }
+    return pages;
+  };
+
   return (
     <div className="flex h-screen bg-[#F0F4F8] text-[#1E293B] font-sans overflow-hidden select-none">
       {/* Sidebar */}
@@ -245,7 +294,7 @@ export default function AdminAiExplorerPage() {
                   Total Enrollments
                 </div>
                 <div className="text-2xl sm:text-3xl font-black text-slate-900 mt-1 font-heading">
-                  {stats?.totalEnrollments ?? safeEnrollments.length}
+                  {stats?.totalEnrollments ?? totalCount}
                 </div>
                 <div className="text-[11px] text-purple-600 font-bold mt-0.5">Students registered</div>
               </div>
@@ -320,7 +369,10 @@ export default function AdminAiExplorerPage() {
               <input
                 type="text"
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setPage(1);
+                }}
                 placeholder="Search student, phone, email, school, enrollment ID..."
                 className="w-full h-10 pl-10 pr-4 rounded-xl border border-slate-200 bg-slate-50 text-xs font-bold focus:bg-white focus:border-purple-600 outline-none"
               />
@@ -331,7 +383,10 @@ export default function AdminAiExplorerPage() {
               <BookOpen className="w-4 h-4 text-purple-600 shrink-0" />
               <select
                 value={standardFilter}
-                onChange={(e) => setStandardFilter(e.target.value)}
+                onChange={(e) => {
+                  setStandardFilter(e.target.value);
+                  setPage(1);
+                }}
                 className="h-10 px-3 rounded-xl border border-slate-200 bg-slate-50 font-bold text-xs outline-none cursor-pointer"
               >
                 <option value="ALL">All Standards</option>
@@ -351,7 +406,10 @@ export default function AdminAiExplorerPage() {
               <Layers className="w-4 h-4 text-indigo-600 shrink-0" />
               <select
                 value={planFilter}
-                onChange={(e) => setPlanFilter(e.target.value)}
+                onChange={(e) => {
+                  setPlanFilter(e.target.value);
+                  setPage(1);
+                }}
                 className="h-10 px-3 rounded-xl border border-slate-200 bg-slate-50 font-bold text-xs outline-none cursor-pointer"
               >
                 <option value="ALL">All Fee Plans</option>
@@ -366,7 +424,10 @@ export default function AdminAiExplorerPage() {
               <Filter className="w-4 h-4 text-emerald-600 shrink-0" />
               <select
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
+                onChange={(e) => {
+                  setStatusFilter(e.target.value);
+                  setPage(1);
+                }}
                 className="h-10 px-3 rounded-xl border border-slate-200 bg-slate-50 font-bold text-xs outline-none cursor-pointer"
               >
                 <option value="ALL">All Payment Status</option>
@@ -400,14 +461,14 @@ export default function AdminAiExplorerPage() {
                         <div>Loading AI Explorer registrations...</div>
                       </td>
                     </tr>
-                  ) : safeEnrollments.length === 0 ? (
+                  ) : displayedEnrollments.length === 0 ? (
                     <tr>
                       <td colSpan={7} className="py-12 text-center text-slate-400 font-bold">
                         No student enrollments found matching the criteria.
                       </td>
                     </tr>
                   ) : (
-                    safeEnrollments.map((student) => {
+                    displayedEnrollments.map((student) => {
                       const isPaid = isPaidStatus(student.paymentStatus) || isPaidStatus(student.status);
                       const displayId = student.enrollmentId || student.id || student._id;
                       const displayMail = student.email || student.mailId || '—';
@@ -465,7 +526,7 @@ export default function AdminAiExplorerPage() {
                             <span
                               className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase ${
                                 isPaid
-                                  ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                                    ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
                                   : 'bg-amber-100 text-amber-800 border border-amber-300'
                               }`}
                             >
@@ -526,6 +587,111 @@ export default function AdminAiExplorerPage() {
                 </tbody>
               </table>
             </div>
+
+            {/* Pagination Controls Footer */}
+            <div className="p-4 bg-slate-50/80 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-bold text-slate-600">
+              {/* Range & Limit Selector */}
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="text-slate-500">
+                  Showing <span className="text-slate-900 font-extrabold">{startItem}</span> to{' '}
+                  <span className="text-slate-900 font-extrabold">{endItem}</span> of{' '}
+                  <span className="text-purple-900 font-black">{totalCount}</span> registrations
+                </div>
+
+                <div className="flex items-center gap-1.5 border-l border-slate-300 pl-3">
+                  <span className="text-slate-500 text-[11px]">Rows per page:</span>
+                  <select
+                    value={limit}
+                    onChange={(e) => {
+                      setLimit(Number(e.target.value));
+                      setPage(1);
+                    }}
+                    className="h-8 px-2 rounded-lg border border-slate-200 bg-white text-xs font-bold text-slate-700 outline-none cursor-pointer focus:border-purple-500"
+                  >
+                    <option value={10}>10</option>
+                    <option value={20}>20</option>
+                    <option value={50}>50</option>
+                    <option value={100}>100</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Navigation Buttons */}
+              <div className="flex items-center gap-1.5">
+                {/* First Page */}
+                <button
+                  type="button"
+                  disabled={validPage <= 1 || loading}
+                  onClick={() => setPage(1)}
+                  className="p-1.5 border border-slate-200 rounded-lg bg-white hover:bg-slate-100 text-slate-700 disabled:opacity-30 disabled:hover:bg-white cursor-pointer transition-all shadow-2xs"
+                  title="First Page"
+                >
+                  <ChevronsLeft className="w-4 h-4" />
+                </button>
+
+                {/* Previous Page */}
+                <button
+                  type="button"
+                  disabled={validPage <= 1 || loading}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  className="p-1.5 border border-slate-200 rounded-lg bg-white hover:bg-slate-100 text-slate-700 disabled:opacity-30 disabled:hover:bg-white cursor-pointer transition-all shadow-2xs"
+                  title="Previous Page"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+
+                {/* Page Numbers */}
+                <div className="flex items-center gap-1 mx-1">
+                  {getPageNumbers().map((pNum, idx) => {
+                    if (pNum === '...') {
+                      return (
+                        <span key={`ellipsis-${idx}`} className="px-1.5 text-slate-400 font-mono">
+                          ...
+                        </span>
+                      );
+                    }
+                    const isCurrent = pNum === validPage;
+                    return (
+                      <button
+                        type="button"
+                        key={`page-${pNum}`}
+                        disabled={loading}
+                        onClick={() => setPage(Number(pNum))}
+                        className={`min-w-[32px] h-8 px-2 rounded-lg text-xs font-black transition-all cursor-pointer ${
+                          isCurrent
+                            ? 'bg-purple-600 text-white shadow-xs'
+                            : 'bg-white border border-slate-200 text-slate-700 hover:bg-purple-50 hover:text-purple-700'
+                        }`}
+                      >
+                        {pNum}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Next Page */}
+                <button
+                  type="button"
+                  disabled={validPage >= totalPages || loading}
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  className="p-1.5 border border-slate-200 rounded-lg bg-white hover:bg-slate-100 text-slate-700 disabled:opacity-30 disabled:hover:bg-white cursor-pointer transition-all shadow-2xs"
+                  title="Next Page"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+
+                {/* Last Page */}
+                <button
+                  type="button"
+                  disabled={validPage >= totalPages || loading}
+                  onClick={() => setPage(totalPages)}
+                  className="p-1.5 border border-slate-200 rounded-lg bg-white hover:bg-slate-100 text-slate-700 disabled:opacity-30 disabled:hover:bg-white cursor-pointer transition-all shadow-2xs"
+                  title="Last Page"
+                >
+                  <ChevronsRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
           </div>
         </main>
       </div>
@@ -554,6 +720,12 @@ export default function AdminAiExplorerPage() {
               <div className="text-xs font-bold text-slate-500">
                 {selectedStudent.standard} • {selectedStudent.school}
               </div>
+              {(Array.isArray(selectedStudent.students) && selectedStudent.students.length > 1) && (
+                <div className="mt-1.5 inline-flex items-center gap-1 bg-purple-50 text-purple-800 text-[11px] font-black px-2.5 py-0.5 rounded-full border border-purple-200">
+                  <Users className="w-3 h-3 text-purple-600" />
+                  <span>{selectedStudent.students.length} Children Enrolled</span>
+                </div>
+              )}
             </div>
 
             {/* QR Code */}
@@ -572,6 +744,46 @@ export default function AdminAiExplorerPage() {
                       <Copy className="w-3 h-3" />
                     )}
                   </button>
+                </div>
+              </div>
+            )}
+
+            {/* Individual Enrolled Students Roster */}
+            {Array.isArray(selectedStudent.students) && selectedStudent.students.length > 0 && (
+              <div className="space-y-2 mb-4">
+                <div className="text-[11px] font-black uppercase tracking-wider text-[#0f1f5c] flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <Users className="w-3.5 h-3.5 text-purple-600" />
+                    <span>Enrolled Children Details ({selectedStudent.students.length})</span>
+                  </span>
+                  <span className="text-[10px] text-purple-700 font-bold bg-purple-50 px-2 py-0.5 rounded-full border border-purple-200">
+                    Student Roster
+                  </span>
+                </div>
+                <div className="space-y-1.5">
+                  {selectedStudent.students.map((child: any, idx: number) => (
+                    <div
+                      key={idx}
+                      className="p-3 rounded-2xl bg-gradient-to-r from-purple-50/80 to-indigo-50/50 border border-purple-200 flex items-center justify-between gap-3 text-xs shadow-2xs"
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <span className="w-6 h-6 rounded-full bg-purple-600 text-white font-black text-[10px] flex items-center justify-center shrink-0 shadow-2xs">
+                          #{idx + 1}
+                        </span>
+                        <div className="truncate">
+                          <div className="font-black text-slate-900 truncate text-xs sm:text-sm">
+                            {child.name || child.studentName || `Child #${idx + 1}`}
+                          </div>
+                          <div className="text-[10px] sm:text-[11px] text-slate-500 font-semibold truncate mt-0.5">
+                            🏫 {child.school || selectedStudent.school || '—'}
+                          </div>
+                        </div>
+                      </div>
+                      <span className="shrink-0 bg-white text-purple-900 font-black text-[10px] px-2.5 py-1 rounded-lg border border-purple-200 shadow-2xs">
+                        {child.standard || selectedStudent.standard || 'Grade'}
+                      </span>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
@@ -597,13 +809,33 @@ export default function AdminAiExplorerPage() {
               <div className="flex justify-between py-1 border-b border-slate-200">
                 <span className="text-slate-500">Residential Address:</span>
                 <span className="font-bold text-slate-900 text-right max-w-[220px]">
-                  {selectedStudent.address}
+                  {selectedStudent.address || selectedStudent.residentialAddress || selectedStudent.parentAddress || selectedStudent.city || '—'}
                 </span>
               </div>
               <div className="flex justify-between py-1 border-b border-slate-200">
-                <span className="text-slate-500">Fee Plan &amp; Amount:</span>
+                <span className="text-slate-500">Fee Plan:</span>
                 <span className="font-black text-blue-700">
-                  {selectedStudent.planName} — {rupee(selectedStudent.amount)}
+                  {selectedStudent.planName}
+                </span>
+              </div>
+              {(selectedStudent.totalFee && selectedStudent.totalFee !== selectedStudent.amount) && (
+                <div className="flex justify-between py-1 border-b border-slate-200">
+                  <span className="text-slate-500">Total Course Fee:</span>
+                  <span className="font-bold text-slate-800">
+                    {rupee(selectedStudent.totalFee)}
+                  </span>
+                </div>
+              )}
+              <div className="flex justify-between py-1 border-b border-slate-200">
+                <span className="text-slate-500">Amount:</span>
+                <span className="font-black text-purple-700">
+                  {rupee(selectedStudent.amount)}
+                </span>
+              </div>
+              <div className="flex justify-between py-1 border-b border-slate-200">
+                <span className="text-slate-500">Order ID:</span>
+                <span className="font-mono font-bold text-slate-800">
+                  {selectedStudent.orderId || selectedStudent.cfOrderId || selectedStudent.transactionId || selectedStudent.id}
                 </span>
               </div>
               <div className="flex justify-between py-1">
