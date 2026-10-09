@@ -580,10 +580,10 @@ export default function AiExplorerPreBooking() {
         {/* Pre-booking Spotlight Value Strip */}
         <div className="print:hidden grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4 mb-8 sm:mb-10">
           {[
-            { icon: '🎟️', title: '₹1,000 Token', desc: 'Adjusted in total fee', border: 'border-[#ffedd5]', bg: 'bg-[#fff7ed]' },
-            { icon: '👨‍👩‍👧‍👦', title: 'Multi-Child Ready', desc: 'Add 2 or 3 kids', border: 'border-[#ede9fe]', bg: 'bg-[#faf5ff]' },
-            { icon: '⭐', title: 'Seat Guaranteed', desc: 'Priority batch slot', border: 'border-[#e0f2fe]', bg: 'bg-[#f0f9ff]' },
-            { icon: '🎁', title: 'Early Starter Kit', desc: 'Bonus AI materials', border: 'border-[#dcfce7]', bg: 'bg-[#f0fdf4]' },
+            { icon: '🎓', title: 'Future-Ready Skills', desc: 'Grades 5 – 12', border: 'border-[#ffedd5]', bg: 'bg-[#fff7ed]' },
+            { icon: '👨‍👩‍👧‍👦', title: 'Learn Together', desc: 'Parent & student', border: 'border-[#ede9fe]', bg: 'bg-[#faf5ff]' },
+            { icon: '🚀', title: 'Hands-On Learning', desc: 'Real AI tools', border: 'border-[#e0f2fe]', bg: 'bg-[#f0f9ff]' },
+            { icon: '💻', title: 'Build Real Projects', desc: 'Build & showcase', border: 'border-[#dcfce7]', bg: 'bg-[#f0fdf4]' },
           ].map((stat) => (
             <div
               key={stat.title}

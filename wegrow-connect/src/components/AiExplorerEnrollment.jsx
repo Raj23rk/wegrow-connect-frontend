@@ -17,7 +17,6 @@ import {
   Printer,
   Copy,
   Check,
-  ShieldCheck,
   GraduationCap,
   Plus,
   Trash2,
@@ -772,13 +771,6 @@ export default function AiExplorerEnrollment() {
             >
               <span>🎟️ Pre-Book (₹1k/Child)</span>
             </Link>
-            <Link
-              to="/admin/ai-explorer"
-              className="hidden sm:inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 bg-white hover:bg-[#f3ede3] px-3.5 py-2 rounded-xl border border-[#ded5c4] shadow-2xs transition-all"
-            >
-              <ShieldCheck className="w-4 h-4 text-purple-600" />
-              <span>Admin Portal</span>
-            </Link>
             <button
               onClick={() => {
                 if (step !== 1) setStep(1);
@@ -832,10 +824,10 @@ export default function AiExplorerEnrollment() {
         {/* STATS STRIP */}
         <div className="print:hidden grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4 mb-8 sm:mb-10">
           {[
-            { icon: '🧪', title: 'Hands-on Labs', desc: 'Real AI tools', border: 'border-[#ffedd5]', bg: 'bg-[#fff7ed]' },
-            { icon: '🛠️', title: 'Real Projects', desc: 'Build & showcase', border: 'border-[#ede9fe]', bg: 'bg-[#faf5ff]' },
-            { icon: '🎓', title: 'Certificates', desc: 'WeGrow verified', border: 'border-[#e0f2fe]', bg: 'bg-[#f0f9ff]' },
-            { icon: '👥', title: 'Small Batches', desc: 'Personal attention', border: 'border-[#dcfce7]', bg: 'bg-[#f0fdf4]' },
+            { icon: '🎓', title: 'Future-Ready Skills', desc: 'Grades 5 – 12', border: 'border-[#ffedd5]', bg: 'bg-[#fff7ed]' },
+            { icon: '👨‍👩‍👧‍👦', title: 'Learn Together', desc: 'Parent & student', border: 'border-[#ede9fe]', bg: 'bg-[#faf5ff]' },
+            { icon: '🚀', title: 'Hands-On Learning', desc: 'Real AI tools', border: 'border-[#e0f2fe]', bg: 'bg-[#f0f9ff]' },
+            { icon: '💻', title: 'Build Real Projects', desc: 'Build & showcase', border: 'border-[#dcfce7]', bg: 'bg-[#f0fdf4]' },
           ].map((stat) => (
             <div
               key={stat.title}
