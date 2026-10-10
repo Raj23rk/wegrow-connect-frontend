@@ -43,6 +43,7 @@ export default function Sidebar() {
     { name: "Roles & Permissions", href: "/admin/roles", icon: ShieldCheck },
     { name: "AI Explorer Students", href: "/admin/ai-explorer", icon: Bot },
     { name: "AI Pre-Bookings", href: "/admin/ai-explorer?tab=prebooking", icon: Ticket },
+    { name: "Sing Along Bookings", href: "/admin/sing-along", icon: Music },
     { name: "Event Teasers", href: "/admin/event-teaser", icon: HelpCircle },
     { name: "Business Dependency", href: "/admin/business-dependency-test", icon: ClipboardCheck },
     { name: "Meetup Feedback", href: "/admin/feedback", icon: MessageSquare },
