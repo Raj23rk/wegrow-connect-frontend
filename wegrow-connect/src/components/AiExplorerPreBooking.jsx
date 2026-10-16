@@ -28,8 +28,9 @@ import {
   Sparkle
 } from 'lucide-react';
 import { aiExplorerApi } from '../services/aiExplorerApi';
+import { openStandardRazorpayCheckout } from '../services/razorpay';
 
-const PREBOOKING_TOKEN_AMOUNT = 1000;
+const PREBOOKING_TOKEN_AMOUNT = 2;
 
 export default function AiExplorerPreBooking() {
   const [step, setStep] = useState(1);
@@ -57,15 +58,15 @@ export default function AiExplorerPreBooking() {
 
   const [errors, setErrors] = useState({});
   const [isDeclared, setIsDeclared] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState('Cashfree');
+  const [paymentMethod, setPaymentMethod] = useState('Razorpay');
   const [isProcessing, setIsProcessing] = useState(false);
   const [completedPreBooking, setCompletedPreBooking] = useState(null);
   const [qrCodeUrl, setQrCodeUrl] = useState('');
   const [copied, setCopied] = useState(false);
 
   const formTopRef = useRef(null);
-
-  const totalAmount = students.length * PREBOOKING_TOKEN_AMOUNT;
+  const [tokenPlanMode, setTokenPlanMode] = useState('flat2'); // 'flat2' = ₹2 Real Test Mode, 'per_student' = students.length * PREBOOKING_TOKEN_AMOUNT
+  const totalAmount = tokenPlanMode === 'flat2' ? 2 : students.length * PREBOOKING_TOKEN_AMOUNT;
 
   // Generate QR Code upon successful pre-booking
   useEffect(() => {
@@ -286,7 +287,7 @@ export default function AiExplorerPreBooking() {
           ...(basePayload || buildPreBookingPayload(orderId)),
           transactionId: orderId,
           paymentStatus: 'PAID',
-          paymentMethod: 'Cashfree',
+          paymentMethod: 'Razorpay',
         };
 
         const response = await aiExplorerApi.enrollPreBooking(payloadToSubmit);
@@ -318,63 +319,68 @@ export default function AiExplorerPreBooking() {
     }
   };
 
-  // Process Final Payment & Pre-Booking
+  // Process Final Payment & Pre-Booking via Razorpay
   const handlePaymentAndPreBook = async () => {
     setIsProcessing(true);
     const preBookingPayload = buildPreBookingPayload();
 
     try {
-      if (paymentMethod === 'Cashfree') {
-        const pgRes = await aiExplorerApi.createPreBookingOrder(preBookingPayload);
-        if (!pgRes?.success || !pgRes?.data?.paymentSessionId) {
-          throw new Error(pgRes?.message || 'Could not initiate payment session with Cashfree.');
-        }
+      await openStandardRazorpayCheckout({
+        amountInRupees: totalAmount,
+        customer: {
+          name: students[0]?.name?.trim() || parent.fatherName.trim() || 'Parent',
+          email: parent.email.trim(),
+          phone: parent.fatherPhone.trim() || parent.motherPhone.trim(),
+        },
+        purpose: 'AI_EXPLORER_PRE_BOOKING',
+        notes: {
+          bookingType: 'AI_EXPLORER_PRE_BOOKING',
+          studentCount: String(students.length),
+          students: students.map((s) => s.name).filter(Boolean).join(', '),
+          fatherPhone: parent.fatherPhone.trim(),
+          motherPhone: parent.motherPhone.trim(),
+        },
+        description: `AI Explorer Pre-Booking Token (${students.length} Student${students.length > 1 ? 's' : ''})`,
+        themeColor: '#7b4dff',
+        onSuccess: async (verifyData) => {
+          toast.loading('Confirming student pre-booking...', { id: 'prebook-pay' });
+          try {
+            const transactionId = verifyData.paymentId || verifyData.orderId || `RZP_${Date.now()}`;
+            const payloadToSubmit = {
+              ...preBookingPayload,
+              transactionId,
+              paymentStatus: 'PAID',
+              paymentMethod: 'Razorpay',
+            };
 
-        const orderData = pgRes.data;
-        const targetOrderId = orderData.orderId || orderData.order_id || `ORD_${Date.now()}`;
-        setPendingOrder({
-          orderId: targetOrderId,
-          paymentSessionId: orderData.paymentSessionId,
-          status: 'INITIATED',
-        });
-
-        if (typeof window !== 'undefined' && window.Cashfree) {
-          toast.success('Opening Cashfree Checkout...');
-          const cashfree = window.Cashfree({
-            mode: (orderData.environment?.toLowerCase() === 'sandbox' || orderData.environment?.toLowerCase() === 'test')
-              ? 'sandbox'
-              : 'production',
-          });
-
-          await cashfree.checkout({
-            paymentSessionId: orderData.paymentSessionId,
-            redirectTarget: '_modal',
-          });
-
-          // After modal closes, verify with backend gateway
-          toast.loading('Verifying payment with gateway...', { id: 'prebook-pay' });
-          await new Promise((r) => setTimeout(r, 1200));
-          await verifyAndSubmitPreBooking(targetOrderId, preBookingPayload);
-        } else if (orderData.paymentLink) {
-          window.location.href = orderData.paymentLink;
-        } else {
-          throw new Error('Cashfree checkout modal could not be loaded.');
-        }
-      } else {
-        const response = await aiExplorerApi.enrollPreBooking(preBookingPayload);
-        if (response?.success) {
-          setCompletedPreBooking(response.data);
-          setStep(4);
-          toast.success(`🎉 Pre-booking registered successfully!`);
-          scrollToSection();
-        } else {
-          throw new Error(response?.message || 'Pre-booking registration failed.');
-        }
-      }
+            const response = await aiExplorerApi.enrollPreBooking(payloadToSubmit);
+            if (response?.success) {
+              setCompletedPreBooking(response.data);
+              setPendingOrder(null);
+              setStep(4);
+              toast.success(`🎉 Payment verified! Pre-booking confirmed for ${students.length} student${students.length > 1 ? 's' : ''}!`, { id: 'prebook-pay' });
+              scrollToSection();
+            } else {
+              throw new Error(response?.message || 'Failed to save pre-booking confirmation.');
+            }
+          } catch (err) {
+            toast.error(err.message || 'Error recording pre-booking confirmation.', { id: 'prebook-pay' });
+          } finally {
+            setIsProcessing(false);
+          }
+        },
+        onError: (err) => {
+          setIsProcessing(false);
+          toast.error(err.message || 'Razorpay payment was not completed.', { id: 'prebook-pay' });
+        },
+        onDismiss: () => {
+          setIsProcessing(false);
+          toast('Payment checkout closed.', { icon: 'ℹ️' });
+        },
+      });
     } catch (error) {
-      toast.error(error.message || 'Payment processing failed. Please try again.', { id: 'prebook-pay' });
-    } finally {
       setIsProcessing(false);
+      toast.error(error.message || 'Payment processing failed. Please try again.', { id: 'prebook-pay' });
     }
   };
 
@@ -535,7 +541,7 @@ export default function AiExplorerPreBooking() {
               className="inline-flex items-center justify-center gap-1.5 text-white font-black text-xs sm:text-sm px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-full shadow-md hover:shadow-lg hover:scale-105 transition-all cursor-pointer whitespace-nowrap shrink-0"
             >
               <Ticket className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-              <span>Pre-Book Seat (₹1,000)</span>
+              <span>Pre-Book Seat (₹2)</span>
             </button>
           </div>
         </div>
@@ -610,7 +616,7 @@ export default function AiExplorerPreBooking() {
                   <span>AI Explorer Seat Pre-Booking</span>
                 </div>
                 <p className="text-slate-500 text-xs sm:text-sm font-semibold mt-1">
-                  Reserve student seats with ₹1,000 token fee per child. Add multiple children below if needed!
+                  Reserve student seats with ₹2 token fee per child. Add multiple children below if needed!
                 </p>
               </div>
 
@@ -645,7 +651,7 @@ export default function AiExplorerPreBooking() {
                     <span>Student(s) Enrolling for AI Explorer</span>
                   </div>
                   <span className="text-xs font-bold text-slate-500">
-                    ₹1,000 per student
+                    ₹2 per student
                   </span>
                 </div>
 
@@ -666,7 +672,7 @@ export default function AiExplorerPreBooking() {
                             Child #{idx + 1} Details
                           </span>
                           <span className="bg-purple-100 text-purple-800 text-[10px] font-extrabold px-2 py-0.5 rounded-md">
-                            ₹1,000 Token Seat
+                            ₹2 Token Seat
                           </span>
                         </div>
 
@@ -782,7 +788,7 @@ export default function AiExplorerPreBooking() {
                     className="w-full py-3.5 px-4 rounded-2xl border-2 border-dashed border-purple-400 hover:border-purple-600 bg-purple-50/70 hover:bg-purple-100/70 text-purple-900 font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer shadow-2xs hover:scale-[1.01]"
                   >
                     <Plus className="w-4 h-4 stroke-[3] text-purple-700" />
-                    <span>+ Add Another Child / Student (₹1,000 per seat)</span>
+                    <span>+ Add Another Child / Student (₹2 per seat)</span>
                   </button>
                 </div>
               </div>
@@ -952,7 +958,7 @@ export default function AiExplorerPreBooking() {
                     ₹{totalAmount.toLocaleString('en-IN')}
                   </span>{' '}
                   <span className="text-[11px] text-slate-500">
-                    ({students.length} Student{students.length > 1 ? 's' : ''} × ₹1,000)
+                    ({students.length} Student{students.length > 1 ? 's' : ''} × ₹2)
                   </span>
                 </div>
 
@@ -1001,7 +1007,7 @@ export default function AiExplorerPreBooking() {
                     AI Explorer Course — {students.length} Student{students.length > 1 ? 's' : ''} Reserved
                   </div>
                   <div className="text-white/80 text-xs font-semibold mt-1">
-                    Token amount of ₹1,000 per child will be adjusted in the final annual tuition fee.
+                    Token amount of ₹2 per child will be adjusted in the final annual tuition fee.
                   </div>
                 </div>
 
@@ -1035,7 +1041,7 @@ export default function AiExplorerPreBooking() {
                       </div>
                     </div>
                     <span className="font-black text-xs text-purple-700 bg-purple-100 px-2.5 py-1 rounded-lg">
-                      ₹1,000
+                      ₹2
                     </span>
                   </div>
                 ))}
@@ -1146,7 +1152,7 @@ export default function AiExplorerPreBooking() {
                     <span className="font-black text-purple-700 text-base">
                       ₹{totalAmount.toLocaleString('en-IN')}{' '}
                       <span className="text-[10px] text-slate-500 font-normal">
-                        ({students.length} × ₹1,000)
+                        ({tokenPlanMode === 'flat2' ? 'Flat ₹2 Real Test' : `${students.length} × ₹2`})
                       </span>
                     </span>
                   </div>
@@ -1155,17 +1161,81 @@ export default function AiExplorerPreBooking() {
 
               {/* Payment Gateway Right Column */}
               <div className="lg:col-span-6 space-y-4 sm:space-y-5">
-                <h3 className="text-xs sm:text-sm font-black text-[#0f1f5c] uppercase tracking-wider">
-                  Payment Gateway
-                </h3>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs sm:text-sm font-black text-[#0f1f5c] uppercase tracking-wider">
+                    Payment Gateway
+                  </h3>
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black bg-amber-100 text-amber-900 border border-amber-300">
+                    <span>⚡ Live Gateway Ready</span>
+                  </span>
+                </div>
 
-                {/* Cashfree Online Gateway */}
+                {/* 2 Rupees Real Payment Menu Selector */}
+                <div className="p-3.5 rounded-2xl bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300 space-y-2 shadow-2xs">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-black text-amber-950 flex items-center gap-1.5">
+                      <span>🧪</span>
+                      <span>Payment Amount Menu (Real Test &amp; Token)</span>
+                    </span>
+                    <span className="text-[10px] font-bold text-amber-800 bg-amber-200/60 px-2 py-0.5 rounded-md">
+                      Live Razorpay
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => setTokenPlanMode('flat2')}
+                      className={`p-2.5 rounded-xl text-left border-2 transition-all cursor-pointer ${
+                        tokenPlanMode === 'flat2'
+                          ? 'bg-amber-600 border-amber-700 text-white shadow-xs scale-101'
+                          : 'bg-white border-amber-200 text-amber-950 hover:bg-amber-100/50'
+                      }`}
+                    >
+                      <div className="font-black text-xs flex items-center justify-between">
+                        <span>⚡ ₹2 Real Test</span>
+                        {tokenPlanMode === 'flat2' && <span>✓</span>}
+                      </div>
+                      <div className={`text-[10px] font-bold mt-0.5 ${tokenPlanMode === 'flat2' ? 'text-amber-100' : 'text-slate-500'}`}>
+                        Charge ₹2.00 (200 paise)
+                      </div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setTokenPlanMode('per_student')}
+                      className={`p-2.5 rounded-xl text-left border-2 transition-all cursor-pointer ${
+                        tokenPlanMode === 'per_student'
+                          ? 'bg-purple-700 border-purple-800 text-white shadow-xs scale-101'
+                          : 'bg-white border-slate-200 text-slate-800 hover:bg-slate-50'
+                      }`}
+                    >
+                      <div className="font-black text-xs flex items-center justify-between">
+                        <span>🎟️ ₹{students.length * 2} Token</span>
+                        {tokenPlanMode === 'per_student' && <span>✓</span>}
+                      </div>
+                      <div className={`text-[10px] font-bold mt-0.5 ${tokenPlanMode === 'per_student' ? 'text-purple-200' : 'text-slate-500'}`}>
+                        ₹2 × {students.length} student{students.length > 1 ? 's' : ''}
+                      </div>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Razorpay Online Gateway */}
                 <div className="p-3.5 sm:p-4 rounded-2xl border-2 border-purple-600 bg-purple-50/70 shadow-2xs flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <span className="text-xl sm:text-2xl">⚡</span>
+                    <div className="w-10 h-10 rounded-xl bg-[#0c2340] flex items-center justify-center text-white font-bold text-xs shadow-xs">
+                      <span className="text-[#3399cc] font-black text-sm">R</span><span className="text-white font-black text-xs">P</span>
+                    </div>
                     <div>
-                      <div className="font-black text-xs sm:text-sm text-[#0f1f5c]">Cashfree Online Checkout</div>
-                      <div className="text-[10px] sm:text-[11px] font-bold text-slate-500">Instant UPI, Google Pay, Cards &amp; NetBanking</div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-black text-xs sm:text-sm text-[#0f1f5c]">Razorpay Secure Checkout</span>
+                        <span className="bg-[#0f1f5c] text-white text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                          Active Gateway
+                        </span>
+                      </div>
+                      <div className="text-[10px] sm:text-[11px] font-bold text-slate-500 mt-0.5">
+                        Instant UPI (GPay, PhonePe, Paytm), Cards &amp; NetBanking
+                      </div>
                     </div>
                   </div>
                   <div className="w-5 h-5 rounded-full bg-purple-600 text-white flex items-center justify-center shrink-0">
@@ -1244,7 +1314,7 @@ export default function AiExplorerPreBooking() {
                     </div>
                   ) : (
                     <span>
-                      Pay ₹{totalAmount.toLocaleString('en-IN')} &amp; Confirm Pre-Booking 🎉
+                      Pay ₹{totalAmount.toLocaleString('en-IN')} with Razorpay ⚡
                     </span>
                   )}
                 </button>
@@ -1364,7 +1434,7 @@ export default function AiExplorerPreBooking() {
                           <span className="font-black text-[#0f1f5c]">{st.name}</span>
                           <span className="text-slate-500">({st.standard} • {st.school})</span>
                         </div>
-                        <span className="font-bold text-emerald-700">₹1,000 Token</span>
+                        <span className="font-bold text-emerald-700">₹2 Token</span>
                       </div>
                     ))}
                   </div>

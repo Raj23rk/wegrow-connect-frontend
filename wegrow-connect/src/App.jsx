@@ -56,6 +56,7 @@ const AdminMeetupFeedbackPage = lazy(() => import('./admin/feedback/page'));
 const AiExplorerEnrollment = lazy(() => import('./components/AiExplorerEnrollment'));
 const AiExplorerPreBooking = lazy(() => import('./components/AiExplorerPreBooking'));
 const AdminAiExplorerPage = lazy(() => import('./admin/ai-explorer/page'));
+const CheckoutDemo = lazy(() => import('./components/CheckoutDemo'));
 
 // Auth Context, Theme Context and Guard
 import { AuthProvider, ProtectedRoute } from './context/AuthContext';
@@ -851,6 +852,11 @@ export default function App() {
             <Route path="/feedback-qr" element={<FeedbackQrPage />} />
             <Route path="/feedback/qr" element={<FeedbackQrPage />} />
             <Route path="/meetup-qr" element={<FeedbackQrPage />} />
+
+            {/* Razorpay Standard Checkout & Payment Demo */}
+            <Route path="/checkout" element={<CheckoutDemo />} />
+            <Route path="/payment-demo" element={<CheckoutDemo />} />
+            <Route path="/razorpay-checkout" element={<CheckoutDemo />} />
 
             {/* Student Dashboard Routes (Protected) */}
             <Route path="/student/dashboard" element={<ProtectedRoute allowedRoles={['student']}><StudentDashboard /></ProtectedRoute>} />

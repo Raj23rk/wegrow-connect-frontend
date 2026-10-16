@@ -9,3 +9,5 @@ export const API_BASE = (isLocal && (!envBase || envBase.includes('render.com'))
   : (envBase
       ? (envBase.endsWith('/api/v1') ? envBase : `${envBase}/api/v1`)
       : 'https://wegrow-connect-backend-1.onrender.com/api/v1');
+
+export const API_ROOT = API_BASE.replace(/\/api\/v1\/?$/, '');

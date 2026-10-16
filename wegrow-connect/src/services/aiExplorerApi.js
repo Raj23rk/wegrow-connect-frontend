@@ -241,7 +241,7 @@ export const aiExplorerApi = {
       selectedTerm: data.selectedTerm || '',
       amount: Number(data.amount || 0),
       totalFee: Number(data.totalFee || data.amount || 0),
-      paymentMethod: data.paymentMethod || 'Cashfree',
+      paymentMethod: data.paymentMethod || 'Razorpay',
       paymentStatus: data.paymentStatus || 'PAID',
       transactionId: data.transactionId || '',
       declarationAccepted: data.declarationAccepted !== false,
@@ -309,7 +309,7 @@ export const aiExplorerApi = {
       fatherPhone: data.fatherPhone,
       motherPhone: data.motherPhone,
       address: data.address,
-      paymentMethod: data.paymentMethod || 'Cashfree',
+      paymentMethod: data.paymentMethod || 'Razorpay',
     };
 
     try {
@@ -395,7 +395,7 @@ export const aiExplorerApi = {
       totalStudents,
       amount: computedAmount,
       amountPerStudent: 1000,
-      paymentMethod: data.paymentMethod || 'Cashfree',
+      paymentMethod: data.paymentMethod || 'Razorpay',
       paymentStatus: data.paymentStatus || 'PAID',
       transactionId: data.transactionId || `PB_${Date.now().toString().slice(-8)}`,
       declarationAccepted: data.declarationAccepted !== false,
@@ -682,7 +682,7 @@ export const aiExplorerApi = {
       address: data.address,
       feePlan: data.feePlan || data.plan,
       amount: Number(data.amount || 0),
-      paymentMethod: data.paymentMethod || 'Cashfree',
+      paymentMethod: data.paymentMethod || 'Razorpay',
     };
 
     try {

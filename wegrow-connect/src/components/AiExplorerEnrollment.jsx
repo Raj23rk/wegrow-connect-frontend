@@ -28,6 +28,7 @@ import {
   X
 } from 'lucide-react';
 import { aiExplorerApi } from '../services/aiExplorerApi';
+import { openStandardRazorpayCheckout } from '../services/razorpay';
 
 const BASE_PLANS = {
   full: {
@@ -65,6 +66,18 @@ const BASE_PLANS = {
     cycles: '3 Terms',
     color: 'from-blue-500 to-cyan-600',
     badgeBg: '#3b82f6',
+  },
+  test2: {
+    id: 'test2',
+    name: '₹2 Real Test Payment',
+    baseTotalFee: 2,
+    baseAmount: 2,
+    baseSavings: 0,
+    tag: '⚡ 2 RUPEES TEST',
+    desc: 'Test real Razorpay gateway with ₹2 real debit via UPI / Cards / NetBanking.',
+    cycles: '₹2 Real Test',
+    color: 'from-amber-500 to-orange-600',
+    badgeBg: '#f59e0b',
   },
 };
 
@@ -107,7 +120,7 @@ export default function AiExplorerEnrollment() {
   const [selectedTerm, setSelectedTerm] = useState('term1');
   const [selectedHalf, setSelectedHalf] = useState('half1');
   const [isDeclared, setIsDeclared] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState('Cashfree');
+  const [paymentMethod, setPaymentMethod] = useState('Razorpay');
   const [utrNumber, setUtrNumber] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [completedEnrollment, setCompletedEnrollment] = useState(null);
@@ -120,6 +133,20 @@ export default function AiExplorerEnrollment() {
 
   const getActivePayDetails = () => {
     const count = students.length || 1;
+    if (selectedPlan === 'test2' || selectedPlan === 'test') {
+      return {
+        planName: '₹2 Real Payment Test (Live Test)',
+        basePlanName: '₹2 Real Payment Test',
+        subLabel: 'Live Razorpay Test Mode',
+        studentCount: count,
+        basePerStudent: 2,
+        amount: 2,
+        totalFee: 2,
+        savings: 0,
+        dueDesc: `Live Real Gateway Test Payment (${count} ${count > 1 ? 'Students' : 'Student'})`,
+        tag: `₹2 Real Test Amount`,
+      };
+    }
     if (selectedPlan === 'term') {
       const t = BASE_TERM_OPTIONS.find((item) => item.id === selectedTerm) || BASE_TERM_OPTIONS[0];
       const perTermAmount = t.baseAmount * count;
@@ -408,7 +435,7 @@ export default function AiExplorerEnrollment() {
               selectedTerm: selectedPlan === 'term' ? payDetails.subLabel : '',
               amount: payDetails.amount,
               totalFee: payDetails.totalFee,
-              paymentMethod: 'Cashfree',
+              paymentMethod: 'Razorpay',
               transactionId: orderIdParam,
               paymentStatus: 'PAID',
             };
@@ -490,7 +517,7 @@ export default function AiExplorerEnrollment() {
           ...(basePayload || buildEnrollmentPayload(orderId)),
           transactionId: orderId,
           paymentStatus: 'PAID',
-          paymentMethod: 'Cashfree',
+          paymentMethod: 'Razorpay',
         };
 
         const response = await aiExplorerApi.submitEnrollment(payloadToSubmit);
@@ -522,7 +549,7 @@ export default function AiExplorerEnrollment() {
     }
   };
 
-  // Process Final Payment & Enrollment
+  // Process Final Payment & Enrollment via Razorpay
   const handlePaymentAndEnroll = async () => {
     setIsProcessing(true);
     const payDetails = getActivePayDetails();
@@ -530,84 +557,65 @@ export default function AiExplorerEnrollment() {
     const enrollmentPayload = buildEnrollmentPayload();
 
     try {
-      if (paymentMethod === 'Cashfree') {
-        const cashfreePayload = {
-          amount: payDetails.amount,
-          orderAmount: payDetails.amount,
-          customerName: students[0]?.name?.trim() || parent.fatherName.trim() || 'Parent',
-          studentName: studentNames,
+      await openStandardRazorpayCheckout({
+        amountInRupees: payDetails.amount,
+        customer: {
+          name: students[0]?.name?.trim() || parent.fatherName.trim() || 'Parent',
           email: parent.email.trim(),
-          customerEmail: parent.email.trim(),
-          fatherPhone: parent.fatherPhone.trim(),
-          customerPhone: parent.fatherPhone.trim(),
-          motherPhone: parent.motherPhone.trim(),
-          fatherName: parent.fatherName.trim(),
-          motherName: parent.motherName.trim(),
-          address: parent.address.trim(),
-          feePlan: selectedPlan,
+          phone: parent.fatherPhone.trim() || parent.motherPhone.trim(),
+        },
+        purpose: 'COURSE_ENROLLMENT',
+        notes: {
           plan: selectedPlan,
           planName: payDetails.planName,
           selectedTerm: selectedPlan === 'term' ? payDetails.subLabel : '',
-          totalFee: payDetails.totalFee,
-          orderNote: `AI Explorer Enrollment (${payDetails.planName} • ${students.length} Student${students.length > 1 ? 's' : ''}) - ${studentNames}`,
-          students: students.map((s) => ({
-            name: s.name.trim(),
-            standard: s.standard,
-            school: s.school.trim(),
-          })),
-        };
+          totalFee: String(payDetails.totalFee),
+          studentCount: String(students.length),
+          students: studentNames,
+          fatherPhone: parent.fatherPhone.trim(),
+          motherPhone: parent.motherPhone.trim(),
+        },
+        description: `AI Explorer Enrollment (${payDetails.planName} • ${students.length} Student${students.length > 1 ? 's' : ''})`,
+        themeColor: '#7b4dff',
+        onSuccess: async (verifyData) => {
+          toast.loading('Confirming course enrollment in portal...', { id: 'payment-act' });
+          try {
+            const transactionId = verifyData.paymentId || verifyData.orderId || `RZP_${Date.now()}`;
+            const payloadToSubmit = {
+              ...enrollmentPayload,
+              transactionId,
+              paymentStatus: 'PAID',
+              paymentMethod: 'Razorpay',
+            };
 
-        const cfRes = await aiExplorerApi.createEnrollmentOrder(cashfreePayload);
-        if (!cfRes?.success || !cfRes?.data?.paymentSessionId) {
-          throw new Error(cfRes?.message || 'Could not initiate payment session with Cashfree.');
-        }
-
-        const orderData = cfRes.data;
-        const targetOrderId = orderData.orderId || orderData.order_id || `ORD_${Date.now()}`;
-        setPendingOrder({
-          orderId: targetOrderId,
-          paymentSessionId: orderData.paymentSessionId,
-          status: 'INITIATED',
-        });
-
-        if (typeof window !== 'undefined' && window.Cashfree) {
-          toast.success('Opening Cashfree Checkout...');
-          const cashfree = window.Cashfree({
-            mode: (orderData.environment?.toLowerCase() === 'sandbox' || orderData.environment?.toLowerCase() === 'test')
-              ? 'sandbox'
-              : 'production',
-          });
-
-          await cashfree.checkout({
-            paymentSessionId: orderData.paymentSessionId,
-            redirectTarget: '_modal',
-          });
-
-          // After modal closes or finishes, verify with backend gateway
-          toast.loading('Verifying payment with gateway...', { id: 'payment-act' });
-          await new Promise((r) => setTimeout(r, 1200));
-          await verifyAndSubmitEnrollment(targetOrderId, enrollmentPayload);
-        } else if (orderData.paymentLink) {
-          window.location.href = orderData.paymentLink;
-        } else {
-          throw new Error('Cashfree checkout modal could not be loaded.');
-        }
-      } else {
-        // Direct / Offline payment mode
-        const response = await aiExplorerApi.submitEnrollment(enrollmentPayload);
-        if (response?.success) {
-          setCompletedEnrollment(response.data);
-          setStep(4);
-          toast.success(`🎉 Enrollment registered successfully!`);
-          scrollToSection();
-        } else {
-          throw new Error(response?.message || 'Enrollment registration failed.');
-        }
-      }
+            const response = await aiExplorerApi.submitEnrollment(payloadToSubmit);
+            if (response?.success) {
+              setCompletedEnrollment(response.data);
+              setPendingOrder(null);
+              setStep(4);
+              toast.success(`🎉 Payment verified! Enrollment confirmed for ${students.length} student${students.length > 1 ? 's' : ''}!`, { id: 'payment-act' });
+              scrollToSection();
+            } else {
+              throw new Error(response?.message || 'Failed to save enrollment details in database.');
+            }
+          } catch (err) {
+            toast.error(err.message || 'Error recording enrollment confirmation.', { id: 'payment-act' });
+          } finally {
+            setIsProcessing(false);
+          }
+        },
+        onError: (err) => {
+          setIsProcessing(false);
+          toast.error(err.message || 'Razorpay payment was not completed.', { id: 'payment-act' });
+        },
+        onDismiss: () => {
+          setIsProcessing(false);
+          toast('Payment checkout closed.', { icon: 'ℹ️' });
+        },
+      });
     } catch (error) {
-      toast.error(error.message || 'Payment processing failed. Please try again.', { id: 'payment-act' });
-    } finally {
       setIsProcessing(false);
+      toast.error(error.message || 'Payment processing failed. Please try again.', { id: 'payment-act' });
     }
   };
   const copyId = (id) => {
@@ -1314,12 +1322,12 @@ export default function AiExplorerEnrollment() {
             </div>
 
             {/* Dynamic Plan Selector Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5 mb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 mb-6">
               {Object.values(BASE_PLANS).map((p) => {
                 const isSelected = selectedPlan === p.id;
-                const calcTotalFee = p.baseTotalFee * students.length;
+                const calcTotalFee = p.id === 'test2' ? p.baseTotalFee : p.baseTotalFee * students.length;
                 const calcSavings = p.baseSavings * students.length;
-                const calcPayNow = p.baseAmount * students.length;
+                const calcPayNow = p.id === 'test2' ? p.baseAmount : p.baseAmount * students.length;
 
                 return (
                   <div
@@ -1327,7 +1335,11 @@ export default function AiExplorerEnrollment() {
                     onClick={() => setSelectedPlan(p.id)}
                     className={`relative p-5 sm:p-6 rounded-2xl sm:rounded-3xl border-2 transition-all cursor-pointer flex flex-col justify-between ${
                       isSelected
-                        ? 'border-purple-600 bg-purple-50 shadow-md scale-101'
+                        ? p.id === 'test2'
+                          ? 'border-amber-500 bg-amber-50/80 shadow-md scale-101 ring-2 ring-amber-400'
+                          : 'border-purple-600 bg-purple-50 shadow-md scale-101'
+                        : p.id === 'test2'
+                        ? 'border-amber-200 bg-amber-50/30 hover:border-amber-400 hover:shadow-sm'
                         : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm'
                     }`}
                   >
@@ -1340,7 +1352,7 @@ export default function AiExplorerEnrollment() {
                         {p.tag}
                       </span>
                       {isSelected && (
-                        <div className="w-5 h-5 rounded-full bg-purple-600 text-white flex items-center justify-center">
+                        <div className={`w-5 h-5 rounded-full ${p.id === 'test2' ? 'bg-amber-600' : 'bg-purple-600'} text-white flex items-center justify-center`}>
                           <Check className="w-3.5 h-3.5 stroke-[3]" />
                         </div>
                       )}
@@ -1373,8 +1385,13 @@ export default function AiExplorerEnrollment() {
                             3 Terms • Pay ₹{calcPayNow.toLocaleString('en-IN')} (Term I)
                           </span>
                         )}
+                        {p.id === 'test2' && (
+                          <span className="text-amber-700 font-black">
+                            Live Test Mode • Exactly ₹2.00 Real Debit via Razorpay
+                          </span>
+                        )}
                       </div>
-                      {students.length > 1 && (
+                      {students.length > 1 && p.id !== 'test2' && (
                         <div className="text-[10px] font-bold text-purple-700 mt-1">
                           Calculated for {students.length} students (₹{p.baseTotalFee.toLocaleString('en-IN')} / student)
                         </div>
@@ -1679,17 +1696,67 @@ export default function AiExplorerEnrollment() {
 
               {/* Right Column: Payment Options */}
               <div className="lg:col-span-6 space-y-4 sm:space-y-5">
-                <h3 className="text-xs sm:text-sm font-black text-[#0f1f5c] uppercase tracking-wider">
-                  Payment Method
-                </h3>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs sm:text-sm font-black text-[#0f1f5c] uppercase tracking-wider">
+                    Payment Method
+                  </h3>
+                  {/* Real ₹2 Test Switch Menu */}
+                  <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-300 px-2.5 py-1 rounded-xl text-[11px] font-black text-amber-900">
+                    <span>⚡ Test Real:</span>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedPlan('test2')}
+                      className={`px-2 py-0.5 rounded-lg transition-all ${
+                        selectedPlan === 'test2'
+                          ? 'bg-amber-600 text-white shadow-xs'
+                          : 'bg-white hover:bg-amber-100 text-amber-900 border border-amber-200'
+                      }`}
+                    >
+                      ₹2 Test
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedPlan('full')}
+                      className={`px-2 py-0.5 rounded-lg transition-all ${
+                        selectedPlan !== 'test2'
+                          ? 'bg-[#0f1f5c] text-white shadow-xs'
+                          : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
+                      }`}
+                    >
+                      Full Fee
+                    </button>
+                  </div>
+                </div>
 
-                {/* Single Verified Online Payment Method */}
+                {/* ₹2 Test Active Notice if test2 is selected */}
+                {selectedPlan === 'test2' && (
+                  <div className="p-3.5 rounded-2xl bg-amber-50 border-2 border-amber-400 text-amber-950 flex items-start gap-2.5 shadow-2xs animate-pulse">
+                    <span className="text-lg">🧪</span>
+                    <div className="text-xs">
+                      <div className="font-black text-amber-900">₹2 Real Payment Test Mode Active</div>
+                      <div className="text-amber-800 text-[11px] font-semibold mt-0.5">
+                        Razorpay modal will open requesting real <strong>₹2.00 (200 paise)</strong>. You can test live UPI/QR/NetBanking and verify database confirmation.
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Razorpay Online Gateway */}
                 <div className="p-3.5 sm:p-4 rounded-2xl border-2 border-purple-600 bg-purple-50/70 shadow-2xs flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <span className="text-xl sm:text-2xl">⚡</span>
+                    <div className="w-10 h-10 rounded-xl bg-[#0c2340] flex items-center justify-center text-white font-bold text-xs shadow-xs">
+                      <span className="text-[#3399cc] font-black text-sm">R</span><span className="text-white font-black text-xs">P</span>
+                    </div>
                     <div>
-                      <div className="font-black text-xs sm:text-sm text-[#0f1f5c]">Cashfree Online Checkout</div>
-                      <div className="text-[10px] sm:text-[11px] font-bold text-slate-500">Instant UPI, Cards &amp; NetBanking</div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-black text-xs sm:text-sm text-[#0f1f5c]">Razorpay Secure Checkout</span>
+                        <span className="bg-[#0f1f5c] text-white text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                          Active Gateway
+                        </span>
+                      </div>
+                      <div className="text-[10px] sm:text-[11px] font-bold text-slate-500 mt-0.5">
+                        Instant UPI (GPay, PhonePe, Paytm), Cards &amp; NetBanking
+                      </div>
                     </div>
                   </div>
                   <div className="w-5 h-5 rounded-full bg-purple-600 text-white flex items-center justify-center shrink-0">
@@ -1713,6 +1780,8 @@ export default function AiExplorerEnrollment() {
                       ? `Total Fee for ${students.length} students: ₹${payDetails.totalFee.toLocaleString('en-IN')} (${payDetails.subLabel} chosen • other terms payable in subsequent terms)`
                       : selectedPlan === 'half'
                       ? `Total Fee for ${students.length} students: ₹${payDetails.totalFee.toLocaleString('en-IN')} (${payDetails.subLabel} chosen • other installment payable bi-annually)`
+                      : selectedPlan === 'test2'
+                      ? `Real Production Gateway Test: Razorpay will charge exactly ₹2.00 (200 paise) via Live UPI / Card`
                       : `100% Secure Transaction via WeGrow Connect (${students.length} student${students.length > 1 ? 's' : ''})`}
                   </div>
                 </div>
@@ -1772,7 +1841,7 @@ export default function AiExplorerEnrollment() {
                     </div>
                   ) : (
                     <span>
-                      Pay {payDetails.subLabel} ₹{payDetails.amount.toLocaleString('en-IN')} &amp; Complete Enrollment 🎉
+                      Pay {payDetails.subLabel ? `${payDetails.subLabel} • ` : ''}₹{payDetails.amount.toLocaleString('en-IN')} with Razorpay ⚡
                     </span>
                   )}
                 </button>
