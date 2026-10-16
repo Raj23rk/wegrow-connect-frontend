@@ -30,7 +30,7 @@ import {
 import { aiExplorerApi } from '../services/aiExplorerApi';
 import { openStandardRazorpayCheckout } from '../services/razorpay';
 
-const PREBOOKING_TOKEN_AMOUNT = 2;
+const PREBOOKING_TOKEN_AMOUNT = 1000;
 
 export default function AiExplorerPreBooking() {
   const [step, setStep] = useState(1);
@@ -65,7 +65,7 @@ export default function AiExplorerPreBooking() {
   const [copied, setCopied] = useState(false);
 
   const formTopRef = useRef(null);
-  const [tokenPlanMode, setTokenPlanMode] = useState('flat2'); // 'flat2' = ₹2 Real Test Mode, 'per_student' = students.length * PREBOOKING_TOKEN_AMOUNT
+  const [tokenPlanMode, setTokenPlanMode] = useState('per_student'); // 'per_student' = default ₹1,000 / student, 'flat2' = ₹2 Real Test Mode
   const totalAmount = tokenPlanMode === 'flat2' ? 2 : students.length * PREBOOKING_TOKEN_AMOUNT;
 
   // Generate QR Code upon successful pre-booking
@@ -541,7 +541,7 @@ export default function AiExplorerPreBooking() {
               className="inline-flex items-center justify-center gap-1.5 text-white font-black text-xs sm:text-sm px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-full shadow-md hover:shadow-lg hover:scale-105 transition-all cursor-pointer whitespace-nowrap shrink-0"
             >
               <Ticket className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-              <span>Pre-Book Seat (₹2)</span>
+              <span>Pre-Book Seat (₹1,000)</span>
             </button>
           </div>
         </div>
@@ -616,7 +616,7 @@ export default function AiExplorerPreBooking() {
                   <span>AI Explorer Seat Pre-Booking</span>
                 </div>
                 <p className="text-slate-500 text-xs sm:text-sm font-semibold mt-1">
-                  Reserve student seats with ₹2 token fee per child. Add multiple children below if needed!
+                  Reserve student seats with ₹1,000 token fee per child. Add multiple children below if needed!
                 </p>
               </div>
 
@@ -651,7 +651,7 @@ export default function AiExplorerPreBooking() {
                     <span>Student(s) Enrolling for AI Explorer</span>
                   </div>
                   <span className="text-xs font-bold text-slate-500">
-                    ₹2 per student
+                    ₹1,000 per student
                   </span>
                 </div>
 
@@ -672,7 +672,7 @@ export default function AiExplorerPreBooking() {
                             Child #{idx + 1} Details
                           </span>
                           <span className="bg-purple-100 text-purple-800 text-[10px] font-extrabold px-2 py-0.5 rounded-md">
-                            ₹2 Token Seat
+                            ₹1,000 Token Seat
                           </span>
                         </div>
 
@@ -788,7 +788,7 @@ export default function AiExplorerPreBooking() {
                     className="w-full py-3.5 px-4 rounded-2xl border-2 border-dashed border-purple-400 hover:border-purple-600 bg-purple-50/70 hover:bg-purple-100/70 text-purple-900 font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer shadow-2xs hover:scale-[1.01]"
                   >
                     <Plus className="w-4 h-4 stroke-[3] text-purple-700" />
-                    <span>+ Add Another Child / Student (₹2 per seat)</span>
+                    <span>+ Add Another Child / Student (₹1,000 per seat)</span>
                   </button>
                 </div>
               </div>
@@ -958,7 +958,7 @@ export default function AiExplorerPreBooking() {
                     ₹{totalAmount.toLocaleString('en-IN')}
                   </span>{' '}
                   <span className="text-[11px] text-slate-500">
-                    ({students.length} Student{students.length > 1 ? 's' : ''} × ₹2)
+                    ({students.length} Student{students.length > 1 ? 's' : ''} × ₹1,000)
                   </span>
                 </div>
 
@@ -1007,7 +1007,7 @@ export default function AiExplorerPreBooking() {
                     AI Explorer Course — {students.length} Student{students.length > 1 ? 's' : ''} Reserved
                   </div>
                   <div className="text-white/80 text-xs font-semibold mt-1">
-                    Token amount of ₹2 per child will be adjusted in the final annual tuition fee.
+                    Token amount of ₹1,000 per child will be adjusted in the final annual tuition fee.
                   </div>
                 </div>
 
@@ -1041,7 +1041,7 @@ export default function AiExplorerPreBooking() {
                       </div>
                     </div>
                     <span className="font-black text-xs text-purple-700 bg-purple-100 px-2.5 py-1 rounded-lg">
-                      ₹2
+                      ₹1,000
                     </span>
                   </div>
                 ))}
@@ -1152,7 +1152,7 @@ export default function AiExplorerPreBooking() {
                     <span className="font-black text-purple-700 text-base">
                       ₹{totalAmount.toLocaleString('en-IN')}{' '}
                       <span className="text-[10px] text-slate-500 font-normal">
-                        ({tokenPlanMode === 'flat2' ? 'Flat ₹2 Real Test' : `${students.length} × ₹2`})
+                        ({tokenPlanMode === 'flat2' ? 'Flat ₹2 Real Test' : `${students.length} × ₹1,000`})
                       </span>
                     </span>
                   </div>
@@ -1170,51 +1170,51 @@ export default function AiExplorerPreBooking() {
                   </span>
                 </div>
 
-                {/* 2 Rupees Real Payment Menu Selector */}
-                <div className="p-3.5 rounded-2xl bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300 space-y-2 shadow-2xs">
+                {/* 1000 Rupees Standard & Real Test Payment Menu Selector */}
+                <div className="p-3.5 rounded-2xl bg-gradient-to-r from-purple-50 via-indigo-50 to-amber-50 border-2 border-purple-300 space-y-2 shadow-2xs">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-black text-amber-950 flex items-center gap-1.5">
-                      <span>🧪</span>
-                      <span>Payment Amount Menu (Real Test &amp; Token)</span>
+                    <span className="text-xs font-black text-[#0f1f5c] flex items-center gap-1.5">
+                      <span>🎟️</span>
+                      <span>Pre-Booking Payment Options</span>
                     </span>
-                    <span className="text-[10px] font-bold text-amber-800 bg-amber-200/60 px-2 py-0.5 rounded-md">
-                      Live Razorpay
+                    <span className="text-[10px] font-bold text-purple-800 bg-purple-100 px-2 py-0.5 rounded-md">
+                      Razorpay Live
                     </span>
                   </div>
-                  <div className="grid grid-cols-2 gap-2 pt-1">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
                     <button
                       type="button"
-                      onClick={() => setTokenPlanMode('flat2')}
-                      className={`p-2.5 rounded-xl text-left border-2 transition-all cursor-pointer ${
-                        tokenPlanMode === 'flat2'
-                          ? 'bg-amber-600 border-amber-700 text-white shadow-xs scale-101'
-                          : 'bg-white border-amber-200 text-amber-950 hover:bg-amber-100/50'
+                      onClick={() => setTokenPlanMode('per_student')}
+                      className={`p-3 rounded-xl text-left border-2 transition-all cursor-pointer ${
+                        tokenPlanMode === 'per_student'
+                          ? 'bg-purple-700 border-purple-800 text-white shadow-md scale-101 ring-2 ring-purple-300'
+                          : 'bg-white border-slate-200 text-slate-800 hover:bg-slate-50'
                       }`}
                     >
-                      <div className="font-black text-xs flex items-center justify-between">
-                        <span>⚡ ₹2 Real Test</span>
-                        {tokenPlanMode === 'flat2' && <span>✓</span>}
+                      <div className="font-black text-xs sm:text-sm flex items-center justify-between">
+                        <span>🎟️ Standard Token (₹{(students.length * 1000).toLocaleString('en-IN')})</span>
+                        {tokenPlanMode === 'per_student' && <span>✓</span>}
                       </div>
-                      <div className={`text-[10px] font-bold mt-0.5 ${tokenPlanMode === 'flat2' ? 'text-amber-100' : 'text-slate-500'}`}>
-                        Charge ₹2.00 (200 paise)
+                      <div className={`text-[10px] sm:text-[11px] font-bold mt-0.5 ${tokenPlanMode === 'per_student' ? 'text-purple-200' : 'text-slate-500'}`}>
+                        ₹1,000 × {students.length} child{students.length > 1 ? 'ren' : ''} • Fully adjustable
                       </div>
                     </button>
 
                     <button
                       type="button"
-                      onClick={() => setTokenPlanMode('per_student')}
-                      className={`p-2.5 rounded-xl text-left border-2 transition-all cursor-pointer ${
-                        tokenPlanMode === 'per_student'
-                          ? 'bg-purple-700 border-purple-800 text-white shadow-xs scale-101'
-                          : 'bg-white border-slate-200 text-slate-800 hover:bg-slate-50'
+                      onClick={() => setTokenPlanMode('flat2')}
+                      className={`p-3 rounded-xl text-left border-2 transition-all cursor-pointer ${
+                        tokenPlanMode === 'flat2'
+                          ? 'bg-amber-600 border-amber-700 text-white shadow-md scale-101 ring-2 ring-amber-400'
+                          : 'bg-white border-amber-200 text-amber-950 hover:bg-amber-100/50'
                       }`}
                     >
-                      <div className="font-black text-xs flex items-center justify-between">
-                        <span>🎟️ ₹{students.length * 2} Token</span>
-                        {tokenPlanMode === 'per_student' && <span>✓</span>}
+                      <div className="font-black text-xs sm:text-sm flex items-center justify-between">
+                        <span>⚡ ₹2 Real Test Mode</span>
+                        {tokenPlanMode === 'flat2' && <span>✓</span>}
                       </div>
-                      <div className={`text-[10px] font-bold mt-0.5 ${tokenPlanMode === 'per_student' ? 'text-purple-200' : 'text-slate-500'}`}>
-                        ₹2 × {students.length} student{students.length > 1 ? 's' : ''}
+                      <div className={`text-[10px] sm:text-[11px] font-bold mt-0.5 ${tokenPlanMode === 'flat2' ? 'text-amber-100' : 'text-slate-500'}`}>
+                        Live Razorpay test • Charge ₹2.00 (200 paise)
                       </div>
                     </button>
                   </div>
@@ -1434,7 +1434,9 @@ export default function AiExplorerPreBooking() {
                           <span className="font-black text-[#0f1f5c]">{st.name}</span>
                           <span className="text-slate-500">({st.standard} • {st.school})</span>
                         </div>
-                        <span className="font-bold text-emerald-700">₹2 Token</span>
+                        <span className="font-bold text-emerald-700">
+                          ₹{completedPreBooking.amount ? Math.round(completedPreBooking.amount / ((completedPreBooking.students || students).length || 1)).toLocaleString('en-IN') : '1,000'} Token
+                        </span>
                       </div>
                     ))}
                   </div>
