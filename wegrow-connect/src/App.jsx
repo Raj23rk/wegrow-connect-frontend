@@ -59,6 +59,7 @@ const AdminAiExplorerPage = lazy(() => import('./admin/ai-explorer/page'));
 const CheckoutDemo = lazy(() => import('./components/CheckoutDemo'));
 const SpinAndWin = lazy(() => import('./components/SpinAndWin'));
 const SpinAndWinQrPage = lazy(() => import('./components/SpinAndWinQrPage'));
+const DiwaliSkillChallenge = lazy(() => import('./components/DiwaliSkillChallenge'));
 const AdminCampusDesk = lazy(() => import('./components/AdminCampusDesk'));
 
 // Auth Context, Theme Context and Guard
@@ -872,6 +873,10 @@ export default function App() {
             <Route path="/spin-qr" element={<SpinAndWinQrPage />} />
             <Route path="/spin-win-qr" element={<SpinAndWinQrPage />} />
             <Route path="/diwali-qr" element={<SpinAndWinQrPage />} />
+            <Route path="/diwali-challenge" element={<DiwaliSkillChallenge />} />
+            <Route path="/skill-challenge" element={<DiwaliSkillChallenge />} />
+            <Route path="/coding-challenge" element={<DiwaliSkillChallenge />} />
+            <Route path="/challenge" element={<DiwaliSkillChallenge />} />
 
             {/* Campus Counselor Desk & Spin-and-Win Admin */}
             <Route path="/campus-desk" element={<AdminCampusDesk />} />

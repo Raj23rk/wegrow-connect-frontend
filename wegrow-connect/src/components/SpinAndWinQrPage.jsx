@@ -102,6 +102,13 @@ export default function SpinAndWinQrPage() {
             <Building className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Counselor Desk</span>
           </a>
+          <a
+            href="/diwali-challenge"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/40 text-xs font-bold text-amber-300 transition"
+          >
+            <span>⚡</span>
+            <span className="hidden sm:inline">20-Q Challenge</span>
+          </a>
         </div>
 
         <div className="flex items-center gap-2">

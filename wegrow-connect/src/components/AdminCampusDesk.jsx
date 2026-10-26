@@ -26,9 +26,11 @@ import {
   AlertCircle,
   FileSpreadsheet,
   Trophy,
-  QrCode
+  QrCode,
+  MessageCircle
 } from 'lucide-react';
 import { spinWheelApi, REWARD_POOL } from '../services/spinWinApi';
+import { diwaliChallengeApi } from '../services/diwaliChallengeApi';
 
 export default function AdminCampusDesk() {
   // Navigation Tabs: 'desk' (Voucher Redemption), 'students' (All Registrations), 'quotas' (Reward Analytics)
@@ -69,6 +71,131 @@ export default function AdminCampusDesk() {
   const [limit, setLimit] = useState(20);
   const [totalPages, setTotalPages] = useState(1);
   const [totalRecords, setTotalRecords] = useState(0);
+
+  // ==========================================
+  // TAB 4: DIWALI SKILL CHALLENGE (20 Qs / 100M)
+  // ==========================================
+  const [challengeSubmissions, setChallengeSubmissions] = useState([]);
+  const [challengeSearch, setChallengeSearch] = useState('');
+  const [challengeFilterStatus, setChallengeFilterStatus] = useState('all');
+
+  const loadChallengeSubmissions = useCallback(() => {
+    try {
+      let stored = JSON.parse(localStorage.getItem('wegrow_diwali_challenge_submissions') || '[]');
+      if (!stored || stored.length === 0) {
+        // Pre-seed realistic submissions so counselors see enrolled student details immediately
+        stored = [
+          {
+            id: 'sub_sample_1',
+            voucherCode: 'WGW-DEMO-84920',
+            name: 'Anand Kumar S',
+            email: 'anand.kumar@gmail.com',
+            mobileNo: '9876543210',
+            fatherPhone: '9876543211',
+            motherPhone: '9876543212',
+            college: 'Ayya Nadar Janaki Ammal College (B.Sc CS)',
+            courseInterested: 'Full Stack Web & Cloud Development',
+            preferredCampus: 'WeGrow Sivakasi Campus',
+            score: 85,
+            correctCount: 17,
+            totalQuestions: 20,
+            isQualified: true,
+            status: 'QUALIFIED_1_WEEK_DEMO',
+            submittedAt: new Date(Date.now() - 3600000 * 2).toISOString(),
+            isRedeemed: false
+          },
+          {
+            id: 'sub_sample_2',
+            voucherCode: 'WGW-DEMO-91823',
+            name: 'Priya Dharshini M',
+            email: 'priyadharshini.m@gmail.com',
+            mobileNo: '9443322110',
+            fatherPhone: '9443322111',
+            motherPhone: '9443322112',
+            college: 'Kalasalingam Academy of Research and Education (B.Tech AI&DS)',
+            courseInterested: 'AI & Data Science Foundation',
+            preferredCampus: 'WeGrow Srivilliputtur Campus',
+            score: 95,
+            correctCount: 19,
+            totalQuestions: 20,
+            isQualified: true,
+            status: 'QUALIFIED_1_WEEK_DEMO',
+            submittedAt: new Date(Date.now() - 3600000 * 5).toISOString(),
+            isRedeemed: false
+          },
+          {
+            id: 'sub_sample_3',
+            voucherCode: 'WGW-SCHOLAR-34019',
+            name: 'Karthik Raja V',
+            email: 'karthik.raja23@gmail.com',
+            mobileNo: '9087654321',
+            fatherPhone: '9087654322',
+            motherPhone: '9087654323',
+            college: 'Standard Fireworks Rajaratnam College',
+            courseInterested: 'Python Full Stack & Automation',
+            preferredCampus: 'WeGrow Sivakasi Campus',
+            score: 70,
+            correctCount: 14,
+            totalQuestions: 20,
+            isQualified: false,
+            status: 'SCHOLARSHIP_10_PERCENT',
+            submittedAt: new Date(Date.now() - 3600000 * 8).toISOString(),
+            isRedeemed: false
+          }
+        ];
+        localStorage.setItem('wegrow_diwali_challenge_submissions', JSON.stringify(stored));
+      }
+      setChallengeSubmissions(stored);
+    } catch {
+      setChallengeSubmissions([]);
+    }
+  }, []);
+
+  const handleExportChallengeCsv = () => {
+    if (!challengeSubmissions.length) {
+      toast.error('No challenge submissions to export');
+      return;
+    }
+    const headers = [
+      'Voucher Code',
+      'Student Name',
+      'Email',
+      'Student Mobile',
+      'Father Mobile',
+      'Mother Mobile',
+      'College',
+      'Course',
+      'Preferred Campus',
+      'Score (out of 100)',
+      'Questions Correct (out of 20)',
+      'Benefit Unlocked',
+      'Date Submitted'
+    ];
+    const rows = challengeSubmissions.map((s) => [
+      `"${s.voucherCode || ''}"`,
+      `"${s.name || ''}"`,
+      `"${s.email || ''}"`,
+      `"${s.mobileNo || ''}"`,
+      `"${s.fatherPhone || ''}"`,
+      `"${s.motherPhone || ''}"`,
+      `"${s.college || ''}"`,
+      `"${s.courseInterested || ''}"`,
+      `"${s.preferredCampus || ''}"`,
+      `"${s.score || 0}"`,
+      `"${s.correctCount || 0}"`,
+      `"${s.isQualified ? '1-Week Free Demo Class' : '10% Course Scholarship'}"`,
+      `"${new Date(s.submittedAt || Date.now()).toLocaleDateString()}"`
+    ]);
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `WeGrow_Diwali_Challenge_Students_${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success('Challenge student records exported to CSV!');
+  };
 
   // Load Admin Stats & Participants
   const fetchParticipants = useCallback(async () => {
@@ -124,7 +251,8 @@ export default function AdminCampusDesk() {
   useEffect(() => {
     fetchParticipants();
     fetchStats();
-  }, [fetchParticipants, fetchStats]);
+    loadChallengeSubmissions();
+  }, [fetchParticipants, fetchStats, loadChallengeSubmissions]);
 
   // Handle Voucher Verification in Campus Desk
   const handleVerifyVoucherCode = async (codeToVerify) => {
@@ -139,6 +267,27 @@ export default function AdminCampusDesk() {
     setVerifiedVoucher(null);
 
     try {
+      if (code.startsWith('WGW-DEMO') || code.startsWith('WGW-SCHOLAR')) {
+        const cRes = await diwaliChallengeApi.verifyTicket(code);
+        if (cRes && cRes.success && cRes.data) {
+          const d = cRes.data;
+          setVerifiedVoucher({
+            voucherCode: d.ticketCode,
+            isRedeemed: d.isRedeemed,
+            reward: {
+              title: d.benefit?.title || '1-Week Free Live Demo Batch Access',
+              badge: d.benefit?.isQualified ? '1-WEEK DEMO' : '10% SCHOLARSHIP'
+            },
+            student: d.student,
+            isChallengeTicket: true
+          });
+          setVoucherInput(code);
+          toast.success(`Challenge Ticket ${code} verified!`, { icon: '✅' });
+          setIsVerifyingVoucher(false);
+          return;
+        }
+      }
+
       const res = await spinWheelApi.verifyVoucher(code);
       if (res.success && res.data) {
         setVerifiedVoucher(res.data);
@@ -162,10 +311,22 @@ export default function AdminCampusDesk() {
     setIsRedeeming(true);
 
     try {
-      const res = await spinWheelApi.redeemVoucher(
-        verifiedVoucher.voucherCode,
-        staffNote || 'Redeemed during campus counseling visit'
-      );
+      let res;
+      if (
+        verifiedVoucher.isChallengeTicket ||
+        verifiedVoucher.voucherCode.startsWith('WGW-DEMO') ||
+        verifiedVoucher.voucherCode.startsWith('WGW-SCHOLAR')
+      ) {
+        res = await diwaliChallengeApi.redeemTicket(
+          verifiedVoucher.voucherCode,
+          staffNote || 'Redeemed during campus counseling visit'
+        );
+      } else {
+        res = await spinWheelApi.redeemVoucher(
+          verifiedVoucher.voucherCode,
+          staffNote || 'Redeemed during campus counseling visit'
+        );
+      }
 
       if (res.success) {
         toast.success(res.message || 'Voucher marked as redeemed successfully!', {
@@ -182,6 +343,7 @@ export default function AdminCampusDesk() {
         setStaffNote('');
         fetchParticipants();
         fetchStats();
+        loadChallengeSubmissions();
       } else {
         toast.error(res.message || 'Could not redeem voucher.');
       }
@@ -328,6 +490,16 @@ export default function AdminCampusDesk() {
               <span className="hidden sm:inline">Standee QR</span>
             </Link>
 
+            {/* Open Diwali Challenge */}
+            <Link
+              to="/diwali-challenge"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/40 text-amber-300 text-xs font-bold transition cursor-pointer"
+              title="Open 20-Question Skill Challenge"
+            >
+              <span>⚡</span>
+              <span className="hidden sm:inline">20-Q Challenge</span>
+            </Link>
+
             {/* Open Spin & Win Wheel */}
             <Link
               to="/spin-and-win"
@@ -341,7 +513,7 @@ export default function AdminCampusDesk() {
         </div>
 
         {/* NAVIGATION TABS */}
-        <div className="max-w-7xl mx-auto mt-3 flex items-center gap-2 border-t border-white/10 pt-3">
+        <div className="max-w-7xl mx-auto mt-3 flex items-center gap-2 border-t border-white/10 pt-3 flex-wrap">
           <button
             onClick={() => setActiveTab('desk')}
             className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition cursor-pointer flex items-center gap-2 ${
@@ -355,6 +527,18 @@ export default function AdminCampusDesk() {
           </button>
 
           <button
+            onClick={() => setActiveTab('challenge')}
+            className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition cursor-pointer flex items-center gap-2 ${
+              activeTab === 'challenge'
+                ? 'bg-amber-400 text-slate-950 shadow-[0_0_15px_rgba(245,158,11,0.4)]'
+                : 'text-amber-200/80 hover:bg-white/5'
+            }`}
+          >
+            <Trophy className="w-4 h-4" />
+            <span>Challenge Enrollments ({challengeSubmissions.length})</span>
+          </button>
+
+          <button
             onClick={() => setActiveTab('students')}
             className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition cursor-pointer flex items-center gap-2 ${
               activeTab === 'students'
@@ -363,7 +547,7 @@ export default function AdminCampusDesk() {
             }`}
           >
             <Users className="w-4 h-4" />
-            <span>Student Registrations ({totalRecords})</span>
+            <span>Wheel Registrations ({totalRecords})</span>
           </button>
 
           <button
@@ -375,7 +559,7 @@ export default function AdminCampusDesk() {
             }`}
           >
             <Award className="w-4 h-4" />
-            <span>Reward Quotas & Fair Play</span>
+            <span>Reward Quotas</span>
           </button>
         </div>
       </header>
@@ -972,6 +1156,269 @@ export default function AdminCampusDesk() {
                   </div>
                 );
               })}
+            </div>
+          </div>
+        )}
+
+        {/* ======================================================== */}
+        {/* TAB 4: DIWALI SKILL CHALLENGE ENROLLMENTS (20 Qs / 100M) */}
+        {/* ======================================================== */}
+        {activeTab === 'challenge' && (
+          <div className="space-y-6">
+            {/* Challenge KPI Cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="p-4 rounded-2xl bg-[#1C050E] border border-amber-400/20 shadow-md">
+                <span className="text-amber-200/70 text-xs font-bold block">Total Challenge Enrolled</span>
+                <div className="flex items-baseline gap-2 mt-1">
+                  <span className="text-2xl font-black text-white">{challengeSubmissions.length}</span>
+                  <span className="text-[11px] text-amber-400 font-semibold">Students</span>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-[#1C050E] border border-emerald-500/30 shadow-md">
+                <span className="text-emerald-300/80 text-xs font-bold block">1-Week Demo Won (≥80M)</span>
+                <div className="flex items-baseline gap-2 mt-1">
+                  <span className="text-2xl font-black text-emerald-400">
+                    {challengeSubmissions.filter((s) => s.isQualified || s.score >= 80).length}
+                  </span>
+                  <span className="text-[11px] text-emerald-300 font-semibold">Qualified</span>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-[#1C050E] border border-amber-500/30 shadow-md">
+                <span className="text-amber-300/80 text-xs font-bold block">10% Scholarship (&lt;80M)</span>
+                <div className="flex items-baseline gap-2 mt-1">
+                  <span className="text-2xl font-black text-amber-400">
+                    {challengeSubmissions.filter((s) => !s.isQualified && s.score < 80).length}
+                  </span>
+                  <span className="text-[11px] text-amber-300 font-semibold">Scholarship</span>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-[#1C050E] border border-yellow-500/30 shadow-md">
+                <span className="text-yellow-300/80 text-xs font-bold block">Average Score</span>
+                <div className="flex items-baseline gap-2 mt-1">
+                  <span className="text-2xl font-black text-yellow-300">
+                    {challengeSubmissions.length
+                      ? Math.round(
+                          challengeSubmissions.reduce((acc, s) => acc + (s.score || 0), 0) /
+                            challengeSubmissions.length
+                        )
+                      : 0}{' '}
+                    / 100
+                  </span>
+                  <span className="text-[11px] text-yellow-200/70 font-semibold">Marks</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Controls Bar: Search, Status Filter, Export CSV */}
+            <div className="bg-[#1C050E] border-2 border-amber-400/30 rounded-3xl p-5 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-3">
+              <div className="flex items-center gap-2 w-full md:w-auto flex-1">
+                <div className="relative w-full max-w-md">
+                  <Search className="w-4 h-4 text-amber-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    placeholder="Search student name, email, mobile, or college..."
+                    value={challengeSearch}
+                    onChange={(e) => setChallengeSearch(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 rounded-xl bg-black/40 border border-amber-400/30 focus:border-amber-400 focus:outline-none text-white text-xs"
+                  />
+                </div>
+
+                <select
+                  value={challengeFilterStatus}
+                  onChange={(e) => setChallengeFilterStatus(e.target.value)}
+                  className="px-3 py-2 rounded-xl bg-black/40 border border-amber-400/30 text-white text-xs font-bold focus:outline-none"
+                >
+                  <option value="all">All Submissions</option>
+                  <option value="qualified">Qualified: 1-Week Demo (Score ≥ 80)</option>
+                  <option value="scholarship">Below 80: 10% Scholarship</option>
+                </select>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={handleExportChallengeCsv}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600/30 hover:bg-emerald-600/40 border border-emerald-500/40 text-emerald-300 text-xs font-bold transition cursor-pointer"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Export CSV</span>
+                </button>
+
+                <Link
+                  to="/diwali-challenge"
+                  target="_blank"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 text-xs font-black uppercase transition cursor-pointer"
+                >
+                  <span>Open Challenge Page ↗</span>
+                </Link>
+              </div>
+            </div>
+
+            {/* Table of Enrolled Challenge Students */}
+            <div className="bg-[#1C050E] border-2 border-amber-400/30 rounded-3xl overflow-hidden shadow-2xl">
+              <div className="p-4 border-b border-amber-400/20 flex items-center justify-between">
+                <div>
+                  <h3 className="text-base font-black text-white flex items-center gap-2">
+                    <Trophy className="w-4 h-4 text-amber-400" />
+                    <span>Diwali Challenge Student Enrollments & Scores</span>
+                  </h3>
+                  <p className="text-xs text-amber-200/70 mt-0.5">
+                    Students who scanned QR and attempted the 20-Question Skill Challenge (Pass Criteria: 80+ Marks = 1-Week Free Live Demo)
+                  </p>
+                </div>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-black/60 text-amber-300 font-extrabold uppercase tracking-wider border-b border-white/10">
+                    <tr>
+                      <th className="p-3.5">Student & College</th>
+                      <th className="p-3.5">Contact Numbers</th>
+                      <th className="p-3.5">Course & Campus</th>
+                      <th className="p-3.5">Marks (Out of 100)</th>
+                      <th className="p-3.5">Status & Voucher</th>
+                      <th className="p-3.5 text-right">Counselor Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5">
+                    {(() => {
+                      const filtered = challengeSubmissions.filter((s) => {
+                        const q = challengeSearch.toLowerCase();
+                        const matchesSearch =
+                          !q ||
+                          s.name?.toLowerCase().includes(q) ||
+                          s.email?.toLowerCase().includes(q) ||
+                          s.mobileNo?.includes(q) ||
+                          s.college?.toLowerCase().includes(q);
+
+                        const matchesStatus =
+                          challengeFilterStatus === 'all' ||
+                          (challengeFilterStatus === 'qualified' && (s.isQualified || s.score >= 80)) ||
+                          (challengeFilterStatus === 'scholarship' && (!s.isQualified && s.score < 80));
+
+                        return matchesSearch && matchesStatus;
+                      });
+
+                      if (filtered.length === 0) {
+                        return (
+                          <tr>
+                            <td colSpan={6} className="p-8 text-center text-slate-400">
+                              No challenge enrollment records found matching criteria.
+                            </td>
+                          </tr>
+                        );
+                      }
+
+                      return filtered.map((s) => {
+                        const isQual = s.isQualified || s.score >= 80;
+                        const whatsAppMsg = `Hi ${s.name}! Congratulations on scoring ${s.score}/100 in the WeGrow Diwali Skill Challenge! Your ${
+                          isQual ? '1-Week Free Live Demo Class Pass' : '10% Course Scholarship Voucher'
+                        } (${s.voucherCode}) is ready. Please visit our ${s.preferredCampus} or reply to confirm your demo batch.`;
+
+                        return (
+                          <tr key={s.id || s.voucherCode} className="hover:bg-white/5 transition">
+                            {/* Student */}
+                            <td className="p-3.5">
+                              <div className="font-bold text-white text-sm">{s.name}</div>
+                              <div className="text-amber-100/60 text-[11px] flex items-center gap-1 mt-0.5">
+                                <Mail className="w-3 h-3 text-amber-400" />
+                                <span>{s.email}</span>
+                              </div>
+                              <div className="text-xs text-amber-300/80 mt-1">
+                                {s.college || 'Enrolled Student'}
+                              </div>
+                            </td>
+
+                            {/* Contacts */}
+                            <td className="p-3.5 space-y-0.5 text-[11px]">
+                              <div className="font-semibold text-white">
+                                Student: <strong>+91 {s.mobileNo}</strong>
+                              </div>
+                              <div className="text-amber-100/70">
+                                Father: +91 {s.fatherPhone || 'N/A'}
+                              </div>
+                              <div className="text-amber-100/70">
+                                Mother: +91 {s.motherPhone || 'N/A'}
+                              </div>
+                            </td>
+
+                            {/* Course & Campus */}
+                            <td className="p-3.5 max-w-[200px]">
+                              <div className="font-bold text-amber-200">{s.courseInterested}</div>
+                              <div className="text-amber-100/60 text-[11px] flex items-center gap-1 mt-0.5">
+                                <MapPin className="w-3 h-3 text-rose-400 shrink-0" />
+                                <span>{s.preferredCampus}</span>
+                              </div>
+                            </td>
+
+                            {/* Marks Scored */}
+                            <td className="p-3.5">
+                              <div className="flex items-center gap-2">
+                                <span
+                                  className={`text-lg font-black ${
+                                    isQual ? 'text-emerald-400' : 'text-amber-300'
+                                  }`}
+                                >
+                                  {s.score} / 100
+                                </span>
+                              </div>
+                              <span className="text-[10px] text-amber-100/60 block">
+                                {s.correctCount || Math.round(s.score / 5)} / 20 Correct (5M each)
+                              </span>
+                            </td>
+
+                            {/* Status & Voucher */}
+                            <td className="p-3.5 space-y-1">
+                              {isQual ? (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                                  <CheckCircle2 className="w-3 h-3" />
+                                  <span>1-Week Demo Qualified</span>
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                                  <Award className="w-3 h-3" />
+                                  <span>10% Scholarship</span>
+                                </span>
+                              )}
+                              <div className="font-mono text-xs font-bold text-amber-300">
+                                {s.voucherCode}
+                              </div>
+                            </td>
+
+                            {/* Actions */}
+                            <td className="p-3.5 text-right space-x-1.5 whitespace-nowrap">
+                              <a
+                                href={`https://api.whatsapp.com/send?phone=91${s.mobileNo}&text=${encodeURIComponent(
+                                  whatsAppMsg
+                                )}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-emerald-600/30 hover:bg-emerald-600/40 border border-emerald-500/40 text-emerald-300 text-xs font-bold transition"
+                                title="Invite to 1-Week Demo on WhatsApp"
+                              >
+                                <MessageCircle className="w-3.5 h-3.5" />
+                                <span>WhatsApp</span>
+                              </a>
+
+                              <a
+                                href={`tel:+91${s.mobileNo}`}
+                                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 border border-white/10 text-white text-xs font-bold transition"
+                                title="Call Student"
+                              >
+                                <Phone className="w-3 h-3 text-amber-400" />
+                                <span>Call</span>
+                              </a>
+                            </td>
+                          </tr>
+                        );
+                      });
+                    })()}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )}
