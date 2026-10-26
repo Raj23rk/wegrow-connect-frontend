@@ -57,6 +57,8 @@ const AiExplorerEnrollment = lazy(() => import('./components/AiExplorerEnrollmen
 const AiExplorerPreBooking = lazy(() => import('./components/AiExplorerPreBooking'));
 const AdminAiExplorerPage = lazy(() => import('./admin/ai-explorer/page'));
 const CheckoutDemo = lazy(() => import('./components/CheckoutDemo'));
+const SpinAndWin = lazy(() => import('./components/SpinAndWin'));
+const AdminCampusDesk = lazy(() => import('./components/AdminCampusDesk'));
 
 // Auth Context, Theme Context and Guard
 import { AuthProvider, ProtectedRoute } from './context/AuthContext';
@@ -857,6 +859,20 @@ export default function App() {
             <Route path="/checkout" element={<CheckoutDemo />} />
             <Route path="/payment-demo" element={<CheckoutDemo />} />
             <Route path="/razorpay-checkout" element={<CheckoutDemo />} />
+
+            {/* Diwali Deal! Spin & Win — Skill Edition */}
+            <Route path="/spin-and-win" element={<SpinAndWin />} />
+            <Route path="/spin-win" element={<SpinAndWin />} />
+            <Route path="/spin" element={<SpinAndWin />} />
+            <Route path="/diwali-offer" element={<SpinAndWin />} />
+            <Route path="/campus-spin" element={<SpinAndWin />} />
+            <Route path="/skill-spin" element={<SpinAndWin />} />
+
+            {/* Campus Counselor Desk & Spin-and-Win Admin */}
+            <Route path="/campus-desk" element={<AdminCampusDesk />} />
+            <Route path="/admin/campus-desk" element={<AdminCampusDesk />} />
+            <Route path="/admin/spin-win" element={<AdminCampusDesk />} />
+            <Route path="/admin/spin-and-win" element={<AdminCampusDesk />} />
 
             {/* Student Dashboard Routes (Protected) */}
             <Route path="/student/dashboard" element={<ProtectedRoute allowedRoles={['student']}><StudentDashboard /></ProtectedRoute>} />

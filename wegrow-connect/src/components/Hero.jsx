@@ -226,6 +226,17 @@ export default function Hero({ heroTransform, scrollToEvents, scrollToSeminars }
               ===================================================== */}
           <div className="lg:col-span-7 flex flex-col items-center lg:items-start text-center lg:text-left space-y-4">
             
+            {/* DIWALI FESTIVE ANNOUNCEMENT BANNER */}
+            <button
+              onClick={() => navigate('/spin-and-win')}
+              className="group inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-500/30 via-rose-500/30 to-amber-500/30 border border-amber-300/60 text-amber-200 text-xs font-bold hover:scale-105 active:scale-95 transition-all shadow-[0_0_15px_rgba(255,200,98,0.3)] cursor-pointer"
+            >
+              <span className="text-sm animate-bounce">🪔</span>
+              <span className="font-extrabold text-white">DIWALI SPECIAL:</span>
+              <span className="text-amber-300">Spin & Win Course Offers!</span>
+              <span className="text-xs group-hover:translate-x-1 transition-transform">→</span>
+            </button>
+
             {/* STATIC / SLIDE BADGE */}
             <div 
               className="inline-flex items-center gap-2 px-3.5 py-1 sm:px-5 sm:py-1.5 rounded-full border text-[10px] sm:text-xs font-black uppercase tracking-wider shadow-sm backdrop-blur-md transition-all duration-300"

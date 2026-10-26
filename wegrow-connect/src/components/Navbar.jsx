@@ -584,6 +584,19 @@ export default function Navbar({
             {/* Header Actions */}
             <div className="flex items-center gap-2 sm:gap-3 shrink-0">
 
+              {/* Diwali Special: Spin & Win CTA */}
+              <button
+                onClick={() => {
+                  setActiveMenu('spin-and-win');
+                  navigate('/spin-and-win');
+                }}
+                className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-full bg-gradient-to-r from-amber-500 via-rose-500 to-amber-600 hover:from-amber-400 hover:to-rose-400 text-white font-extrabold text-xs tracking-wide shadow-md shadow-amber-500/25 hover:scale-105 active:scale-95 transition-all cursor-pointer whitespace-nowrap"
+                title="Diwali Deal: Spin & Win Skill Rewards"
+              >
+                <span className="text-sm animate-pulse">🪔</span>
+                <span>Spin & Win</span>
+              </button>
+
               {!user && (
                 <button
                   onClick={handleJoinClick}
@@ -659,6 +672,22 @@ export default function Navbar({
 
           {/* Links */}
           <div className="flex flex-col py-4 space-y-1.5 text-left">
+            {/* Diwali Deal Mobile CTA */}
+            <button
+              onClick={() => {
+                setActiveMenu('spin-and-win');
+                setMobileMenuOpen(false);
+                navigate('/spin-and-win');
+              }}
+              className="w-full text-left py-2.5 px-3 rounded-xl font-extrabold text-sm transition-all duration-200 cursor-pointer flex items-center justify-between bg-gradient-to-r from-amber-500 via-rose-500 to-amber-600 text-white shadow-md shadow-amber-500/20 mb-1"
+            >
+              <div className="flex items-center gap-2">
+                <span>🪔</span>
+                <span>Diwali Spin & Win</span>
+              </div>
+              <span className="text-[10px] bg-black/30 text-amber-200 px-2 py-0.5 rounded-full font-black uppercase">Win Pass</span>
+            </button>
+
             <button
               onClick={() => mobileNav('home', scrollToHero)}
               className={getMobileNavClass('home')}
