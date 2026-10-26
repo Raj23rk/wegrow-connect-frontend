@@ -487,7 +487,17 @@ export default function AdminCampusDesk() {
               title="Print Spin & Win Event QR Standee Poster"
             >
               <QrCode className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Standee QR</span>
+              <span className="hidden sm:inline">Wheel QR</span>
+            </Link>
+
+            {/* Print Challenge Standee QR */}
+            <Link
+              to="/diwali-challenge-qr"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-600/30 hover:bg-rose-600/40 border border-rose-500/40 text-rose-300 text-xs font-bold transition cursor-pointer"
+              title="Print Diwali Challenge Poster & Standee QR"
+            >
+              <QrCode className="w-3.5 h-3.5 text-rose-400" />
+              <span className="hidden sm:inline">Challenge QR</span>
             </Link>
 
             {/* Open Diwali Challenge */}

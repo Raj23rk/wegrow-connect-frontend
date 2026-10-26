@@ -42,7 +42,6 @@ export default function DiwaliSkillChallenge() {
   // QR Code States
   const [standeeQrUrl, setStandeeQrUrl] = useState('');
   const [passQrUrl, setPassQrUrl] = useState('');
-  const [showPosterQrModal, setShowPosterQrModal] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
 
   // Form State
@@ -303,24 +302,7 @@ export default function DiwaliSkillChallenge() {
             </span>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
-            {/* Poster QR Quick Trigger */}
-            <button
-              type="button"
-              onClick={() => setShowPosterQrModal(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-400 to-yellow-300 text-slate-950 text-xs font-black uppercase hover:brightness-110 transition shadow-md cursor-pointer"
-            >
-              <QrCode className="w-3.5 h-3.5" />
-              <span>Campus Poster QR</span>
-            </button>
-            <Link
-              to="/diwali-challenge-qr"
-              className="hidden lg:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/20 text-xs font-bold text-amber-200 transition border border-white/10"
-              title="Print Standee Poster A4"
-            >
-              <Printer className="w-3.5 h-3.5 text-amber-300" />
-              <span className="hidden xl:inline">Standee Poster</span>
-            </Link>
+          <div className="flex items-center gap-2.5 shrink-0">
             <Link
               to="/spin-and-win"
               className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-400 text-slate-950 text-xs font-black uppercase hover:bg-amber-300 transition"
@@ -373,57 +355,6 @@ export default function DiwaliSkillChallenge() {
               <div className="p-2.5 rounded-xl bg-emerald-500/15 border border-emerald-400/40 text-emerald-200">
                 <span className="font-extrabold block text-emerald-300 text-sm">Pass Mark: 80+</span>
                 <span>1-Week Free Live Demo Pass</span>
-              </div>
-            </div>
-
-            {/* Quick Mobile Scan QR Banner */}
-            <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-amber-500/15 via-rose-500/15 to-amber-500/15 border border-amber-400/30 flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left shadow-inner">
-              <div className="shrink-0 p-1.5 bg-white rounded-xl shadow-lg border border-amber-300">
-                {standeeQrUrl ? (
-                  <img
-                    src={standeeQrUrl}
-                    alt="Scan with Mobile Camera"
-                    className="w-24 h-24 object-contain"
-                  />
-                ) : (
-                  <div className="w-24 h-24 flex items-center justify-center text-[10px] text-slate-600">
-                    <QrCode className="w-8 h-8 text-amber-600" />
-                  </div>
-                )}
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center justify-center sm:justify-start gap-1.5 text-amber-300 text-xs font-black uppercase tracking-wider mb-1">
-                  <QrCode className="w-3.5 h-3.5" />
-                  <span>Scan QR To Take Challenge On Mobile</span>
-                </div>
-                <p className="text-xs text-amber-100/80 leading-relaxed">
-                  Point your phone camera or Google Lens to load this challenge directly on your mobile device.
-                </p>
-                <div className="mt-2.5 flex flex-wrap items-center justify-center sm:justify-start gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setShowPosterQrModal(true)}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-400/20 hover:bg-amber-400/30 text-amber-200 border border-amber-400/40 text-[11px] font-bold transition cursor-pointer"
-                  >
-                    <ExternalLink className="w-3 h-3" />
-                    <span>View Standee QR</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleCopyLink}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/15 text-white border border-white/10 text-[11px] font-bold transition cursor-pointer"
-                  >
-                    {copiedLink ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3 text-amber-400" />}
-                    <span>{copiedLink ? 'Copied!' : 'Copy Link'}</span>
-                  </button>
-                  <Link
-                    to="/diwali-challenge-qr"
-                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 border border-rose-400/30 text-[11px] font-bold transition"
-                  >
-                    <Printer className="w-3 h-3" />
-                    <span>Print Standee Poster</span>
-                  </Link>
-                </div>
               </div>
             </div>
 
@@ -984,69 +915,6 @@ export default function DiwaliSkillChallenge() {
           </div>
         )}
       </main>
-
-      {/* POSTER QR STAND-ALONE MODAL */}
-      {showPosterQrModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn">
-          <div className="w-full max-w-md bg-[#1F050F] border-2 border-amber-400 rounded-3xl p-6 shadow-2xl relative text-center">
-            <button
-              type="button"
-              onClick={() => setShowPosterQrModal(false)}
-              className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition cursor-pointer"
-            >
-              <X className="w-4 h-4" />
-            </button>
-
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 text-xs font-black uppercase mb-3">
-              <QrCode className="w-3.5 h-3.5 text-amber-400" />
-              <span>Campus Poster & Standee QR</span>
-            </div>
-
-            <h3 className="text-xl font-black text-amber-300">
-              Diwali Skill Challenge QR Code
-            </h3>
-            <p className="text-xs text-amber-100/70 mt-1 mb-4">
-              Place on campus posters & desks. Students scan to take the 20-question challenge and win a 1-Week Free Live Demo Pass!
-            </p>
-
-            <div className="p-3 bg-white rounded-2xl shadow-xl inline-block border-4 border-amber-400">
-              {standeeQrUrl ? (
-                <img
-                  src={standeeQrUrl}
-                  alt="Campus Standee QR"
-                  className="w-56 h-56 object-contain"
-                />
-              ) : (
-                <div className="w-56 h-56 flex items-center justify-center text-slate-700">
-                  <Loader2 className="w-8 h-8 animate-spin text-amber-600" />
-                </div>
-              )}
-            </div>
-
-            <div className="mt-3 text-xs font-mono text-amber-200/90 bg-black/40 px-3 py-2 rounded-xl truncate border border-amber-500/20">
-              https://www.wegrowbschool.in/diwali-challenge
-            </div>
-
-            <div className="mt-5 grid grid-cols-2 gap-2.5">
-              <Link
-                to="/diwali-challenge-qr"
-                className="py-2.5 px-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs uppercase flex items-center justify-center gap-1.5 transition shadow-lg"
-              >
-                <Printer className="w-3.5 h-3.5" />
-                <span>Print Poster</span>
-              </Link>
-              <button
-                type="button"
-                onClick={handleCopyLink}
-                className="py-2.5 px-3 rounded-xl bg-white/10 hover:bg-white/15 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition border border-white/10 cursor-pointer"
-              >
-                {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-amber-400" />}
-                <span>{copiedLink ? 'Copied' : 'Copy Link'}</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

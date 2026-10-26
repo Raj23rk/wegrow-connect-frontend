@@ -109,6 +109,14 @@ export default function SpinAndWinQrPage() {
             <span>⚡</span>
             <span className="hidden sm:inline">20-Q Challenge</span>
           </a>
+          <a
+            href="/diwali-challenge-qr"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 border border-rose-400/40 text-xs font-bold text-rose-300 transition"
+            title="Switch to Diwali Challenge Poster QR"
+          >
+            <span>📜</span>
+            <span className="hidden sm:inline">Challenge Poster QR</span>
+          </a>
         </div>
 
         <div className="flex items-center gap-2">
