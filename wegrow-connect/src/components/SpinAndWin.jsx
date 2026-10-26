@@ -379,11 +379,51 @@ export default function SpinAndWin() {
     sfx.muted = !soundEnabled;
   }, [soundEnabled]);
 
-  // Load existing session or voucher if student previously visited
+  // Load existing session or voucher from URL query param (?voucher=...) or localStorage
   useEffect(() => {
-    const lastEmail = localStorage.getItem('wegrow_spin_last_email');
-    if (lastEmail) {
-      spinWinApi.getVoucherDetails(lastEmail).then((res) => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const voucherParam = urlParams.get('voucher');
+    const emailParam = urlParams.get('email') || localStorage.getItem('wegrow_spin_last_email');
+
+    // If student or counselor opened direct link from scanned QR code
+    if (voucherParam) {
+      spinWinApi.verifyVoucher(voucherParam).then((res) => {
+        if (res && res.success && res.data) {
+          const v = res.data;
+          setWonReward(v.wonReward || v.reward || { title: v.rewardTitle || 'Skill Scholarship', valueText: v.voucherCode });
+          setVoucherCode(voucherParam);
+          setVoucherExpiry(v.voucherExpiry || '15 Days from Diwali');
+          if (v.student) {
+            setActiveParticipant(v.student);
+            setFormData((prev) => ({
+              ...prev,
+              name: v.student.name || prev.name,
+              email: v.student.email || prev.email,
+              mobileNo: v.student.mobileNo || prev.mobileNo,
+              preferredCampus: v.student.preferredCampus || prev.preferredCampus,
+              courseInterested: v.student.courseInterested || prev.courseInterested
+            }));
+          }
+          setStep(4);
+        } else if (emailParam) {
+          spinWinApi.getVoucherDetails(emailParam).then((vres) => {
+            if (vres.success && vres.participant) {
+              const p = vres.participant;
+              setActiveParticipant(p);
+              if (p.hasSpun && p.wonReward) {
+                setWonReward(p.wonReward);
+                setVoucherCode(p.voucherCode || voucherParam);
+                setStep(4);
+              }
+            }
+          });
+        }
+      }).catch((err) => console.warn('Voucher param verify error:', err));
+      return;
+    }
+
+    if (emailParam) {
+      spinWinApi.getVoucherDetails(emailParam).then((res) => {
         if (res.success && res.participant) {
           const p = res.participant;
           setActiveParticipant(p);
@@ -411,28 +451,20 @@ export default function SpinAndWin() {
     }
   }, []);
 
-  // Generate QR Code when reward is unlocked
+  // Generate QR Code when reward is unlocked — encodes live public URL so phone camera scan opens voucher directly
   useEffect(() => {
     if (wonReward && voucherCode) {
-      const qrData = JSON.stringify({
-        voucherCode,
-        reward: wonReward.title,
-        studentName: activeParticipant?.name || formData.name,
-        email: activeParticipant?.email || formData.email,
-        mobile: activeParticipant?.mobileNo || formData.mobileNo,
-        course: activeParticipant?.courseInterested || formData.courseInterested,
-        campus: activeParticipant?.preferredCampus || formData.preferredCampus,
-        issuer: 'WeGrow Skill Campus & B-School',
-        type: 'DIWALI_SKILL_REWARD'
-      });
+      const studentEmail = activeParticipant?.email || formData.email || '';
+      const liveVoucherUrl = `https://www.wegrowbschool.in/spin-and-win?voucher=${encodeURIComponent(voucherCode)}&email=${encodeURIComponent(studentEmail)}`;
 
-      QRCode.toDataURL(qrData, {
-        width: 280,
+      QRCode.toDataURL(liveVoucherUrl, {
+        width: 320,
         margin: 2,
         color: {
           dark: '#1e1b4b',
           light: '#ffffff'
-        }
+        },
+        errorCorrectionLevel: 'H'
       })
         .then((url) => setQrCodeUrl(url))
         .catch((err) => console.error('QR Generation Error:', err));
@@ -1351,7 +1383,7 @@ export default function SpinAndWin() {
 
   // Share on WhatsApp
   const handleWhatsAppShare = () => {
-    const text = `🎉 I just won an exclusive Diwali Skill Reward at WeGrow B-School!\n\n🏆 Reward: ${wonReward?.title} (${wonReward?.valueText})\n🎫 Voucher Code: ${voucherCode}\n🏫 Campus: ${activeParticipant?.preferredCampus || formData.preferredCampus}\n\nCelebrate Diwali by upgrading your career skills! Spin the wheel at: ${window.location.origin}/spin-and-win`;
+    const text = `🎉 I just won an exclusive Diwali Skill Reward at WeGrow B-School!\n\n🏆 Reward: ${wonReward?.title} (${wonReward?.valueText || ''})\n🎫 Voucher Code: ${voucherCode}\n🏫 Campus: ${activeParticipant?.preferredCampus || formData.preferredCampus}\n\nCelebrate Diwali by upgrading your career skills! Spin the wheel at: https://www.wegrowbschool.in/spin-and-win`;
     const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
     window.open(url, '_blank');
   };
@@ -1536,15 +1568,15 @@ export default function SpinAndWin() {
           </div>
 
           <div className="flex items-center gap-3 shrink-0">
-            {/* Burst Crackers Trigger in Topbar */}
-            <button
-              onClick={burstGrandDiwaliCrackers}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 text-slate-950 text-xs font-black uppercase hover:scale-105 active:scale-95 transition shadow-[0_0_12px_#f59e0b] cursor-pointer"
-              title="Burst celebratory Diwali fireworks"
+            {/* Standee QR Poster Link */}
+            <Link
+              to="/spin-qr"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/20 text-amber-200 text-xs font-bold transition border border-white/10"
+              title="Print Event QR Standee Poster"
             >
-              <span>💥</span>
-              <span className="hidden sm:inline">Burst Crackers</span>
-            </button>
+              <span>📱</span>
+              <span className="hidden sm:inline">Standee QR</span>
+            </Link>
 
             <Link
               to="/"
@@ -2233,19 +2265,6 @@ export default function SpinAndWin() {
               <p className="text-sm text-amber-100/90 mt-1 max-w-lg mx-auto">
                 {wonReward.description}
               </p>
-
-              {/* Extra Burst Crackers Button */}
-              <div className="mt-3 flex justify-center">
-                <button
-                  type="button"
-                  onClick={burstGrandDiwaliCrackers}
-                  className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-gradient-to-r from-amber-400 via-orange-500 to-rose-500 text-slate-950 font-black text-xs uppercase tracking-wide shadow-[0_0_20px_#f59e0b] hover:scale-105 active:scale-95 transition cursor-pointer"
-                >
-                  <Sparkles className="w-4 h-4 text-yellow-900" />
-                  <span>Launch More Fireworks!</span>
-                  <span>💥</span>
-                </button>
-              </div>
             </div>
 
             {/* GOLDEN DIGITAL VOUCHER PASS CARD (Printable) */}
@@ -2592,24 +2611,6 @@ export default function SpinAndWin() {
           </div>
         )}
       </main>
-
-      {/* FLOATING DIWALI CRACKER LAUNCHER BUTTON */}
-      <div className="fixed bottom-6 right-6 z-40">
-        <button
-          type="button"
-          onClick={burstGrandDiwaliCrackers}
-          className="group relative flex items-center gap-2.5 px-5 py-3 rounded-full bg-gradient-to-r from-amber-400 via-orange-500 to-rose-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 font-black text-xs sm:text-sm uppercase tracking-wider shadow-[0_4px_25px_rgba(245,158,11,0.6)] border-2 border-yellow-200 hover:scale-105 active:scale-95 transition-all cursor-pointer animate-pulse"
-          title="Click to burst celebration Diwali fireworks!"
-        >
-          <span className="text-base group-hover:rotate-12 transition-transform">💥</span>
-          <span>Burst Crackers!</span>
-          {crackerCount > 0 && (
-            <span className="bg-black/30 text-white px-2 py-0.5 rounded-full text-[10px] font-black">
-              {crackerCount}
-            </span>
-          )}
-        </button>
-      </div>
 
       {/* CAMPUS VISITATION INFORMATION & FAQ */}
       <section className="relative z-10 max-w-5xl mx-auto px-4 pb-16">

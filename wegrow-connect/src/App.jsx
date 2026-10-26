@@ -58,6 +58,7 @@ const AiExplorerPreBooking = lazy(() => import('./components/AiExplorerPreBookin
 const AdminAiExplorerPage = lazy(() => import('./admin/ai-explorer/page'));
 const CheckoutDemo = lazy(() => import('./components/CheckoutDemo'));
 const SpinAndWin = lazy(() => import('./components/SpinAndWin'));
+const SpinAndWinQrPage = lazy(() => import('./components/SpinAndWinQrPage'));
 const AdminCampusDesk = lazy(() => import('./components/AdminCampusDesk'));
 
 // Auth Context, Theme Context and Guard
@@ -867,6 +868,10 @@ export default function App() {
             <Route path="/diwali-offer" element={<SpinAndWin />} />
             <Route path="/campus-spin" element={<SpinAndWin />} />
             <Route path="/skill-spin" element={<SpinAndWin />} />
+            <Route path="/spin-and-win-qr" element={<SpinAndWinQrPage />} />
+            <Route path="/spin-qr" element={<SpinAndWinQrPage />} />
+            <Route path="/spin-win-qr" element={<SpinAndWinQrPage />} />
+            <Route path="/diwali-qr" element={<SpinAndWinQrPage />} />
 
             {/* Campus Counselor Desk & Spin-and-Win Admin */}
             <Route path="/campus-desk" element={<AdminCampusDesk />} />

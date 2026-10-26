@@ -25,7 +25,8 @@ import {
   Check,
   AlertCircle,
   FileSpreadsheet,
-  Trophy
+  Trophy,
+  QrCode
 } from 'lucide-react';
 import { spinWheelApi, REWARD_POOL } from '../services/spinWinApi';
 
@@ -316,6 +317,16 @@ export default function AdminCampusDesk() {
               <Download className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Export CSV</span>
             </button>
+
+            {/* Print Standee QR */}
+            <Link
+              to="/spin-qr"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-600/30 hover:bg-purple-600/40 border border-purple-500/40 text-purple-300 text-xs font-bold transition cursor-pointer"
+              title="Print Spin & Win Event QR Standee Poster"
+            >
+              <QrCode className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Standee QR</span>
+            </Link>
 
             {/* Open Spin & Win Wheel */}
             <Link
