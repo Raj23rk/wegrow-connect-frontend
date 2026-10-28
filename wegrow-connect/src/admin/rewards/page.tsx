@@ -130,13 +130,23 @@ export default function RewardsBadgesPage() {
             </p>
           </div>
 
-          <button
-            onClick={() => setShowAddBadgeModal(true)}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 active:scale-95 transition-all text-white px-4 py-2.5 rounded-xl text-xs font-bold shadow-md shadow-blue-500/20 cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Create New Badge</span>
-          </button>
+          <div className="flex items-center gap-2.5">
+            <a
+              href="/admin/spin-wheel"
+              className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-4 py-2.5 rounded-xl text-xs font-bold shadow-md shadow-orange-500/20 transition-all cursor-pointer"
+            >
+              <Gift className="w-4 h-4" />
+              <span>Spin & Win Wheel Admin</span>
+            </a>
+
+            <button
+              onClick={() => setShowAddBadgeModal(true)}
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 active:scale-95 transition-all text-white px-4 py-2.5 rounded-xl text-xs font-bold shadow-md shadow-blue-500/20 cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Create New Badge</span>
+            </button>
+          </div>
         </div>
 
         {/* Metric Summary Cards */}

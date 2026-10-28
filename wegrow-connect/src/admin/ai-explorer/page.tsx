@@ -242,18 +242,30 @@ export default function AdminAiExplorerPage() {
 
   // Update Status
   const handleStatusChange = async (id: string, newStatus: string) => {
+    if (!id) {
+      toast.error('Student ID is missing.');
+      return;
+    }
     try {
       const res =
         activeTab === 'prebooking'
           ? await aiExplorerApi.updatePreBooking(id, { paymentStatus: newStatus })
           : await aiExplorerApi.updateStatus(id, newStatus);
 
-      if (res?.success) {
+      if (res?.success !== false) {
         toast.success(`Status updated to ${newStatus}`);
         loadData();
-        if (selectedStudent && (selectedStudent.id === id || selectedStudent.prebookingId === id)) {
+        if (
+          selectedStudent &&
+          (selectedStudent.id === id ||
+            selectedStudent.prebookingId === id ||
+            selectedStudent.enrollmentId === id ||
+            selectedStudent._id === id)
+        ) {
           setSelectedStudent({ ...selectedStudent, paymentStatus: newStatus });
         }
+      } else {
+        toast.error(res?.message || 'Failed to update status.');
       }
     } catch {
       toast.error('Failed to update status.');
@@ -262,6 +274,10 @@ export default function AdminAiExplorerPage() {
 
   // Delete Record
   const handleDelete = async (id: string) => {
+    if (!id) {
+      toast.error('Record ID is missing.');
+      return;
+    }
     if (!window.confirm('Are you sure you want to remove this record?')) return;
     try {
       const res =
@@ -269,10 +285,20 @@ export default function AdminAiExplorerPage() {
           ? await aiExplorerApi.deletePreBooking(id)
           : await aiExplorerApi.deleteEnrollment(id);
 
-      if (res?.success) {
+      if (res?.success !== false) {
         toast.success('Record deleted.');
-        if (selectedStudent?.id === id || selectedStudent?.prebookingId === id) setSelectedStudent(null);
+        if (
+          selectedStudent &&
+          (selectedStudent.id === id ||
+            selectedStudent.prebookingId === id ||
+            selectedStudent.enrollmentId === id ||
+            selectedStudent._id === id)
+        ) {
+          setSelectedStudent(null);
+        }
         loadData();
+      } else {
+        toast.error(res?.message || 'Failed to delete record.');
       }
     } catch {
       toast.error('Failed to delete record.');
@@ -281,6 +307,10 @@ export default function AdminAiExplorerPage() {
 
   // Resend Confirmation Email
   const handleResendEmail = async (id: string, email?: string) => {
+    if (!id) {
+      toast.error('Student ID is missing.');
+      return;
+    }
     try {
       toast.loading('Sending confirmation email...', { id: 'email' });
       const res =
@@ -710,7 +740,7 @@ export default function AdminAiExplorerPage() {
                               <button
                                 onClick={() =>
                                   handleStatusChange(
-                                    student.prebookingId || student.id || student._id,
+                                    displayId,
                                     isPaid ? 'PENDING' : 'PAID'
                                   )
                                 }
@@ -723,7 +753,7 @@ export default function AdminAiExplorerPage() {
                               <button
                                 onClick={() =>
                                   handleResendEmail(
-                                    student.prebookingId || student.id || student._id,
+                                    displayId,
                                     student.email || student.mailId
                                   )
                                 }
@@ -734,9 +764,7 @@ export default function AdminAiExplorerPage() {
                               </button>
 
                               <button
-                                onClick={() =>
-                                  handleDelete(student.prebookingId || student.id || student._id)
-                                }
+                                onClick={() => handleDelete(displayId)}
                                 className="p-2 rounded-lg bg-slate-100 hover:bg-pink-100 text-pink-700 transition-all cursor-pointer"
                                 title="Delete Record"
                               >
@@ -1026,33 +1054,39 @@ export default function AdminAiExplorerPage() {
                 <span>Print Pass</span>
               </button>
 
-              <button
-                onClick={() => handleResendEmail(selectedStudent.id || selectedStudent._id, selectedStudent.email || selectedStudent.mailId)}
-                className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-3.5 py-2.5 rounded-xl transition-all cursor-pointer shadow-xs"
-              >
-                <Send className="w-3.5 h-3.5" />
-                <span>Resend Email</span>
-              </button>
+              {(() => {
+                const modalId =
+                  selectedStudent.prebookingId ||
+                  selectedStudent.enrollmentId ||
+                  selectedStudent.id ||
+                  selectedStudent._id;
+                const modalPaid =
+                  isPaidStatus(selectedStudent.paymentStatus) ||
+                  isPaidStatus(selectedStudent.status);
+                const modalMail = selectedStudent.email || selectedStudent.mailId;
 
-              <button
-                onClick={() =>
-                  handleStatusChange(
-                    selectedStudent.id || selectedStudent._id,
-                    isPaidStatus(selectedStudent.paymentStatus) || isPaidStatus(selectedStudent.status)
-                      ? 'PENDING'
-                      : 'PAID'
-                  )
-                }
-                className="inline-flex items-center gap-1.5 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs px-3.5 py-2.5 rounded-xl transition-all cursor-pointer shadow-xs"
-              >
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                <span>
-                  Mark as{' '}
-                  {isPaidStatus(selectedStudent.paymentStatus) || isPaidStatus(selectedStudent.status)
-                    ? 'PENDING'
-                    : 'PAID'}
-                </span>
-              </button>
+                return (
+                  <>
+                    <button
+                      onClick={() => handleResendEmail(modalId, modalMail)}
+                      className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-3.5 py-2.5 rounded-xl transition-all cursor-pointer shadow-xs"
+                    >
+                      <Send className="w-3.5 h-3.5" />
+                      <span>Resend Email</span>
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        handleStatusChange(modalId, modalPaid ? 'PENDING' : 'PAID')
+                      }
+                      className="inline-flex items-center gap-1.5 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs px-3.5 py-2.5 rounded-xl transition-all cursor-pointer shadow-xs"
+                    >
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      <span>Mark as {modalPaid ? 'PENDING' : 'PAID'}</span>
+                    </button>
+                  </>
+                );
+              })()}
             </div>
           </div>
         </div>

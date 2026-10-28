@@ -59,6 +59,7 @@ const AdminAiExplorerPage = lazy(() => import('./admin/ai-explorer/page'));
 const CheckoutDemo = lazy(() => import('./components/CheckoutDemo'));
 const SpinAndWin = lazy(() => import('./components/SpinAndWin'));
 const SpinAndWinQrPage = lazy(() => import('./components/SpinAndWinQrPage'));
+const AdminSpinWheelPage = lazy(() => import('./admin/spin-wheel/page'));
 const DiwaliSkillChallenge = lazy(() => import('./components/DiwaliSkillChallenge'));
 const DiwaliChallengeQrPage = lazy(() => import('./components/DiwaliChallengeQrPage'));
 const AdminCampusDesk = lazy(() => import('./components/AdminCampusDesk'));
@@ -934,6 +935,9 @@ export default function App() {
             <Route path="/admin/payments" element={<ProtectedRoute allowedRoles={['admin']}><AdminPayments /></ProtectedRoute>} />
             <Route path="/admin/certificates" element={<ProtectedRoute allowedRoles={['admin']}><AdminCertificates /></ProtectedRoute>} />
             <Route path="/admin/rewards" element={<ProtectedRoute allowedRoles={['admin']}><AdminRewards /></ProtectedRoute>} />
+            <Route path="/admin/spin-wheel" element={<ProtectedRoute allowedRoles={['admin']}><AdminSpinWheelPage /></ProtectedRoute>} />
+            <Route path="/admin/spin-win" element={<ProtectedRoute allowedRoles={['admin']}><AdminSpinWheelPage /></ProtectedRoute>} />
+            <Route path="/admin/spin" element={<ProtectedRoute allowedRoles={['admin']}><AdminSpinWheelPage /></ProtectedRoute>} />
             <Route path="/admin/reports" element={<ProtectedRoute allowedRoles={['admin']}><AdminReports /></ProtectedRoute>} />
             <Route path="/admin/notifications" element={<ProtectedRoute allowedRoles={['admin']}><AdminNotifications /></ProtectedRoute>} />
             <Route path="/admin/settings" element={<ProtectedRoute allowedRoles={['admin']}><AdminSettings /></ProtectedRoute>} />

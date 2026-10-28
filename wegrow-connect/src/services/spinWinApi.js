@@ -580,6 +580,56 @@ export const spinWheelApi = {
         }
       };
     }
+  },
+
+  // 9. Admin: Export All Participants to CSV
+  exportParticipantsCsv: async () => {
+    try {
+      const res = await spinWheelApi.getAdminParticipants({ page: 1, limit: 1000 });
+      const participants = res.data?.participants || [];
+      const headers = [
+        'Voucher Code',
+        'Student Name',
+        'Email',
+        'Mobile No',
+        'Parent Name',
+        'Parent Mobile',
+        'City',
+        'Course Interested',
+        'Institution Name',
+        'Spun Wheel',
+        'Spun Date',
+        'Reward Won',
+        'Reward Badge',
+        'Redeemed Status',
+        'Redeemed Date',
+        'Registration Date'
+      ];
+
+      const rows = participants.map((p) => [
+        `"${p.voucherCode || ''}"`,
+        `"${p.fullName || p.name || ''}"`,
+        `"${p.email || ''}"`,
+        `"${p.mobileNo || ''}"`,
+        `"${p.parentName || ''}"`,
+        `"${p.parentPhone || p.fatherMobile || ''}"`,
+        `"${p.city || ''}"`,
+        `"${p.courseInterested || ''}"`,
+        `"${p.institutionName || p.collegeOrSchool || ''}"`,
+        `"${p.hasSpun ? 'YES' : 'NO'}"`,
+        `"${p.spunAt ? new Date(p.spunAt).toLocaleString('en-IN') : ''}"`,
+        `"${p.rewardTitle || p.wonReward?.title || ''}"`,
+        `"${p.rewardBadge || p.wonReward?.badge || ''}"`,
+        `"${p.isRedeemed ? 'REDEEMED' : 'ACTIVE'}"`,
+        `"${p.redeemedAt ? new Date(p.redeemedAt).toLocaleString('en-IN') : ''}"`,
+        `"${p.createdAt ? new Date(p.createdAt).toLocaleString('en-IN') : ''}"`
+      ]);
+
+      return [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    } catch (e) {
+      console.error('Failed to export CSV:', e);
+      throw e;
+    }
   }
 };
 

@@ -27,7 +27,8 @@ import {
   HelpCircle,
   MessageSquare,
   Bot,
-  Ticket
+  Ticket,
+  Gift
 } from "lucide-react";
 
 export default function Sidebar() {
@@ -57,6 +58,7 @@ export default function Sidebar() {
     { name: "Payments & Invoices", href: "/admin/payments", icon: Receipt },
     { name: "Certificates", href: "/admin/certificates", icon: Award },
     { name: "Rewards & Badges", href: "/admin/rewards", icon: Medal },
+    { name: "Spin & Win Wheel", href: "/admin/spin-wheel", icon: Gift },
     { name: "Reports & Analytics", href: "/admin/reports", icon: BarChart3 },
     { name: "Notifications", href: "/admin/notifications", icon: Bell },
     { name: "Settings", href: "/admin/settings", icon: Settings },
