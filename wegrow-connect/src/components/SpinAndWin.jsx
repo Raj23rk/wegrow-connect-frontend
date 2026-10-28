@@ -302,7 +302,7 @@ const CRACKER_PALETTE = [
 ];
 
 export default function SpinAndWin() {
-  // Step tracker: 1 = Register Form, 2 = Email OTP Verification, 3 = Spin Wheel, 4 = Won Reward Pass
+  // Step tracker: 1 = Register Form, 2 = Spin Wheel, 3 = Won Reward Pass
   const [step, setStep] = useState(1);
 
   // Form State
@@ -320,13 +320,6 @@ export default function SpinAndWin() {
 
   const [formErrors, setFormErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // OTP State
-  const [otpDigits, setOtpDigits] = useState(['', '', '', '', '', '']);
-  const [demoOtp, setDemoOtp] = useState('');
-  const [timerCount, setTimerCount] = useState(60);
-  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
-  const otpInputsRef = useRef([]);
 
   // Spin Wheel State
   const canvasRef = useRef(null);
@@ -404,7 +397,7 @@ export default function SpinAndWin() {
               courseInterested: v.student.courseInterested || prev.courseInterested
             }));
           }
-          setStep(4);
+          setStep(3);
         } else if (emailParam) {
           spinWinApi.getVoucherDetails(emailParam).then((vres) => {
             if (vres.success && vres.participant) {
@@ -413,7 +406,7 @@ export default function SpinAndWin() {
               if (p.hasSpun && p.wonReward) {
                 setWonReward(p.wonReward);
                 setVoucherCode(p.voucherCode || voucherParam);
-                setStep(4);
+                setStep(3);
               }
             }
           });
@@ -442,9 +435,9 @@ export default function SpinAndWin() {
             setWonReward(p.wonReward);
             setVoucherCode(p.voucherCode);
             setVoucherExpiry(p.voucherExpiry || '15 Days from Diwali');
-            setStep(4);
-          } else if (p.isEmailVerified) {
             setStep(3);
+          } else {
+            setStep(2);
           }
         }
       });
@@ -470,17 +463,6 @@ export default function SpinAndWin() {
         .catch((err) => console.error('QR Generation Error:', err));
     }
   }, [wonReward, voucherCode, activeParticipant, formData]);
-
-  // Countdown timer for OTP
-  useEffect(() => {
-    let interval = null;
-    if (step === 2 && timerCount > 0) {
-      interval = setInterval(() => {
-        setTimerCount((prev) => prev - 1);
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [step, timerCount]);
 
   // ============================================================
   // FIRECRACKER CELEBRATION CANVAS ENGINE
@@ -859,9 +841,9 @@ export default function SpinAndWin() {
     });
   };
 
-  // Trigger grand celebration when reaching Step 4 (won reward)
+  // Trigger grand celebration when reaching Step 3 (won reward)
   useEffect(() => {
-    if (step === 4 && wonReward) {
+    if (step === 3 && wonReward) {
       setTimeout(() => {
         burstGrandDiwaliCrackers();
       }, 500);
@@ -1032,9 +1014,9 @@ export default function SpinAndWin() {
     ctx.restore();
   }, [rotationAngle, numSlices, sliceAngle, slices]);
 
-  // Clean redraw effect: runs when step is 3 or drawWheel changes (no state updates, no loops!)
+  // Clean redraw effect: runs when step is 2 or drawWheel changes (no state updates, no loops!)
   useEffect(() => {
-    if (step === 3) {
+    if (step === 2) {
       drawWheel();
       const raf = requestAnimationFrame(drawWheel);
       const timer = setTimeout(drawWheel, 60);
@@ -1137,7 +1119,7 @@ export default function SpinAndWin() {
     (formData.mobileNo && formData.motherPhone && formData.mobileNo === formData.motherPhone) ||
     (formData.fatherPhone && formData.motherPhone && formData.fatherPhone === formData.motherPhone);
 
-  // Step 1: Submit Registration -> Send OTP
+  // Step 1: Submit Registration -> Directly unlock spin wheel (No OTP)
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) {
@@ -1145,11 +1127,28 @@ export default function SpinAndWin() {
       return;
     }
 
+    const cleanEmail = formData.email.trim().toLowerCase();
+
+    // Check localStorage fast guard for 1-email-1-spin
+    const alreadySpunLocal = localStorage.getItem(`wegrow_spun_${cleanEmail}`);
+    if (alreadySpunLocal) {
+      toast.error('This email has already spun the wheel! Each student is eligible for 1 spin only.', {
+        duration: 5000,
+        icon: '🔒'
+      });
+      if (activeParticipant?.wonReward) {
+        setWonReward(activeParticipant.wonReward);
+        setVoucherCode(activeParticipant.voucherCode || '');
+        setStep(3);
+      }
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const res = await spinWheelApi.sendOtp({
         name: formData.name,
-        email: formData.email,
+        email: cleanEmail,
         mobileNo: formData.mobileNo,
         fatherMobile: formData.fatherPhone,
         motherMobile: formData.motherPhone,
@@ -1158,31 +1157,31 @@ export default function SpinAndWin() {
       });
 
       if (res.alreadySpun) {
-        toast('Welcome back! You already spun the wheel for Diwali.', { icon: '✨' });
+        toast.error('This email has already spun the wheel! Each student is eligible for 1 spin only.', {
+          icon: '🔒',
+          duration: 6000
+        });
         if (res.data) {
-          setWonReward({
-            title: res.data.rewardTitle || '5% Course Scholarship',
-            description: 'Redeem your Diwali skill scholarship on visiting WeGrow B-School Campus.'
+          setWonReward(res.data.wonReward || {
+            title: res.data.rewardTitle || 'Course Scholarship',
+            description: res.data.rewardDescription || 'Redeem your Diwali skill scholarship on visiting WeGrow B-School Campus.'
           });
-          setVoucherCode(res.data.voucherCode || 'WGW-SPIN-83921');
+          setVoucherCode(res.data.voucherCode || 'WGW-SPIN-ALREADY');
           if (res.data.qrCodeDataUrl) setQrCodeUrl(res.data.qrCodeDataUrl);
         }
-        setStep(4);
+        localStorage.setItem(`wegrow_spun_${cleanEmail}`, 'true');
+        setStep(3);
         setIsSubmitting(false);
         return;
       }
 
-      if (res.success) {
-        toast.success(res.message, { duration: 6000 });
-        const devCode = res.data?.devOtp || res.demoOtp;
-        if (devCode) {
-          setDemoOtp(devCode);
-        }
-        localStorage.setItem('wegrow_spin_last_email', formData.email.trim().toLowerCase());
-        setTimerCount(60);
+      if (res.success || res.canSpin) {
+        toast.success('Registration successful! The Spin Wheel is unlocked!', { icon: '🎡' });
+        localStorage.setItem('wegrow_spin_last_email', cleanEmail);
+        setActiveParticipant(res.data?.student || { ...formData, email: cleanEmail });
         setStep(2);
       } else {
-        toast.error(res.message || 'Failed to send OTP. Please try again.');
+        toast.error(res.message || 'Registration failed. Please try again.');
       }
     } catch (err) {
       toast.error('Something went wrong. Please check your connection.');
@@ -1191,115 +1190,36 @@ export default function SpinAndWin() {
     }
   };
 
-  // OTP Input Change Handlers
-  const handleOtpDigitChange = (index, value) => {
-    const clean = value.replace(/\D/g, '').slice(-1);
-    const newDigits = [...otpDigits];
-    newDigits[index] = clean;
-    setOtpDigits(newDigits);
-
-    // Auto-focus next input
-    if (clean && index < 5 && otpInputsRef.current[index + 1]) {
-      otpInputsRef.current[index + 1].focus();
-    }
-  };
-
-  const handleOtpKeyDown = (index, e) => {
-    if (e.key === 'Backspace' && !otpDigits[index] && index > 0) {
-      otpInputsRef.current[index - 1].focus();
-    }
-  };
-
-  const handleOtpPaste = (e) => {
-    e.preventDefault();
-    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
-    if (pasted) {
-      const newDigits = [...otpDigits];
-      for (let i = 0; i < 6; i++) {
-        newDigits[i] = pasted[i] || '';
-      }
-      setOtpDigits(newDigits);
-      if (pasted.length === 6 && otpInputsRef.current[5]) {
-        otpInputsRef.current[5].focus();
-      }
-    }
-  };
-
-  const handleAutoFillDemoOtp = () => {
-    const code = demoOtp || '123456';
-    const split = code.split('');
-    setOtpDigits(split);
-    toast.success(`Auto-filled OTP: ${code}`);
-  };
-
-  const handleResendOtp = async () => {
-    if (timerCount > 0) return;
-    setIsSubmitting(true);
-    try {
-      const res = await spinWheelApi.sendOtp({
-        name: formData.name,
-        email: formData.email,
-        mobileNo: formData.mobileNo,
-        fatherMobile: formData.fatherPhone,
-        motherMobile: formData.motherPhone,
-        courseInterested: formData.courseInterested,
-        campusPreference: formData.preferredCampus
-      });
-      if (res.success) {
-        toast.success('New OTP sent to ' + formData.email);
-        const devCode = res.data?.devOtp || res.demoOtp;
-        if (devCode) setDemoOtp(devCode);
-        setTimerCount(60);
-        setOtpDigits(['', '', '', '', '', '']);
-      }
-    } catch {
-      toast.error('Could not resend OTP.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  // Step 2: Verify OTP
-  const handleVerifyOtp = async (e) => {
-    if (e) e.preventDefault();
-    const enteredOtp = otpDigits.join('');
-    if (enteredOtp.length !== 6) {
-      toast.error('Please enter the complete 6-digit OTP code');
-      return;
-    }
-
-    setIsVerifyingOtp(true);
-    try {
-      const res = await spinWheelApi.verifyOtp(formData.email, enteredOtp);
-      if (res.success) {
-        toast.success(res.message || 'Email verified successfully!', { icon: '🎉' });
-        sfx.playFanfare();
-        if (res.data?.student) {
-          setActiveParticipant(res.data.student);
-        }
-        setStep(3);
-        // Small festive cracker burst on verification
-        launchSingleRocket(window.innerWidth * 0.5, window.innerHeight * 0.35, true);
-      } else {
-        toast.error(res.message || 'Verification failed. Try again.');
-      }
-    } catch {
-      toast.error('Error verifying OTP.');
-    } finally {
-      setIsVerifyingOtp(false);
-    }
-  };
-
-  // Step 3: Trigger Spin
+  // Step 2: Trigger Spin (Strict 1-spin-per-email policy)
   const handleSpinNow = async () => {
     if (isSpinning) return;
     sfx.init();
 
+    const cleanEmail = (formData.email || '').trim().toLowerCase();
+    const alreadySpun =
+      activeParticipant?.hasSpun ||
+      localStorage.getItem(`wegrow_spun_${cleanEmail}`) === 'true';
+
+    if (alreadySpun) {
+      toast.error('You have already used your 1-time spin for this email!', { icon: '🔒' });
+      if (activeParticipant?.wonReward) {
+        setWonReward(activeParticipant.wonReward);
+        setVoucherCode(activeParticipant.voucherCode || '');
+        setStep(3);
+      }
+      return;
+    }
+
     setIsSpinning(true);
     try {
-      const res = await spinWheelApi.spinWheel(formData.email);
-      if (!res.success) {
-        toast.error(res.message);
+      const res = await spinWheelApi.spinWheel(cleanEmail);
+      if (!res.success || res.alreadySpun) {
+        toast.error(res.message || 'This email has already spun the wheel!', { icon: '🔒' });
+        if (res.data?.reward || res.data?.rewardTitle) {
+          setWonReward(res.data.reward || { title: res.data.rewardTitle });
+          setVoucherCode(res.data.voucherCode || '');
+          setStep(3);
+        }
         setIsSpinning(false);
         return;
       }
@@ -1346,6 +1266,9 @@ export default function SpinAndWin() {
           requestAnimationFrame(animateWheel);
         } else {
           setIsSpinning(false);
+          // Mark as spun to enforce 1 email 1 spin
+          localStorage.setItem(`wegrow_spun_${cleanEmail}`, 'true');
+          setActiveParticipant((prev) => ({ ...(prev || {}), hasSpun: true }));
           setWonReward(targetReward);
           setVoucherCode(code);
           if (qrUrl) setQrCodeUrl(qrUrl);
@@ -1360,7 +1283,7 @@ export default function SpinAndWin() {
           });
 
           setTimeout(() => {
-            setStep(4);
+            setStep(3);
           }, 800);
         }
       };
@@ -1369,6 +1292,7 @@ export default function SpinAndWin() {
     } catch (err) {
       console.error('Spin error:', err);
       toast.error('Failed to spin. Please try again.');
+      setIsSpinning(false);
     }
   };
 
@@ -1644,14 +1568,14 @@ export default function SpinAndWin() {
       </header>
 
       {/* STEP PROGRESS INDICATOR */}
-      <div className="relative z-10 max-w-3xl mx-auto px-4 py-4">
+      <div className="relative z-10 max-w-2xl mx-auto px-4 py-4">
         <div className="flex items-center justify-between relative">
           <div className="absolute top-1/2 left-0 right-0 h-1 bg-black/50 border border-white/10 -translate-y-1/2 z-0 rounded-full" />
           <div
             className="absolute top-1/2 left-0 h-1 bg-gradient-to-r from-amber-400 via-orange-500 to-rose-500 -translate-y-1/2 z-0 transition-all duration-500 rounded-full shadow-[0_0_10px_#f59e0b]"
             style={{
               width:
-                step === 1 ? '15%' : step === 2 ? '50%' : step === 3 ? '85%' : '100%'
+                step === 1 ? '20%' : step === 2 ? '60%' : '100%'
             }}
           />
 
@@ -1668,7 +1592,7 @@ export default function SpinAndWin() {
             <span className="text-[11px] font-bold mt-1.5 text-amber-200">Registration</span>
           </div>
 
-          {/* Step 2 Node */}
+          {/* Step 2 Node: Spin Wheel */}
           <div className="relative z-10 flex flex-col items-center">
             <div
               className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs transition-all ${step >= 2
@@ -1678,26 +1602,13 @@ export default function SpinAndWin() {
             >
               {step > 2 ? <Check className="w-4 h-4 stroke-[3]" /> : '2'}
             </div>
-            <span className="text-[11px] font-bold mt-1.5 text-amber-200">OTP Verify</span>
-          </div>
-
-          {/* Step 3 Node */}
-          <div className="relative z-10 flex flex-col items-center">
-            <div
-              className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs transition-all ${step >= 3
-                  ? 'bg-amber-400 text-slate-950 ring-4 ring-amber-400/30 shadow-[0_0_12px_#f59e0b]'
-                  : 'bg-black/60 border border-white/20 text-slate-400'
-                }`}
-            >
-              {step > 3 ? <Check className="w-4 h-4 stroke-[3]" /> : '3'}
-            </div>
             <span className="text-[11px] font-bold mt-1.5 text-amber-200">Spin Wheel</span>
           </div>
 
-          {/* Step 4 Node */}
+          {/* Step 3 Node: Campus Pass */}
           <div className="relative z-10 flex flex-col items-center">
             <div
-              className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs transition-all ${step >= 4
+              className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs transition-all ${step >= 3
                   ? 'bg-amber-400 text-slate-950 ring-4 ring-amber-400/30 shadow-[0_0_15px_#f59e0b]'
                   : 'bg-black/60 border border-white/20 text-slate-400'
                 }`}
@@ -1768,7 +1679,7 @@ export default function SpinAndWin() {
               {/* Email Address */}
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-amber-200 mb-1.5">
-                  Email Address (For OTP & Voucher Delivery) <span className="text-rose-400">*</span>
+                  Email Address (For Reward Voucher Delivery) <span className="text-rose-400">*</span>
                 </label>
                 <div
                   className={`flex items-center rounded-xl border ${formErrors.email
@@ -2046,12 +1957,12 @@ export default function SpinAndWin() {
                 {isSubmitting ? (
                   <>
                     <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
-                    <span>Sending Verification Code...</span>
+                    <span>Confirming Registration...</span>
                   </>
                 ) : (
                   <>
                     <PartyPopper className="w-4 h-4 text-orange-800" />
-                    <span>Proceed To Email Verification</span>
+                    <span>Proceed To Spin Wheel</span>
                     <ArrowRight className="w-4 h-4" />
                   </>
                 )}
@@ -2061,116 +1972,25 @@ export default function SpinAndWin() {
         )}
 
         {/* ======================================================== */}
-        {/* STEP 2: EMAIL OTP VERIFICATION                           */}
+        {/* STEP 2: INTERACTIVE DIWALI SPINNING WHEEL                */}
         {/* ======================================================== */}
         {step === 2 && (
-          <div className="max-w-md mx-auto bg-gradient-to-b from-[#2B0914]/95 via-[#20060E]/95 to-[#150308]/95 border-2 border-amber-400/40 rounded-3xl p-6 sm:p-8 shadow-[0_20px_60px_rgba(245,158,11,0.25)] backdrop-blur-md text-center relative overflow-hidden">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-amber-500/20 border-2 border-amber-400/40 flex items-center justify-center text-amber-300 shadow-[0_0_20px_rgba(245,158,11,0.3)]">
-              <Mail className="w-8 h-8" />
-            </div>
-
-            <h2 className="text-2xl font-black text-white drop-shadow-sm">Verify Your Email</h2>
-            <p className="text-xs text-amber-100/80 mt-1.5 leading-relaxed">
-              We have dispatched a 6-digit verification code to:
-              <br />
-              <span className="font-bold text-amber-300 text-sm">{formData.email}</span>
-            </p>
-
-            {/* Quick-Fill Pill for Instant Testing */}
-            {demoOtp && (
-              <div className="mt-3.5 inline-flex items-center gap-2 bg-amber-500/20 border border-amber-400/50 px-3 py-1.5 rounded-full text-xs text-amber-200">
-                <span>Demo OTP: <strong>{demoOtp}</strong></span>
-                <button
-                  type="button"
-                  onClick={handleAutoFillDemoOtp}
-                  className="bg-amber-400 text-slate-950 px-2 py-0.5 rounded text-[10px] font-black uppercase hover:bg-amber-300 transition cursor-pointer"
-                >
-                  Auto-Fill
-                </button>
-              </div>
-            )}
-
-            {/* OTP Input Fields */}
-            <form onSubmit={handleVerifyOtp} className="mt-6">
-              <div
-                className="flex items-center justify-center gap-2 sm:gap-3 mb-6"
-                onPaste={handleOtpPaste}
-              >
-                {otpDigits.map((digit, idx) => (
-                  <input
-                    key={idx}
-                    ref={(el) => (otpInputsRef.current[idx] = el)}
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={1}
-                    value={digit}
-                    onChange={(e) => handleOtpDigitChange(idx, e.target.value)}
-                    onKeyDown={(e) => handleOtpKeyDown(idx, e)}
-                    className="w-10 sm:w-12 h-12 sm:h-14 bg-[#140308] border-2 border-amber-400/40 rounded-xl text-center text-xl font-black text-amber-300 focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-400/40 shadow-inner transition"
-                  />
-                ))}
-              </div>
-
-              {/* Verify Button */}
-              <button
-                type="submit"
-                disabled={isVerifyingOtp}
-                className="w-full py-4 px-6 rounded-2xl font-black text-sm uppercase tracking-wider text-slate-950 bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-500 hover:from-amber-200 hover:to-amber-400 transition shadow-[0_6px_25px_rgba(245,158,11,0.5)] border border-yellow-200 disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
-              >
-                {isVerifyingOtp ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
-                    <span>Verifying Code...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>Verify & Unlock Wheel</span>
-                    <Sparkles className="w-4 h-4" />
-                  </>
-                )}
-              </button>
-
-              {/* Resend & Back Actions */}
-              <div className="mt-5 flex items-center justify-between text-xs text-amber-200/80">
-                <button
-                  type="button"
-                  onClick={() => setStep(1)}
-                  className="hover:text-amber-300 flex items-center gap-1 transition cursor-pointer"
-                >
-                  <ArrowLeft className="w-3.5 h-3.5" />
-                  <span>Edit Details</span>
-                </button>
-
-                <div>
-                  {timerCount > 0 ? (
-                    <span className="flex items-center gap-1 text-amber-200/60">
-                      <Clock className="w-3.5 h-3.5" />
-                      <span>Resend in {timerCount}s</span>
-                    </span>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={handleResendOtp}
-                      className="text-amber-400 font-bold hover:underline cursor-pointer"
-                    >
-                      Resend Code
-                    </button>
-                  )}
-                </div>
-              </div>
-            </form>
-          </div>
-        )}
-
-        {/* ======================================================== */}
-        {/* STEP 3: INTERACTIVE DIWALI SPINNING WHEEL                */}
-        {/* ======================================================== */}
-        {step === 3 && (
           <div className="max-w-4xl mx-auto flex flex-col items-center">
             {/* Student Banner */}
-            <div className="mb-4 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-400/50 text-emerald-200 text-xs font-bold shadow-[0_0_15px_rgba(16,185,129,0.2)]">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-              <span>Verified Student: {formData.name} • {formData.email}</span>
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3 w-full max-w-lg">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-400/50 text-emerald-200 text-xs font-bold shadow-[0_0_15px_rgba(16,185,129,0.2)]">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                <span>Eligible Student: {formData.name} • {formData.email}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setStep(1)}
+                className="text-xs text-amber-300 hover:text-amber-200 underline font-semibold flex items-center gap-1 cursor-pointer transition"
+                title="Change student or contact details"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Edit Details</span>
+              </button>
             </div>
 
             {/* Wheel Canvas Container */}
@@ -2249,9 +2069,9 @@ export default function SpinAndWin() {
         )}
 
         {/* ======================================================== */}
-        {/* STEP 4: WON REWARD PASS & VOUCHER                        */}
+        {/* STEP 3: WON REWARD PASS & VOUCHER                        */}
         {/* ======================================================== */}
-        {step === 4 && wonReward && (
+        {step === 3 && wonReward && (
           <div className="max-w-2xl mx-auto">
             {/* Celebratory Banner */}
             <div className="text-center mb-6">

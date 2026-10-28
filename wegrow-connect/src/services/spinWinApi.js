@@ -248,77 +248,105 @@ export const spinWheelApi = {
         body: JSON.stringify(payload),
       });
       const data = await res.json();
-      return data;
+      
+      // If already spun, pass through alreadySpun flag
+      if (data.alreadySpun || data.data?.alreadySpun) {
+        return {
+          success: false,
+          alreadySpun: true,
+          message: data.message || 'This email has already spun the wheel!',
+          data: data.data || data
+        };
+      }
+
+      return {
+        ...data,
+        canSpin: true
+      };
     } catch (err) {
       console.warn('Backend /send-otp error, using offline mock:', err);
-      // Offline fallback
-      const devOtp = '123456';
+      // Offline fallback with 1-email-1-spin enforcement
       const participants = getLocalParticipants();
-      let p = participants.find(item => item.email === payload.email);
+      const cleanEmail = (payload.email || '').trim().toLowerCase();
+      let p = participants.find(item => item.email === cleanEmail);
+
+      if (p && p.hasSpun) {
+        return {
+          success: false,
+          alreadySpun: true,
+          message: 'This email is already registered and has already spun the wheel! Each student is eligible for 1 spin only.',
+          data: {
+            name: p.name,
+            email: p.email,
+            voucherCode: p.voucherCode,
+            rewardTitle: p.wonReward?.title || 'Skill Scholarship',
+            wonReward: p.wonReward,
+            qrCodeDataUrl: p.qrCodeDataUrl || '',
+            isRedeemed: p.isRedeemed
+          }
+        };
+      }
+
       if (!p) {
         p = {
           ...payload,
           _id: 'mock_' + Date.now(),
-          isEmailVerified: false,
+          isEmailVerified: true,
           hasSpun: false,
           createdAt: new Date().toISOString()
         };
         participants.push(p);
       } else {
-        Object.assign(p, payload);
+        Object.assign(p, payload, { isEmailVerified: true });
       }
       saveLocalParticipants(participants);
+
       return {
         success: true,
-        message: `Verification OTP has been sent to ${payload.email}. (Demo OTP: ${devOtp})`,
+        canSpin: true,
+        message: 'Registration confirmed! Spin wheel is unlocked.',
         data: {
-          email: payload.email,
-          devOtp
+          email: cleanEmail,
+          canSpin: true,
+          student: p
         }
       };
     }
   },
 
-  // 3. Verify 6-digit OTP (POST /verify-otp)
-  verifyOtp: async (email, otp) => {
+  // Direct registration alias
+  registerStudent: async (studentData) => {
+    return spinWheelApi.sendOtp(studentData);
+  },
+
+  // 3. Verify OTP (retained for backward compatibility, automatically resolves)
+  verifyOtp: async (email, otp = '123456') => {
     const cleanEmail = (email || '').trim().toLowerCase();
-    const cleanOtp = (otp || '').trim();
 
     try {
       const res = await fetch(`${SPIN_WHEEL_API_BASE}/verify-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: cleanEmail, otp: cleanOtp }),
+        body: JSON.stringify({ email: cleanEmail, otp }),
       });
       const data = await res.json();
       return data;
     } catch (err) {
       console.warn('Backend /verify-otp error, using offline mock:', err);
-      // Offline fallback
-      const participants = getLocalParticipants();
-      const p = participants.find(item => item.email === cleanEmail);
-      if (p) {
-        p.isEmailVerified = true;
-        saveLocalParticipants(participants);
-      }
       return {
         success: true,
-        message: 'Email successfully verified! The Spin Wheel is now unlocked.',
-        data: {
-          canSpin: true,
-          student: {
-            name: p?.name || 'Student',
-            email: cleanEmail,
-            courseInterested: p?.courseInterested || 'Full Stack'
-          }
-        }
+        message: 'Registration confirmed! The Spin Wheel is unlocked.',
+        data: { canSpin: true, student: { email: cleanEmail } }
       };
     }
   },
 
-  // 4. Spin the Wheel & Claim Reward (POST /spin)
+  // 4. Spin the Wheel & Claim Reward (POST /spin) - strictly 1 spin per email
   spinWheel: async (email) => {
     const cleanEmail = (email || '').trim().toLowerCase();
+
+    // Check localStorage fast guard for 1-email-1-spin
+    const localSpunFlag = localStorage.getItem(`wegrow_spun_${cleanEmail}`);
 
     try {
       const res = await fetch(`${SPIN_WHEEL_API_BASE}/spin`, {
@@ -327,15 +355,46 @@ export const spinWheelApi = {
         body: JSON.stringify({ email: cleanEmail }),
       });
       const data = await res.json();
+
+      if (data.alreadySpun || data.data?.alreadySpun) {
+        localStorage.setItem(`wegrow_spun_${cleanEmail}`, 'true');
+        return {
+          success: false,
+          alreadySpun: true,
+          message: data.message || 'You have already spun the wheel! Only 1 spin per student.',
+          data: data.data || data
+        };
+      }
+
+      if (data.success) {
+        localStorage.setItem(`wegrow_spun_${cleanEmail}`, 'true');
+      }
+
       return data;
     } catch (err) {
       console.warn('Backend /spin error, using offline fallback:', err);
+      // Offline fallback: check if already spun
+      const participants = getLocalParticipants();
+      const p = participants.find(item => item.email === cleanEmail);
+
+      if ((p && p.hasSpun) || localSpunFlag) {
+        return {
+          success: false,
+          alreadySpun: true,
+          message: 'You have already spun the wheel! Each student is eligible for 1 spin only.',
+          data: {
+            reward: p?.wonReward || REWARD_POOL[0],
+            voucherCode: p?.voucherCode || 'WGW-SPIN-ALREADY',
+            student: p
+          }
+        };
+      }
+
       // Offline fallback: pick random reward from pool
       const sectorIndex = Math.floor(Math.random() * REWARD_POOL.length);
       const reward = REWARD_POOL[sectorIndex];
       const voucherCode = generateVoucherCode();
-      const participants = getLocalParticipants();
-      const p = participants.find(item => item.email === cleanEmail);
+
       if (p) {
         p.hasSpun = true;
         p.spunAt = new Date().toISOString();
@@ -344,6 +403,8 @@ export const spinWheelApi = {
         p.isRedeemed = false;
         saveLocalParticipants(participants);
       }
+      localStorage.setItem(`wegrow_spun_${cleanEmail}`, 'true');
+
       return {
         success: true,
         message: 'Congratulations! You have won an exclusive skill reward!',
