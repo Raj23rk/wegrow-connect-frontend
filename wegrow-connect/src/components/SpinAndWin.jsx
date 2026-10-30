@@ -40,9 +40,10 @@ import {
 } from 'lucide-react';
 import { spinWheelApi, spinWinApi, REWARD_POOL } from '../services/spinWinApi';
 
-// Web Audio API Sound Synthesizer (Realistic Ticks, Fanfares, Rockets, Anars, Chakris, Ladis & Booms)
+// Web Audio API Sound Synthesizer (Realistic Ticks, Fanfares, Rockets, Anars, Chakris, Ladis & Booms - Optimized)
 class SoundFX {
   constructor() {
+    this.noiseBuffer = null;
     this.ctx = null;
     this.muted = false;
   }
@@ -52,6 +53,16 @@ class SoundFX {
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
       if (AudioCtx) {
         this.ctx = new AudioCtx();
+        try {
+          const bufferSize = Math.floor(this.ctx.sampleRate * 0.2);
+          this.noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+          const output = this.noiseBuffer.getChannelData(0);
+          for (let i = 0; i < bufferSize; i++) {
+            output[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.3));
+          }
+        } catch {
+          // Audio buffer fallback
+        }
       }
     }
     if (this.ctx && this.ctx.state === 'suspended') {
@@ -153,28 +164,24 @@ class SoundFX {
       osc.frequency.setValueAtTime(200, t);
       osc.frequency.exponentialRampToValueAtTime(32, t + 0.32);
 
-      gain.gain.setValueAtTime(0.45, t);
+      gain.gain.setValueAtTime(0.35, t);
       gain.gain.exponentialRampToValueAtTime(0.001, t + 0.34);
       osc.connect(gain);
       gain.connect(this.ctx.destination);
       osc.start(t);
       osc.stop(t + 0.34);
 
-      // Crackling noise burst (Diwali firecracker sizzle)
-      const bufferSize = Math.floor(this.ctx.sampleRate * 0.22);
-      const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-      const output = buffer.getChannelData(0);
-      for (let i = 0; i < bufferSize; i++) {
-        output[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.32));
+      // Crackling noise burst using cached buffer (no array allocation per pop)
+      if (this.noiseBuffer) {
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = this.noiseBuffer;
+        const noiseGain = this.ctx.createGain();
+        noiseGain.gain.setValueAtTime(0.24, t + 0.02);
+        noiseGain.gain.exponentialRampToValueAtTime(0.005, t + 0.22);
+        noise.connect(noiseGain);
+        noiseGain.connect(this.ctx.destination);
+        noise.start(t + 0.02);
       }
-      const noise = this.ctx.createBufferSource();
-      noise.buffer = buffer;
-      const noiseGain = this.ctx.createGain();
-      noiseGain.gain.setValueAtTime(0.32, t + 0.03);
-      noiseGain.gain.exponentialRampToValueAtTime(0.005, t + 0.26);
-      noise.connect(noiseGain);
-      noiseGain.connect(this.ctx.destination);
-      noise.start(t + 0.03);
     } catch {
       // Audio not permitted yet
     }
@@ -184,16 +191,11 @@ class SoundFX {
     if (this.muted) return;
     try {
       this.init();
-      if (!this.ctx) return;
+      if (!this.ctx || !this.noiseBuffer) return;
       const t = this.ctx.currentTime;
-      const bufferSize = Math.floor(this.ctx.sampleRate * 0.05);
-      const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-      const output = buffer.getChannelData(0);
-      for (let i = 0; i < bufferSize; i++) {
-        output[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.2));
-      }
+
       const noise = this.ctx.createBufferSource();
-      noise.buffer = buffer;
+      noise.buffer = this.noiseBuffer;
 
       const filter = this.ctx.createBiquadFilter();
       filter.type = 'bandpass';
@@ -201,7 +203,7 @@ class SoundFX {
       filter.Q.setValueAtTime(2.5, t);
 
       const gain = this.ctx.createGain();
-      gain.gain.setValueAtTime(0.3, t);
+      gain.gain.setValueAtTime(0.2, t);
       gain.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
 
       noise.connect(filter);
@@ -217,17 +219,11 @@ class SoundFX {
     if (this.muted) return;
     try {
       this.init();
-      if (!this.ctx) return;
+      if (!this.ctx || !this.noiseBuffer) return;
       const t = this.ctx.currentTime;
-      const duration = 1.8;
-      const bufferSize = Math.floor(this.ctx.sampleRate * duration);
-      const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-      const output = buffer.getChannelData(0);
-      for (let i = 0; i < bufferSize; i++) {
-        output[i] = (Math.random() * 2 - 1) * (0.75 + 0.25 * Math.sin(i / 120));
-      }
+
       const noise = this.ctx.createBufferSource();
-      noise.buffer = buffer;
+      noise.buffer = this.noiseBuffer;
 
       const filter = this.ctx.createBiquadFilter();
       filter.type = 'highpass';
@@ -235,8 +231,8 @@ class SoundFX {
 
       const gain = this.ctx.createGain();
       gain.gain.setValueAtTime(0.02, t);
-      gain.gain.linearRampToValueAtTime(0.2, t + 0.2);
-      gain.gain.exponentialRampToValueAtTime(0.001, t + duration);
+      gain.gain.linearRampToValueAtTime(0.14, t + 0.2);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 1.2);
 
       noise.connect(filter);
       filter.connect(gain);
@@ -331,18 +327,21 @@ export default function SpinAndWin() {
     chakris: [],
     ladis: [],
     flashAlpha: 0,
-    animId: null
+    animId: null,
+    isRunning: false
   });
 
   const [isSpinning, setIsSpinning] = useState(false);
-  const [rotationAngle, setRotationAngle] = useState(0);
+  const rotationAngleRef = useRef(0);
+  const lastClickRef = useRef(0);
+  const hasCelebratedRef = useRef(false);
   const [wonReward, setWonReward] = useState(null);
   const [voucherCode, setVoucherCode] = useState('');
   const [voucherExpiry, setVoucherExpiry] = useState('');
   const [qrCodeUrl, setQrCodeUrl] = useState('');
   const [copiedCode, setCopiedCode] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
-  const [crackerCount, setCrackerCount] = useState(0);
+  const loopRef = useRef(null);
 
   // Participant Data
   const [activeParticipant, setActiveParticipant] = useState(null);
@@ -462,7 +461,7 @@ export default function SpinAndWin() {
         .then((url) => setQrCodeUrl(url))
         .catch((err) => console.error('QR Generation Error:', err));
     }
-  }, [wonReward, voucherCode, activeParticipant, formData]);
+  }, [wonReward, voucherCode]);
 
   // ============================================================
   // FIRECRACKER CELEBRATION CANVAS ENGINE
@@ -482,9 +481,26 @@ export default function SpinAndWin() {
     const engine = fireworksEngineRef.current;
 
     const loop = () => {
+      // Check if any fireworks are actively running
+      const hasActive =
+        engine.rockets.length > 0 ||
+        engine.particles.length > 0 ||
+        engine.fountains.length > 0 ||
+        engine.chakris.length > 0 ||
+        engine.ladis.length > 0 ||
+        engine.flashAlpha > 0.005;
+
+      // Auto-sleep when idle to consume 0% CPU & 0% GPU!
+      if (!hasActive) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        engine.isRunning = false;
+        engine.animId = null;
+        return;
+      }
+
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Flash overlay for thunderous immersion
+      // Flash overlay for celebration immersion
       if (engine.flashAlpha > 0.005) {
         ctx.fillStyle = `rgba(255, 230, 180, ${engine.flashAlpha})`;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -492,31 +508,32 @@ export default function SpinAndWin() {
       }
 
       ctx.save();
-      ctx.globalCompositeOperation = 'lighter'; // Additive blending for blinding festive glow!
+      ctx.globalCompositeOperation = 'lighter'; // Native additive blending (0 Gaussian blur overhead)
 
       // Update & Draw Fountains (Anars)
       for (let i = engine.fountains.length - 1; i >= 0; i--) {
         const f = engine.fountains[i];
         f.timer++;
         if (f.timer < f.duration) {
-          const sparks = 6;
+          const sparks = 3;
           for (let s = 0; s < sparks; s++) {
             const angle = -Math.PI / 2 + (Math.random() - 0.5) * 0.5;
-            const speed = Math.random() * 12 + 8;
+            const speed = Math.random() * 9 + 5;
             const color = Math.random() > 0.25 ? '#FBBF24' : '#FFFBEB';
             engine.particles.push({
               x: f.x,
               y: f.y,
-              coords: [[f.x, f.y], [f.x, f.y], [f.x, f.y]],
+              prevX: f.x,
+              prevY: f.y,
               vx: Math.cos(angle) * speed,
               vy: Math.sin(angle) * speed,
               friction: 0.98,
-              gravity: 0.32,
+              gravity: 0.3,
               alpha: 1,
-              decay: 0.02,
+              decay: 0.025,
               color,
               flicker: true,
-              size: 2.5
+              size: 2
             });
           }
         } else {
@@ -530,14 +547,17 @@ export default function SpinAndWin() {
         c.timer++;
         c.angle += 0.38;
         if (c.timer < c.duration) {
-          for (let s = 0; s < 4; s++) {
-            const sparkAngle = c.angle + (s * Math.PI) / 2 + (Math.random() - 0.5) * 0.3;
-            const speed = 5 + Math.random() * 6;
+          for (let s = 0; s < 3; s++) {
+            const sparkAngle = c.angle + (s * Math.PI) / 1.5 + (Math.random() - 0.5) * 0.3;
+            const speed = 4 + Math.random() * 4;
             const color = CRACKER_PALETTE[Math.floor(Math.random() * CRACKER_PALETTE.length)];
+            const cx = c.x + Math.cos(c.angle) * 16;
+            const cy = c.y + Math.sin(c.angle) * 16;
             engine.particles.push({
-              x: c.x + Math.cos(c.angle) * 16,
-              y: c.y + Math.sin(c.angle) * 16,
-              coords: [[c.x, c.y], [c.x, c.y]],
+              x: cx,
+              y: cy,
+              prevX: cx,
+              prevY: cy,
               vx: Math.cos(sparkAngle) * speed,
               vy: Math.sin(sparkAngle) * speed,
               friction: 0.95,
@@ -546,7 +566,7 @@ export default function SpinAndWin() {
               decay: 0.035,
               color,
               flicker: true,
-              size: 2.2
+              size: 2
             });
           }
         } else {
@@ -561,47 +581,49 @@ export default function SpinAndWin() {
         if (l.timer % l.popInterval === 0 && l.currentPop < l.totalPops) {
           const popY = l.y + l.currentPop * 14;
           sfx.playLadiPop();
-          engine.flashAlpha = Math.max(engine.flashAlpha, 0.16);
+          engine.flashAlpha = Math.max(engine.flashAlpha, 0.14);
 
-          for (let s = 0; s < 18; s++) {
+          for (let s = 0; s < 8; s++) {
             const angle = Math.random() * Math.PI * 2;
-            const speed = Math.random() * 5 + 1.5;
+            const speed = Math.random() * 4 + 1.2;
             engine.particles.push({
               x: l.x,
               y: popY,
-              coords: [[l.x, popY], [l.x, popY]],
+              prevX: l.x,
+              prevY: popY,
               vx: Math.cos(angle) * speed,
               vy: Math.sin(angle) * speed,
               friction: 0.94,
               gravity: 0.18,
               alpha: 1,
-              decay: 0.025,
+              decay: 0.03,
               color: Math.random() > 0.4 ? '#EF4444' : '#FBBF24',
               flicker: true,
-              size: 2.5
+              size: 2
             });
           }
 
           l.currentPop++;
           if (l.currentPop >= l.totalPops) {
             sfx.playCrackerBurst();
-            engine.flashAlpha = 0.28;
-            for (let p = 0; p < 65; p++) {
+            engine.flashAlpha = 0.2;
+            for (let p = 0; p < 20; p++) {
               const angle = Math.random() * Math.PI * 2;
-              const speed = Math.random() * 8 + 2;
+              const speed = Math.random() * 5.5 + 1.5;
               engine.particles.push({
                 x: l.x,
                 y: popY,
-                coords: [[l.x, popY], [l.x, popY]],
+                prevX: l.x,
+                prevY: popY,
                 vx: Math.cos(angle) * speed,
                 vy: Math.sin(angle) * speed,
                 friction: 0.96,
                 gravity: 0.18,
                 alpha: 1,
-                decay: 0.016,
+                decay: 0.02,
                 color: Math.random() > 0.5 ? '#EF4444' : '#F59E0B',
                 flicker: true,
-                size: 3
+                size: 2.2
               });
             }
           }
@@ -614,8 +636,8 @@ export default function SpinAndWin() {
       // Update & Draw Rockets
       for (let i = engine.rockets.length - 1; i >= 0; i--) {
         const r = engine.rockets[i];
-        r.coords.pop();
-        r.coords.unshift([r.x, r.y]);
+        r.prevX = r.x;
+        r.prevY = r.y;
 
         const vx = Math.cos(r.angle) * r.speed;
         const vy = Math.sin(r.angle) * r.speed;
@@ -623,50 +645,51 @@ export default function SpinAndWin() {
         r.y += vy;
 
         ctx.beginPath();
-        ctx.moveTo(r.coords[r.coords.length - 1][0], r.coords[r.coords.length - 1][1]);
+        ctx.moveTo(r.prevX, r.prevY);
         ctx.lineTo(r.x, r.y);
         ctx.strokeStyle = r.color;
-        ctx.lineWidth = 3;
-        ctx.shadowColor = r.color;
-        ctx.shadowBlur = 12;
+        ctx.lineWidth = 2.5;
         ctx.stroke();
 
         const currentDist = Math.hypot(r.targetX - r.x, r.targetY - r.y);
         if (currentDist <= r.speed || (vy > 0 && r.y >= r.targetY)) {
           sfx.playCrackerBurst();
-          engine.flashAlpha = 0.22;
-          const pCount = 75 + Math.floor(Math.random() * 25);
+          engine.flashAlpha = 0.18;
+          const pCount = 28 + Math.floor(Math.random() * 8);
           for (let p = 0; p < pCount; p++) {
             const angle = Math.random() * Math.PI * 2;
-            const speed = Math.random() * 8.5 + 2;
+            const speed = Math.random() * 6.5 + 1.5;
             engine.particles.push({
               x: r.targetX,
               y: r.targetY,
-              coords: [
-                [r.targetX, r.targetY],
-                [r.targetX, r.targetY],
-                [r.targetX, r.targetY]
-              ],
+              prevX: r.targetX,
+              prevY: r.targetY,
               vx: Math.cos(angle) * speed,
               vy: Math.sin(angle) * speed,
-              friction: 0.96,
-              gravity: 0.16,
+              friction: 0.95,
+              gravity: 0.15,
               alpha: 1,
-              decay: Math.random() * 0.015 + 0.014,
+              decay: Math.random() * 0.018 + 0.015,
               color: r.color,
               flicker: true,
-              size: 2.6
+              size: 2.2
             });
           }
           engine.rockets.splice(i, 1);
         }
       }
 
-      // Update & Draw Explosion Particles
+      // Cap max particles to prevent any performance hit
+      const maxParticles = 140;
+      if (engine.particles.length > maxParticles) {
+        engine.particles.splice(0, engine.particles.length - maxParticles);
+      }
+
+      // Update & Draw Explosion Particles (Fast batch stroke without shadowBlur)
       for (let i = engine.particles.length - 1; i >= 0; i--) {
         const p = engine.particles[i];
-        p.coords.pop();
-        p.coords.unshift([p.x, p.y]);
+        p.prevX = p.x;
+        p.prevY = p.y;
         p.vx *= p.friction;
         p.vy *= p.friction;
         p.vy += p.gravity;
@@ -679,41 +702,38 @@ export default function SpinAndWin() {
           continue;
         }
 
-        ctx.save();
         const displayAlpha = Math.max(p.alpha * (p.flicker ? 0.75 + Math.random() * 0.5 : 1), 0);
         ctx.globalAlpha = Math.min(displayAlpha, 1);
-        ctx.beginPath();
-        ctx.moveTo(p.coords[p.coords.length - 1][0], p.coords[p.coords.length - 1][1]);
-        ctx.lineTo(p.x, p.y);
         ctx.strokeStyle = p.color;
-        ctx.lineWidth = p.size || 2.4;
-        ctx.shadowColor = p.color;
-        ctx.shadowBlur = 12;
+        ctx.lineWidth = p.size || 2.2;
+        ctx.beginPath();
+        ctx.moveTo(p.prevX, p.prevY);
+        ctx.lineTo(p.x, p.y);
         ctx.stroke();
-        ctx.restore();
       }
 
       ctx.restore();
       engine.animId = requestAnimationFrame(loop);
     };
 
-    engine.animId = requestAnimationFrame(loop);
-
-    // Ambient background firecracker bursts every 6 seconds
-    const ambientTimer = setInterval(() => {
-      if (document.visibilityState === 'visible') {
-        const rx = 100 + Math.random() * (window.innerWidth - 200);
-        const ry = 100 + Math.random() * (window.innerHeight * 0.45);
-        launchSingleRocket(rx, ry, false);
-      }
-    }, 6000);
+    loopRef.current = loop;
 
     return () => {
       window.removeEventListener('resize', resize);
-      cancelAnimationFrame(engine.animId);
-      clearInterval(ambientTimer);
+      if (engine.animId) cancelAnimationFrame(engine.animId);
+      engine.isRunning = false;
+      engine.animId = null;
     };
   }, []);
+
+  // Wake up fireworks animation loop only when fireworks are actively playing
+  const wakeUpFireworksEngine = () => {
+    const engine = fireworksEngineRef.current;
+    if (!engine.isRunning && loopRef.current) {
+      engine.isRunning = true;
+      engine.animId = requestAnimationFrame(loopRef.current);
+    }
+  };
 
   // Launch a single rocket firecracker
   const launchSingleRocket = (targetX, targetY, playSound = true) => {
@@ -729,18 +749,15 @@ export default function SpinAndWin() {
     fireworksEngineRef.current.rockets.push({
       x: startX,
       y: startY,
+      prevX: startX,
+      prevY: startY,
       targetX,
       targetY,
       color,
       angle,
-      speed,
-      coords: [
-        [startX, startY],
-        [startX, startY],
-        [startX, startY]
-      ]
+      speed
     });
-    setCrackerCount((prev) => prev + 1);
+    wakeUpFireworksEngine();
   };
 
   // Launch Anar (Flowerpot Fountain)
@@ -752,11 +769,11 @@ export default function SpinAndWin() {
     fireworksEngineRef.current.fountains.push({
       x,
       y,
-      duration: 100, // ~1.7 seconds
+      duration: 80,
       timer: 0,
       color: '#FBBF24'
     });
-    setCrackerCount((prev) => prev + 1);
+    wakeUpFireworksEngine();
     toast('🪔 Golden Anar Fountain lit! Sparkling shower in motion!', { duration: 2500 });
   };
 
@@ -770,14 +787,14 @@ export default function SpinAndWin() {
       x,
       y,
       angle: 0,
-      duration: 120, // ~2 seconds
+      duration: 90,
       timer: 0
     });
-    setCrackerCount((prev) => prev + 1);
+    wakeUpFireworksEngine();
     toast('🎡 Zameen Chakri spinning! Whirring 360° sparks flying!', { duration: 2500 });
   };
 
-  // Launch Ladi (10,000-Wala Red Crackers String)
+  // Launch Ladi (Red Crackers String)
   const launchLadi = (targetX, targetY) => {
     sfx.init();
     const x = targetX || (window.innerWidth * 0.5 + (Math.random() - 0.5) * 200);
@@ -785,16 +802,16 @@ export default function SpinAndWin() {
     fireworksEngineRef.current.ladis.push({
       x,
       y,
-      totalPops: 16,
+      totalPops: 12,
       currentPop: 0,
       popInterval: 5,
       timer: 0
     });
-    setCrackerCount((prev) => prev + 1);
-    toast('💥 10,000-Wala Red Ladi ignited! Rapid-fire crackle chain!', { duration: 2500 });
+    wakeUpFireworksEngine();
+    toast('💥 Red Ladi ignited! Rapid-fire crackle chain!', { duration: 2500 });
   };
 
-  // Handle Global Click on Background to burst cracker at cursor
+  // Handle Global Click on Background to burst cracker at cursor (throttled to avoid spam)
   useEffect(() => {
     const handleBackgroundClick = (e) => {
       const target = e.target;
@@ -809,6 +826,9 @@ export default function SpinAndWin() {
       ) {
         return;
       }
+      const now = Date.now();
+      if (now - lastClickRef.current < 400) return;
+      lastClickRef.current = now;
       launchSingleRocket(e.clientX, e.clientY, true);
     };
 
@@ -816,42 +836,40 @@ export default function SpinAndWin() {
     return () => window.removeEventListener('click', handleBackgroundClick);
   }, []);
 
-  // Launch Grand Diwali Celebration Barrage
+  // Launch Grand Diwali Celebration Barrage (4 crisp, non-blocking celebration rockets)
   const burstGrandDiwaliCrackers = () => {
     sfx.init();
-    toast('💥 Happy Diwali! Bursting celebration crackers!', { icon: '🪔' });
+    toast('💥 Happy Diwali! Bursting celebration crackers!', { icon: '🪔', duration: 3000 });
     const w = window.innerWidth;
     const h = window.innerHeight;
 
     const positions = [
-      { x: w * 0.2, y: h * 0.25 },
+      { x: w * 0.3, y: h * 0.25 },
+      { x: w * 0.7, y: h * 0.22 },
       { x: w * 0.5, y: h * 0.18 },
-      { x: w * 0.8, y: h * 0.28 },
-      { x: w * 0.35, y: h * 0.3 },
-      { x: w * 0.65, y: h * 0.22 },
-      { x: w * 0.15, y: h * 0.35 },
-      { x: w * 0.85, y: h * 0.2 },
-      { x: w * 0.5, y: h * 0.28 }
+      { x: w * 0.2, y: h * 0.3 }
     ];
 
     positions.forEach((pos, idx) => {
       setTimeout(() => {
         launchSingleRocket(pos.x, pos.y, true);
-      }, idx * 300);
+      }, idx * 350);
     });
   };
 
-  // Trigger grand celebration when reaching Step 3 (won reward)
+  // Trigger grand celebration when reaching Step 3 (won reward) - runs strictly once
   useEffect(() => {
-    if (step === 3 && wonReward) {
-      setTimeout(() => {
+    if (step === 3 && wonReward && !hasCelebratedRef.current) {
+      hasCelebratedRef.current = true;
+      const timer = setTimeout(() => {
         burstGrandDiwaliCrackers();
       }, 500);
+      return () => clearTimeout(timer);
     }
   }, [step, wonReward]);
 
-  // Draw Canvas Wheel
-  const drawWheel = useCallback(() => {
+  // Draw Canvas Wheel (Accepts direct angle for 60fps spin without React re-renders)
+  const drawWheel = useCallback((angle = rotationAngleRef.current) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -865,7 +883,7 @@ export default function SpinAndWin() {
 
     ctx.save();
     ctx.translate(centerX, centerY);
-    ctx.rotate(rotationAngle);
+    ctx.rotate(angle);
 
     // Draw Wheel Slices
     for (let i = 0; i < numSlices; i++) {
@@ -1012,18 +1030,13 @@ export default function SpinAndWin() {
     ctx.fill();
 
     ctx.restore();
-  }, [rotationAngle, numSlices, sliceAngle, slices]);
+  }, [numSlices, sliceAngle, slices]);
 
-  // Clean redraw effect: runs when step is 2 or drawWheel changes (no state updates, no loops!)
+  // Draw wheel once when Step 2 mounts or slices change
   useEffect(() => {
     if (step === 2) {
-      drawWheel();
-      const raf = requestAnimationFrame(drawWheel);
-      const timer = setTimeout(drawWheel, 60);
-      return () => {
-        cancelAnimationFrame(raf);
-        clearTimeout(timer);
-      };
+      const raf = requestAnimationFrame(() => drawWheel());
+      return () => cancelAnimationFrame(raf);
     }
   }, [step, drawWheel]);
 
@@ -1242,7 +1255,7 @@ export default function SpinAndWin() {
 
       const duration = 5200;
       const startTime = performance.now();
-      const initialAngle = rotationAngle % (2 * Math.PI);
+      const initialAngle = rotationAngleRef.current % (2 * Math.PI);
       let lastTickSlice = -1;
 
       const animateWheel = (now) => {
@@ -1251,7 +1264,8 @@ export default function SpinAndWin() {
 
         const easeOut = 1 - Math.pow(1 - progress, 3.8);
         const currentAngle = initialAngle + (finalAngle - initialAngle) * easeOut;
-        setRotationAngle(currentAngle);
+        rotationAngleRef.current = currentAngle;
+        drawWheel(currentAngle);
 
         const effectiveAngle = ((3 * Math.PI) / 2 - currentAngle) % (2 * Math.PI);
         const normalized = (effectiveAngle + 2 * Math.PI) % (2 * Math.PI);
@@ -1276,6 +1290,7 @@ export default function SpinAndWin() {
 
           // Victory fanfare & instant grand cracker celebration!
           sfx.playFanfare();
+          hasCelebratedRef.current = true;
           burstGrandDiwaliCrackers();
 
           toast.success(`🎉 BINGO! You won: ${targetReward.title}!`, {
@@ -1405,15 +1420,27 @@ export default function SpinAndWin() {
       {/* FESTIVE DIWALI CELEBRATION AMBIENCE & ANIMATIONS            */}
       {/* ============================================================ */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        {/* Warm Golden-Crimson Glow Auras */}
-        <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-[800px] h-[450px] bg-gradient-to-b from-amber-500/25 via-rose-600/20 to-transparent rounded-full blur-[120px]" />
-        <div className="absolute top-1/4 -left-32 w-96 h-96 bg-amber-600/20 rounded-full blur-[140px] animate-pulse" />
-        <div className="absolute top-1/2 -right-32 w-96 h-96 bg-rose-600/20 rounded-full blur-[140px] animate-pulse" style={{ animationDelay: '1.5s' }} />
-        <div className="absolute bottom-10 left-1/3 w-[500px] h-[500px] bg-amber-500/15 rounded-full blur-[160px]" />
+        {/* Warm Golden-Crimson Glow Auras using fast radial gradients (0 Gaussian blur passes) */}
+        <div 
+          className="absolute -top-20 left-1/2 -translate-x-1/2 w-[750px] h-[400px] rounded-full pointer-events-none"
+          style={{ background: 'radial-gradient(ellipse at center, rgba(245, 158, 11, 0.2) 0%, rgba(225, 29, 72, 0.12) 50%, transparent 75%)' }}
+        />
+        <div 
+          className="absolute top-1/4 -left-20 w-80 h-80 rounded-full pointer-events-none opacity-60"
+          style={{ background: 'radial-gradient(circle, rgba(217, 119, 6, 0.18) 0%, transparent 70%)' }}
+        />
+        <div 
+          className="absolute top-1/2 -right-20 w-80 h-80 rounded-full pointer-events-none opacity-60"
+          style={{ background: 'radial-gradient(circle, rgba(225, 29, 72, 0.18) 0%, transparent 70%)' }}
+        />
+        <div 
+          className="absolute bottom-10 left-1/3 w-96 h-96 rounded-full pointer-events-none opacity-40"
+          style={{ background: 'radial-gradient(circle, rgba(245, 158, 11, 0.14) 0%, transparent 70%)' }}
+        />
 
-        {/* Slowly Rotating Golden Rangoli Mandala Behind Content */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] opacity-10 pointer-events-none select-none">
-          <svg viewBox="0 0 400 400" className="w-full h-full animate-[spin_100s_linear_infinite]">
+        {/* Slowly Rotating Golden Rangoli Mandala Behind Content (GPU hardware-accelerated) */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[850px] h-[850px] opacity-10 pointer-events-none select-none will-change-transform">
+          <svg viewBox="0 0 400 400" className="w-full h-full animate-[spin_120s_linear_infinite]">
             <circle cx="200" cy="200" r="190" fill="none" stroke="#F59E0B" strokeWidth="1.5" strokeDasharray="6 6" />
             <circle cx="200" cy="200" r="160" fill="none" stroke="#FBBF24" strokeWidth="2" />
             <circle cx="200" cy="200" r="130" fill="none" stroke="#F59E0B" strokeWidth="1" strokeDasharray="4 4" />
@@ -1429,16 +1456,16 @@ export default function SpinAndWin() {
         </div>
 
         {/* Floating Golden Sparks / Light Particles */}
-        <div className="particles-container absolute inset-0">
-          {[...Array(16)].map((_, i) => (
+        <div className="particles-container absolute inset-0 pointer-events-none">
+          {[...Array(12)].map((_, i) => (
             <div
               key={i}
-              className="absolute w-1.5 h-1.5 rounded-full bg-amber-300 shadow-[0_0_8px_#f59e0b] animate-diwali-float"
+              className="absolute w-1.5 h-1.5 rounded-full bg-amber-300 shadow-[0_0_6px_#f59e0b] animate-diwali-float will-change-transform"
               style={{
-                left: `${(i * 6.25) % 100}%`,
+                left: `${(i * 8.33) % 100}%`,
                 bottom: '-20px',
-                animationDelay: `${(i * 0.7) % 6}s`,
-                animationDuration: `${7 + (i % 5)}s`
+                animationDelay: `${(i * 0.8) % 6}s`,
+                animationDuration: `${8 + (i % 4)}s`
               }}
             />
           ))}
@@ -2486,47 +2513,49 @@ export default function SpinAndWin() {
         @keyframes diwaliFlame {
           0%, 100% {
             transform: scale(1) rotate(-1.5deg);
-            filter: drop-shadow(0 0 8px #f59e0b) drop-shadow(0 0 16px #ea580c);
           }
           50% {
-            transform: scale(1.15, 0.92) rotate(2deg);
-            filter: drop-shadow(0 0 14px #fbbf24) drop-shadow(0 0 24px #f97316);
+            transform: scale(1.12, 0.94) rotate(2deg);
           }
         }
 
         .animate-diwali-flame {
           animation: diwaliFlame 1.4s ease-in-out infinite;
           transform-origin: bottom center;
+          filter: drop-shadow(0 0 8px #f59e0b);
+          will-change: transform;
         }
 
         @keyframes diwaliTwinkle {
-          0%, 100% { opacity: 0.35; transform: scale(0.85); }
-          50% { opacity: 1; transform: scale(1.2); }
+          0%, 100% { opacity: 0.4; transform: scale(0.9); }
+          50% { opacity: 1; transform: scale(1.15); }
         }
 
         .animate-diwali-twinkle {
-          animation: diwaliTwinkle 1.8s ease-in-out infinite;
+          animation: diwaliTwinkle 2s ease-in-out infinite;
+          will-change: transform, opacity;
         }
 
         @keyframes diwaliFloat {
           0% {
-            transform: translateY(0) scale(0.6);
+            transform: translate3d(0, 0, 0) scale(0.6);
             opacity: 0;
           }
           30% {
-            opacity: 0.9;
+            opacity: 0.8;
           }
           70% {
             opacity: 0.6;
           }
           100% {
-            transform: translateY(-800px) scale(1.2);
+            transform: translate3d(0, -750px, 0) scale(1.1);
             opacity: 0;
           }
         }
 
         .animate-diwali-float {
           animation: diwaliFloat 9s linear infinite;
+          will-change: transform, opacity;
         }
 
         @keyframes anarShower {

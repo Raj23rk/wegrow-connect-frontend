@@ -92,6 +92,8 @@ Thumbs.db
 # ===========================
 tmp/
 temp/
+test.txt
+src/components/test.txt
 *.tmpwegrow-connect.zip
 wegrow-connect.zip
 wegrow-connect.zip
